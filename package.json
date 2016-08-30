@@ -1,5 +1,5 @@
 {
-    "name"    : "your-app",
-    "version" : "0.1.0",
+    "name"    : "DICe",
+    "version" : "2.0",
     "main"    : "main.js"
 }

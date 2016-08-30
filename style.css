@@ -14,28 +14,54 @@ body {
 .material-icons.md-24 { font-size: 24px; }
 .material-icons.md-36 { font-size: 36px; }
 .material-icons.md-48 { font-size: 48px; }
-
 /* Rules for using icons as black on a light background. */
 .material-icons.md-dark {
     color: rgba(0, 0, 0, 0.54);
     vertical-align: middle;
-    padding: 0px 10px 3px 0px;
+    padding: 0px 0px 0px 0px;
+}
+.material-icons.md-br-pad {
+    padding: 0px 5px 3px 0px;
 }
 .material-icons.md-dark.md-inactive { color: rgba(0, 0, 0, 0.26); }
-
 /* Rules for using icons as white on a dark background. */
 .material-icons.md-light { color: rgba(255, 255, 255, 1); }
 .material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3); }
-
+.align-left {
+    float: left;
+    padding: 4px 0px 0px 0px;
+}
+.align-right {
+    float: right;
+    padding: 0;
+}
+.panel-group {
+    margin-bottom: 0;
+}
+.panel-title {
+    vertical-align: middle;
+    padding: 0;
+}
+.panel-heading {
+    vertical-align: middle;
+    padding: 3px 15px;
+}
 ul{
     list-style-type: none;
-    padding: 10px;
+    padding: 0px 10px;
+    margin-left: 0px;
     line-height: 40px;
     vertical-align: middle;
+    margin-bottom: 0;
 }
 h1{
     font-weight: bold;
     font-size: 18px;
+}
+h4{
+    font-size: 18px;
+    color: #0099cc;
+    vertical-align: middle;
 }
 .wrapper{
     position: absolute;
@@ -49,24 +75,24 @@ h1{
     width: 100%;
     height: 50px;
     top: 0;
-    padding: 10px;
-    /*background-color: #33ccff; */
+    padding: 4px;
     background-color: #0099cc;
 }
 .content{
     position: absolute;
     top: 50px;
-    bottom: 50px;
+    bottom: 40px;
     width: 100%;
 }
 .footer{
     position: absolute;
     width: 100%;
-    height: 50px;
+    height: 40px;
     bottom: 0;
     padding: 10px;
     color: white;
     background-color: #666666;
+    text-align: center;
 }
 .fixed-col{
     background-color: #e6e6e6;
