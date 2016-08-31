@@ -8,7 +8,7 @@
     <!-- jQuery library -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <!-- Latest compiled JavaScript -->
-    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>    
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script>if (window.module) module = window.module;</script>
@@ -24,7 +24,7 @@
         <img src="./images/DICe_logo_white-01.png" alt="DICe logo" height="42" width="auto">
       </div>
       <div class="content">
-        <div class="fixed-col">
+       <div class="fixed-col">
           <h1>IMAGES</h1>
           <ul>
             <li><i class="material-icons md-dark md-br-pad">add_a_photo</i>load reference</li>
@@ -37,9 +37,12 @@
             <li><i class="material-icons md-dark md-br-pad">camera_roll</i>cine format</li>
             <li><i class="material-icons md-dark md-br-pad">brightness_6</i>normalize</li>
           </ul>
-        </div>
+          <h1>ANALYSIS</h1>
+          <ul>
+            <li id="runLI" class="action-li"><i class="material-icons md-dark md-br-pad">play_circle_filled</i>run</li>
+          </ul>
+        </div> <!-- end fixed-col -->
         <div class="fluid-col">
-          <div class="inner-fluid-col">
             <div class="inner-fluid-left-col">
               <!-- -->
                 <div class="panel-group">
@@ -59,94 +62,101 @@
                       <div class="panel-body">Panel Body</div>
                     </div> <!-- end panel-collapse -->
                   </div> <!-- end panel-default -->
-                </div> <!-- end panel-group -->
+              </div> <!-- end panel-group -->
               <!-- -->
-                <div class="panel-group">
-                  <div class="panel panel-default">
-                    <div class="panel-heading">
-                      <h4 class="panel-title">
-                        <span class="align-left">VIEW CONTROL</span>
-                        <span class="align-right">
-                          <a data-toggle="collapse" href="#collapseL2">
-                            <i class="material-icons md-dark">swap_vertical_circle</i>
-                          </a>
-                        </span>
-                        <div style="clear: both;"></div>
-                      </h4>
-                    </div> <!-- end panel-heading -->
-                    <div id="collapseL2" class="panel-collapse collapse">
-                      <div class="panel-body">Panel Body</div>
-                    </div> <!-- end panel-collapse -->
-                  </div> <!-- end panel-default -->
-                </div> <!-- end panel-group -->
+              <div class="panel-group">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <h4 class="panel-title">
+                      <span class="align-left">VIEW CONTROL</span>
+                      <span class="align-right">
+                        <a data-toggle="collapse" href="#collapseL2">
+                          <i class="material-icons md-dark">swap_vertical_circle</i>
+                        </a>
+                      </span>
+                      <div style="clear: both;"></div>
+                    </h4>
+                  </div> <!-- end panel-heading -->
+                  <div id="collapseL2" class="panel-collapse collapse">
+                    <div class="panel-body">Panel Body</div>
+                  </div> <!-- end panel-collapse -->
+                </div> <!-- end panel-default -->
+              </div> <!-- end panel-group -->
               <!-- -->
-                <div class="panel-group">
-                  <div class="panel panel-default">
-                    <div class="panel-heading">
-                      <h4 class="panel-title">
-                        <span class="align-left">CONSOLE OUTPUT</span>
-                        <span class="align-right">
-                          <a data-toggle="collapse" href="#collapseL3">
-                            <i class="material-icons md-dark">swap_vertical_circle</i>
-                          </a>
-                        </span>
-                        <div style="clear: both;"></div>
-                      </h4>
-                    </div> <!-- end panel-heading -->
-                    <div id="collapseL3" class="panel-collapse collapse">
-                      <div class="panel-body">Panel Body</div>
-                    </div> <!-- end panel-collapse -->
-                  </div> <!-- end panel-default -->
-                </div> <!-- end panel-group -->
+              <div class="panel-group">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <h4 class="panel-title">
+                      <span class="align-left">CONSOLE</span>
+                      <span class="align-right">
+                        <i id="clearConsoleIcon" class="material-icons md-dark action-li" title="clear console">backspace</i>
+                        <a data-toggle="collapse" href="#collapseL3">
+                          <i class="material-icons md-dark">swap_vertical_circle</i>
+                        </a>
+                      </span>
+                      <div style="clear: both;"></div>
+                    </h4>
+                  </div> <!-- end panel-heading -->
+                  <div id="collapseL3" class="panel-collapse collapse">
+                    <div class="panel-body">
+                      <div id="consoleWindow" class="console">
+                        Console output: <br/><br/>
+                      </div>
+                    </div> <!-- end panel body -->
+                  </div> <!-- end panel-collapse -->
+                </div> <!-- end panel-default -->
+              </div> <!-- end panel-group -->
               <!-- -->
-            </div> <!-- end inner-fluid-left-col -->
+          </div> <!-- end inner-fluid-left-col -->
             <div class="inner-fluid-right-col">
               <!-- -->
-                <div class="panel-group">
-                  <div class="panel panel-default">
-                    <div class="panel-heading">
-                      <h4 class="panel-title">
-                        <span class="align-left">PARAMETERS</span>
-                        <span class="align-right">
-                          <a data-toggle="collapse" href="#collapseR1">
-                            <i class="material-icons md-dark">swap_vertical_circle</i>
-                          </a>
-                        </span>
-                        <div style="clear: both;"></div>
-                      </h4>
-                    </div> <!-- end panel-heading -->
-                    <div id="collapseR1" class="panel-collapse collapse">
-                      <div class="panel-body">Panel Body</div>
-                    </div> <!-- end panel-collapse -->
-                  </div> <!-- end panel-default -->
-                </div> <!-- end panel-group -->
+              <div class="panel-group">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <h4 class="panel-title">
+                      <span class="align-left">PARAMETERS</span>
+                      <span class="align-right">
+                        <a data-toggle="collapse" href="#collapseR1">
+                          <i class="material-icons md-dark">swap_vertical_circle</i>
+                        </a>
+                      </span>
+                      <div style="clear: both;"></div>
+                    </h4>
+                  </div> <!-- end panel-heading -->
+                  <div id="collapseR1" class="panel-collapse collapse">
+                    <div class="panel-body">Panel Body</div>
+                  </div> <!-- end panel-collapse -->
+                </div> <!-- end panel-default -->
+              </div> <!-- end panel-group -->
               <!-- -->
-                <div class="panel-group">
-                  <div class="panel panel-default">
-                    <div class="panel-heading">
-                      <h4 class="panel-title">
-                        <span class="align-left">REFERENCE</span>
-                        <span class="align-right">
-                          <a data-toggle="collapse" href="#collapseR2">
-                            <i class="material-icons md-dark">swap_vertical_circle</i>
-                          </a>
-                        </span>
-                        <div style="clear: both;"></div>
-                      </h4>
-                    </div> <!-- end panel-heading -->
-                    <div id="collapseR2" class="panel-collapse collapse">
-                      <div class="panel-body">Panel Body</div>
-                    </div> <!-- end panel-collapse -->
-                  </div> <!-- end panel-default -->
-                </div> <!-- end panel-group -->
+              <div class="panel-group">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <h4 class="panel-title">
+                      <span class="align-left">REFERENCE</span>
+                      <span class="align-right">
+                        <a data-toggle="collapse" href="#collapseR2">
+                          <i class="material-icons md-dark">swap_vertical_circle</i>
+                        </a>
+                      </span>
+                      <div style="clear: both;"></div>
+                    </h4>
+                  </div> <!-- end panel-heading -->
+                  <div id="collapseR2" class="panel-collapse collapse">
+                     <div class="panel-body">Panel Body</div>
+                  </div> <!-- end panel-collapse -->
+                </div> <!-- end panel-default -->
+              </div> <!-- end panel-group -->
               <!-- -->
             </div> <!-- end inner-fluid-right-col -->
-          </div>  <!-- end inner-fluid-col -->
         </div> <!-- end fluid-col -->
       </div> <!-- end content -->
       <div class="footer">
         Copyright 2016 Sandia Corporation
       </div>
       </div> <!-- end wrapper -->
+    <!-- Custom JS -->
+    <script src="./js/dice.js"></script>  
+    <script src="./js/utils.js"></script>  
   </body>
 </html>
