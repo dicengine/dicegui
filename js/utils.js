@@ -14,13 +14,17 @@ function eraseText(object_id) {
 function resizeView(toggler) {
     var H = $(toggler).parent().parent('div').parent('div').outerHeight();
     var bannerH = $(toggler).parent().parent('div').outerHeight();
-    if(H==bannerH){
+    if(H==bannerH){ // toggle will show
         $(toggler).parent().parent('div').parent('div').outerHeight("auto");
-    }else{
+        // change the border radius
+        $(toggler).parent().parent('div').css('border-radius','5px 5px 0px 0px');
+    }else{ // toggle will hide
         $(toggler).parent().parent('div').parent('div').outerHeight(bannerH + "px");
+        // change the border radius
+        $(toggler).parent().parent('div').css('border-radius','5px');
     }
     // now find any fill divs and resize the
-    resizeFullDivs("#" + $(toggler).parent().parent('div').parent('div').parent('div').attr('id'));
+    resizeFullDivs("#" + $(toggler).parent().parent('div').parent('div').parent('div').attr('id'));    
 }
 
 function resizeAll(){
