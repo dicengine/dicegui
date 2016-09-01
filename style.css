@@ -99,6 +99,9 @@ body {
     padding: 3px 15px;
     margin-bottom: 3px;
 }
+p {
+    margin-bottom: 5px;
+}
 ul {
     list-style-type: none;
     padding: 0px 10px;

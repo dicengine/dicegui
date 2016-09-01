@@ -5,6 +5,13 @@ $(window).load(function(){
     resizeAll();
 });
 
+const shell = require('electron').shell;
+
+$(document).on('click', 'a[href^="http"]', function(event) {
+    event.preventDefault();
+    shell.openExternal(this.href);
+});
+
 window.addEventListener('resize', function(){resizeAll();}, true);
 
 document.getElementById("clearConsoleIcon").onclick = function() {eraseText("consoleWindow")};
