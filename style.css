@@ -16,9 +16,12 @@ body {
 .material-icons.md-48 { font-size: 48px; }
 /* Rules for using icons as black on a light background. */
 .material-icons.md-dark {
-    color: rgba(0, 0, 0, 0.54);
+    color: rgba(0, 0, 0, 0.40);
     vertical-align: middle;
     padding: 0px 0px 0px 0px;
+}
+.material-icons.md-dark:hover {
+    color: rgba(0, 0, 0, 0.6);
 }
 .material-icons.md-br-pad {
     padding: 0px 5px 3px 0px;
@@ -29,11 +32,13 @@ body {
 .material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3); }
 .align-left {
     float: left;
-    padding: 4px 0px 0px 0px;
 }
 .align-right {
     float: right;
-    padding: 0;
+}
+.panel-large {
+    background-color: red;
+    height: 500px;
 }
 .panel-group {
     margin-bottom: 0;
@@ -49,7 +54,56 @@ body {
 .panel-body {
     padding: 4px 15px;
 }
-ul{
+.view-controls {
+    height: 30px;
+    width: 100%;
+    float: left;
+    background-color: white;
+    padding: 3px 15px;
+    margin: 0px 0px 3px 0px;
+}
+.toggler {
+    cursor: pointer;
+}
+.toggle-title {
+    float: left;
+    height: auto;
+    padding: 1px 0px 0px 0px;
+}
+.toggle-icon {
+    float: right;
+    height: auto;
+}
+.toggle-div {
+    height: auto;
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 3px;
+}
+.toggle-div-banner {
+    padding: 3px 15px;
+    background-color: lightblue;
+    height: auto;
+    width: 100%;
+    display: inline-block;
+    vertical-align: middle;
+    border-radius: 5px 5px 0px 0px;
+}
+.toggle-div-body {
+    border-radius: 0px 0px 5px 5px;
+    background-color: white;
+    min-height: 150px;
+    padding: 3px 15px;
+}
+.fill-div {
+    width: 100%;
+    background-color: yellow;
+    display: inline-block;
+    vertical-align: middle;
+    border-radius: 5px;
+    padding: 3px 15px;
+}
+ul {
     list-style-type: none;
     padding: 0px 10px;
     margin-left: 0px;
@@ -57,26 +111,26 @@ ul{
     vertical-align: middle;
     margin-bottom: 0;
 }
-.action-li{
+.action-li {
     cursor: pointer;
 }
-h1{
+h1 {
     font-weight: bold;
     font-size: 18px;
 }
-h4{
+h4 {
     font-size: 18px;
     color: #0099cc;
     vertical-align: middle;
 }
-.wrapper{
+.wrapper {
     position: absolute;
     min-width: 1000px;
     min-height: 600px;
     width: 100%;
     height: 100%;
 }
-.header{
+.header {
     position: absolute;
     width: 100%;
     height: 50px;
@@ -84,13 +138,13 @@ h4{
     padding: 4px;
     background-color: #0099cc;
 }
-.content{
+.content {
     position: absolute;
     top: 50px;
     bottom: 40px;
     width: 100%;
 }
-.footer{
+.footer {
     position: absolute;
     width: 100%;
     height: 40px;
@@ -100,7 +154,7 @@ h4{
     background-color: #666666;
     text-align: center;
 }
-.fixed-col{
+.fixed-col {
     background-color: #e6e6e6;
     float: left;
     width: 200px;
@@ -108,7 +162,7 @@ h4{
     height: 100%;
     padding: 10px;
 }
-.fluid-col{
+.fluid-col {
     position: absolute;
     left: 200px;
     right: 0;
@@ -116,22 +170,22 @@ h4{
     min-width: 0px;
     height: 100%;
 }
-.inner-fluid-left-col{
+.inner-fluid-left-col {
     float: left;
     width: 70%;
     height: 100%;
     padding: 10px;
 }
-.inner-fluid-right-col{
+.inner-fluid-right-col {
     background-color: #e6e6e6;
     float: left;
     width: 30%;
     height: 100%;
     padding: 10px;
 }
-.console{
+.console {
     width: 100%;
-    height: 300px;
+    height: 200px;
     font-size: 12px;
     overflow-y: scroll;
 }

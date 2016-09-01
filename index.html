@@ -43,34 +43,15 @@
           </ul>
         </div> <!-- end fixed-col -->
         <div class="fluid-col">
-            <div class="inner-fluid-left-col">
+            <div id="innerFluidLeftCol" class="inner-fluid-left-col">
               <!-- -->
-                <div class="panel-group">
-                  <div class="panel panel-default">
-                    <div class="panel-heading">
-                      <h4 class="panel-title">
-                        <span class="align-left">VIEWER</span>
-                        <span class="align-right">
-                          <a data-toggle="collapse" href="#collapseL1">
-                            <i class="material-icons md-dark">swap_vertical_circle</i>
-                          </a>
-                        </span>
-                        <div style="clear: both;"></div>
-                      </h4>
-                    </div> <!-- end panel-heading -->
-                    <div id="collapseL1" class="panel-collapse collapse in">
-                      <div class="panel-body">Panel Body</div>
-                    </div> <!-- end panel-collapse -->
-                  </div> <!-- end panel-default -->
-              </div> <!-- end panel-group -->
-              <!-- -->
-              <div class="panel-group">
+              <div id="viewerControlPanel" class="panel-group">
                 <div class="panel panel-default">
                   <div class="panel-heading">
                     <h4 class="panel-title">
                       <span class="align-left">VIEW CONTROL</span>
                       <span class="align-right">
-                        <a data-toggle="collapse" href="#collapseL2">
+                        <a id="collapseViewControl" data-toggle="collapse" href="#collapseL2">
                           <i class="material-icons md-dark">swap_vertical_circle</i>
                         </a>
                       </span>
@@ -83,14 +64,33 @@
                 </div> <!-- end panel-default -->
               </div> <!-- end panel-group -->
               <!-- -->
-              <div class="panel-group">
+                <div id="viewerPanel" class="panel-group panel-large">
+                  <div class="panel panel-default">
+                    <div class="panel-heading">
+                      <h4 class="panel-title">
+                        <span class="align-left">VIEWER</span>
+                        <span class="align-right">
+                          <!--<a data-toggle="collapse" href="#collapseL1">
+                            <i class="material-icons md-dark">swap_vertical_circle</i>
+                          </a>-->
+                        </span>
+                        <div style="clear: both;"></div>
+                      </h4>
+                    </div> <!-- end panel-heading -->
+                    <div id="collapseL1" class="panel-collapse collapse in">
+                      <div id="viewerPanelBody" class="panel-body">Panel Body</div>
+                    </div> <!-- end panel-collapse -->
+                  </div> <!-- end panel-default -->
+              </div> <!-- end panel-group -->
+              <!-- -->
+              <div id="consolePanel" class="panel-group">
                 <div class="panel panel-default">
                   <div class="panel-heading">
                     <h4 class="panel-title">
                       <span class="align-left">CONSOLE</span>
                       <span class="align-right">
-                        <i id="clearConsoleIcon" class="material-icons md-dark action-li" title="clear console">backspace</i>
-                        <a data-toggle="collapse" href="#collapseL3">
+                        <i id="clearConsoleIcon" class="material-icons md-dark action-li" title="clear console">clear</i>
+                        <a id="collapseConsole" data-toggle="collapse" href="#collapseL3">
                           <i class="material-icons md-dark">swap_vertical_circle</i>
                         </a>
                       </span>
@@ -148,6 +148,27 @@
                 </div> <!-- end panel-default -->
               </div> <!-- end panel-group -->
               <!-- -->
+              <div class="toggle-div">
+                   <div class="toggle-div-banner">
+                       <span class="toggle-title">TOGGLE DIV</span>
+                       <span class="toggle-icon"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
+                   </div> <!-- end toggle div banner -->
+                   <div class="toggle-div-body">
+                         Inside the toggle div dropdown
+                   </div> <!-- end toggle div body -->
+              </div> <!-- end toggle div -->
+              <div class="toggle-div">
+                   <div class="toggle-div-banner">
+                       <span class="toggle-title">TOGGLE DIV 2</span>
+                       <span class="toggle-icon"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
+                   </div> <!-- end toggle div banner -->
+                   <div class="toggle-div-body">
+                         Inside the toggle div dropdown
+                   </div> <!-- end toggle div body -->
+              </div> <!-- end toggle div -->
+              <div class="fill-div">
+                I am in a fill div
+              </div>
             </div> <!-- end inner-fluid-right-col -->
         </div> <!-- end fluid-col -->
       </div> <!-- end content -->
