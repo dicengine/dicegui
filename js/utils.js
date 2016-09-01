@@ -1,9 +1,9 @@
 $(window).load(function(){
     // resize the full div elements
-    resizeFullDivs();
+    resizeAll();
 });
 
-window.addEventListener('resize', function(){resizeFullDivs();}, true);
+window.addEventListener('resize', function(){resizeAll();}, true);
 
 document.getElementById("clearConsoleIcon").onclick = function() {eraseText("consoleWindow")};
 
@@ -19,21 +19,29 @@ function resizeView(toggler) {
     }else{
         $(toggler).parent().parent('div').parent('div').outerHeight(bannerH + "px");
     }
-    // now find any fill divs and resize them
-    resizeFullDivs();
+    // now find any fill divs and resize the
+    resizeFullDivs("#" + $(toggler).parent().parent('div').parent('div').parent('div').attr('id'));
 }
 
-function resizeFullDivs(){
+function resizeAll(){
+    resizeFullDivs("#innerFluidLeftCol");
+    resizeFullDivs("#innerFluidRightCol");
+}
+
+function resizeFullDivs(targetDiv){
     // total height of all divs in the inner fluid right col
     var sumHeight = 0;
-    $(".inner-fluid-right-col > div").each(function() {
+    $(targetDiv + '> div').each(function() {
         sumHeight += $(this).outerHeight();
     });
-    var currentFillHeight = $('.fill-div').outerHeight();
+    var currentFillHeight = $(targetDiv).find('.fill-div').outerHeight();
     sumHeight -= currentFillHeight;
-    var totalHeight = $('.inner-fluid-right-col').outerHeight();
+    var totalHeight = $(targetDiv).outerHeight();
     var resizeHeight = totalHeight - sumHeight - 20;
-    $('.fill-div').outerHeight(resizeHeight);    
+    // NOTE assumes only one div in the targetDiv should fill the leftover space
+    $(targetDiv).find('.fill-div').each(function() {        
+        $(this).outerHeight(resizeHeight);
+    })
 }
 
 // toggle boxes up and down

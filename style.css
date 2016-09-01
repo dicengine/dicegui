@@ -64,7 +64,7 @@ body {
 }
 .toggle-div-banner {
     padding: 3px 15px;
-    background-color: lightblue;
+    background-color: #f2f2f2;
     height: auto;
     width: 100%;
     display: inline-block;
@@ -79,11 +79,12 @@ body {
 }
 .fill-div {
     width: 100%;
-    background-color: yellow;
+    background-color: white;
     display: inline-block;
     vertical-align: middle;
     border-radius: 5px;
     padding: 3px 15px;
+    margin-bottom: 3px;
 }
 ul {
     list-style-type: none;
@@ -170,4 +171,5 @@ h4 {
     height: 200px;
     font-size: 12px;
     overflow-y: scroll;
+    padding-right: 0;
 }
