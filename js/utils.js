@@ -1,4 +1,6 @@
 $(window).load(function(){
+    // TODO  set the default show/hide positions for toggles
+    
     // resize the full div elements
     resizeAll();
 });
@@ -6,6 +8,20 @@ $(window).load(function(){
 window.addEventListener('resize', function(){resizeAll();}, true);
 
 document.getElementById("clearConsoleIcon").onclick = function() {eraseText("consoleWindow")};
+
+// toggle the params menu on or off
+document.getElementById("paramsButton").onclick = function(){
+    if($('#innerFluidRightCol').css('display')=='none'){
+        $('#innerFluidRightCol').css('display','inline-block');
+        $('#innerFluidRightCol').css('width','30%');
+        $('#innerFluidLeftCol').css('width','70%');
+    }
+    else {
+        $('#innerFluidRightCol').css('display','none');
+        $('#innerFluidLeftCol').css('width','100%');
+    }
+    resizeAll();
+};
 
 function eraseText(object_id) {
     document.getElementById(object_id).innerHTML = "Console output:" + '<br/><br/>';

@@ -33,6 +33,19 @@ body {
 .align-left {
     float: left;
 }
+.params-button {
+    position: absolute;
+    bottom: 0;
+    right: 5px;
+    color: white;
+    vertical-align: middle;
+    background-color: #33ccff;
+    border-radius: 5px 5px 0px 0px;
+    cursor: pointer;
+}
+.menu-button:hover {
+    background-color: #b3ecff;
+}
 .align-right {
     float: right;
 }
@@ -120,6 +133,7 @@ h4 {
     top: 0;
     padding: 4px;
     background-color: #0099cc;
+    vertical-align: middle;
 }
 .content {
     position: absolute;
@@ -155,16 +169,21 @@ h4 {
 }
 .inner-fluid-left-col {
     float: left;
-    width: 70%;
+    width: 100%;
     height: 100%;
     padding: 10px;
 }
 .inner-fluid-right-col {
+    display: none;
     background-color: #e6e6e6;
     float: left;
-    width: 30%;
+    /*width: 0%;*/
     height: 100%;
     padding: 10px;
+    overflow: hidden;
+    border-style: solid;
+    border-width: 4px 0px 0px 0px;
+    border-color: #33ccff;
 }
 .console {
     width: 100%;
