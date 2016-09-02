@@ -90,13 +90,20 @@ body {
     min-height: 150px;
     padding: 3px 15px;
 }
+.sub-fill-div {
+    width: 50%;
+    height: 100%;
+    float: left;
+    overflow: hidden;
+    background-color: darkgray;
+}
 .fill-div {
     width: 100%;
     background-color: white;
     display: inline-block;
     vertical-align: middle;
     border-radius: 5px;
-    padding: 3px 15px;
+    padding: 0;
     margin-bottom: 3px;
 }
 p {
