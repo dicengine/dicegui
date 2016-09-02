@@ -1,4 +1,4 @@
-document.getElementById("runLI").onclick = function() {callDICeExec()};
+document.getElementById("runLi").onclick = function() {callDICeExec()};
 
 function callDICeExec() {
 

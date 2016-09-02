@@ -1,5 +1,8 @@
 $(window).load(function(){
     // TODO  set the default show/hide positions for toggles    
+    // set the stereo toggle to off
+    $('#runLi span').text('run 2d');
+    hideStereoViewer();
     // resize the full div elements
     resizeAll();
 });
@@ -85,3 +88,29 @@ function resizeFullDivs(targetDiv){
     })
 }
 
+// toggle boxes up and down
+$("#stereoButton").click(function(){
+    // get the current state of stereo on or off:
+    var oldText = $('#runLi span').text();
+    if(oldText=='run 2d'){
+        $('#runLi span').text('run stereo');
+        $('#x1x2').text('x 2');
+        showStereoViewer();
+    }else{
+        $('#runLi span').text('run 2d');
+        $('#x1x2').text('x 1');
+        hideStereoViewer();
+    }
+    resizeAll();
+});
+
+function hideStereoViewer(){
+    $('#subFillDivRight').css('display','none');
+    $('#subFillDivLeft').css('width','100%');
+}
+
+function showStereoViewer(){
+    $('#subFillDivRight').css('display','inline-block');
+    $('#subFillDivRight').css('width','50%');
+    $('#subFillDivLeft').css('width','50%');
+}

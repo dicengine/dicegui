@@ -20,7 +20,13 @@
     <div class="wrapper">
       <div class="header">
         <img src="./images/DICe_logo_white-01.png" alt="DICe logo" height="42" width="auto">
-        <div id="paramsButton" title="toggle opions pane" class="params-button"><i class="material-icons md-light md-36">menu</i></div>
+        <div id="stereoButton" title="toggle stereo on/off" class="stereo-button">
+          <div style="float:left; width:auto;"><i class="material-icons md-light md-28">camera_alt</i></div>
+          <div id="x1x2" style="float:left; width:auto; padding-left:5px;">x 1</div>
+        </div>
+        <div id="paramsButton" title="toggle opions pane shown/hidden" class="params-button">
+          <i class="material-icons md-light md-36">menu</i>
+        </div>
       </div>
       <div class="content">
        <div class="fixed-col">
@@ -38,7 +44,9 @@
           </ul>
           <h1>ANALYSIS</h1>
           <ul>
-            <li id="runLI" class="action-li"><i class="material-icons md-dark md-br-pad">play_circle_filled</i>run</li>
+            <li id="runLi" class="action-li"><i class="material-icons md-dark md-br-pad">play_circle_filled</i>
+              <span>run 2d<span>
+            </li>
           </ul>
         </div> <!-- end fixed-col -->
         <div class="fluid-col">
@@ -57,7 +65,7 @@
                          Inside the toggle div dropdown
                    </div> <!-- end toggle div body -->
                  </div> <!-- end toggle div -->
-                 <div id="viewWindowLeft" class="fill-div">
+                 <div id="viewWindowLeft" class="fill-div" style="background-color:darkgray;">
                     I am in a fill div
                  </div>
               </div> <!-- end fill div left -->
@@ -75,7 +83,7 @@
                          Inside the toggle div dropdown
                    </div> <!-- end toggle div body -->
                  </div> <!-- end toggle div -->
-                 <div id="viewWindowRight" class="fill-div">
+                 <div id="viewWindowRight" class="fill-div"  style="background-color:darkgray;">
                     I am in a fill div
                  </div>
                </div> <!-- end fill div right -->

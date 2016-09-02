@@ -42,9 +42,27 @@ body {
     background-color: #33ccff;
     border-radius: 5px 5px 0px 0px;
     cursor: pointer;
+    height: 36px;
 }
-.menu-button:hover {
+.params-button:hover {
     background-color: #b3ecff;
+}
+.stereo-button {
+    position: absolute;
+    bottom: 0;
+    right: 50px;
+    color: white;
+    vertical-align: middle;
+    background-color: #ff66cc;
+    border-radius: 5px 5px 0px 0px;
+    cursor: pointer;
+    height: 36px;
+    width: 62px;
+    padding: 5px 3px 3px 3px;
+    float: left;
+}
+.stereo-button:hover {
+    background-color: #ff99dd;
 }
 .align-right {
     float: right;
@@ -95,12 +113,10 @@ body {
     height: 100%;
     float: left;
     overflow: hidden;
-    background-color: darkgray;
-    padding: 3px 3px 0px 3px;
+    padding: 3px 3px 0px 0px;
 }
 .fill-div {
     width: 100%;
-    background-color: white;
     display: inline-block;
     vertical-align: middle;
     border-radius: 5px;
