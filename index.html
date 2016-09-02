@@ -43,7 +43,8 @@
         </div> <!-- end fixed-col -->
         <div class="fluid-col">
           <div id="innerFluidLeftCol" class="inner-fluid-left-col">
-              <div id="fillDivLeft" class="fill-div">
+            <div id="viewerFillDiv" class="fill-div">
+              <div id="subFillDivLeft" class="sub-fill-div">
                 <div>
                     Buttons go here load ref/def
                 </div>
@@ -56,18 +57,37 @@
                          Inside the toggle div dropdown
                    </div> <!-- end toggle div body -->
                  </div> <!-- end toggle div -->
-                 <div id="viewWindow" class="fill-div">
+                 <div id="viewWindowLeft" class="fill-div">
                     I am in a fill div
                  </div>
-               </div> <!-- end fill div left -->
+              </div> <!-- end fill div left -->
 
+              <div id="subFillDivRight" class="sub-fill-div">
+                <div>
+                    Buttons go here load ref/def
+                </div>
+                <div class="toggle-div">
+                <div class="toggle-div-banner">
+                    <span class="toggle-title">VIEW CONTROL</span>
+                    <span class="toggle-icon"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
+                </div> <!-- end toggle div banner -->
+                   <div class="toggle-div-body">
+                         Inside the toggle div dropdown
+                   </div> <!-- end toggle div body -->
+                 </div> <!-- end toggle div -->
+                 <div id="viewWindowRight" class="fill-div">
+                    I am in a fill div
+                 </div>
+               </div> <!-- end fill div right -->
+              
+            </div> <!-- end fill div -->
                  
                  <div class="toggle-div">
                    <div class="toggle-div-banner">
                        <span class="toggle-title">CONSOLE</span>
                        <span class="toggle-icon">
                          <i id="clearConsoleIcon" class="material-icons md-dark action-li" title="clear console">clear</i>
-                         <i class="material-icons md-dark toggler">swap_vertical_circle</i>
+                         <i id="consoleToggle" class="material-icons md-dark toggler">swap_vertical_circle</i>
                        </span>
                    </div> <!-- end toggle div banner -->
                    <div class="toggle-div-body">
@@ -94,7 +114,7 @@
                        <span class="toggle-icon"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
                    </div> <!-- end toggle div banner -->
                    <div class="toggle-div-body">
-                     <p>Having trouble? Submit an issue at: <a href="http://github.com/dicengine/dice/issues" alt="">issues</a></p>
+                     <p>Having trouble? Take a deep breath (you got this code for free) and Submit an issue at: <a href="http://github.com/dicengine/dice/issues" alt="">issues</a></p>
                      <p>papers and reports</p>
                      <p><a href="http://dicengine.github.io/dice/" alt="">class and namespace documentation</a></p>
                      <p><a href="http://github.com/dicengine/dice" alt="">source code</a></p>

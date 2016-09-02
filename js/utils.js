@@ -52,14 +52,20 @@ function resizeView(toggler) {
     }
     // now find any fill divs and resize the
     // NOTE assumes that top level div has an id (TODO address this)
-    resizeFullDivs("#" + $(toggler).parent().parent('div').parent('div').parent('div').attr('id'));    
+    resizeFullDivs("#" + $(toggler).parent().parent('div').parent('div').parent('div').attr('id'));
+
+    // the console tag should call the resize method here
+    if($(toggler).attr('id')=='consoleToggle'){
+        resizeAll();
+    }
 }
 
 // resize all columns and inner-columns to make fill-divs fill the column
 function resizeAll(){
     resizeFullDivs("#innerFluidLeftCol");
     resizeFullDivs("#innerFluidRightCol");
-    resizeFullDivs("#fillDivLeft");
+    resizeFullDivs("#subFillDivLeft");
+    resizeFullDivs("#subFillDivRight");
 }
 
 // resize the elements within the target div
@@ -72,7 +78,7 @@ function resizeFullDivs(targetDiv){
     var currentFillHeight = $(targetDiv).find('.fill-div').outerHeight();
     sumHeight -= currentFillHeight;
     var totalHeight = $(targetDiv).outerHeight();
-    var resizeHeight = totalHeight - sumHeight - 20;
+    var resizeHeight = totalHeight - sumHeight - 10;
     // NOTE assumes only one div in the targetDiv should fill the leftover space
     $(targetDiv).find('.fill-div').each(function() {        
         $(this).outerHeight(resizeHeight);
