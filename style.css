@@ -108,7 +108,7 @@ body {
 .toggle-div-body {
     border-radius: 0px 0px 5px 5px;
     background-color: white;
-    min-height: 150px;
+    /*min-height: 150px;*/
     padding: 3px 15px;
 }
 .sub-fill-div {
@@ -124,6 +124,7 @@ body {
     vertical-align: middle;
     border-radius: 5px;
     padding: 0;
+    overflow: hidden;
 }
 p {
     margin-bottom: 5px;

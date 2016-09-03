@@ -7,9 +7,12 @@
     <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script>if (window.module) module = window.module;</script>
-        <!-- Custom JS -->
+    <!-- Custom JS -->
     <script src="./js/dice.js" defer></script>  
-    <script src="./js/utils.js" defer></script>  
+    <script src="./js/utils.js" defer></script>
+    <!-- Panzoom -->
+    <script src="./js/jquery.panzoom.min.js" defer></script>
+    <script src="./js/viewer.js" defer></script>
     <!-- Local style sheet -->
     <link rel="stylesheet" type="text/css" href="style.css">
     <!-- Google fonts and icons -->
@@ -64,12 +67,17 @@
                     <span class="toggle-title">VIEW CONTROL</span>
                     <span class="toggle-icon"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
                 </div> <!-- end toggle div banner -->
-                   <div class="toggle-div-body">
-                         Inside the toggle div dropdown
+                <div class="toggle-div-body">
+                     <button class="zoom-in">Zoom In</button>
+                     <button class="zoom-out">Zoom Out</button>
+                     <input type="range" class="zoom-range">
+                     <button class="reset">Reset</button>
                    </div> <!-- end toggle div body -->
                  </div> <!-- end toggle div -->
-                 <div id="viewWindowLeft" class="fill-div" style="background-color:darkgray;">
-                    I am in a fill div
+                <div id="viewWindowLeft" class="fill-div" style="background-color:darkgray;">
+                    <div id="panzoom">
+                      <img src="http://blog.millermedeiros.com/wp-content/uploads/2010/04/awesome_tiger.svg" width="900" height="900">
+                    </div>
                  </div>
               </div> <!-- end fill div left -->
 
