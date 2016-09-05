@@ -1,11 +1,4 @@
-$(".panzoom-elements").panzoom();
-
-// Pass options
-$("a.panzoom-elements").panzoom({
-    minScale: 0,
-    $zoomRange: $("input[type='range']")
-});
-
+// initialize panzoom
 $("#panzoom").panzoom({
     $zoomIn: $(".zoom-in"),
     $zoomOut: $(".zoom-out"),
@@ -13,24 +6,34 @@ $("#panzoom").panzoom({
     $reset: $(".reset")
 });
 
-$('.left').click(function () {
-    $("#panzoom").panzoom("goTo", true);
+// write panzoom transform to console
+$("#zoomInfo").click(function(){
+    console.log($("#panzoom").panzoom("getTransform"));
 });
 
-$('.right').click(function () {
-    $("#panzoom").panzoom("resetPan", true);
+// show position coordinates in console when mouse over panzoom
+//$("#panzoom").mousemove(function( event ) {
+//    var msg = "Handler for .mousemove() called at ";
+//    msg += event.pageX + ", " + event.pageY;
+//    console.log(msg);
+//});
+
+// compute the image coordiate of a mouse click in the viewer
+$("#panzoom").click(function( event ) {
+    var X = event.pageX - this.offsetLeft;
+    var Y = event.pageY - this.offsetTop;
+    console.log("x = " + X + " y = " + Y);
 });
 
-$('.panLeft').click(function () {
-    $("#panzoom").panzoom("pan", -250, 0, {
-        relative: true,
-        animate: true
+// zoom on focal point from mousewheel    
+$("#panzoom").parent().on('mousewheel.focal', function( e ) {
+    e.preventDefault();
+    var delta = e.delta || e.originalEvent.wheelDelta;
+    var zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
+    $("#panzoom").panzoom('zoom', zoomOut, {
+        increment: 0.1,
+        animate: false,
+        focal: e
     });
 });
-
-$('.panRight').click(function () {
-    $("#panzoom").panzoom("pan", 250, 0, {
-        relative: true,
-        animate: true
-    });
-});
+      
