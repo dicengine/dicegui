@@ -12,6 +12,7 @@
     <!-- Custom JS -->
     <script src="./js/dice.js" defer></script>  
     <script src="./js/utils.js" defer></script>
+    <script src="./js/global.js" defer></script>
     <!-- Panzoom -->
     <script src="./js/jquery.panzoom.min.js" defer></script>
     <script src="./js/viewer.js" defer></script>
@@ -88,14 +89,16 @@
                     <span class="toggle-icon"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
                   </div> <!-- end toggle div banner -->
                   <div class="toggle-div-body">
-                    <i class="material-icons md-dark action-li zoom-in-left">zoom_in</i>
-                    <i class="material-icons md-dark action-li zoom-out-left">zoom_out</i>
+                    <i class="material-icons md-dark action-li zoom-in-left" title="zoom in">zoom_in</i>
+                    <i class="material-icons md-dark action-li zoom-out-left" title="zoom out">zoom_out</i>
                     <input type="range" class="zoom-range-left">                   
-                    <i class="material-icons md-dark action-li reset-left">zoom_out_map</i>
+                    <i class="material-icons md-dark action-li reset-left" title="actual size">aspect_ratio</i>
+                    <i class="material-icons md-dark action-li" id="zoomToFitLeft" title="zoom to fit">zoom_out_map</i>
+                    <label id="leftDims"></label>
                   </div> <!-- end toggle div body -->
                 </div> <!-- end toggle div -->
                 <div id="viewWindowLeft" class="fill-div" style="background-color:darkgray;">
-                    <div id="panzoomLeft"></div>
+                    <div id="panzoomLeft" class="panzoom"></div>
                  </div>
               </div> <!-- end fill div left -->
 
@@ -106,14 +109,16 @@
                     <span class="toggle-icon"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
                 </div> <!-- end toggle div banner -->
                 <div class="toggle-div-body">
-                   <i class="material-icons md-dark action-li zoom-in-right">zoom_in</i>
-                   <i class="material-icons md-dark action-li zoom-out-right">zoom_out</i>
-                   <input type="range" class="zoom-range-right">                   
-                   <i class="material-icons md-dark action-li reset-right">zoom_out_map</i>
+                    <i class="material-icons md-dark action-li zoom-in-right" title="zoom in">zoom_in</i>
+                    <i class="material-icons md-dark action-li zoom-out-right" title="zoom out">zoom_out</i>
+                    <input type="range" class="zoom-range-right">                   
+                    <i class="material-icons md-dark action-li reset-right" title="actual size">aspect_ratio</i>
+                    <i class="material-icons md-dark action-li" id="zoomToFitRight" title="zoom to fit">zoom_out_map</i>
+                    <label id="rightDims"></label>
                    </div> <!-- end toggle div body -->
                  </div> <!-- end toggle div -->
                  <div id="viewWindowRight" class="fill-div"  style="background-color:darkgray;">
-                   <div id="panzoomRight"></div>
+                   <div id="panzoomRight" class="panzoom"></div>
                  </div>
                </div> <!-- end fill div right -->
               

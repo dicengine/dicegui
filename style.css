@@ -43,7 +43,12 @@ input[type="file"] {
 }
 .panzoom {
     -webkit-backface-visibility: initial !important;
-    -webkit-transform-origin: 50% 50%;
+    -ms-transform-origin: 0% 0%; /* IE 9 */
+    -webkit-transform-origin: 0% 0%; /* Chrome, Safari, Opera */
+    transform-origin: 0% 0%;
+    /*border-style: solid;*/
+    /*border-width: 5px;*/
+    /*border-color: red;*/
 }
 .nav-two-cam {
     display: none;
@@ -72,7 +77,7 @@ input[type="file"] {
 }
 .stack-button {
     display: none;
-    right: 121px;
+    right: 122px;
     padding: 5px 3px 3px 3px;
 }
 .view-actions-container {

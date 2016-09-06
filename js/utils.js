@@ -69,6 +69,8 @@ function resizeAll(){
     resizeFullDivs("#innerFluidRightCol");
     resizeFullDivs("#subFillDivLeft");
     resizeFullDivs("#subFillDivRight");
+    $("#panzoomLeft").panzoom("resetDimensions");
+    $("#panzoomRight").panzoom("resetDimensions");
 }
 
 // resize the elements within the target div
@@ -103,8 +105,6 @@ $("#stereoButton").click(function(){
     }
     resizeAll();
 });
-
-var viewersStacked = false;
 
 $("#stackButton").click(function(){
     if(viewersStacked==false){
