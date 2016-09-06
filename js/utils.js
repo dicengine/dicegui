@@ -47,9 +47,11 @@ function updateResultsFilesList(){
         workingDir += '/results';       
     }
     fs.readdir(workingDir, function(err,dir) {
-        for(var i = 0, l = dir.length; i < l; i++) {
-            var filePath = dir[i];
-            $("#resultsFilesList").append(filePath + '</br>');
+        if(dir){
+            for(var i = 0, l = dir.length; i < l; i++) {
+                var filePath = dir[i];
+                $("#resultsFilesList").append(filePath + '</br>');
+            }
         }
     });
     
