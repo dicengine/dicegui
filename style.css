@@ -48,36 +48,32 @@ input[type="file"] {
 .nav-two-cam {
     display: none;
 }
-.params-button {
+.banner-button {
     position: absolute;
     bottom: 0;
-    right: 5px;
     color: white;
     vertical-align: middle;
     background-color: #33ccff;
     border-radius: 5px 5px 0px 0px;
     cursor: pointer;
     height: 36px;
-}
-.params-button:hover {
-    background-color: #b3ecff;
-}
-.stereo-button {
-    position: absolute;
-    bottom: 0;
-    right: 50px;
-    color: white;
-    vertical-align: middle;
-    background-color: #ff66cc;
-    border-radius: 5px 5px 0px 0px;
-    cursor: pointer;
-    height: 36px;
-    width: 62px;
-    padding: 5px 3px 3px 3px;
     float: left;
 }
-.stereo-button:hover {
-    background-color: #ff99dd;
+.banner-button:hover {
+    background-color: #b3ecff;
+}
+.params-button {
+    right: 5px;
+}
+.stereo-button {
+    right: 50px;
+    width: 62px;
+    padding: 5px 3px 3px 3px;
+}
+.stack-button {
+    display: none;
+    right: 121px;
+    padding: 5px 3px 3px 3px;
 }
 .view-actions-container {
     padding: 3px;
@@ -137,7 +133,6 @@ input[type="file"] {
     width: 100%;
     display: inline-block;
     vertical-align: middle;
-    border-radius: 5px;
     padding: 0;
     overflow: hidden;
 }

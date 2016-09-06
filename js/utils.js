@@ -73,7 +73,7 @@ function resizeAll(){
 
 // resize the elements within the target div
 function resizeFullDivs(targetDiv){
-    // total height of all divs in the inner fluid right col
+    // total height of all divs in the targetDiv
     var sumHeight = 0;
     $(targetDiv + '> div').each(function() {
         sumHeight += $(this).outerHeight();
@@ -104,10 +104,40 @@ $("#stereoButton").click(function(){
     resizeAll();
 });
 
+var viewersStacked = false;
+
+$("#stackButton").click(function(){
+    if(viewersStacked==false){
+        $('#stackButton').css('background-color','#80dfff'); 
+        viewersStacked=true;
+    }else{
+        $('#stackButton').css('background-color','#33ccff'); 
+        viewersStacked=false;
+    }
+    stackViews();
+});
+
+function stackViews(){
+    if(viewersStacked){
+      $('#subFillDivRight').css('width','100%');
+      $('#subFillDivLeft').css('width','100%');
+      $('#subFillDivRight').css('height','50%');
+      $('#subFillDivLeft').css('height','50%');
+    }else{
+      $('#subFillDivRight').css('width','50%');
+      $('#subFillDivLeft').css('width','50%');
+      $('#subFillDivRight').css('height','100%');
+      $('#subFillDivLeft').css('height','100%');
+    }
+    resizeAll();    
+}
+
 function hideStereoViewer(){
     $('#subFillDivRight').css('display','none');
     $('#subFillDivLeft').css('width','100%');
+    $('#subFillDivLeft').css('height','100%');
     $(".nav-two-cam").css('display','none');
+    $("#stackButton").css('display','none');    
 }
 
 function showStereoViewer(){
@@ -115,4 +145,6 @@ function showStereoViewer(){
     $('#subFillDivRight').css('width','50%');
     $('#subFillDivLeft').css('width','50%');
     $(".nav-two-cam").css('display','block');
+    $("#stackButton").css('display','block');
+    stackViews();
 }
