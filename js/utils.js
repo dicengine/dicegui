@@ -1,3 +1,11 @@
+const electron = require('electron');
+const shell = electron.shell;
+const {dialog} = electron.remote;
+const os = require('os');
+const homeDir = os.homedir()
+const fs = require('fs');
+
+// tasks for when window loads
 $(window).load(function(){
     // TODO  set the default show/hide positions for toggles    
     // set the stereo toggle to off
@@ -5,14 +13,47 @@ $(window).load(function(){
     hideStereoViewer();
     // resize the full div elements
     resizeAll();
+    // set the default working dir to the home dir
+    workingDirectory = homeDir;
+    updateWorkingDirLabel();
 });
 
 // launch external links in the default browser not the frame
-const shell = require('electron').shell;
 $(document).on('click', 'a[href^="http"]', function(event) {
     event.preventDefault();
     shell.openExternal(this.href);
 });
+
+$("#changeWorkingDirLi").click(function(){
+    
+    var path =  dialog.showOpenDialog({defaultPath: workingDirectory, properties: ['openDirectory','createDirectory']});
+    if(path){
+        workingDirectory = path[0];
+        updateWorkingDirLabel();
+    }
+});
+
+function updateWorkingDirLabel(){
+    $("#workingDirLabel").text(workingDirectory);
+    updateResultsFilesList();
+}
+
+function updateResultsFilesList(){
+    $("#resultsFilesList").text("");
+    var workingDir = workingDirectory;
+    if(os.platform()=='win32'){
+        workingDir += '\results';
+    }else{
+        workingDir += '/results';       
+    }
+    fs.readdir(workingDir, function(err,dir) {
+        for(var i = 0, l = dir.length; i < l; i++) {
+            var filePath = dir[i];
+            $("#resultsFilesList").append(filePath + '</br>');
+        }
+    });
+    
+}
 
 // toggle the params menu on or off
 document.getElementById("paramsButton").onclick = function(){
@@ -108,10 +149,10 @@ $("#stereoButton").click(function(){
 
 $("#stackButton").click(function(){
     if(viewersStacked==false){
-        $('#stackButton').css('background-color','#80dfff'); 
+        $('#stackIcon').css('transform','rotate(90deg)'); 
         viewersStacked=true;
     }else{
-        $('#stackButton').css('background-color','#33ccff'); 
+        $('#stackIcon').css('transform','rotate(0deg)'); 
         viewersStacked=false;
     }
     stackViews();

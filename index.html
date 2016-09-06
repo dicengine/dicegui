@@ -27,7 +27,7 @@
       <div class="header">
         <img src="./images/DICe_logo_white-01.png" alt="DICe logo" height="42" width="auto">
         <div id="stackButton" title="toggle stack and column view" class="banner-button stack-button">
-          <div style="float:left; width:auto;"><i class="material-icons md-light md-28">view_agenda</i></div>
+          <div style="float:left; width:auto;"><i id="stackIcon" class="material-icons md-light md-28">view_agenda</i></div>
         </div>
         <div id="stereoButton" title="toggle stereo on/off" class="banner-button stereo-button">
           <div style="float:left; width:auto;"><i class="material-icons md-light md-28">camera_alt</i></div>
@@ -41,7 +41,7 @@
        <div class="fixed-col">
           <h1>IMAGES</h1>
           <div id="leftImageMenu">
-            <div class="nav-two-cam">LEFT</div>
+            <div class="nav-two-cam" style="padding-left: 10px;">left</div>
               <label for="leftRefInput" class="custom-file-input">
                 <i class="material-icons md-dark md-br-pad">add_a_photo</i>
                 load reference     
@@ -54,7 +54,7 @@
               <input id="leftDefInput" type="file"/>                  
             </div>
           <div id="rightImageMenu" class="nav-two-cam">
-            <div class="nav-two-cam">RIGHT</div>
+            <div class="nav-two-cam"  style="padding-left: 10px;">right</div>
               <label for="rightRefInput" class="custom-file-input">
                 <i class="material-icons md-dark md-br-pad">add_a_photo</i>
                 load reference     
@@ -74,6 +74,9 @@
           </ul>
           <h1>ANALYSIS</h1>
           <ul>
+            <li id="changeWorkingDirLi" class="action-li"><i class="material-icons md-dark md-br-pad">folder</i>
+              working directory
+            </li>
             <li id="runLi" class="action-li"><i class="material-icons md-dark md-br-pad">play_circle_filled</i>
               <span>run 2d<span>
             </li>
@@ -160,6 +163,22 @@
                      <p>papers and reports</p>
                      <p><a href="http://dicengine.github.io/dice/" alt="">class and namespace documentation</a></p>
                      <p><a href="http://github.com/dicengine/dice" alt="">source code</a></p>
+                   </div> <!-- end toggle div body -->
+              </div> <!-- end toggle div -->
+              <div class="toggle-div">
+                   <div class="toggle-div-banner">
+                       <span class="toggle-title">WORKING DIRECTORY</span>
+                       <span class="toggle-icon"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
+                   </div> <!-- end toggle div banner -->
+                   <div class="toggle-div-body">
+                       <div style="width:100%; line-height: 24px;">
+                           current working directory: </br>
+                           <label id="workingDirLabel" style="word-wrap: break-word;">${home}</label>
+                       </div>
+                       <div style="background-color: #f2f2f2; padding 2px; line-height: 18px; width: 100%;">
+                           <div style="background-color:#cccccc; padding: 5px;">results files:</div>
+                           <div id="resultsFilesList" style="padding: 2px; line-height: 22px;"> </div>
+                       </div>
                    </div> <!-- end toggle div body -->
               </div> <!-- end toggle div -->
             </div> <!-- end inner-fluid-right-col -->

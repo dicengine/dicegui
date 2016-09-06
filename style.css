@@ -35,7 +35,7 @@ body {
 }
 .custom-file-input {
     display: inline-block;
-    padding: 3px 3px 3px 10px;
+    padding: 8px 3px 3px 10px;
     cursor: pointer;
 }
 input[type="file"] {
@@ -156,6 +156,8 @@ ul {
     cursor: pointer;
 }
 h1 {
+    margin-top: 12px;
+    margin-bottom: 8px;
     font-weight: bold;
     font-size: 18px;
 }
