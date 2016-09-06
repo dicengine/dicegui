@@ -25,7 +25,6 @@ $(document).on('click', 'a[href^="http"]', function(event) {
 });
 
 $("#changeWorkingDirLi").click(function(){
-    
     var path =  dialog.showOpenDialog({defaultPath: workingDirectory, properties: ['openDirectory','createDirectory']});
     if(path){
         workingDirectory = path[0];

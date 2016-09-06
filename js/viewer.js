@@ -60,12 +60,20 @@ function zoomToFitRight(){
 $("#zoomToFitLeft").click(function(){zoomToFitLeft();});
 $("#zoomToFitRight").click(function(){zoomToFitRight();});
 
-// compute the image coordiate of a mouse click in the viewer
-//$("#panzoomLeft").click(function( event ) {
-//    var X = event.pageX - this.offsetLeft;
-//    var Y = event.pageY - this.offsetTop;
-//    console.log("x = " + X + " y = " + Y);
-//});
+// compute the image coordiates of a mouse click in the viewer
+$("#panzoomLeft").click(function( event ) {
+    //var transform = $makeArray();
+    var scale = $("#panzoomLeft").panzoom("getMatrix")[0];
+    // TODO remove pan x and y refs (not needed)
+    var panX = $("#panzoomLeft").panzoom("getMatrix")[4];
+    var panY = $("#panzoomLeft").panzoom("getMatrix")[5];
+    var viewX = event.pageX - $(this).offset().left;
+    var viewY = event.pageY - $(this).offset().top;
+    var imgX = viewX / scale;
+    var imgY = viewY / scale;
+    console.log("scale " + scale + " pan x " + panX + " pan y " + panY + " vx " + viewX + " vy " +  viewY + " x " + imgX + " y " + imgY);
+    //console.log("x = " + X + " y = " + Y);
+});
 
 // zoom on focal point from mousewheel    
 $("#panzoomLeft").parent().on('mousewheel.focal', function( e ) {

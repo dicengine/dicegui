@@ -7,7 +7,7 @@ var workingDirectory = "undefined";
 var viewersStacked = false;
 
 // reference image dimensions
-var refImageWidthLeft = -1;
-var refImageHeightLeft = -1;
-var refImageWidthRight = -1;
-var refImageHeightRight = -1;
+var refImageWidthLeft = 0;
+var refImageHeightLeft = 0;
+var refImageWidthRight = 0;
+var refImageHeightRight = 0;
