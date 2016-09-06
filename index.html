@@ -7,6 +7,8 @@
     <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script>if (window.module) module = window.module;</script>
+    <!-- Tiff -->
+    <script src="./js/tiff.js" defer></script>
     <!-- Custom JS -->
     <script src="./js/dice.js" defer></script>  
     <script src="./js/utils.js" defer></script>
@@ -34,11 +36,32 @@
       <div class="content">
        <div class="fixed-col">
           <h1>IMAGES</h1>
-          <ul>
-            <li><i class="material-icons md-dark md-br-pad">add_a_photo</i>load reference</li>
-            <li><i class="material-icons md-dark md-br-pad">add_a_photo</i>load deformed</li>
-            <li><i class="material-icons md-dark md-br-pad">insert_drive_file</i>export</li>
-          </ul>
+          <div id="leftImageMenu">
+            <div class="nav-two-cam">LEFT</div>
+              <label for="leftRefInput" class="custom-file-input">
+                <i class="material-icons md-dark md-br-pad">add_a_photo</i>
+                load reference     
+              </label>
+              <input id="leftRefInput" type="file"/>                  
+              <label for="leftDefInput" class="custom-file-input">
+                <i class="material-icons md-dark md-br-pad">add_a_photo</i>
+                load deformed    
+              </label>
+              <input id="leftDefInput" type="file"/>                  
+            </div>
+          <div id="rightImageMenu" class="nav-two-cam">
+            <div class="nav-two-cam">RIGHT</div>
+              <label for="rightRefInput" class="custom-file-input">
+                <i class="material-icons md-dark md-br-pad">add_a_photo</i>
+                load reference     
+              </label>
+              <input id="rightRefInput" type="file"/>                  
+              <label for="rightDefInput" class="custom-file-input">
+                <i class="material-icons md-dark md-br-pad">add_a_photo</i>
+                load deformed    
+              </label>
+              <input id="rightDefInput" type="file"/>                  
+            </div>
           <h1>TOOLS</h1>
           <ul>
             <li><i class="material-icons md-dark md-br-pad">compare</i>filter images</li>
@@ -56,50 +79,38 @@
           <div id="innerFluidLeftCol" class="inner-fluid-left-col">
             <div id="viewerFillDiv" class="fill-div">
               <div id="subFillDivLeft" class="sub-fill-div">
-                <div class="view-actions-container">
-                  <i class="material-icons md-dark md-br-pad" style="color: #ffa64d;">add_a_photo</i>
-                  load reference
-                  <i class="material-icons md-dark md-br-pad" style="color: #ffa64d;">add_a_photo</i>
-                  load deformed                  
-                </div>
+                <div class="toggle-div">
+                  <div class="toggle-div-banner">
+                    <span class="toggle-title">VIEW CONTROL</span>
+                    <span class="toggle-icon"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
+                  </div> <!-- end toggle div banner -->
+                  <div class="toggle-div-body">
+                    <i class="material-icons md-dark action-li zoom-in-left">zoom_in</i>
+                    <i class="material-icons md-dark action-li zoom-out-left">zoom_out</i>
+                    <input type="range" class="zoom-range-left">                   
+                    <i class="material-icons md-dark action-li reset-left">zoom_out_map</i>
+                  </div> <!-- end toggle div body -->
+                </div> <!-- end toggle div -->
+                <div id="viewWindowLeft" class="fill-div" style="background-color:darkgray;">
+                    <div id="panzoomLeft"></div>
+                 </div>
+              </div> <!-- end fill div left -->
+
+              <div id="subFillDivRight" class="sub-fill-div">
                 <div class="toggle-div">
                 <div class="toggle-div-banner">
                     <span class="toggle-title">VIEW CONTROL</span>
                     <span class="toggle-icon"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
                 </div> <!-- end toggle div banner -->
                 <div class="toggle-div-body">
-                     <button class="zoom-in">Zoom In</button>
-                     <button class="zoom-out">Zoom Out</button>
-                     <input type="range" class="zoom-range">
-                     <button class="reset">Reset</button>
-                     <button id="zoomInfo">Info</button>
-                   </div> <!-- end toggle div body -->
-                 </div> <!-- end toggle div -->
-                <div id="viewWindowLeft" class="fill-div" style="background-color:darkgray;">
-                    <div id="panzoom">
-                      <img src="http://blog.millermedeiros.com/wp-content/uploads/2010/04/awesome_tiger.svg" width="900" height="900">
-                    </div>
-                 </div>
-              </div> <!-- end fill div left -->
-
-              <div id="subFillDivRight" class="sub-fill-div">
-                <div class="view-actions-container">
-                  <i class="material-icons md-dark md-br-pad" style="color: #ffa64d;">add_a_photo</i>
-                  load reference
-                  <i class="material-icons md-dark md-br-pad" style="color: #ffa64d;">add_a_photo</i>
-                  load deformed                  
-                </div>
-                <div class="toggle-div">
-                <div class="toggle-div-banner">
-                    <span class="toggle-title">VIEW CONTROL</span>
-                    <span class="toggle-icon"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
-                </div> <!-- end toggle div banner -->
-                   <div class="toggle-div-body">
-                         Inside the toggle div dropdown
+                   <i class="material-icons md-dark action-li zoom-in-right">zoom_in</i>
+                   <i class="material-icons md-dark action-li zoom-out-right">zoom_out</i>
+                   <input type="range" class="zoom-range-right">                   
+                   <i class="material-icons md-dark action-li reset-right">zoom_out_map</i>
                    </div> <!-- end toggle div body -->
                  </div> <!-- end toggle div -->
                  <div id="viewWindowRight" class="fill-div"  style="background-color:darkgray;">
-                    I am in a fill div
+                   <div id="panzoomRight"></div>
                  </div>
                </div> <!-- end fill div right -->
               

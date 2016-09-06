@@ -107,10 +107,12 @@ $("#stereoButton").click(function(){
 function hideStereoViewer(){
     $('#subFillDivRight').css('display','none');
     $('#subFillDivLeft').css('width','100%');
+    $(".nav-two-cam").css('display','none');
 }
 
 function showStereoViewer(){
     $('#subFillDivRight').css('display','inline-block');
     $('#subFillDivRight').css('width','50%');
     $('#subFillDivLeft').css('width','50%');
+    $(".nav-two-cam").css('display','block');
 }

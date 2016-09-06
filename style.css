@@ -33,6 +33,21 @@ body {
 .align-left {
     float: left;
 }
+.custom-file-input {
+    display: inline-block;
+    padding: 3px 3px 3px 10px;
+    cursor: pointer;
+}
+input[type="file"] {
+    display: none;
+}
+.panzoom {
+    -webkit-backface-visibility: initial !important;
+    -webkit-transform-origin: 50% 50%;
+}
+.nav-two-cam {
+    display: none;
+}
 .params-button {
     position: absolute;
     bottom: 0;
