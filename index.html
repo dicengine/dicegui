@@ -49,12 +49,13 @@
                 <i class="material-icons md-dark md-br-pad">add_a_photo</i>
                 load reference     
               </label>
-              <input id="leftRefInput" type="file"/>                  
+              <input id="leftRefInput" type="file">                  
               <label for="leftDefInput" class="custom-file-input">
                 <i class="material-icons md-dark md-br-pad">add_a_photo</i>
                 load deformed    
               </label>
-              <input id="leftDefInput" type="file"/>                  
+              <input id="leftDefInput" type="file" multiple>
+              <div class="def-image-list" id="defImageListLeft"></div>
             </div>
           <div id="rightImageMenu" class="nav-two-cam">
             <div class="nav-two-cam"  style="padding-left: 10px;">right</div>
@@ -62,12 +63,13 @@
                 <i class="material-icons md-dark md-br-pad">add_a_photo</i>
                 load reference     
               </label>
-              <input id="rightRefInput" type="file"/>                  
+              <input id="rightRefInput" type="file">                  
               <label for="rightDefInput" class="custom-file-input">
                 <i class="material-icons md-dark md-br-pad">add_a_photo</i>
                 load deformed    
               </label>
-              <input id="rightDefInput" type="file"/>                  
+              <input id="rightDefInput" type="file" multiple>                  
+              <div class="def-image-list" id="defImageListRight"></div>
             </div>
           <h1>TOOLS</h1>
           <ul>
@@ -182,7 +184,7 @@
                    <div class="toggle-div-body">
                        <div style="width:100%; line-height: 24px;">
                            current working directory: </br>
-                           <label id="workingDirLabel" style="word-wrap: break-word;">${home}</label>
+                           <label id="workingDirLabel" style="word-wrap: break-word;">${home}</label> 
                        </div>
                        <div style="background-color: #f2f2f2; padding 2px; line-height: 18px; width: 100%;">
                            <div style="background-color:#cccccc; padding: 5px;">results files:</div>

@@ -6,6 +6,8 @@ var workingDirectory = "undefined";
 // image sets
 var refImagePathLeft = "undefined";
 var refImagePathRight = "undefined";
+var defImagePathsLeft = new Array();
+var defImagePathsRight = new Array();
 
 // determines if the image viewers are stacked on top of each other when stereo is in use
 var viewersStacked = false;

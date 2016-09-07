@@ -193,6 +193,36 @@ $("#leftRefInput").change(function (evt) {
     loadRefImage(evt,"#panzoomLeft");
 });
 
+$("#leftDefInput").change(function (evt) {
+    var tgt = evt.target || window.event.srcElement,
+    files = tgt.files;
+    if(files){
+        $("#defImageListLeft").text("");
+        defImagePathsLeft = [];
+        for(var i = 0, l = files.length; i < l; i++) {
+            var filePath = files[i].path;
+            var fileName = files[i].name;
+            $("#defImageListLeft").append(fileName + '</br>');
+            defImagePathsLeft.push(filePath);
+        }
+    }
+});
+
+$("#rightDefInput").change(function (evt) {
+    var tgt = evt.target || window.event.srcElement,
+    files = tgt.files;
+    if(files){
+        $("#defImageListRight").text("");
+        defImagePathsLeft = [];
+        for(var i = 0, l = files.length; i < l; i++) {
+            var filePath = files[i].path;
+            var fileName = files[i].name;
+            $("#defImageListRight").append(fileName + '</br>');
+            defImagePathsRight.push(filePath);
+        }
+    }
+});
+
 function updateDimsLabels (){
     $("#leftDims").text("w:" + refImageWidthLeft  + " h:" + refImageHeightLeft);
     $("#rightDims").text("w:" + refImageWidthRight  + " h:" + refImageHeightRight);
