@@ -131,30 +131,40 @@ function loadRefImage(evt, viewer) {
                     "height": "auto",
                     "overflow": "hidden",
                     "display": "block",
-                    "padding": "0px"
+                    "padding": "0px",
+                    "z-index" : "1",
+                    "position" : "absolute",
+                    "image-rendering" : "pixelated"
                 }).addClass("preview");
+                tiffCanvas.getContext("2d").mozImageSmoothingEnabled = false;
+                tiffCanvas.getContext("2d").msImageSmoothingEnabled = false;
+                tiffCanvas.getContext("2d").imageSmoothingEnabled = false;
                 $(viewer).html(tiffCanvas);
                 if(viewer=="#panzoomLeft"){
                     refImageWidthLeft = tiff.width();
                     refImageHeightLeft = tiff.height();
+                    refImagePathLeft = files[0].path;
                 }else{
                     refImageWidthRight = tiff.width();
                     refImageHeightRight = tiff.height();
+                    refImagePathRight = files[0].path;
                 }
                 updateDimsLabels();
             }
             else if(fileTypesOther.indexOf(extension) > -1){
                 $('#consoleWindow').append('parsing reference jpg or png image ...<br/>');
-                $(viewer).html('<img src="' + files[0].path + '" width="auto" height="auto"/>');                
+                $(viewer).html('<img src="' + files[0].path + '" width="auto" height="auto" style="z-index:1; position: absolute;"/>');                
                 function findHHandWW() {
                     var imgHeight = this.height;
                     var imgWidth = this.width;
                     if(viewer=="#panzoomLeft"){
                         refImageWidthLeft = imgWidth;
                         refImageHeightLeft = imgHeight;
+                        refImagePathLeft = files[0].path;
                     }else{
                         refImageWidthRight = imgWidth;
                         refImageHeightRight = imgHeight;
+                        refImagePathRight = files[0].path;
                     }
                     updateDimsLabels();
                     return true;
