@@ -18,11 +18,6 @@ $("#panzoomRight").panzoom({
     cursor: "pointer"
 });
 
-// write panzoom transform to console
-//$("#zoomInfoLeft").click(function(){
-//    console.log($("#panzoomLeft").panzoom("getTransform"));
-//});
-
 function getOffset( el ) {
     var _x = 0;
     var _y = 0;
@@ -45,6 +40,7 @@ function zoomToFitLeft(){
         $("#panzoomLeft").panzoom("zoom",scale,{focal: e });
     }                              
 }
+
 function zoomToFitRight(){
     $("#panzoomRight").panzoom("resetDimensions");
     var windowHeight = $("#viewWindowRight").outerHeight();
@@ -60,19 +56,28 @@ function zoomToFitRight(){
 $("#zoomToFitLeft").click(function(){zoomToFitLeft();});
 $("#zoomToFitRight").click(function(){zoomToFitRight();});
 
-// compute the image coordiates of a mouse click in the viewer
-$("#panzoomLeft").click(function( event ) {
-    //var transform = $makeArray();
+// compute the image coordiates of the mouse in the left viewer
+$("#panzoomLeft").mousemove(function( event ) {
     var scale = $("#panzoomLeft").panzoom("getMatrix")[0];
-    // TODO remove pan x and y refs (not needed)
-    var panX = $("#panzoomLeft").panzoom("getMatrix")[4];
-    var panY = $("#panzoomLeft").panzoom("getMatrix")[5];
     var viewX = event.pageX - $(this).offset().left;
     var viewY = event.pageY - $(this).offset().top;
-    var imgX = viewX / scale;
-    var imgY = viewY / scale;
-    console.log("scale " + scale + " pan x " + panX + " pan y " + panY + " vx " + viewX + " vy " +  viewY + " x " + imgX + " y " + imgY);
-    //console.log("x = " + X + " y = " + Y);
+    var imgX = Math.round(viewX / scale);
+    var imgY = Math.round(viewY / scale);
+    if(imgX>=0&&imgX<refImageWidthLeft&&imgY>=0&&imgY<refImageHeightLeft){
+        $("#leftPos").text("x:" + imgX + " y:" + imgY);
+    }
+});
+
+// compute the image coordiates of the mouse in the right viewer
+$("#panzoomRight").mousemove(function( event ) {
+    var scale = $("#panzoomRight").panzoom("getMatrix")[0];
+    var viewX = event.pageX - $(this).offset().left;
+    var viewY = event.pageY - $(this).offset().top;
+    var imgX = Math.round(viewX / scale);
+    var imgY = Math.round(viewY / scale);
+    if(imgX>=0&&imgX<refImageWidthRight&&imgY>=0&&imgY<refImageHeightRight){
+        $("#rightPos").text("x:" + imgX + " y:" + imgY);
+    }
 });
 
 // zoom on focal point from mousewheel    
@@ -179,6 +184,6 @@ $("#leftRefInput").change(function (evt) {
 });
 
 function updateDimsLabels (){
-    $("#leftDims").text("W:" + refImageWidthLeft  + " H:" + refImageHeightLeft);
-    $("#rightDims").text("W:" + refImageWidthRight  + " H:" + refImageHeightRight);
+    $("#leftDims").text("w:" + refImageWidthLeft  + " h:" + refImageHeightLeft);
+    $("#rightDims").text("w:" + refImageWidthRight  + " h:" + refImageHeightRight);
 }
