@@ -141,36 +141,68 @@ function clearExcluded () {
 function drawROIs(){
     // clear the old ROIs
     clearDrawnROIs();
+    var hasExcluded = false;
+    var hasROI = false;
     var draw = SVG('panzoomLeft').size(refImageWidthLeft, refImageHeightLeft);
+    var polygon;
+    var excluded;
     // draw existing ROIs using the svg element:
     if(ROIDefsX && ROIDefsY){
+        var coordsString = '';        
         for(var i = 0, l = 1; i < ROIDefsX.length; i++) {
-            var coordsString = '';
             var ROIX = ROIDefsX[i];
             var ROIY = ROIDefsY[i];
+            coordsString += ' M ';
             for(var j = 0, jl = ROIX.length; j < jl; j++) {
-                coordsString += ROIX[j] + ',' + ROIY[j];
-                if(j!=ROIX.length-1){
-                    coordsString += ' ';
+                if(j==0){
+                    coordsString += ROIX[j] + ' ' + ROIY[j];
+                }else if(j!=ROIX.length-1){
+                    coordsString += ' L ' + ROIX[j] + ' ' + ROIY[j];
+                }
+                else{
+                    coordsString += ' L ' + ROIX[j] + ' ' + ROIY[j] + ' Z';
                 }
             }
-            var polygon = draw.polygon(coordsString).attr({ fill: '#00ff00', 'fill-opacity': '0.4', stroke: '#00ff00', 'stroke-opacity': '1','stroke-width': '4', 'stroke-dasharray': '10,8', 'stroke-linecap':'round' });
+        }
+        console.log(coordsString);
+        if(coordsString!=' M '){
+            hasROI = true;
+            polygon = draw.path(coordsString).attr({ fill: '#00ff00', 'fill-opacity': '0.4', stroke: '#00ff00', 'stroke-opacity': '1','stroke-width': '4', 'stroke-dasharray': '10,8', 'stroke-linecap':'round' });
         }
     }
     // draw existing exclusions using the svg element:
+    // draw excluded first because this serves as the mask
     if(excludedDefsX && excludedDefsY){
+        var coordsString = '';        
         for(var i = 0, l = 1; i < excludedDefsX.length; i++) {
-            var coordsString = '';
             var ROIX = excludedDefsX[i];
             var ROIY = excludedDefsY[i];
+            coordsString += ' M ';
             for(var j = 0, jl = ROIX.length; j < jl; j++) {
-                coordsString += ROIX[j] + ',' + ROIY[j];
-                if(j!=ROIX.length-1){
-                    coordsString += ' ';
+                if(j==0){
+                    coordsString += ROIX[j] + ' ' + ROIY[j];
+                }else if(j!=ROIX.length-1){
+                    coordsString += ' L ' + ROIX[j] + ' ' + ROIY[j];
+                }
+                else{
+                    coordsString += ' L ' + ROIX[j] + ' ' + ROIY[j] + ' Z';
                 }
             }
-            var polygon = draw.polygon(coordsString).attr({ 'fill-opacity':'0', stroke: '#f06', 'stroke-opacity': '1','stroke-width': '4', 'stroke-dasharray': '10,8', 'stroke-linecap':'round' });
         }
+        console.log(coordsString);
+        if(coordsString!=' M '){
+            hasExcluded = true;
+            if(hasROI){
+                excluded = draw.path(coordsString).attr({fill: 'black'});
+            }
+            var outline = draw.path(coordsString).attr({ 'fill-opacity':'0', stroke: '#f06', 'stroke-opacity': '1','stroke-width': '4', 'stroke-dasharray': '10,8', 'stroke-linecap':'round' });
+        }
+    }
+    // mask the included ROI with the excluded region
+    if(hasExcluded && hasROI){
+        var backMask = draw.rect(refImageWidthLeft,refImageHeightLeft).attr({fill: 'white'});
+        var mask = draw.mask().add(backMask).add(excluded);
+        polygon.maskWith(mask);
     }
     draw.style('z-index',2);
     draw.style('position','absolute');    
@@ -204,6 +236,7 @@ function removeLastExcluded(){
             excludedDefsX.pop();
             excludedDefsY.pop();
         }else{
+            excludedDefsX=[[]];
             excludedDefsY=[[]];
         }
     }
