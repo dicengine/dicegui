@@ -4,7 +4,7 @@ $("#panzoomLeft").panzoom({
     $zoomOut: $(".zoom-out-left"),
     $zoomRange: $(".zoom-range-left"),
     $reset: $(".reset-left"),
-    which: 3,
+    which: 2,
     minScale: 0.05,
     cursor: "pointer"
 });
@@ -13,7 +13,7 @@ $("#panzoomRight").panzoom({
     $zoomOut: $(".zoom-out-right"),
     $zoomRange: $(".zoom-range-right"),
     $reset: $(".reset-right"),
-    which: 3,
+    which: 2,
     minScale: 0.05,
     cursor: "pointer"
 });

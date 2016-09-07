@@ -60,8 +60,8 @@ function updateResultsFilesList(){
 document.getElementById("paramsButton").onclick = function(){
     if($('#innerFluidRightCol').css('display')=='none'){
         $('#innerFluidRightCol').css('display','inline-block');
-        $('#innerFluidRightCol').css('width','30%');
-        $('#innerFluidLeftCol').css('width','70%');
+        $('#innerFluidRightCol').css('width','25%');
+        $('#innerFluidLeftCol').css('width','75%');
     }
     else {
         $('#innerFluidRightCol').css('display','none');

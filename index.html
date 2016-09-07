@@ -106,11 +106,27 @@
                     <label id="leftPos"></label>
                   </div> <!-- end toggle div body -->
                 </div> <!-- end toggle div -->
+                <div class="toggle-div">
+                  <div class="toggle-div-banner">
+                    <span class="toggle-title">REGIONS OF INTEREST</span>
+                    <span class="toggle-icon"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
+                  </div> <!-- end toggle div banner -->
+                  <div class="toggle-div-body">
+                    <i id="addROIs" class="material-icons md-dark action-li" title="add ROIs">add_circle</i>
+                    <i id="addExcludeds" class="material-icons md-dark action-li" title="add exclusions">add_circle_outline</i>
+                    <i id="removeLastROI" class="material-icons md-dark action-li" title="remove last ROI">remove_circle</i>
+                    <i id="removeLastExcluded"class="material-icons md-dark action-li" title="remove last exclusion">remove_circle_outline</i>
+                    <i id="resetROIs"class="material-icons md-dark action-li" title="reset ROIs">cancel</i>
+                    <button id="showShapes" type="button">show shapes</button>
+                    <label id="ROIProgress"></label>
+                  </div> <!-- end toggle div body -->
+                </div> <!-- end toggle div -->
                 <div id="viewWindowLeft" class="fill-div" style="background-color:darkgray;">
                   <div id="panzoomLeft" class="panzoom">
                     <!--<svg id="svgLeft" width="300" height="300"> -->
                     <!--  <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />-->
                     <!--</svg>-->
+                    <div id="svgContainer" class="svg-container"></div>
                   </div>
                  </div>
               </div> <!-- end fill div left -->
