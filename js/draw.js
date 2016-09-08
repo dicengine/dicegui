@@ -92,10 +92,21 @@ $("#panzoomLeft").mousedown(function(){
     else if(event.button == 2 && shapeInProgress){
         console.log("end shape");
         shapeInProgress = false;
-        if(addROIsActive){
-            currentROIIndex += 1;
-        }else{
-            currentExcludedIndex += 1;
+        // validate the polygon
+        var validPolygon = validatePolygon();
+        if(validPolygon){
+            if(addROIsActive){
+                currentROIIndex += 1;
+            }else{
+                currentExcludedIndex += 1;
+            }
+        }
+        else{ // delete the last shape
+            if(addROIsActive){
+                removeLastROI();
+            }else{
+                removeLastExcluded();
+            }
         }
         $("#ROIProgress").text("");
         drawROIs();
@@ -329,3 +340,73 @@ $("#removeLastExcluded").click(function(){
     }
     drawROIs();
 });
+
+
+function validatePolygon(){
+    var tol = 1.0E-3;
+    var polysX;
+    var polysY;
+    if(addROIsActive){
+        polysX = ROIDefsX;
+        polysY = ROIDefsY;
+    }else{
+        polysX = excludedDefsX;
+        polysY = excludedDefsY;            
+    }
+    if(polysX && polysY){
+        var numPolys = polysX.length;
+        var numPoints = polysX[numPolys-1].length;
+        var pointsX = polysX[numPolys-1];
+        var pointsY = polysY[numPolys-1];
+        // check that there are more than 2 points
+        if(numPoints < 3){
+            alert('Invalid polygon: not enough vertices');
+            return false;
+        }
+        // TODO check for degenerate points
+        if(Math.abs(pointsX[0]-pointsX[numPoints-1]) + Math.abs(pointsY[0]-pointsY[numPoints-1]) < tol){
+            alert('Invalid polygon: first and last point of the polygon are too close');
+            return false;
+        }
+        for(var i = 1, l = numPoints; i < l; i++) {
+            if(Math.abs(pointsX[i]-pointsX[i-1]) + Math.abs(pointsY[i]-pointsY[i-1]) < tol){
+                alert('Invalid polygon: co-located vertices detected');
+                return false;
+            }
+        }
+        // TODO check for intersections
+        for(var i = 0, l = numPoints; i < l; i++) {
+            var ipt  = [pointsX[i],pointsY[i]]
+            var iqpt = i == numPoints-1 ? [pointsX[0],pointsY[0]] : [pointsX[i+1],pointsY[i+1]];
+            for(var j = 0, jl = numPoints; j < jl; j++) {
+                if( (j==i||j==i+1||j==i-1) ||
+                    (i==0&&j==numPoints-1) ||
+                    (i==numPoints-1&&j==0)){}
+                else{
+                    var jpt = [pointsX[j],pointsY[j]];
+                    var jqpt = j == numPoints-1 ? [pointsX[0],pointsY[0]] : [pointsX[j+1],pointsY[j+1]];
+                    if(isIntersecting(ipt,iqpt,jpt,jqpt)){
+                        alert('Invalid polygon: self-intersecting');
+                        return false;
+                    }
+                }
+            }
+        }            
+    } // end array not undefined   
+    return true;
+}
+
+function clockwise(a,b,c){
+    var valueDbl = ((b[0]-a[0])*(c[1]-a[1]) - (c[0]-a[0])*(b[1]-a[1]));
+    var value = valueDbl > 0.0 ? 1 : valueDbl < 0.0 ? -1 : 0;
+    if(value!=0&&value!=1&&value!=-1) {
+        alert("ERROR: invalid clockwise vlaue");
+    }
+    return value;
+}
+
+function isIntersecting(ap,aq,bp,bq){
+    if (clockwise(ap,aq,bp)*clockwise(ap,aq,bq)>0) return false;
+    if (clockwise(bp,bq,ap)*clockwise(bp,bq,aq)>0) return false;
+    return true;
+}
