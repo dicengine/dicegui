@@ -23,6 +23,7 @@ var ROIDefsX = [[]];
 var ROIDefsY = [[]];
 var excludedDefsX = [[]];
 var excludedDefsY = [[]];
+var firstClick = true;
 var shapeInProgress = false;
 var addROIsActive = false;
 var addExcludedActive = false;

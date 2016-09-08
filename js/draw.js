@@ -1,3 +1,52 @@
+$("#panzoomLeft").mousemove(function(){
+    if(shapeInProgress){
+        // get the position of the last point
+        if(addROIsActive || addExcludedActive){
+            var scale = $("#panzoomLeft").panzoom("getMatrix")[0];
+            var viewX = event.pageX - $(this).offset().left;
+            var viewY = event.pageY - $(this).offset().top;
+            var imgX = Math.round(viewX / scale);
+            var imgY = Math.round(viewY / scale);
+            if(imgX>=0&&imgX<refImageWidthLeft&&imgY>=0&&imgY<refImageHeightLeft){
+                // remove the last svg
+                if(firstClick==false){
+                    clearLastDrawnROI();
+                }
+                firstClick = false;
+                var draw = SVG('panzoomLeft').size(refImageWidthLeft, refImageHeightLeft);
+                // add all the existing points in the polygon
+                var coordsString = '';
+                var ROIX;
+                var ROIY;
+                if(addROIsActive){
+                    ROIX = ROIDefsX[ROIDefsX.length - 1];
+                    ROIY = ROIDefsY[ROIDefsY.length - 1];
+                }else{
+                    ROIX = excludedDefsX[excludedDefsX.length - 1];
+                    ROIY = excludedDefsY[excludedDefsY.length - 1];
+                }
+                coordsString += ' M ';
+                for(var j = 0, jl = ROIX.length; j < jl; j++) {
+                    if(j==0){
+                        coordsString += ROIX[j] + ' ' + ROIY[j];
+                    }else{
+                        coordsString += ' L ' + ROIX[j] + ' ' + ROIY[j];
+                    }
+                }
+                // add the current point
+                coordsString += ' L ' + imgX + ' ' + imgY + ' Z';
+                if(addROIsActive){
+                    var polygon = draw.path(coordsString).attr({ fill: '#00ff00', 'fill-opacity': '0.4', stroke: '#00ff00', 'stroke-opacity': '1','stroke-width': '2', 'stroke-linecap':'round' });
+                }else{
+                    var outline = draw.path(coordsString).attr({ 'fill-opacity':'0', stroke: '#f06', 'stroke-opacity': '1','stroke-width': '2', 'stroke-linecap':'round' });
+                }
+                draw.style('z-index',2);
+                draw.style('position','absolute');
+            }
+        }
+    }
+});
+
 $("#panzoomLeft").mousedown(function(){
     // add point to shapeon left click
     if(event.button == 0){
@@ -49,6 +98,8 @@ $("#panzoomLeft").mousedown(function(){
             currentExcludedIndex += 1;
         }
         $("#ROIProgress").text("");
+        drawROIs();
+        firstClick = true;
     }
 });
 
@@ -131,12 +182,12 @@ function clearROIs () {
     ROIDefsY = [[]];
     currentROIIndex = 0;
 }
+
 function clearExcluded () {
     excludedDefsX = [[]];
     excludedDefsY = [[]];
     currentExcludedIndex = 0;
 }
-
 
 function drawROIs(){
     // clear the old ROIs
@@ -167,7 +218,7 @@ function drawROIs(){
         console.log(coordsString);
         if(coordsString!=' M '){
             hasROI = true;
-            polygon = draw.path(coordsString).attr({ fill: '#00ff00', 'fill-opacity': '0.4', stroke: '#00ff00', 'stroke-opacity': '1','stroke-width': '4', 'stroke-dasharray': '10,8', 'stroke-linecap':'round' });
+            polygon = draw.path(coordsString).attr({ fill: '#00ff00', 'fill-opacity': '0.4', stroke: '#00ff00', 'stroke-opacity': '1','stroke-width': '2', 'stroke-linecap':'round' });
         }
     }
     // draw existing exclusions using the svg element:
@@ -195,7 +246,7 @@ function drawROIs(){
             if(hasROI){
                 excluded = draw.path(coordsString).attr({fill: 'black'});
             }
-            var outline = draw.path(coordsString).attr({ 'fill-opacity':'0', stroke: '#f06', 'stroke-opacity': '1','stroke-width': '4', 'stroke-dasharray': '10,8', 'stroke-linecap':'round' });
+            var outline = draw.path(coordsString).attr({ 'fill-opacity':'0', stroke: '#f06', 'stroke-opacity': '1','stroke-width': '2', 'stroke-linecap':'round' });
         }
     }
     // mask the included ROI with the excluded region
@@ -214,8 +265,31 @@ $("#showShapes").click(function(){
 
 function clearDrawnROIs(){
     $('#panzoomLeft > svg').each(function(){
-        $(this).html('');
+        $(this).remove();
     });
+}
+
+function clearLastDrawnROI(){
+    //var numSVG = 0;
+    //$('#panzoomLeft > svg').each(function(){
+    //    console.log("num SVG " + numSVG );
+    //    numSVG += 1;
+    //});
+
+    var cells = $("#panzoomLeft").find('svg');
+    var length = cells.length;
+    console.log("length is " + length);
+    cells.each(function(i) {
+        if(i!=length-1){
+        }else{
+            $(this).remove();
+        }
+    });
+    
+//    $('#panzoomLeft svg:last-child').last(function(){
+//        console.log('removed svg');
+//        $(this).remove();
+//    });
 }
 
 function removeLastROI(){
