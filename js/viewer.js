@@ -111,6 +111,11 @@ function loadRefImage(evt, viewer) {
         files = tgt.files;
 
     if (FileReader && files && files.length) {
+        // clear the ROIs drawn on the canvas already
+        clearROIs();
+        clearExcluded();
+        // clear the drawn ROIs
+        clearDrawnROIs();        
         var fr = new FileReader();
         var extension = files[0].name.split('.').pop().toLowerCase();
         fr.onload = function(e) {
@@ -175,14 +180,16 @@ function loadRefImage(evt, viewer) {
                 myImage.src = files[0].path;
             }
             else{ // load FAILURE
-                $('#consoleWindow').append('image load FAILURE: invalid file type, ' + files[0].name + '<br/>');            
+                $('#consoleWindow').append('image load FAILURE: invalid file type, ' + files[0].name + '<br/>');
+                return;
             }
         }
         fr.onloadend = function(e) {
             $('#consoleWindow').append('reference image load complete <br/>');
+            drawDefaultROI();
         }
         fr.readAsArrayBuffer(files[0]);
-    } 
+    }
 }
 
 $("#rightRefInput").change(function (evt) {

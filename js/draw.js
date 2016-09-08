@@ -65,7 +65,7 @@ $("#panzoomLeft").mousedown(function(){
             if(imgX>=0&&imgX<refImageWidthLeft&&imgY>=0&&imgY<refImageHeightLeft){
                 ROIDefsX[currentROIIndex].push(imgX);
                 ROIDefsY[currentROIIndex].push(imgY);
-                printROIDefs();
+                //printROIDefs();
             }
         }
         if(addExcludedActive){
@@ -84,37 +84,42 @@ $("#panzoomLeft").mousedown(function(){
                 var shapeIndex = 0;
                 excludedDefsX[currentExcludedIndex].push(imgX);
                 excludedDefsY[currentExcludedIndex].push(imgY);
-                printExcludedDefs();
+                //printExcludedDefs();
             }
          }
     }
     // end shape if right click
     else if(event.button == 2 && shapeInProgress){
-        console.log("end shape");
-        shapeInProgress = false;
-        // validate the polygon
-        var validPolygon = validatePolygon();
-        if(validPolygon){
-            if(addROIsActive){
-                currentROIIndex += 1;
-            }else{
-                currentExcludedIndex += 1;
-            }
-        }
-        else{ // delete the last shape
-            if(addROIsActive){
-                removeLastROI();
-            }else{
-                removeLastExcluded();
-            }
-        }
-        $("#ROIProgress").text("");
-        drawROIs();
-        firstClick = true;
+        completeShape();
     }
 });
 
+function completeShape(){
+    if(shapeInProgress==false) return;
+    shapeInProgress = false;
+    // validate the polygon
+    var validPolygon = validatePolygon();
+    if(validPolygon){
+        if(addROIsActive){
+            currentROIIndex += 1;
+        }else{
+            currentExcludedIndex += 1;
+        }
+    }
+    else{ // delete the last shape
+        if(addROIsActive){
+            removeLastROI();
+        }else{
+            removeLastExcluded();
+        }
+    }
+    $("#ROIProgress").text("");
+    drawROIs();
+    firstClick = true;
+}
+
 $("#addROIs").click(function(){
+    completeShape();
     if(addROIsActive==false){
         addROIsActive = true;
         addExcludedActive = false;
@@ -125,11 +130,11 @@ $("#addROIs").click(function(){
         $("#addROIs").css('background-color','transparent');
         addROIsActive = false;
         // TODO abort any ROIS in progress
-    }    
-    // change the background color of the icon
+    }
 });
 
 $("#addExcludeds").click(function(){
+    completeShape();
     if(addExcludedActive==false){
         addROIsActive = false;
         addExcludedActive = true;
@@ -140,8 +145,7 @@ $("#addExcludeds").click(function(){
         $("#addExcludeds").css('background-color','transparent');
         addExcludedActive = false;
         // TODO abort any excluded in progress
-    }    
-    // change the background color of the icon
+    }
 });
 
 
@@ -178,11 +182,12 @@ function printExcludedDefs () {
 }
 
 $("#resetROIs").click(function(){
-    if (confirm('Are you sure you want to clear all ROIs?')) {
+    if (confirm('Are you sure you want to reset the ROIs?')) {
         clearROIs();
         clearExcluded();
         // clear the drawn ROIs
         clearDrawnROIs();
+        drawDefaultROI();
     } else {
         // Do nothing!
     }
@@ -226,7 +231,7 @@ function drawROIs(){
                 }
             }
         }
-        console.log(coordsString);
+        //console.log(coordsString);
         if(coordsString!=' M '){
             hasROI = true;
             polygon = draw.path(coordsString).attr({ fill: '#00ff00', 'fill-opacity': '0.4', stroke: '#00ff00', 'stroke-opacity': '1','stroke-width': '2', 'stroke-linecap':'round' });
@@ -251,7 +256,7 @@ function drawROIs(){
                 }
             }
         }
-        console.log(coordsString);
+        //console.log(coordsString);
         if(coordsString!=' M '){
             hasExcluded = true;
             if(hasROI){
@@ -270,10 +275,6 @@ function drawROIs(){
     draw.style('position','absolute');    
 }
 
-$("#showShapes").click(function(){
-    drawROIs();
-});
-
 function clearDrawnROIs(){
     $('#panzoomLeft > svg').each(function(){
         $(this).remove();
@@ -281,26 +282,14 @@ function clearDrawnROIs(){
 }
 
 function clearLastDrawnROI(){
-    //var numSVG = 0;
-    //$('#panzoomLeft > svg').each(function(){
-    //    console.log("num SVG " + numSVG );
-    //    numSVG += 1;
-    //});
-
     var cells = $("#panzoomLeft").find('svg');
     var length = cells.length;
-    console.log("length is " + length);
     cells.each(function(i) {
         if(i!=length-1){
         }else{
             $(this).remove();
         }
     });
-    
-//    $('#panzoomLeft svg:last-child').last(function(){
-//        console.log('removed svg');
-//        $(this).remove();
-//    });
 }
 
 function removeLastROI(){
@@ -409,4 +398,20 @@ function isIntersecting(ap,aq,bp,bq){
     if (clockwise(ap,aq,bp)*clockwise(ap,aq,bq)>0) return false;
     if (clockwise(bp,bq,ap)*clockwise(bp,bq,aq)>0) return false;
     return true;
+}
+
+function drawDefaultROI(){
+    // add a default region of the image selected
+    var buf = 20; // pixels
+    ROIDefsX[0] = [buf, refImageWidthLeft-buf, refImageWidthLeft-buf,buf];
+    ROIDefsY[0] = [buf,buf,refImageHeightLeft-buf,refImageHeightLeft-buf];
+    currentROIIndex += 1;
+    drawROIs();
+    
+    //var draw = SVG('panzoomLeft').size(refImageWidthLeft, refImageHeightLeft);
+    //var coordsString = ' M 20 20 L '+(refImageWidthLeft-20)+' 20 L '+(refImageWidthLeft-20)+' '+(refImageHeightLeft-20)+' L 20 ' + (refImageHeightLeft-20)+' Z';
+    //console.log(coordsString);
+    //var polygon = draw.path(coordsString).attr({ fill: '#ffff00', 'fill-opacity': '0.2'});
+    //draw.style('z-index',2);
+    //draw.style('position','absolute');
 }
