@@ -407,11 +407,4 @@ function drawDefaultROI(){
     ROIDefsY[0] = [buf,buf,refImageHeightLeft-buf,refImageHeightLeft-buf];
     currentROIIndex += 1;
     drawROIs();
-    
-    //var draw = SVG('panzoomLeft').size(refImageWidthLeft, refImageHeightLeft);
-    //var coordsString = ' M 20 20 L '+(refImageWidthLeft-20)+' 20 L '+(refImageWidthLeft-20)+' '+(refImageHeightLeft-20)+' L 20 ' + (refImageHeightLeft-20)+' Z';
-    //console.log(coordsString);
-    //var polygon = draw.path(coordsString).attr({ fill: '#ffff00', 'fill-opacity': '0.2'});
-    //draw.style('z-index',2);
-    //draw.style('position','absolute');
 }

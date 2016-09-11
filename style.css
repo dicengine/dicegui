@@ -202,7 +202,7 @@ h4 {
     width: 200px;
     min-width: 200px;
     height: 100%;
-    padding: 10px;
+    padding: 0px 10px 10px 10px;
 }
 .fluid-col {
     position: absolute;
@@ -236,14 +236,24 @@ h4 {
     overflow-y: scroll;
     padding-right: 0;
 }
-.def-image-list {
+.def-image-list-container {
     width: 100%;
     background-color: white;
-    padding-left: 5px;
+    padding: 0px;
     height: 100px;
     overflow-y: scroll;
     word-wrap: break-word;
     margin-bottom: 10px;
     margin-left: 5px;
+}
+.def-image-ul {
     font-size: 12px;
+    line-height: 20px;
+}
+.arrow-left {
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right:10px solid #666666;
 }

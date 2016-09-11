@@ -40,7 +40,7 @@
           <i class="material-icons md-light md-36">menu</i>
         </div>
       </div>
-      <div class="content">
+      <div id="contentDiv" class="content">
        <div class="fixed-col">
           <h1>IMAGES</h1>
           <div id="leftImageMenu">
@@ -55,7 +55,10 @@
                 load deformed    
               </label>
               <input id="leftDefInput" type="file" multiple>
-              <div class="def-image-list" id="defImageListLeft"></div>
+              <div id="defImageListLeftContainer" class="def-image-list-container">
+                <ul id="defImageListLeft" class="def-image-ul">
+                </ul>
+              </div>
             </div>
           <div id="rightImageMenu" class="nav-two-cam">
             <div class="nav-two-cam"  style="padding-left: 10px;">right</div>
@@ -69,7 +72,10 @@
                 load deformed    
               </label>
               <input id="rightDefInput" type="file" multiple>                  
-              <div class="def-image-list" id="defImageListRight"></div>
+              <div id="defImageListRightContainer" class="def-image-list-container">
+                <ul id="defImageListRight" class="def-image-ul">
+                </ul>
+              </div>
             </div>
           <h1>TOOLS</h1>
           <ul>
