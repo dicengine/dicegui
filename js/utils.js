@@ -120,12 +120,12 @@ function resizeFullDivs(targetDiv){
     // total height of all divs in the targetDiv
     var sumHeight = 0;
     $(targetDiv + '> div').each(function() {
-        sumHeight += $(this).outerHeight();
+        sumHeight += $(this).outerHeight(true);
     });
     var currentFillHeight = $(targetDiv).find('.fill-div').outerHeight();
     sumHeight -= currentFillHeight;
-    var totalHeight = $(targetDiv).outerHeight();
-    var resizeHeight = totalHeight - sumHeight - 10;
+    var totalHeight = $(targetDiv).outerHeight(true);
+    var resizeHeight = totalHeight - sumHeight - 8;
     // NOTE assumes only one div in the targetDiv should fill the leftover space
     $(targetDiv).find('.fill-div').each(function() {        
         $(this).outerHeight(resizeHeight);

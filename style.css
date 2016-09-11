@@ -16,13 +16,13 @@ body {
 .material-icons.md-48 { font-size: 48px; }
 /* Rules for using icons as black on a light background. */
 .material-icons.md-dark {
-    color: rgba(0, 0, 0, 0.40);
+    /*color: rgba(0, 0, 0, 0.40);*/
     vertical-align: middle;
     padding: 0px 0px 0px 0px;
 }
-.material-icons.md-dark:hover {
+/*.material-icons.md-dark:hover {
     color: rgba(0, 0, 0, 0.6);
-}
+}*/
 .material-icons.md-br-pad {
     padding: 0px 5px 3px 0px;
 }
@@ -151,7 +151,11 @@ ul {
     margin-bottom: 0;
 }
 .action-li {
+    color: rgba(0, 0, 0, 0.5);
     cursor: pointer;
+}
+.action-li:hover {
+    color: rgba(0, 0, 0, 1.0);
 }
 h1 {
     margin-top: 12px;
