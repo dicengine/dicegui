@@ -41,7 +41,7 @@ function updateResultsFilesList(){
     $("#resultsFilesList").text("");
     var workingDir = workingDirectory;
     if(os.platform()=='win32'){
-        workingDir += '\results';
+        workingDir += '\\results';
     }else{
         workingDir += '/results';       
     }
