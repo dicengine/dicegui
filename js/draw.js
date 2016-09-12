@@ -123,11 +123,14 @@ $("#addROIs").click(function(){
     if(addROIsActive==false){
         addROIsActive = true;
         addExcludedActive = false;
-        $("#addROIs").css('background-color','#33ccff');
-        $("#addExcludeds").css('background-color','transparent');
+        //$("#addROIs").css('background-color','#33ccff');
+        $("#addROIs").css('color','#33ccff');
+        //$("#addExcludeds").css('background-color','transparent');
+        $("#addExcludeds").css('color','rgba(0, 0, 0, 0.5)');
         // TODO abort any excluded shapes in progress
     }else{
-        $("#addROIs").css('background-color','transparent');
+        //$("#addROIs").css('background-color','transparent');
+        $("#addROIs").css('color','rgba(0, 0, 0, 0.5)');
         addROIsActive = false;
         // TODO abort any ROIS in progress
     }
@@ -138,11 +141,14 @@ $("#addExcludeds").click(function(){
     if(addExcludedActive==false){
         addROIsActive = false;
         addExcludedActive = true;
-        $("#addExcludeds").css('background-color','#33ccff');
-        $("#addROIs").css('background-color','transparent');
+        //$("#addExcludeds").css('background-color','#33ccff');
+        $("#addExcludeds").css('color','#33ccff');
+        //$("#addROIs").css('background-color','transparent');
+        $("#addROIs").css('color','rgba(0, 0, 0, 0.5)');
         // TODO abort any ROI shapes in progress
     }else{
-        $("#addExcludeds").css('background-color','transparent');
+        //$("#addExcludeds").css('background-color','transparent');
+        $("#addExcludeds").css('color','rgba(0, 0, 0, 0.5)');
         addExcludedActive = false;
         // TODO abort any excluded in progress
     }
@@ -182,7 +188,7 @@ function printExcludedDefs () {
 }
 
 $("#resetROIs").click(function(){
-    if (confirm('Are you sure you want to reset the ROIs?')) {
+    if (confirm('reset all included and excluded regions?')) {
         clearROIs();
         clearExcluded();
         // clear the drawn ROIs
