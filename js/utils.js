@@ -25,6 +25,7 @@ $(window).load(function(){
                     hideParams();
                 }
                 if(showStereoPaneState){
+                    $('#runLi span').text('run stereo');
                     showStereoViewer();
                 }else{
                     $('#runLi span').text('run 2d');
@@ -292,7 +293,7 @@ $("#stepSize").on('input',function(){
 
 $("#stepSize").change(function(){
     var value = $(this).val();
-    $("#strainGaugeSize").attr('min',Math.round(value*2));
+    $("#strainGaugeSize").attr('min',Math.round(value*1));
     $("#strainGaugeSize").attr('max',Math.round(value*10));
     $("#strainGaugeSize").attr('step',value);
     $("#strainGaugeSize").val(Math.round(value*3));

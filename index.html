@@ -86,7 +86,7 @@
           <h1>ANALYSIS</h1>
           <ul>
             <li id="changeWorkingDirLi" class="action-li"><i class="material-icons md-dark md-br-pad">folder</i>
-              working directory
+              set working dir
             </li>
             <li id="runLi" class="action-li"><i class="material-icons md-dark md-br-pad">play_circle_filled</i>
               <span>run 2d<span>
@@ -151,7 +151,18 @@
                     <label id="rightDims"></label>
                     <label id="rightPos"></label>
                    </div> <!-- end toggle div body -->
-                 </div> <!-- end toggle div -->
+                </div> <!-- end toggle div -->
+                <div class="toggle-div">
+                  <div class="toggle-div-banner">
+                    <span class="toggle-title">LEFT TO RIGHT UTILITIES</span>
+                    <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
+                  </div> <!-- end toggle div banner -->
+                  <div class="toggle-div-body">
+                    <i class="material-icons md-dark action-li" title="zoom in">zoom_in</i>
+                    Utilities go here
+                  </div> <!-- end toggle div body -->
+                </div> <!-- end toggle div -->
+
                  <div id="viewWindowRight" class="fill-div"  style="background-color:darkgray;">
                    <div id="panzoomRight" class="panzoom"></div>
                  </div>
@@ -182,6 +193,7 @@
                        <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
                    </div> <!-- end toggle div banner -->
                    <div class="toggle-div-body">
+                       <p>DIC method:</p>
                        <select>
                            <option value="subset">subset</option>
                            <option value="global">global</option>
@@ -198,8 +210,8 @@
                            <p><input id="shearStrainCheck" type="checkbox" > shear stretch</p>
                            <p>strain:</p>
                            <p><input id="strainCheck" type="checkbox" checked> compute strains</p>
-                           <p>gauge size: <label id="strainGaugeSizeLabel">31</label> (pixels)</p>
-                           <input id="strainGaugeSize" type="range" min="31" max="91" defaultValue="31" value="31" step="15"> 
+                           <p>gauge size: <label id="strainGaugeSizeLabel">45</label> (pixels)</p>
+                           <input id="strainGaugeSize" type="range" min="15" max="150" defaultValue="45" value="45" step="15"> 
                        </div>
                        <div id="globalParams" class="param-options">
                             
