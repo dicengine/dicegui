@@ -290,6 +290,19 @@ $("#stepSize").on('input',function(){
     $("#stepSizeLabel").text($(this).val());
 });
 
+$("#stepSize").change(function(){
+    var value = $(this).val();
+    $("#strainGaugeSize").attr('min',Math.round(value*2));
+    $("#strainGaugeSize").attr('max',Math.round(value*10));
+    $("#strainGaugeSize").attr('step',value);
+    $("#strainGaugeSize").val(Math.round(value*3));
+    $("#strainGaugeSizeLabel").text(Math.round(value*3));
+});
+
+$("#strainGaugeSize").on('input',function(){
+    $("#strainGaugeSizeLabel").text($(this).val());
+});
+
 function saveStateFile() {  
     fileName = homeDir;
     if(os.platform()=='win32'){

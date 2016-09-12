@@ -103,6 +103,11 @@ function writeParamsFile() {
     }else{
         content += '<Parameter name="enable_shear_strain" type="bool" value="false" />\n';
     }
+    if($("#strainCheck")[0].checked){
+        content += '<ParameterList name="post_process_vsg_strain">\n';
+        content += '<Parameter name="strain_window_size_in_pixels" type="int" value="'+$("#strainGaugeSize").val()+'" />\n';
+        content += '</ParameterList>\n';
+    }
     content += '<Parameter name="output_delimiter" type="string" value="," />\n'
     content += '<ParameterList name="output_spec"> \n';
     content += '<Parameter name="COORDINATE_X" type="bool" value="true" />\n';
@@ -113,6 +118,11 @@ function writeParamsFile() {
     content += '<Parameter name="GAMMA" type="bool" value="true" />\n';
     content += '<Parameter name="BETA" type="bool" value="true" />\n';
     content += '<Parameter name="STATUS_FLAG" type="bool" value="true" />\n';
+    if($("#strainCheck")[0].checked){
+        content += '<Parameter name="VSG_STRAIN_XX" type="bool" value="true" />\n';
+        content += '<Parameter name="VSG_STRAIN_YY" type="bool" value="true" />\n';
+        content += '<Parameter name="VSG_STRAIN_XY" type="bool" value="true" />\n';
+    }
     content += '</ParameterList>\n';
     content += '</ParameterList>\n';
     fs.writeFile(paramsFile, content, function (err) {

@@ -178,7 +178,7 @@
             <div id="innerFluidRightCol" class="inner-fluid-right-col">
               <div class="toggle-div">
                    <div class="toggle-div-banner">
-                       <span class="toggle-title">PARAMETERS</span>
+                       <span class="toggle-title">OPTIONS</span>
                        <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
                    </div> <!-- end toggle div banner -->
                    <div class="toggle-div-body">
@@ -187,15 +187,19 @@
                            <option value="global">global</option>
                        </select>
                        <div id="subsetParams" class="param-options">
-                           <p>subset size: <label id="subsetSizeLabel">31</label></p>
+                           <p>subset size: <label id="subsetSizeLabel">31</label> (pixels)</p>
                            <input id="subsetSize" type="range" min="9" max="51" defaultValue="31" value="31" step="2">
-                           <p>step size: <label id="stepSizeLabel">15</label></p>
+                           <p>step size: <label id="stepSizeLabel">15</label> (pixels)</p>
                            <input id="stepSize" type="range" min="1" max="100" defaultValue="15" value="15" step="1">
                            <p>shape functions:</p>
                            <p><input id="translationCheck" type="checkbox" checked> translation</p>
                            <p><input id="rotationCheck" type="checkbox" > rotation</p>
-                           <p><input id="normalStrainCheck" type="checkbox" > normal strain</p>
-                           <p><input id="shearStrainCheck" type="checkbox" > shear strain</p>
+                           <p><input id="normalStrainCheck" type="checkbox" > normal stretch</p>
+                           <p><input id="shearStrainCheck" type="checkbox" > shear stretch</p>
+                           <p>strain:</p>
+                           <p><input id="strainCheck" type="checkbox" checked> compute strains</p>
+                           <p>gauge size: <label id="strainGaugeSizeLabel">31</label> (pixels)</p>
+                           <input id="strainGaugeSize" type="range" min="31" max="91" defaultValue="31" value="31" step="15"> 
                        </div>
                        <div id="globalParams" class="param-options">
                             
