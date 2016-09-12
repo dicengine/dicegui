@@ -7,15 +7,63 @@ const fs = require('fs');
 
 // tasks for when window loads
 $(window).load(function(){
-    // TODO  set the default show/hide positions for toggles    
-    // set the stereo toggle to off
-    $('#runLi span').text('run 2d');
-    hideStereoViewer();
+    // see if the .dice file exists:
+    fileName = homeDir;
+    if(os.platform()=='win32'){
+        fileName += '\\.dice.js';
+    }else{
+        fileName += '/.dice.js';
+    }
+
+    fs.stat(fileName, function(err, stat) {
+        if(err == null) {
+            $('#consoleWindow').append('loading GUI state and preferences from ' + fileName + ' <br/>');
+            $.getScript(fileName, function(){
+                if(showPrefPaneState){
+                    showParams();
+                }else{
+                    hideParams();
+                }
+                if(showStereoPaneState){
+                    showStereoViewer();
+                }else{
+                    $('#runLi span').text('run 2d');
+                    hideStereoViewer();
+                }
+                if(viewersStackedState){
+                    stackViews();
+                }else{
+                    unstackViews();
+                }
+                if(showConsoleState){
+                    defaultConsole();
+                }else{
+                    showConsole = false;
+                    defaultConsole();
+                }
+            });
+        } else if(err.code == 'ENOENT') {
+            // file does not exist
+            $('#consoleWindow').append('no previous state or preferences saved <br/>');
+            showParams();
+            $('#runLi span').text('run 2d');
+            hideStereoViewer();
+            unstackViews();
+        } else {
+            $('#consoleWindow').append('error occurred trying to load previous state <br/>');
+        }
+    });
     // resize the full div elements
     resizeAll();
     // set the default working dir to the home dir
     workingDirectory = homeDir;
     updateWorkingDirLabel();
+});
+
+// last items before closing browser
+$(window).bind("beforeunload", function() {
+    saveStateFile();
+    //return confirm("Do you really want to close?");
 });
 
 // launch external links in the default browser not the frame
@@ -59,16 +107,26 @@ function updateResultsFilesList(){
 // toggle the params menu on or off
 document.getElementById("paramsButton").onclick = function(){
     if($('#innerFluidRightCol').css('display')=='none'){
-        $('#innerFluidRightCol').css('display','inline-block');
-        $('#innerFluidRightCol').css('width','25%');
-        $('#innerFluidLeftCol').css('width','75%');
+        showParams();
     }
     else {
-        $('#innerFluidRightCol').css('display','none');
-        $('#innerFluidLeftCol').css('width','100%');
+        hideParams();
     }
-    resizeAll();
 };
+function showParams(){
+    $('#innerFluidRightCol').css('display','inline-block');
+    $('#innerFluidRightCol').css('width','25%');
+    $('#innerFluidLeftCol').css('width','75%');    
+    resizeAll();
+    showPrefPane = true;
+}
+function hideParams(){
+    $('#innerFluidRightCol').css('display','none');
+    $('#innerFluidLeftCol').css('width','100%');
+    resizeAll();
+    showPrefPane = false;
+}
+
 
 // clear the console text
 document.getElementById("clearConsoleIcon").onclick = function() {eraseText("consoleWindow")};
@@ -102,8 +160,22 @@ function resizeView(toggler) {
     // the console tag should call the resize method here
     if($(toggler).attr('id')=='consoleToggle'){
         resizeAll();
+        showConsole = !showConsole;
     }
 }
+
+function defaultConsole(){
+    var bannerH = $("#consoleToggle").parent().parent('div').outerHeight();
+    if(showConsole){
+        $("#consoleToggle").parent().parent('div').parent('div').outerHeight("auto");
+        $("#consoleToggle").parent().parent('div').css('border-radius','5px 5px 0px 0px');
+    }else{
+        $("#consoleToggle").parent().parent('div').parent('div').outerHeight(bannerH + "px");
+        $("#consoleToggle").parent().parent('div').css('border-radius','5px');
+    }
+    resizeAll();
+}
+
 
 // resize all columns and inner-columns to make fill-divs fill the column
 function resizeAll(){
@@ -150,27 +222,38 @@ $("#stereoButton").click(function(){
 
 $("#stackButton").click(function(){
     if(viewersStacked==false){
-        $('#stackIcon').css('transform','rotate(90deg)'); 
-        viewersStacked=true;
+        stackViews();
     }else{
-        $('#stackIcon').css('transform','rotate(0deg)'); 
-        viewersStacked=false;
+        unstackViews();
     }
-    stackViews();
 });
 
 function stackViews(){
-    if(viewersStacked){
-      $('#subFillDivRight').css('width','100%');
-      $('#subFillDivLeft').css('width','100%');
-      $('#subFillDivRight').css('height','50%');
-      $('#subFillDivLeft').css('height','50%');
-    }else{
-      $('#subFillDivRight').css('width','50%');
-      $('#subFillDivLeft').css('width','50%');
-      $('#subFillDivRight').css('height','100%');
-      $('#subFillDivLeft').css('height','100%');
+    $('#stackIcon').css('transform','rotate(90deg)'); 
+    $('#subFillDivRight').css('width','100%');
+    $('#subFillDivLeft').css('width','100%');
+    if(showStereoPane){
+        $('#subFillDivRight').css('height','50%');
+        $('#subFillDivLeft').css('height','50%');
     }
+    else{
+        $('#subFillDivLeft').css('height','100%');
+    }
+    viewersStacked = true;
+    resizeAll();    
+}
+function unstackViews(){
+    $('#stackIcon').css('transform','rotate(0deg)');
+    if(showStereoPane){
+        $('#subFillDivRight').css('width','50%');
+        $('#subFillDivLeft').css('width','50%');
+    }
+    else{
+        $('#subFillDivLeft').css('height','100%');
+    }
+    $('#subFillDivRight').css('height','100%');
+    $('#subFillDivLeft').css('height','100%');
+    viewersStacked = false;
     resizeAll();    
 }
 
@@ -179,7 +262,9 @@ function hideStereoViewer(){
     $('#subFillDivLeft').css('width','100%');
     $('#subFillDivLeft').css('height','100%');
     $(".nav-two-cam").css('display','none');
-    $("#stackButton").css('display','none');    
+    $("#stackButton").css('display','none');
+    showStereoPane = false;
+    $('#runLi span').text('run 2d');
 }
 
 function showStereoViewer(){
@@ -188,5 +273,49 @@ function showStereoViewer(){
     $('#subFillDivLeft').css('width','50%');
     $(".nav-two-cam").css('display','block');
     $("#stackButton").css('display','block');
-    stackViews();
+    showStereoPane = true;
+    if(viewersStacked){
+        stackViews();
+    }
+    else {
+        unstackViews();
+    }
+}
+
+
+function saveStateFile() {  
+    fileName = homeDir;
+    if(os.platform()=='win32'){
+        fileName += '\\.dice.js';
+    }else{
+        fileName += '/.dice.js';
+    }
+    $('#consoleWindow').append('saving GUI state and preferences to ' + fileName + ' <br/>');
+    var content = '';
+    if(showPrefPane){
+        content += 'var showPrefPaneState = true;\n';
+    }else{
+        content += 'var showPrefPaneState = false;\n';
+    }
+    if(showStereoPane){
+        content += 'var showStereoPaneState = true;\n';
+    }else{
+        content += 'var showStereoPaneState = false;\n';
+    }
+    if(viewersStacked){
+        content += 'var viewersStackedState = true;\n';
+    }else{
+        content += 'var viewersStackedState = false;\n';
+    }
+    if(showConsole){
+        content += 'var showConsoleState = true;\n';
+    }else{
+        content += 'var showConsoleState = false;\n';
+    }
+    fs.writeFile(fileName, content, function (err) {
+        if(err){
+            alert("ERROR: an error ocurred creating the file "+ err.message)
+        }
+        $('#consoleWindow').append('.dice.js file has been successfully saved <br/>');
+    });
 }
