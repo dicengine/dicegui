@@ -144,12 +144,15 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs) {
                     refImageWidthLeft = tiff.width();
                     refImageHeightLeft = tiff.height();
                     refImagePathLeft = file.path;
-                }else{
+                    updateDimsLabels();
+                    checkValidInput();
+                }else if(viewer=="#panzoomRight"){
                     refImageWidthRight = tiff.width();
                     refImageHeightRight = tiff.height();
                     refImagePathRight = file.path;
+                    updateDimsLabels();
+                    checkValidInput();
                 }
-                updateDimsLabels();
                 if(addBorder){
                     $(tiffCanvas).css({border: '5px solid #666666'});
                 }
@@ -169,12 +172,15 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs) {
                         refImageWidthLeft = imgWidth;
                         refImageHeightLeft = imgHeight;
                         refImagePathLeft = file.path;
-                    }else{
+                        updateDimsLabels();
+                        checkValidInput();
+                    }else if(viewer=="#panzoomRight"){
                         refImageWidthRight = imgWidth;
                         refImageHeightRight = imgHeight;
                         refImagePathRight = file.path;
+                        updateDimsLabels();
+                        checkValidInput();
                     }
-                    updateDimsLabels();
                     $(viewer).css({width:vwidth,height:vheight})
                     return true;
                 }
@@ -228,6 +234,7 @@ $("#leftDefInput").change(function (evt) {
             defImagePathsLeft.push(files[i]);//filePath);
         }
     }
+    checkValidInput();
 });
 
 function createPreview(index,isLeft,event){
@@ -285,6 +292,7 @@ $("#rightDefInput").change(function (evt) {
             defImagePathsRight.push(files[i]);//filePath);
         }
     }
+    checkValidInput();
 });
 
 function updateDimsLabels (){

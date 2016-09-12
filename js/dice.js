@@ -5,24 +5,44 @@ document.getElementById("runLi").onclick = function() {
 };
 
 function callDICeExec() {
+
+    var inputFile = workingDirectory;
+    if(os.platform()=='win32'){
+        inputFile += '\\input.xml';
+    }else{
+        inputFile += '/input.xml';
+    }
     
     var child_process = require('child_process');
     var readline      = require('readline');
-    var proc          = child_process.spawn('/Users/dzturne/code/KDICe/build_global/bin/dice', ['--version']);
+    var proc          = child_process.spawn(execPath, ['-i',inputFile,'-v','-t']);
+
     readline.createInterface({
         input     : proc.stdout,
         terminal  : false
     }).on('line', function(line) {
-        console.log(line);
+        //console.log(line);
         $('#consoleWindow').append(line + '<br/>');
+        var objDiv = document.getElementById("consoleWindow");
+        objDiv.scrollTop = objDiv.scrollHeight;
     });
 
-    proc.stderr.on('data', (data) => {
-        console.log(`stderr: ${data}`);
+//    proc.stderr.on('data', (data) => {
+//        console.log(`stderr: ${data}`);
+//        alert('DICe execution failed (see console for details)');
+//    });
+    
+    proc.on('error', function(){
+        alert('DICe execution failed: invalid executable: ' + execPath);
+        var objDiv = document.getElementById("consoleWindow");
+        objDiv.scrollTop = objDiv.scrollHeight;
     });
     
     proc.on('close', (code) => {
         console.log(`child process exited with code ${code}`);
+        if(code!=0){
+            alert('DICe execution failed (see console for details)');
+        }
         // move the scroll on the console to the bottom
         var objDiv = document.getElementById("consoleWindow");
         objDiv.scrollTop = objDiv.scrollHeight;
@@ -133,3 +153,41 @@ function writeParamsFile() {
     });
 }
 
+function checkValidInput() {
+    $('#consoleWindow').append('checking if input requirements met to enable running DICe ... <br/>');
+    var validInput = true;
+    // see if the left reference image is set:
+    if(refImagePathLeft=='undefined') {
+        $('#consoleWindow').append('reference image not set yet <br/>');
+        validInput = false;
+    }
+    // check that the image extensions all match
+    var refExtension = refImagePathLeft.split('.').pop().toLowerCase();
+    if(!defImagePathsLeft[0]){
+        $('#consoleWindow').append('deformed images have not been defined yet <br/>');
+        validInput = false;
+    }
+    // check all the deformed images
+    for(var i = 0, l = defImagePathsLeft.length; i < l; i++) {
+        var defExtension = defImagePathsLeft[i].name.split('.').pop().toLowerCase();
+        if(refExtension!=defExtension){
+            $('#consoleWindow').append('deformed image ' + defImagePathsLeft[i].name + ' extension does not match ref extension <br/>');
+            validInput = false;
+        }
+    }
+
+    if(showStereoPane){
+        $('#consoleWindow').append('running in stereo has not been enabled yet <br/>');
+        validInput = false;
+    }
+    
+    // TODO check right images ...
+    // TODO see if the left and right ref have the same dimensions
+    // TODO check the number of def images left and right
+    
+    if(validInput){       
+        $("#runLi").show();
+    }else{
+        $("#runLi").hide();
+    }
+}

@@ -1,8 +1,7 @@
 const electron = require('electron');
 const shell = electron.shell;
 const {dialog} = electron.remote;
-const os = require('os');
-const homeDir = os.homedir()
+const homeDir = os.homedir();
 const fs = require('fs');
 
 // tasks for when window loads
@@ -59,6 +58,8 @@ $(window).load(function(){
     // set the default working dir to the home dir
     workingDirectory = homeDir;
     updateWorkingDirLabel();
+    // hide the run button until the input is valid
+    $("#runLi").hide();
 });
 
 // last items before closing browser
@@ -213,10 +214,12 @@ $("#stereoButton").click(function(){
         $('#runLi span').text('run stereo');
         $('#x1x2').text('x 2');
         showStereoViewer();
+        checkValidInput();
     }else{
         $('#runLi span').text('run 2d');
         $('#x1x2').text('x 1');
         hideStereoViewer();
+        checkValidInput();
     }
     resizeAll();
 });
