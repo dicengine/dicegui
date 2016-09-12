@@ -282,6 +282,13 @@ function showStereoViewer(){
     }
 }
 
+$("#subsetSize").on('input',function(){
+    $("#subsetSizeLabel").text($(this).val());
+});
+
+$("#stepSize").on('input',function(){
+    $("#stepSizeLabel").text($(this).val());
+});
 
 function saveStateFile() {  
     fileName = homeDir;

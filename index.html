@@ -182,7 +182,19 @@
                        <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
                    </div> <!-- end toggle div banner -->
                    <div class="toggle-div-body">
-                         Inside the toggle div dropdown
+                       <select>
+                           <option value="subset">subset</option>
+                           <option value="global">global</option>
+                       </select>
+                       <div id="subsetParams" class="param-options">
+                           <p>subset size: <label id="subsetSizeLabel">31</label></p>
+                           <input id="subsetSize" type="range" min="9" max="51" defaultValue="31" value="31" step="2">
+                           <p>step size: <label id="stepSizeLabel">15</label></p>
+                           <input id="stepSize" type="range" min="1" max="100" defaultValue="15" value="15" step="1">
+                       </div>
+                       <div id="globalParams" class="param-options">
+                            
+                       </div>
                    </div> <!-- end toggle div body -->
               </div> <!-- end toggle div -->
               <div class="toggle-div">

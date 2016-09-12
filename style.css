@@ -68,6 +68,10 @@ input[type="file"] {
 .params-button {
     right: 5px;
 }
+.param-options {
+    padding-top: 10px;
+    line-height: 20px;
+}
 .stereo-button {
     right: 50px;
     width: 62px;

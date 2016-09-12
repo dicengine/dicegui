@@ -50,8 +50,8 @@ function writeInputFile() {
     content += '<Parameter name="output_folder" type="string" value="' + outputFolder + '" /> \n';
     content += '<Parameter name="image_folder" type="string" value="" />\n';
     content += '<Parameter name="correlation_parameters_file" type="string" value="' + paramsFile + '" />\n';
-    content += '<Parameter name="subset_size" type="int" value="25" />\n';
-    content += '<Parameter name="step_size" type="int" value="15" />\n';
+    content += '<Parameter name="subset_size" type="int" value="'+$("#subsetSize").val()+'" />\n';
+    content += '<Parameter name="step_size" type="int" value="'+$("#stepSize").val()+'" />\n';
     content += '<Parameter name="separate_output_file_for_each_subset" type="bool" value="false" />\n';
     content += '<Parameter name="create_separate_run_info_file" type="bool" value="true" />\n';
     content += '<Parameter name="reference_image" type="string" value="' + refImagePathLeft + '" />\n';
