@@ -116,7 +116,7 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs) {
         fr.onload = function(e) {
             if (fileTypesTiff.indexOf(extension) > -1) {
                 //Using tiff.min.js library - https://github.com/seikichi/tiff.js/tree/master
-                $('#consoleWindow').append('parsing TIFF image ' + file.path + ' ...<br/>');
+                consoleMsg('parsing TIFF image ' + file.path + ' ...');
                 //initialize with 100MB for large files
                 Tiff.initialize({
                     TOTAL_MEMORY: 100000000
@@ -159,7 +159,7 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs) {
             }
             else if(fileTypesOther.indexOf(extension) > -1){
                 //alert(file.path);
-                $('#consoleWindow').append('parsing jpg or png image ' + file.path + ' ...<br/>');
+                consoleMsg('parsing jpg or png image ' + file.path + ' ...');
                 if(addBorder){
                     $(viewer).html('<img src="' + file.path + '" width='+vwidth+' height='+vheight+' style="z-index:'+zIndex+'; position: absolute; border: 5px solid #666666"/>');
                 }else{
@@ -190,12 +190,12 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs) {
                 myImage.src = file.path;
             }
             else{ // load FAILURE
-                $('#consoleWindow').append('image load FAILURE: invalid file type, ' + file.name + '<br/>');
+                consoleMsg('image load FAILURE: invalid file type, ' + file.name);
                 return;
             }
         }
         fr.onloadend = function(e) {
-            $('#consoleWindow').append('reference image load complete <br/>');
+            consoleMsg('reference image load complete');
             if(updateROIs){
                 // clear the ROIs drawn on the canvas already
                 clearROIs();

@@ -16,7 +16,7 @@ $(window).load(function(){
 
     fs.stat(fileName, function(err, stat) {
         if(err == null) {
-            $('#consoleWindow').append('loading GUI state and preferences from ' + fileName + ' <br/>');
+            consoleMsg('loading GUI state and preferences from ' + fileName);
             $.getScript(fileName, function(){
                 if(showPrefPaneState){
                     showParams();
@@ -44,13 +44,13 @@ $(window).load(function(){
             });
         } else if(err.code == 'ENOENT') {
             // file does not exist
-            $('#consoleWindow').append('no previous state or preferences saved <br/>');
+            consoleMsg('no previous state or preferences saved');
             showParams();
             $('#runLi span').text('run 2d');
             hideStereoViewer();
             unstackViews();
         } else {
-            $('#consoleWindow').append('error occurred trying to load previous state <br/>');
+            consoleMsg('error occurred trying to load previous state');
         }
     });
     // resize the full div elements
@@ -129,11 +129,16 @@ function hideParams(){
     showPrefPane = false;
 }
 
-
 // clear the console text
 document.getElementById("clearConsoleIcon").onclick = function() {eraseText("consoleWindow")};
 function eraseText(object_id) {
     document.getElementById(object_id).innerHTML = "Console output:" + '<br/><br/>';
+}
+
+function consoleMsg(string){
+    $("#consoleWindow").append(string + '</br>');
+    var objDiv = document.getElementById('consoleWindow');
+    objDiv.scrollTop = objDiv.scrollHeight;
 }
 
 // resize the full divs on window resize
@@ -314,7 +319,7 @@ function saveStateFile() {
     }else{
         fileName += '/.dice.js';
     }
-    $('#consoleWindow').append('saving GUI state and preferences to ' + fileName + ' <br/>');
+    consoleMsg('saving GUI state and preferences to ' + fileName);
     var content = '';
     if(showPrefPane){
         content += 'var showPrefPaneState = true;\n';
@@ -340,6 +345,6 @@ function saveStateFile() {
         if(err){
             alert("ERROR: an error ocurred creating the file "+ err.message)
         }
-        $('#consoleWindow').append('.dice.js file has been successfully saved <br/>');
+        consoleMsg('.dice.js file has been successfully saved');
     });
 }

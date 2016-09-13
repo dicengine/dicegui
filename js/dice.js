@@ -12,31 +12,26 @@ function callDICeExec() {
         inputFile += '\\input.xml';
     }else{
         inputFile += '/input.xml';
-    }
-    
+    }   
     var child_process = require('child_process');
     var readline      = require('readline');
-    var proc          = child_process.spawn(execPath, ['-i',inputFile,'-v','-t']);
+    var proc          = child_process.execFile(execPath, ['-i',inputFile,'-v','-t']);
 
     readline.createInterface({
         input     : proc.stdout,
         terminal  : false
-    }).on('line', function(line) {
+    }).on('line', function(line) {                
         //console.log(line);
-        $('#consoleWindow').append(line + '<br/>');
-        var objDiv = document.getElementById("consoleWindow");
-        objDiv.scrollTop = objDiv.scrollHeight;
+        consoleMsg(line);
     });
-
+    
 //    proc.stderr.on('data', (data) => {
 //        console.log(`stderr: ${data}`);
 //        alert('DICe execution failed (see console for details)');
 //    });
-    
+
     proc.on('error', function(){
         alert('DICe execution failed: invalid executable: ' + execPath);
-        var objDiv = document.getElementById("consoleWindow");
-        objDiv.scrollTop = objDiv.scrollHeight;
     });
     
     proc.on('close', (code) => {
@@ -44,9 +39,6 @@ function callDICeExec() {
         if(code!=0){
             alert('DICe execution failed (see console for details)');
         }
-        // move the scroll on the console to the bottom
-        var objDiv = document.getElementById("consoleWindow");
-        objDiv.scrollTop = objDiv.scrollHeight;
     });    
 }
 
@@ -66,7 +58,7 @@ function writeInputFile() {
         paramsFile += '/params.xml';
         subsetFile += '/subset_defs.txt';
     }
-    $('#consoleWindow').append('writing input file ' + fileName + '<br/>');
+    consoleMsg('writing input file ' + fileName);
     var content = '';
     content += '<!-- Auto generated input file from DICe GUI -->\n';
     content += '<ParameterList>\n';
@@ -90,7 +82,7 @@ function writeInputFile() {
         if(err){
             alert("Error: an error ocurred creating the file "+ err.message)
          }
-        $('#consoleWindow').append('input.xml file has been successfully saved <br/>');
+        consoleMsg('input.xml file has been successfully saved');
     });
 }
 
@@ -101,7 +93,7 @@ function writeParamsFile() {
     }else{
         paramsFile += '/params.xml';
     }
-    $('#consoleWindow').append('writing parameters file ' + paramsFile + '<br/>');
+    consoleMsg('writing parameters file ' + paramsFile);
     var content = '';
     content += '<!-- Auto generated parameters file from DICe GUI -->\n';
     content += '<ParameterList>\n';
@@ -154,7 +146,7 @@ function writeParamsFile() {
         if(err){
             alert("Error: an error ocurred creating the file "+ err.message)
          }
-        $('#consoleWindow').append('params.xml file has been successfully saved <br/>');
+        consoleMsg('params.xml file has been successfully saved');
     });
 }
 
@@ -165,7 +157,7 @@ function writeSubsetFile(){
     }else{
         subsetFile += '/subset_defs.txt';
     }
-    $('#consoleWindow').append('writing subset file ' + subsetFile + '<br/>');
+    consoleMsg('writing subset file ' + subsetFile);
     var content = '';
     content += '# Auto generated subset file from DICe GUI\n';
     if(ROIDefsX[0].length < 3 || ROIDefsY[0].length < 3){
@@ -209,35 +201,35 @@ function writeSubsetFile(){
         if(err){
             alert("Error: an error ocurred creating the file "+ err.message)
          }
-        $('#consoleWindow').append('subset_defs.txt file has been successfully saved <br/>');
+        consoleMsg('subset_defs.txt file has been successfully saved');
     });
 }
 
 function checkValidInput() {
-    $('#consoleWindow').append('checking if input requirements met to enable running DICe ... <br/>');
+    consoleMsg('checking if input requirements met to enable running DICe ...');
     var validInput = true;
     // see if the left reference image is set:
     if(refImagePathLeft=='undefined') {
-        $('#consoleWindow').append('reference image not set yet <br/>');
+        consoleMsg('reference image not set yet');
         validInput = false;
     }
     // check that the image extensions all match
     var refExtension = refImagePathLeft.split('.').pop().toLowerCase();
     if(!defImagePathsLeft[0]){
-        $('#consoleWindow').append('deformed images have not been defined yet <br/>');
+        consoleMsg('deformed images have not been defined yet');
         validInput = false;
     }
     // check all the deformed images
     for(var i = 0, l = defImagePathsLeft.length; i < l; i++) {
         var defExtension = defImagePathsLeft[i].name.split('.').pop().toLowerCase();
         if(refExtension!=defExtension){
-            $('#consoleWindow').append('deformed image ' + defImagePathsLeft[i].name + ' extension does not match ref extension <br/>');
+            consoleMsg('deformed image ' + defImagePathsLeft[i].name + ' extension does not match ref extension');
             validInput = false;
         }
     }
 
     if(showStereoPane){
-        $('#consoleWindow').append('running in stereo has not been enabled yet <br/>');
+        consoleMsg('running in stereo has not been enabled yet');
         validInput = false;
     }
     

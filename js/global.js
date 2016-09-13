@@ -9,7 +9,7 @@ var execPath
 if(os.platform()=='win32'){
     execPath =  "C:\\Program Files (x86)\\Digital Image Correlation Engine\\dice.exe";
 }else{
-    execPath = '/Users/dzturne/code/KDICe/build_global/bin/dice';
+    execPath = '/Users/dzturne/code/KDICe/build_serial_release/bin/dice';
     //var execPath =  "/Applications/DICe.app/Contents/MacOS/dice";
 }
 
