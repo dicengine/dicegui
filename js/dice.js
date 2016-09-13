@@ -1,6 +1,7 @@
 document.getElementById("runLi").onclick = function() {
     writeInputFile();
     writeParamsFile();
+    writeSubsetFile();
     callDICeExec();
 };
 
@@ -53,14 +54,17 @@ function writeInputFile() {
     fileName = workingDirectory;
     outputFolder = workingDirectory;
     paramsFile = workingDirectory;
+    subsetFile = workingDirectory;
     if(os.platform()=='win32'){
         fileName += '\\input.xml';
         outputFolder += '\\results\\';
         paramsFile += '\\params.xml';
+        subsetFile += '\\subset_defs.txt';
     }else{
         fileName += '/input.xml';
         outputFolder += '/restuls/';
         paramsFile += '/params.xml';
+        subsetFile += '/subset_defs.txt';
     }
     $('#consoleWindow').append('writing input file ' + fileName + '<br/>');
     var content = '';
@@ -69,6 +73,7 @@ function writeInputFile() {
     content += '<Parameter name="output_folder" type="string" value="' + outputFolder + '" /> \n';
     content += '<Parameter name="image_folder" type="string" value="" />\n';
     content += '<Parameter name="correlation_parameters_file" type="string" value="' + paramsFile + '" />\n';
+    content += '<Parameter name="subset_file" type="string" value="' + subsetFile + '" />\n';
     content += '<Parameter name="subset_size" type="int" value="'+$("#subsetSize").val()+'" />\n';
     content += '<Parameter name="step_size" type="int" value="'+$("#stepSize").val()+'" />\n';
     content += '<Parameter name="separate_output_file_for_each_subset" type="bool" value="false" />\n';
@@ -83,7 +88,7 @@ function writeInputFile() {
     content += '</ParameterList>\n';
     fs.writeFile(fileName, content, function (err) {
         if(err){
-            alert("ERROR: an error ocurred creating the file "+ err.message)
+            alert("Error: an error ocurred creating the file "+ err.message)
          }
         $('#consoleWindow').append('input.xml file has been successfully saved <br/>');
     });
@@ -147,9 +152,64 @@ function writeParamsFile() {
     content += '</ParameterList>\n';
     fs.writeFile(paramsFile, content, function (err) {
         if(err){
-            alert("ERROR: an error ocurred creating the file "+ err.message)
+            alert("Error: an error ocurred creating the file "+ err.message)
          }
         $('#consoleWindow').append('params.xml file has been successfully saved <br/>');
+    });
+}
+
+function writeSubsetFile(){
+    subsetFile = workingDirectory;
+    if(os.platform()=='win32'){
+        subsetFile += '\\subset_defs.txt';
+    }else{
+        subsetFile += '/subset_defs.txt';
+    }
+    $('#consoleWindow').append('writing subset file ' + subsetFile + '<br/>');
+    var content = '';
+    content += '# Auto generated subset file from DICe GUI\n';
+    if(ROIDefsX[0].length < 3 || ROIDefsY[0].length < 3){
+        alert('Error: subset file creation failed, invalid vertices for region of interest');
+        return false;
+    }
+    content += 'begin region_of_interest\n';
+    content += '  begin boundary\n';
+    // write all the boundary shapes
+    for(var i = 0, l = ROIDefsX.length; i < l; i++) {
+        var ROIx = ROIDefsX[i];
+        var ROIy = ROIDefsY[i];
+        content += '    begin polygon\n';
+        content += '      begin vertices\n';
+        for(var j = 0, jl = ROIx.length; j < jl; j++) {
+            content += '        ' +  ROIx[j] + ' ' + ROIy[j] + '\n';
+        }
+        content += '      end vertices\n';
+        content += '    end polygon\n';
+    }
+    content += '  end boundary\n';
+    if(excludedDefsX.length>0){
+        if(excludedDefsX[0].length > 2){
+            content += '  begin excluded\n';
+            for(var i = 0, l = excludedDefsX.length; i < l; i++) {
+                var ROIx = excludedDefsX[i];
+                var ROIy = excludedDefsY[i];
+                content += '    begin polygon\n';
+                content += '      begin vertices\n';
+                for(var j = 0, jl = ROIx.length; j < jl; j++) {
+                    content += '        ' + ROIx[j] + ' ' + ROIy[j] + '\n';
+                }
+                content += '      end vertices\n';
+                content += '    end polygon\n';
+            }
+            content += '  end excluded\n';
+        } // excluded[0].length > 2
+    } // excluded defs > 0
+    content += 'end region_of_interest\n';
+    fs.writeFile(subsetFile, content, function (err) {
+        if(err){
+            alert("Error: an error ocurred creating the file "+ err.message)
+         }
+        $('#consoleWindow').append('subset_defs.txt file has been successfully saved <br/>');
     });
 }
 
