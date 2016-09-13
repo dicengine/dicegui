@@ -102,8 +102,7 @@ function updateResultsFilesList(){
                 $("#resultsFilesList").append(filePath + '</br>');
             }
         }
-    });
-    
+    });    
 }
 
 // toggle the params menu on or off

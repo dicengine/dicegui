@@ -9,6 +9,49 @@ body {
     font-family: 'Open Sans', serif;
     font-size: 15px;
 }
+
+/* progress bar */
+.loader {
+    height: 4px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    background-color: #ddd;
+}
+.pre-loader {
+    height: 4px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    background-color: #ddd;
+}
+.post-loader-success {
+    background-color: #33cc33;
+}
+.post-loader-fail {
+    background-color: #ff0000;
+}
+.loader:before{
+    display: block;
+    position: absolute;
+    content: "";
+    left: -200px;
+    width: 200px;
+    height: 4px;
+    background-color: #33ccff; /*#2980b9;*/
+    animation: loading 2s linear infinite;
+}
+
+@-webkit-keyframes loading {
+    from {left: -200px; width: 30%;}
+    50% {width: 30%;}
+    70% {width: 70%;}
+    80% { left: 50%;}
+    95% {left: 120%;}
+    to {left: 100%;}
+}
+
+
 /* Rules for sizing the icon. */
 .material-icons.md-18 { font-size: 18px; }
 .material-icons.md-24 { font-size: 24px; }

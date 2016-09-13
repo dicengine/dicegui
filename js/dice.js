@@ -1,6 +1,7 @@
 document.getElementById("runLi").onclick = function() {
     // all the input file writes are chained via callbacks with the
     // last callback executing DICe
+    startProgress();
     writeInputFile();
 };
 
@@ -31,14 +32,35 @@ function callDICeExec() {
 
     proc.on('error', function(){
         alert('DICe execution failed: invalid executable: ' + execPath);
+        endProgress(false);
     });
     
     proc.on('close', (code) => {
         console.log(`child process exited with code ${code}`);
+        updateResultsFilesList();
         if(code!=0){
             alert('DICe execution failed (see console for details)');
+            endProgress(false);
+        }
+        else{
+            endProgress(true);
         }
     });    
+}
+
+function startProgress (){
+    $("#runLoader").removeClass('post-loader-success');
+    $("#runLoader").removeClass('post-loader-fail');
+    $("#runLoader").addClass('loader');    
+}
+function endProgress (success){
+    $("#runLoader").removeClass('loader');
+    if(success){
+        $("#runLoader").addClass('post-loader-success');
+    }
+    else {
+        $("#runLoader").addClass('post-loader-fail');
+    }
 }
 
 function writeInputFile() {
@@ -53,7 +75,7 @@ function writeInputFile() {
         subsetFile += '\\subset_defs.txt';
     }else{
         fileName += '/input.xml';
-        outputFolder += '/restuls/';
+        outputFolder += '/results/';
         paramsFile += '/params.xml';
         subsetFile += '/subset_defs.txt';
     }
