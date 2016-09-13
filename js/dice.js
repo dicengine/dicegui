@@ -1,8 +1,7 @@
 document.getElementById("runLi").onclick = function() {
+    // all the input file writes are chained via callbacks with the
+    // last callback executing DICe
     writeInputFile();
-    writeParamsFile();
-    writeSubsetFile();
-    callDICeExec();
 };
 
 function callDICeExec() {
@@ -83,6 +82,7 @@ function writeInputFile() {
             alert("Error: an error ocurred creating the file "+ err.message)
          }
         consoleMsg('input.xml file has been successfully saved');
+        writeParamsFile();
     });
 }
 
@@ -147,6 +147,7 @@ function writeParamsFile() {
             alert("Error: an error ocurred creating the file "+ err.message)
          }
         consoleMsg('params.xml file has been successfully saved');
+        writeSubsetFile();
     });
 }
 
@@ -202,6 +203,7 @@ function writeSubsetFile(){
             alert("Error: an error ocurred creating the file "+ err.message)
          }
         consoleMsg('subset_defs.txt file has been successfully saved');
+        callDICeExec();
     });
 }
 
