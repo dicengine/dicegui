@@ -41,6 +41,7 @@ $(window).load(function(){
                     showConsole = false;
                     defaultConsole();
                 }
+                paraviewMsg = paraviewMsgState;
             });
         } else if(err.code == 'ENOENT') {
             // file does not exist
@@ -339,6 +340,11 @@ function saveStateFile() {
         content += 'var showConsoleState = true;\n';
     }else{
         content += 'var showConsoleState = false;\n';
+    }
+    if(paraviewMsg){
+        content += 'var paraviewMsgState = true;\n';
+    }else{
+        content += 'var paraviewMsgState = false;\n';
     }
     fs.writeFile(fileName, content, function (err) {
         if(err){

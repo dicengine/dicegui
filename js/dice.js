@@ -44,8 +44,16 @@ function callDICeExec() {
         }
         else{
             endProgress(true);
+            showParaviewMsg();
         }
     });    
+}
+
+function showParaviewMsg(){
+    if(paraviewMsg){
+        alert('Analysis successful\n\nView the results files using ParaView\nwhich can be freely downloaded at\nwww.paraview.org');
+        paraviewMsg = false;
+    }
 }
 
 function startProgress (){

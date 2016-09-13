@@ -37,9 +37,9 @@ var addExcludedActive = false;
 var currentROIIndex = 0;
 var currentExcludedIndex = 0;
 
-
 // state of windows etc. in interface
 var showPrefPane = true;
 var showStereoPane = false;
 var viewersStacked = false;
 var showConsole = true;
+var paraviewMsg = true;
