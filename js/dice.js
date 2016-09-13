@@ -1,8 +1,28 @@
 document.getElementById("runLi").onclick = function() {
-    // all the input file writes are chained via callbacks with the
-    // last callback executing DICe
-    startProgress();
-    writeInputFile();
+   // check if any of the results files exist, if so warn user
+    // see if the .dice file exists:
+    var fileName = workingDirectory;
+    if(os.platform()=='win32'){
+        fileName += '\\results';
+    }else{
+        fileName += '/results';
+    }
+    fs.stat(fileName, function(err, stat) {
+        if(err == null) {
+            if (confirm('existing results files found in the working directory, overwrite?')) {
+                // all the input file writes are chained via callbacks with the
+                // last callback executing DICe
+                startProgress();
+                writeInputFile();
+            }else{
+                return false;
+            }
+        }
+        // all the input file writes are chained via callbacks with the
+        // last callback executing DICe
+        startProgress();
+        writeInputFile();
+    });
 };
 
 function callDICeExec() {

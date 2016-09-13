@@ -66,7 +66,6 @@ $(window).load(function(){
 // last items before closing browser
 $(window).bind("beforeunload", function() {
     saveStateFile();
-    //return confirm("Do you really want to close?");
 });
 
 // launch external links in the default browser not the frame
