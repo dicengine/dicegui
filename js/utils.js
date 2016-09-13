@@ -312,6 +312,10 @@ $("#strainGaugeSize").on('input',function(){
     $("#strainGaugeSizeLabel").text($(this).val());
 });
 
+$("#filterSize").on('input',function(){
+    $("#filterSizeLabel").text($(this).val());
+});
+
 function saveStateFile() {  
     fileName = homeDir;
     if(os.platform()=='win32'){

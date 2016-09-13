@@ -214,6 +214,10 @@
                            <p><input id="rotationCheck" type="checkbox" > rotation</p>
                            <p><input id="normalStrainCheck" type="checkbox" > normal stretch</p>
                            <p><input id="shearStrainCheck" type="checkbox" > shear stretch</p>
+                           <p>filtering:</p>
+                           <p><input id="filterCheck" type="checkbox"> gauss filter images</p>
+                           <p>filter window: <label id="filterSizeLabel">5</label> (pixels)</p>
+                           <input id="filterSize" type="range" min="5" max="13" defaultValue="5" value="5" step="2">
                            <p>strain:</p>
                            <p><input id="strainCheck" type="checkbox" checked> compute strain</p>
                            <p>gauge size: <label id="strainGaugeSizeLabel">45</label> (pixels)</p>

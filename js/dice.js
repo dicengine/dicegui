@@ -150,6 +150,10 @@ function writeParamsFile() {
     }else{
         content += '<Parameter name="enable_shear_strain" type="bool" value="false" />\n';
     }
+    if($("#filterCheck")[0].checked){
+        content += '<Parameter name="gauss_filter_images" type="bool" value="true" />\n';
+        content += '<Parameter name="gauss_filter_mask_size" type="int" value="'+$("#filterSize").val()+'" />\n';
+    }
     if($("#strainCheck")[0].checked){
         content += '<ParameterList name="post_process_vsg_strain">\n';
         content += '<Parameter name="strain_window_size_in_pixels" type="int" value="'+$("#strainGaugeSize").val()+'" />\n';
