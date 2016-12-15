@@ -119,7 +119,7 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs) {
                 consoleMsg('parsing TIFF image ' + file.path + ' ...');
                 //initialize with 100MB for large files
                 Tiff.initialize({
-                    TOTAL_MEMORY: 100000000
+                    TOTAL_MEMORY: 1000000000
                 });
                 var tiff = new Tiff({
                     buffer: e.target.result
