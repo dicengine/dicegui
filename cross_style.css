@@ -1,0 +1,37 @@
+* {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    margin: 0;
+}
+body {
+    background-color: #cccccc;
+    font-family: 'Open Sans', serif;
+    font-size: 15px;
+}
+#crossControls {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: white;
+    padding: 10px;
+}
+.crossButton {
+    background-color: #0099cc;
+    color: white;
+    font-size: 16px;
+    display: inline-block;
+    text-align: center;
+    border: none;
+    padding: 10px 20px;
+}
+.cross-view-window {
+    /*position: relative;*/
+    display: flex;
+    padding: 100px;
+    /*float: left;*/    
+    width: 1300px;
+    height: 900px;
+    overflow: scroll;
+    /*align-items: center;*/
+}

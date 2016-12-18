@@ -61,6 +61,9 @@ $(window).load(function(){
     updateWorkingDirLabel();
     // hide the run button until the input is valid
     $("#runLi").hide();
+
+    // disable the initialize cross correlation button until the ref and def images are set
+    $("#crossCorrInit").hide();
 });
 
 // last items before closing browser

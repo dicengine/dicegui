@@ -1,3 +1,6 @@
+const remote = require('electron').remote;
+const BrowserWindow = remote.BrowserWindow;
+
 // initialize panzooms
 $("#panzoomLeft").panzoom({
     $zoomIn: $(".zoom-in-left"),
@@ -109,6 +112,7 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs) {
     var fileTypesTiff = ['tiff','tif','TIFF','TIF'];  //acceptable file types
     //var tgt = evt.target || window.event.srcElement,
     //    files = tgt.files;
+    console.log('loading image: ' + file.name + ' path: ' + file.path);
 
     if (FileReader && file){   
         var fr = new FileReader();
@@ -116,7 +120,7 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs) {
         fr.onload = function(e) {
             if (fileTypesTiff.indexOf(extension) > -1) {
                 //Using tiff.min.js library - https://github.com/seikichi/tiff.js/tree/master
-                consoleMsg('parsing TIFF image ' + file.path + ' ...');
+                console.log('parsing TIFF image ' + file.path + ' ...');
                 //initialize with 100MB for large files
                 Tiff.initialize({
                     TOTAL_MEMORY: 1000000000
@@ -159,7 +163,7 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs) {
             }
             else if(fileTypesOther.indexOf(extension) > -1){
                 //alert(file.path);
-                consoleMsg('parsing jpg or png image ' + file.path + ' ...');
+                console.log('parsing jpg or png image ' + file.path + ' ...');
                 if(addBorder){
                     $(viewer).html('<img src="' + file.path + '" width='+vwidth+' height='+vheight+' style="z-index:'+zIndex+'; position: absolute; border: 5px solid #666666"/>');
                 }else{
@@ -190,12 +194,12 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs) {
                 myImage.src = file.path;
             }
             else{ // load FAILURE
-                consoleMsg('image load FAILURE: invalid file type, ' + file.name);
+                console.log('image load FAILURE: invalid file type, ' + file.name);
                 return;
             }
         }
         fr.onloadend = function(e) {
-            consoleMsg('reference image load complete');
+            console.log('reference image load complete');
             if(updateROIs){
                 // clear the ROIs drawn on the canvas already
                 clearROIs();
@@ -299,3 +303,25 @@ function updateDimsLabels (){
     $("#leftDims").text("w:" + refImageWidthLeft  + " h:" + refImageHeightLeft);
     $("#rightDims").text("w:" + refImageWidthRight  + " h:" + refImageHeightRight);
 }
+
+$("#crossCorrInit").click(function () {
+    // write a file that has the image names, etc
+    var content = 'var rightFileName = "' + refImagePathRight + '"\n';
+    content += 'var leftFileName = "' + refImagePathLeft + '"\n';
+    fs.writeFile('.dice-bw-info.js', content, function (err) {
+        if(err){
+            alert("ERROR: an error ocurred creating the .dice-bw-info.js file "+ err.message)
+        }
+        consoleMsg('.dice-bw-info.js file has been successfully saved');
+    }); 
+    var win = new BrowserWindow({ width: 1200, height: 1000 });
+    win.on('closed', () => {
+        win = null
+        $("#crossCorrInit").show();
+    })
+    win.loadURL('file://' + __dirname + '/cross_init.html');
+    $("#crossCorrInit").hide();
+    win.webContents.openDevTools()
+});
+
+

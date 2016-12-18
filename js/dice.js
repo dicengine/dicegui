@@ -264,10 +264,12 @@ function writeSubsetFile(){
 function checkValidInput() {
     consoleMsg('checking if input requirements met to enable running DICe ...');
     var validInput = true;
+    var enableCross = true;
     // see if the left reference image is set:
     if(refImagePathLeft=='undefined') {
-        consoleMsg('reference image not set yet');
+        consoleMsg('left reference image not set yet');
         validInput = false;
+        enableCross = false;
     }
     // check that the image extensions all match
     var refExtension = refImagePathLeft.split('.').pop().toLowerCase();
@@ -290,6 +292,11 @@ function checkValidInput() {
     }
     
     // TODO check right images ...
+    // see if the right reference image is set:
+    if(refImagePathRight=='undefined') {
+        consoleMsg('right reference image not set yet');
+        enableCross = false;
+    }
     // TODO see if the left and right ref have the same dimensions
     // TODO check the number of def images left and right
     
@@ -297,5 +304,10 @@ function checkValidInput() {
         $("#runLi").show();
     }else{
         $("#runLi").hide();
+    }
+    if(enableCross){  
+        $("#crossCorrInit").show();
+    }else{
+        $("#crossCorrInit").hide();
     }
 }

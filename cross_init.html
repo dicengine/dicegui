@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Initialize Cross Correlation</title>
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+    <script>if (window.module) module = window.module;</script>
+    <!-- Panzoom -->
+    <script src="./js/jquery.panzoom.min.js" defer></script>
+    <!-- Custom JS -->
+    <script src="./js/viewer.js" defer></script>
+    <script src="./js/cross.js" defer></script>
+    <script src="./js/tiff.js" defer></script>
+    <!--<script src="./js/global.js" defer></script>-->
+    <link rel="stylesheet" type="text/css" href="cross_style.css">
+    <!-- Google fonts and icons -->
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  </head>
+  <body>
+    <div id="crossViewWindow" class="cross-view-window">
+      <div id="panzoomCross" class="panzoom"></div>
+    </div>
+    <div id="crossControls">
+      <button class="crossButton" id="crossCancelButton" typ="button">cancel</button>
+      <button class="crossButton" id="crossAcceptButton" typ="button">accept</button>
+    </div>    
+  </body>
+</html>
