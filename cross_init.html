@@ -21,11 +21,16 @@
   </head>
   <body>
     <div id="crossViewWindow" class="cross-view-window">
-      <div id="panzoomCross" class="panzoom"></div>
+      <div id="panzoomCrossBottom" class="overlap-images"></div>
+      <div id="panzoomCrossTop" class="overlap-images"></div>
+      <!--<div id="panzoomCross" class="panzoom"></div>-->
     </div>
-    <div id="crossControls">
-      <button class="crossButton" id="crossCancelButton" typ="button">cancel</button>
-      <button class="crossButton" id="crossAcceptButton" typ="button">accept</button>
+    <div id="crossControls" class="cross-controls">
+      <button class="cross-button float-left" id="crossAcceptButton" typ="button">accept</button>
+      <button class="cross-button float-left" id="crossResetButton" typ="button">reset</button>
+      <button class="cross-button force-right" id="crossCancelButton" typ="button">cancel</button>
+      <input class="float-left" id="transparencyInput" type="range" min="0.0" max="1.0" defaultValue="0.5" value="0.5" step="0.05">
+      <p class="float-left">left opacity: <label id="transparencyLabel">0.5</label></p>
     </div>    
   </body>
 </html>

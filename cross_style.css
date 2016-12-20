@@ -9,14 +9,24 @@ body {
     font-family: 'Open Sans', serif;
     font-size: 15px;
 }
-#crossControls {
+.cross-controls {
     position: fixed;
+    left: 0;
     bottom: 0;
     width: 100%;
     background-color: white;
     padding: 10px;
+    display: inline-block;
 }
-.crossButton {
+.float-left {
+    float: left;
+    margin-left: 10px;
+}
+.force-right {
+    position: absolute;
+    right: 10px;
+}
+.cross-button {
     background-color: #0099cc;
     color: white;
     font-size: 16px;
@@ -25,13 +35,31 @@ body {
     border: none;
     padding: 10px 20px;
 }
+.cross-button:disabled {
+    background-color: #cccccc;
+}
 .cross-view-window {
-    /*position: relative;*/
-    display: flex;
-    padding: 100px;
-    /*float: left;*/    
-    width: 1300px;
+    position: relative;
+    display: inline-block;
+    padding: 100px 0px 0px 100px;
+    width: 1350px;
     height: 900px;
-    overflow: scroll;
-    /*align-items: center;*/
+    overflow: visible;
+}
+.bottom-image {
+}
+.top-image {
+    overflow: visible;
+    cursor: pointer;
+}
+#panzoomCrossTop {
+    opacity: 0.5;
+}
+.sepia {
+    -webkit-filter: saturate(800%) sepia(100%);
+    filter: saturate(800%) sepia(100%);
+}
+.huerotate {
+    -webkit-filter: hue-rotate(180deg);
+    filter: hue-rotate(180deg);
 }

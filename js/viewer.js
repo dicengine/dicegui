@@ -107,7 +107,7 @@ $("#panzoomRight").parent().on('mousewheel.focal', function( e ) {
     });
 });
 
-function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs) {
+function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addClass,addID) {
     var fileTypesOther = ['jpg', 'jpeg', 'png','JPG','PNG'];  //acceptable file types
     var fileTypesTiff = ['tiff','tif','TIFF','TIF'];  //acceptable file types
     //var tgt = evt.target || window.event.srcElement,
@@ -139,7 +139,13 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs) {
                     "z-index" : zIndex,
                     "position" : "absolute",
                     "image-rendering" : "pixelated"
-                }).addClass("preview");
+                });
+                if(addClass!=""){
+                    $(tiffCanvas).addClass(addClass);
+                }
+                if(addID!=""){
+                    $(tiffCanvas).attr('id',addID);
+                }
                 tiffCanvas.getContext("2d").mozImageSmoothingEnabled = false;
                 tiffCanvas.getContext("2d").msImageSmoothingEnabled = false;
                 tiffCanvas.getContext("2d").imageSmoothingEnabled = false;
@@ -168,6 +174,9 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs) {
                     $(viewer).html('<img src="' + file.path + '" width='+vwidth+' height='+vheight+' style="z-index:'+zIndex+'; position: absolute; border: 5px solid #666666"/>');
                 }else{
                     $(viewer).html('<img src="' + file.path + '" width='+vwidth+' height='+vheight+' style="z-index:'+zIndex+'; position: absolute;"/>');
+                }
+                if(addID!=""){
+                    $(viewer).attr('id',addID);
                 }
                 function findHHandWW() {
                     var imgHeight = this.height;
@@ -215,14 +224,14 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs) {
 
 $("#rightRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
-      file = tgt.files[0];
-    loadImage(file,"#panzoomRight","auto","auto",1,false,false);
+        file = tgt.files[0];
+    loadImage(file,"#panzoomRight","auto","auto",1,false,false,"","");
 });
 
 $("#leftRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
-      file = tgt.files[0];
-    loadImage(file,"#panzoomLeft","auto","auto",1,false,true);
+        file = tgt.files[0];
+    loadImage(file,"#panzoomLeft","auto","auto",1,false,true,"","");
 });
 
 $("#leftDefInput").change(function (evt) {
@@ -254,9 +263,9 @@ function createPreview(index,isLeft,event){
     $("#contentDiv").append(divTri);
     $("#contentDiv").append(div);
     if(isLeft){
-        loadImage(defImagePathsLeft[index],"#previewDiv","auto","300px",4,true,false);
+        loadImage(defImagePathsLeft[index],"#previewDiv","auto","300px",4,true,false,"","");
     }else{
-        loadImage(defImagePathsRight[index],"#previewDiv","auto","300px",4,true,false);
+        loadImage(defImagePathsRight[index],"#previewDiv","auto","300px",4,true,false,"","");
     }
 }
 
@@ -308,6 +317,10 @@ $("#crossCorrInit").click(function () {
     // write a file that has the image names, etc
     var content = 'var rightFileName = "' + refImagePathRight + '"\n';
     content += 'var leftFileName = "' + refImagePathLeft + '"\n';
+    content += 'var rightWidth = ' + refImageWidthRight + '\n';
+    content += 'var rightHeight = ' + refImageHeightRight + '\n';
+    content += 'var leftWidth = ' + refImageWidthLeft + '\n';
+    content += 'var leftHeight = ' + refImageHeightLeft + '\n';
     fs.writeFile('.dice-bw-info.js', content, function (err) {
         if(err){
             alert("ERROR: an error ocurred creating the .dice-bw-info.js file "+ err.message)
