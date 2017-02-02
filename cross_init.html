@@ -10,6 +10,8 @@
     <!-- Panzoom -->
     <script src="./js/jquery.panzoom.min.js" defer></script>
     <!-- Custom JS -->
+    <!-- SVG -->
+    <script src="./js/svg.js" defer></script>
     <script src="./js/viewer.js" defer></script>
     <script src="./js/cross.js" defer></script>
     <script src="./js/tiff.js" defer></script>
@@ -20,17 +22,57 @@
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   </head>
   <body>
-    <div id="crossViewWindow" class="cross-view-window">
-      <div id="panzoomCrossBottom" class="overlap-images"></div>
-      <div id="panzoomCrossTop" class="overlap-images"></div>
-      <!--<div id="panzoomCross" class="panzoom"></div>-->
+    <div class="content">
+    <div class="cross-viewer-fluid">
+    <div id="crossLeftRow" class="cross-viewer-wrapper">
+      <div id="panzoomViewLeft1" class="cross-viewer">
+        <div id="panzoomCrossLeft1" class="panzoom"></div>
+        <div id="svgContainerLeft1" class="svg-container"></div>
+      </div>
+      <div id="panzoomViewLeft2" class="cross-viewer">
+        <div id="panzoomCrossLeft2" class="panzoom"></div>
+        <div id="svgContainerLeft2" class="svg-container"></div>
+      </div>
+      <div id="panzoomViewLeft3" class="cross-viewer">
+        <div id="panzoomCrossLeft3" class="panzoom"></div>
+        <div id="svgContainerLeft3" class="svg-container"></div>
+      </div>
+      <div id="panzoomViewLeft4" class="cross-viewer">
+        <div id="panzoomCrossLeft4" class="panzoom"></div>
+        <div id="svgContainerLeft4" class="svg-container"></div>
+      </div>
     </div>
+    <div id="crossRightRow" class="cross-viewer-wrapper">
+      <div id="panzoomViewLeft1" class="cross-viewer">
+        <div id="panzoomCrossRight1" class="panzoom"></div>
+        <div id="svgContainerRight1" class="svg-container"></div>
+      </div>
+      <div id="panzoomViewLeft2" class="cross-viewer">
+        <div id="panzoomCrossRight2" class="panzoom"></div>
+        <div id="svgContainerRight2" class="svg-container"></div>
+      </div>
+      <div id="panzoomViewLeft3" class="cross-viewer">
+        <div id="panzoomCrossRight3" class="panzoom"></div>
+        <div id="svgContainerRight3" class="svg-container"></div>
+      </div>
+      <div id="panzoomViewLeft4" class="cross-viewer">
+        <div id="panzoomCrossRight4" class="panzoom"></div>
+        <div id="svgContainerRight4" class="svg-container"></div>
+      </div>
+    </div>
+    </div>
+   <!-- <div id="crossViewWindow" class="cross-view-window"> -->
+   <!--   <div id="panzoomCrossBottom" class="overlap-images"></div> -->
+   <!--   <div id="panzoomCrossTop" class="overlap-images"></div> -->
+          <!--<div id="panzoomCross" class="panzoom"></div>-->
+   <!-- </div> -->
     <div id="crossControls" class="cross-controls">
       <button class="cross-button float-left" id="crossAcceptButton" typ="button">accept</button>
-      <button class="cross-button float-left" id="crossResetButton" typ="button">reset</button>
+      <button class="cross-button float-left" id="crossCalculateButton" typ="button">calculate</button>
       <button class="cross-button force-right" id="crossCancelButton" typ="button">cancel</button>
-      <input class="float-left" id="transparencyInput" type="range" min="0.0" max="1.0" defaultValue="0.5" value="0.5" step="0.05">
-      <p class="float-left">left opacity: <label id="transparencyLabel">0.5</label></p>
-    </div>    
+      <!--<input class="float-left" id="transparencyInput" type="range" min="0.0" max="1.0" defaultValue="0.5" value="0.5" step="0.05">
+      <p class="float-left">left opacity: <label id="transparencyLabel">0.5</label></p>-->
+    </div>
+    </div>
   </body>
 </html>

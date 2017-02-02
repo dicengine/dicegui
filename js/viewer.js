@@ -131,7 +131,6 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCl
                 var tiffCanvas = tiff.toCanvas();
                 $(tiffCanvas).css({
                     "width": vwidth,
-                    "max-width": "1500px",
                     "height": vheight,
                     "overflow": "hidden",
                     "display": "block",
@@ -168,7 +167,6 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCl
                 }
             }
             else if(fileTypesOther.indexOf(extension) > -1){
-                //alert(file.path);
                 console.log('parsing jpg or png image ' + file.path + ' ...');
                 if(addBorder){
                     $(viewer).html('<img src="' + file.path + '" width='+vwidth+' height='+vheight+' style="z-index:'+zIndex+'; position: absolute; border: 5px solid #666666"/>');
@@ -195,6 +193,14 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCl
                         checkValidInput();
                     }
                     $(viewer).css({width:vwidth,height:vheight})
+                    if(updateROIs){
+                        // clear the ROIs drawn on the canvas already
+                        clearROIs();
+                        clearExcluded();
+                        // clear the drawn ROIs
+                        clearDrawnROIs();
+                        drawDefaultROI();
+                    }
                     return true;
                 }
                 var myImage = new Image();

@@ -17,6 +17,7 @@ body {
     background-color: white;
     padding: 10px;
     display: inline-block;
+    height: 60px;
 }
 .float-left {
     float: left;
@@ -52,9 +53,9 @@ body {
     overflow: visible;
     cursor: pointer;
 }
-#panzoomCrossTop {
+/*#panzoomCrossTop {
     opacity: 0.5;
-}
+}*/
 .sepia {
     -webkit-filter: saturate(800%) sepia(100%);
     filter: saturate(800%) sepia(100%);
@@ -62,4 +63,35 @@ body {
 .huerotate {
     -webkit-filter: hue-rotate(180deg);
     filter: hue-rotate(180deg);
+}
+.content {
+    height: 100vh;
+}
+.cross-viewer-fluid {
+    height: calc(100% - 70px);
+}
+.cross-viewer-wrapper {
+    position: relative;
+    background: #cccccc;
+    float: left;
+    overflow: hidden;
+    width: 100%;
+    min-width: 1315px;
+    min-height: 330px;
+    height: 50%;
+    padding: 10px;
+    display: inline-block;
+}
+.cross-viewer {
+    position: relative;
+    overflow: hidden;
+    min-width: 300px;
+    width: 24%;
+    min-height: 300px;
+    margin-left: 10px;
+    height: 100%;
+    display: inline-block;
+}
+.svg-container {
+    position: absolute;
 }
