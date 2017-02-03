@@ -192,7 +192,9 @@ function writeInputFile(only_write) {
     content += '<Parameter name="output_folder" type="string" value="' + outputFolder + '" /> \n';
     content += '<Parameter name="image_folder" type="string" value="" />\n';
     content += '<Parameter name="correlation_parameters_file" type="string" value="' + paramsFile + '" />\n';
-    content += '<Parameter name="subset_file" type="string" value="' + subsetFile + '" />\n';
+    if(ROIDefsX.length>=3){
+        content += '<Parameter name="subset_file" type="string" value="' + subsetFile + '" />\n';
+    }
     content += '<Parameter name="subset_size" type="int" value="'+$("#subsetSize").val()+'" />\n';
     content += '<Parameter name="step_size" type="int" value="'+$("#stepSize").val()+'" />\n';
     content += '<Parameter name="separate_output_file_for_each_subset" type="bool" value="false" />\n';
@@ -297,6 +299,7 @@ function writeParamsFile(only_write) {
 }
 
 function writeSubsetFile(only_write){
+  if(ROIDefsX.length>=3){
     subsetFile = workingDirectory;
     if(os.platform()=='win32'){
         subsetFile += '\\subset_defs.txt';
@@ -351,6 +354,9 @@ function writeSubsetFile(only_write){
         if(!only_write)
           callDICeExec();
     });
+  }else{
+      callDICeExec();
+  }
 }
 
 function checkValidInput() {

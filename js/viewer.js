@@ -199,7 +199,7 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCl
                         clearExcluded();
                         // clear the drawn ROIs
                         clearDrawnROIs();
-                        drawDefaultROI();
+                        //drawDefaultROI();
                     }
                     return true;
                 }
@@ -221,7 +221,7 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCl
                 clearExcluded();
                 // clear the drawn ROIs
                 clearDrawnROIs();
-                drawDefaultROI();
+                //drawDefaultROI();
             }
         }
         fr.readAsArrayBuffer(file);
