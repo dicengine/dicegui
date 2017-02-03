@@ -209,7 +209,6 @@
                        <p>DIC method:</p>
                        <select>
                            <option value="subset">subset</option>
-                           <option value="global">global</option>
                        </select>
                        <div id="subsetParams" class="param-options">
                            <p>subset size: <label id="subsetSizeLabel">31</label> (pixels)</p>
@@ -242,8 +241,10 @@
                        <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
                    </div> <!-- end toggle div banner -->
                    <div class="toggle-div-body">
-                     <p>Having trouble? Take a deep breath (you got this code for free) and Submit an issue at: <a href="http://github.com/dicengine/dice/issues" alt="">issues</a></p>
-                     <p>papers and reports</p>
+                     <p>Select at least one reference and deformed image. Then the "run" and "write input" buttons should appear. (For stereo analysis, a reference image and deformed image must be selected for the right camera as well as a calibration file for the buttons to appear.) </p>
+                     <p>Press "run 2d" or "run stereo" if you want to run the DICe executable in serial on this machine. Choose "write input" if you want to write the input files to be run via the command line later (do this to run on an HPC system in parallel). </p>
+                     <p>Visualize the output in the results folder using ParaView.</p>
+                     <p>Having trouble? Take a deep breath (afterall, you got this code for free) and submit an issue at: <a href="http://github.com/dicengine/dice/issues" alt="">issues</a></p>
                      <p><a href="http://dicengine.github.io/dice/" alt="">class and namespace documentation</a></p>
                      <p><a href="http://github.com/dicengine/dice" alt="">source code</a></p>
                    </div> <!-- end toggle div body -->
