@@ -13,7 +13,7 @@ document.getElementById("runLi").onclick = function() {
                 // all the input file writes are chained via callbacks with the
                 // last callback executing DICe
                 startProgress();
-                writeInputFile();
+                writeInputFile(false);
             }else{
                 return false;
             }
@@ -21,7 +21,7 @@ document.getElementById("runLi").onclick = function() {
         // all the input file writes are chained via callbacks with the
         // last callback executing DICe
         startProgress();
-        writeInputFile();
+        writeInputFile(false);
     });
 };
 
@@ -59,7 +59,7 @@ function callDICeExec() {
     }   
     var child_process = require('child_process');
     var readline      = require('readline');
-    var proc          = child_process.execFile(execPath, ['-i',inputFile,'-v','-t']);
+    var proc          = child_process.execFile(execPath, ['-i',inputFile,'-v','-t'],{cwd:workingDirectory});
 
     readline.createInterface({
         input     : proc.stdout,
@@ -165,7 +165,7 @@ function endProgress (success){
     }
 }
 
-function writeInputFile() {
+function writeInputFile(only_write) {
     fileName = workingDirectory;
     outputFolder = workingDirectory;
     paramsFile = workingDirectory;
@@ -200,17 +200,27 @@ function writeInputFile() {
         content += '<Parameter name="'+defImagePathsLeft[i].path+'" type="bool" value="true" />\n';        
     }
     content += '</ParameterList>\n';
+    if(showStereoPane){
+        content += '<Parameter name="calibration_parameters_file" type="string" value="' + calPath + '" />\n';
+        content += '<Parameter name="stereo_reference_image" type="string" value="' + refImagePathRight + '" />\n';
+        content += '<ParameterList name="stereo_deformed_images">\n';
+        // add the deformed images
+        for(var i = 0, l = defImagePathsRight.length; i < l; i++) {
+            content += '<Parameter name="'+defImagePathsRight[i].path+'" type="bool" value="true" />\n';        
+        }
+        content += '</ParameterList>\n';
+    }
     content += '</ParameterList>\n';
     fs.writeFile(fileName, content, function (err) {
         if(err){
             alert("Error: an error ocurred creating the file "+ err.message)
          }
         consoleMsg('input.xml file has been successfully saved');
-        writeParamsFile();
+        writeParamsFile(only_write);
     });
 }
 
-function writeParamsFile() {
+function writeParamsFile(only_write) {
     paramsFile = workingDirectory;
     if(os.platform()=='win32'){
         paramsFile += '\\params.xml';
@@ -275,11 +285,11 @@ function writeParamsFile() {
             alert("Error: an error ocurred creating the file "+ err.message)
          }
         consoleMsg('params.xml file has been successfully saved');
-        writeSubsetFile();
+        writeSubsetFile(only_write);
     });
 }
 
-function writeSubsetFile(){
+function writeSubsetFile(only_write){
     subsetFile = workingDirectory;
     if(os.platform()=='win32'){
         subsetFile += '\\subset_defs.txt';
@@ -331,7 +341,8 @@ function writeSubsetFile(){
             alert("Error: an error ocurred creating the file "+ err.message)
          }
         consoleMsg('subset_defs.txt file has been successfully saved');
-        callDICeExec();
+        if(!only_write)
+          callDICeExec();
     });
 }
 
@@ -360,10 +371,10 @@ function checkValidInput() {
         }
     }
 
-//    if(showStereoPane){
-//        consoleMsg('running in stereo has not been enabled yet');
-//        validInput = false;
-//    }
+    if(showStereoPane){
+        if(calPath=='undefined')
+            validInput = false;
+    }
     
     // TODO check right images ...
     // see if the right reference image is set:

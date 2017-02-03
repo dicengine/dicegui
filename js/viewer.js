@@ -234,6 +234,17 @@ $("#rightRefInput").change(function (evt) {
     loadImage(file,"#panzoomRight","auto","auto",1,false,false,"","");
 });
 
+$("#calInput").change(function (evt) {
+    var tgt = evt.target || window.event.srcElement,
+        file = tgt.files[0];
+    if(file){
+        $("#calList").empty();
+        calPath = file.path;
+        $("#calList").append("<li class='calListLi'>" + file.name + "</li>");
+        checkValidInput();
+    }
+});
+
 $("#leftRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
