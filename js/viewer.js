@@ -1,5 +1,33 @@
 const remote = require('electron').remote;
 const BrowserWindow = remote.BrowserWindow;
+///////////////////////////////////////////////////                                                                                
+// these three transform a string into a file object                                                                               
+var getFileBlob = function (url, cb) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", url);
+    xhr.responseType = "blob";
+    xhr.addEventListener('load', function() {
+        cb(xhr.response);
+    });
+    xhr.send();
+};
+var blobToFile = function (blob, name) {
+    blob.lastModifiedDate = new Date();
+    if(os.platform()=='win32'){
+        blob.name = name.split('\\').pop();
+    }else{
+        blob.name = name.split('/').pop();
+    }
+    blob.path = name;
+    return blob;
+};
+var getFileObject = function(filePathOrUrl, cb) {
+    getFileBlob(filePathOrUrl, function (blob) {
+        cb(blobToFile(blob, filePathOrUrl));
+    });
+};
+//////////////////////////////////////////////////                                                                                 
+
 
 // initialize panzooms
 $("#panzoomLeft").panzoom({
@@ -227,6 +255,63 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCl
         fr.readAsArrayBuffer(file);
     }
 }
+
+$("#loadRef").click(function (){
+    var fullImageName = $("#imageFolderSpan").text();
+    var fullStereoImageName = $("#imageFolderSpan").text();
+    if(os.platform()=='win32'){
+        fullImageName += '\\';
+        fullStereoImageName += '\\';
+    }else{
+        fullImageName += '/';
+        fullStereoImageName += '/';
+    }
+    fullImageName += $("#imagePrefix").val();
+    fullStereoImageName += $("#imagePrefix").val();
+    // get the number of digits in the ref index
+    var tmpNum = Number($("#refIndex").val());
+    var defDig = 0;
+    if(tmpNum==0)
+        defDig = 1;
+    else{
+        while (tmpNum) {tmpNum /= 10; defDig++;}
+    }
+    var digits = Number($("#numDigits").val());
+    if(digits > 1)
+        for(j=0;j<digits - defDig;++j){
+            fullImageName += "0";
+            fullStereoImageName += "0";
+        }
+    fullImageName += $("#refIndex").val();
+    fullStereoImageName += $("#refIndex").val();
+    if(showStereoPane){
+        fullImageName += $("#stereoLeftSuffix").val();
+        fullStereoImageName += $("#stereoRightSuffix").val();
+    }
+    fullImageName += $("#imageExtension").val();
+    fullStereoImageName += $("#imageExtension").val();
+    if(showStereoPane){
+        if (confirm('load reference images (from sequence): ' + fullImageName + ' and ' + fullStereoImageName)) {
+            getFileObject(fullImageName, function (fileObject) {
+                 loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","");
+             });
+            getFileObject(fullStereoImageName, function (fileObject) {
+                 loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","");
+             });
+      }else{
+         return false;
+      }
+    }
+    else{
+        if (confirm('load reference image (from sequence): ' + fullImageName)) {
+             getFileObject(fullImageName, function (fileObject) {
+                 loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","");
+             });
+      }else{
+         return false;
+      }
+    }
+});
 
 $("#rightRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,

@@ -43,9 +43,18 @@
       </div>
       <div id="contentDiv" class="content">
        <div class="fixed-col">
-          <h1>IMAGES</h1>
+         <h1>IMAGES</h1>
+          <p>file select method:</p>
+           <select id="fileSelectMode" style="width:100%; margin-bottom:15px;">
+               <option value="list">select individually</option>
+               <option value="sequence">sequence of images</option>
+               <option value="cine">.cine video frames</option>
+           </select>
+
           <div id="leftImageMenu">
-            <div class="nav-two-cam" style="padding-left: 10px;">left</div>
+            <!-- begin list input -->
+            <div class="nav-list">
+              <div class="nav-two-cam">LEFT</div>
               <label for="leftRefInput" class="custom-file-input action-li">
                 <i class="material-icons md-dark md-br-pad">add_a_photo</i>
                 load reference     
@@ -61,8 +70,48 @@
                 </ul>
               </div>
             </div>
+            <!-- end list input -->
+            <!-- begin sequence input -->
+            <div class="nav-sequence">
+             <div id="changeImageFolder" class="action-li"><i class="material-icons md-dark md-br-pad">folder</i>
+                image folder
+             </div>
+             <div id="imageFolder" style="word-wrap: break-word;"><span id="imageFolderSpan"></span></div>
+             <div>prefix</div>
+             <input type="text" id="imagePrefix" name="imagePrefix" value="" style="width:100%;">
+             <div>ref index</div>
+             <input type="text" id="refIndex" name="refIndex" value="0" style="width:100%;">
+             <div>start index</div>
+             <input type="text" id="startIndex" name="startIndex" value="0" style="width:100%;">
+             <div>end index</div>
+             <input type="text" id="endIndex" name="endIndex" value="0" style="width:100%;">
+             <div>frame interval</div>
+             <input type="text" id="skipIndex" name="skipIndex" value="1" style="width:100%;">
+             <div>digits in number</div>
+             <input type="text" id="numDigits" name="numDigits" value="1" style="width:100%;">
+             <div class="nav-two-cam">stereo left suffix</div>
+             <input class="nav-two-cam" type="text" id="stereoLeftSuffix" name="stereoLeftSuffix" value="_0" style="width:100%;">
+             <div class="nav-two-cam">stereo right suffix</div>
+             <input class="nav-two-cam" type="text" id="stereoRightSuffix" name="stereoRightSuffix" value="_1" style="width:100%;">
+             <div>extension</div>
+             <input type="text" id="imageExtension" name="imageExtension" value="" style="width:100%; margin-bottom:10px;">
+             <label id="loadRef" class="action-li">
+                <i class="material-icons md-dark md-br-pad">add_a_photo</i>
+                load reference     
+             </label>
+            </div>
+            <!-- end sequence input -->
+            <!-- begin cine input -->
+            <div class="nav-cine">
+              I AM IN CINE
+            </div>
+            <!-- end cine input -->
+          </div>
+          <!-- start nav-two-cam -->
           <div id="rightImageMenu" class="nav-two-cam">
-            <div class="nav-two-cam"  style="padding-left: 10px;">right</div>
+            <!-- start list -->
+            <div class="nav-list">
+              <div class="nav-two-cam">RIGHT</div>
               <label for="rightRefInput" class="custom-file-input action-li">
                 <i class="material-icons md-dark md-br-pad">add_a_photo</i>
                 load reference     
@@ -77,27 +126,31 @@
                 <ul id="defImageListRight" class="def-image-ul">
                 </ul>
               </div>
+            </div>
+            <!-- end list -->
+              <div style="margin-top:15px; margin-bottom:5px;">CALIBRATION</div>
               <label for="calInput" class="custom-file-input action-li">
                 <i class="material-icons md-dark md-br-pad">image_aspect_ratio</i>
-                load calibration    
+                load cal file   
               </label>
               <input id="calInput" type="file">                  
               <div id="calContainer" class="cal-list-container">
                 <ul id="calList" class="cal-ul">
                 </ul>
               </div>
-            </div>
-          <h1>ANALYSIS</h1>
+          </div>
+          <!-- end nav-two-cam-->
+          <h1 style="margin-top:40px;">ANALYSIS</h1>
           <div id="runLoader" class="pre-loader"></div>
           <ul>
             <li id="changeWorkingDirLi" class="action-li"><i class="material-icons md-dark md-br-pad">folder</i>
               set working dir
             </li>
             <li id="runLi" class="action-li"><i class="material-icons md-dark md-br-pad">play_circle_filled</i>
-              <span>run 2d<span>
+              <span>run 2d</span>
             </li>
             <li id="writeLi" class="action-li"><i class="material-icons md-dark md-br-pad">archive</i>
-              <span>write input files<span>
+              <span>write input files</span>
             </li>
           </ul>
           <svg class="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
@@ -244,7 +297,7 @@
                      <p>Select at least one reference and deformed image. Then the "run" and "write input" buttons should appear. (For stereo analysis, a reference image and deformed image must be selected for the right camera as well as a calibration file for the buttons to appear.) </p>
                      <p>Press "run 2d" or "run stereo" if you want to run the DICe executable in serial on this machine. Choose "write input" if you want to write the input files to be run via the command line later (do this to run on an HPC system in parallel). </p>
                      <p>Visualize the output in the results folder using ParaView.</p>
-                     <p>Having trouble? Take a deep breath (afterall, you got this code for free) and submit an issue at: <a href="http://github.com/dicengine/dice/issues" alt="">issues</a></p>
+                     <p>Having trouble? Take a deep breath (after all, you got this code for free) and submit an issue at: <a href="http://github.com/dicengine/dice/issues" alt="">issues</a></p>
                      <p><a href="http://dicengine.github.io/dice/" alt="">class and namespace documentation</a></p>
                      <p><a href="http://github.com/dicengine/dice" alt="">source code</a></p>
                    </div> <!-- end toggle div body -->

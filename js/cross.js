@@ -365,30 +365,30 @@ function checkCrossCalcReady(){
 
 ///////////////////////////////////////////////////
 // these three transform a string into a file object
-var getFileBlob = function (url, cb) {
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", url);
-    xhr.responseType = "blob";
-    xhr.addEventListener('load', function() {
-        cb(xhr.response);
-    });
-    xhr.send();
-};
-var blobToFile = function (blob, name) {
-    blob.lastModifiedDate = new Date();
-    if(os.platform()=='win32'){
-        blob.name = name.split('\\').pop();
-    }else{
-        blob.name = name.split('/').pop();
-    }
-    blob.path = name;
-    return blob;
-};
-var getFileObject = function(filePathOrUrl, cb) {
-    getFileBlob(filePathOrUrl, function (blob) {
-        cb(blobToFile(blob, filePathOrUrl));
-    });
-};
+//var getFileBlob = function (url, cb) {
+//    var xhr = new XMLHttpRequest();
+//    xhr.open("GET", url);
+//    xhr.responseType = "blob";
+//    xhr.addEventListener('load', function() {
+//        cb(xhr.response);
+//    });
+//    xhr.send();
+//};
+//var blobToFile = function (blob, name) {
+//    blob.lastModifiedDate = new Date();
+//    if(os.platform()=='win32'){
+//        blob.name = name.split('\\').pop();
+//    }else{
+//        blob.name = name.split('/').pop();
+//    }
+//    blob.path = name;
+//    return blob;
+//};
+//var getFileObject = function(filePathOrUrl, cb) {
+//    getFileBlob(filePathOrUrl, function (blob) {
+//        cb(blobToFile(blob, filePathOrUrl));
+//    });
+//};
 //////////////////////////////////////////////////
 
 var rWidth = 0;

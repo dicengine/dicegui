@@ -89,6 +89,13 @@ $("#changeWorkingDirLi").click(function(){
     }
 });
 
+$("#changeImageFolder").click(function(){
+    var path =  dialog.showOpenDialog({defaultPath: workingDirectory, properties: ['openDirectory']});
+    if(path){
+        $('#imageFolder span').text(path[0]);
+    }
+});
+
 function updateWorkingDirLabel(){
     $("#workingDirLabel").text(workingDirectory);
     updateResultsFilesList();
@@ -317,6 +324,24 @@ function showStereoViewer(){
         unstackViews();
     }
 }
+
+$("#fileSelectMode").on('change',function (){
+    if($(this).val()=="sequence"){
+        $(".nav-sequence").css('display','block');
+        $(".nav-list").css('display','none');
+        $(".nav-cine").css('display','none');
+    }
+    else if($(this).val()=="list"){
+        $(".nav-sequence").css('display','none');
+        $(".nav-list").css('display','block');
+        $(".nav-cine").css('display','none');
+    }
+    else if($(this).val()=="cine"){
+        $(".nav-sequence").css('display','none');
+        $(".nav-list").css('display','none');
+        $(".nav-cine").css('display','block');
+    }
+});
 
 $("#subsetSize").on('input',function(){
     $("#subsetSizeLabel").text($(this).val());

@@ -94,6 +94,17 @@ input[type="file"] {
 .nav-two-cam {
     display: none;
 }
+.nav-list {
+    display: block;
+}
+.nav-sequence {
+    display: none;
+    padding-left: 10px;
+}
+.nav-cine {
+    display: none;
+    padding-left: 10px;
+}
 .banner-button {
     position: absolute;
     bottom: 0;
