@@ -61,9 +61,10 @@ $(window).load(function(){
     updateWorkingDirLabel();
     // hide the run button until the input is valid
     $("#runLi").hide();
+    // hide the stereo utilities
+    $("#previewCross").hide();
+    $("#initCross").hide();
 
-    // disable the initialize cross correlation button until the ref and def images are set
-    $("#crossCorrInit").hide();
 });
 
 // last items before closing browser
@@ -105,7 +106,28 @@ function updateResultsFilesList(){
                 $("#resultsFilesList").append(filePath + '</br>');
             }
         }
-    });    
+    });
+
+    function appendFile(inputName){
+        var fileName = workingDirectory;
+        if(os.platform()=='win32'){
+            fileName += '\\';
+        }else{
+            fileName += '/';
+        }
+        fileName += inputName
+        fs.stat(fileName, function(err, stat) {
+            if(err == null) {                
+                $("#resultsFilesList").append(inputName + '</br>');
+            }
+        });
+    }
+
+    // add any .dat files from the working directory to the list
+    appendFile("projection_points.dat");
+    appendFile("projection_out.dat");
+    appendFile("best_fit_plane.dat");
+    appendFile("best_fit_plane_out.dat");
 }
 
 // toggle the params menu on or off

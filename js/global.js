@@ -8,8 +8,10 @@ var workingDirectory = "undefined";
 var execPath
 if(os.platform()=='win32'){
     execPath =  "C:\\Program Files (x86)\\Digital Image Correlation Engine\\dice.exe";
+    execCrossInitPath = 'C:\\Program Files (x86)\\Digital Image Correlation Engine\\DICe_CrossInit.exe';
 }else{
     execPath = '/Users/dzturne/code/KDICe/build_serial_release/bin/dice';
+    execCrossInitPath = '/Users/dzturne/code/KDICe/build_global/bin/DICe_CrossInit';
     //var execPath =  "/Applications/DICe.app/Contents/MacOS/dice";
 }
 

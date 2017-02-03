@@ -9,7 +9,6 @@ var crossRightX = [0,0,0,0];
 var crossRightY = [0,0,0,0];
 
 // disable the accept and calculate button initially
-$("#crossAcceptButton").prop("disabled",true);
 $("#crossCalculateButton").prop("disabled",true);
 
 $("#crossCancelButton").click(function () {
@@ -424,6 +423,46 @@ $(document).ready(function(){
                         loadImage(fileObject,"#panzoomCrossRight4","auto","auto",1,false,false,"","");
                     });
 
+                    // read the points file if it alread exists
+
+//                    var fileName = workingDirectory;
+//                    if(os.platform()=='win32'){
+//                        fileName += '\\projection_points.dat';
+//                    }else{
+//                        fileName += '/projection_points.dat';
+//                    }
+//                    fs.stat(fileName, function(err, stat) {
+//                        if(err == null) {
+//                           if (confirm('use existing warp seed file ' + fileName +'?')) {
+//                                fs.readFile(fileName, 'utf8', function (err,data) {
+//                                   if (err) {
+//                                       return console.log(err);
+//                                   }
+//                                    //console.log(data);
+//                                    var positions = data.toString().split(/\s+/g).map(Number);
+//                                    if(positions.length >= 16){
+//                                        for(i=0;i<16;i+=4)
+//                                        crossLeftX[i/4] = positions[i];
+//                                        crossLeftY[i/4] = positions[i+1];
+//                                        crossRightX[i/4] = positions[i+2];
+//                                        crossRightY[i/4] = positions[i+3];
+//                                    }
+//                                    //console.log(positions);
+//                                   var draw = SVG('panzoomCrossRight2').size(rWidth,rHeight);
+//                                  var circle = draw.circle(3).move(imgX-2,imgY-1).fill('#00ff00');
+//                                   var circle2 = draw.circle(20).move(imgX-10,imgY-10).fill('none').stroke('#00ff00').attr({'stroke-width':2});
+//                                   draw.style('z-index',2);
+//                                   draw.style('position','absolute');
+//                                   crossRightX[1] = imgX;
+//                                   crossRightY[1] = imgY;
+//                                   checkCrossCalcReady(); 
+//                                });
+//                            }else{
+//                            return false;
+//                            }
+//                        }
+//                   });
+
                     // assume a parent div size of 1350 x 900 with pad left and bottom of 100px
  
                     // check if the height or width is the limiting dim:
@@ -517,22 +556,24 @@ function resetProjection(){
     projectionStep = 0;
 }
 
-//$("#crossResetButton").click(function () {
-//    resetProjection();
-//    $("#crossAcceptButton").prop("disabled",true);
-//});
-
 $("#crossCalculateButton").click(function () {
-    alert("calculating!");
     var content = "";
     for (i=0; i<crossLeftX.length;i++){
         content += crossLeftX[i] + ' ' + crossLeftY[i] + ' ' + crossRightX[i] + ' ' + crossRightY[i] + '\n';
     }
-    fs.writeFile('projection_points.dat', content, function (err) {
+    var fileName = workingDirectory;
+    if(os.platform()=='win32'){
+        fileName += '\\projection_points.dat';
+    }else{
+        fileName += '/projection_points.dat';
+     }
+    fs.writeFile(fileName, content, function (err) {
         if(err){
             alert("ERROR: an error ocurred creating the projection_points.dat file "+ err.message)
         }
-        console.log('projection_points.dat file has been successfully saved');
+        console.log(fileName + ' file has been successfully saved');
+        var win = remote.getCurrentWindow();
+        win.close();
     });
 });
 

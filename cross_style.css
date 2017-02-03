@@ -35,6 +35,7 @@ body {
     text-align: center;
     border: none;
     padding: 10px 20px;
+    margin-right: 10px;
 }
 .cross-button:disabled {
     background-color: #cccccc;
@@ -89,6 +90,17 @@ body {
     width: 24%;
     min-height: 300px;
     margin-left: 10px;
+    height: 100%;
+    display: inline-block;
+}
+.preview-viewer {
+    position: relative;
+    overflow: hidden;
+    min-width: 300px;
+    width: 100%;
+    min-height: 300px;
+    margin-left: 10px;
+    margin-top: 10px;
     height: 100%;
     display: inline-block;
 }

@@ -319,7 +319,7 @@ function updateDimsLabels (){
     $("#rightDims").text("w:" + refImageWidthRight  + " h:" + refImageHeightRight);
 }
 
-$("#crossCorrInit").click(function () {
+$("#initCross").click(function () {
     // write a file that has the image names, etc
     var content = 'var rightFileName = "' + refImagePathRight + '"\n';
     content += 'var leftFileName = "' + refImagePathLeft + '"\n';
@@ -327,6 +327,7 @@ $("#crossCorrInit").click(function () {
     content += 'var rightHeight = ' + refImageHeightRight + '\n';
     content += 'var leftWidth = ' + refImageWidthLeft + '\n';
     content += 'var leftHeight = ' + refImageHeightLeft + '\n';
+    content += 'var workingDirectory = "' + workingDirectory + '"\n';
     fs.writeFile('.dice-bw-info.js', content, function (err) {
         if(err){
             alert("ERROR: an error ocurred creating the .dice-bw-info.js file "+ err.message)
@@ -337,10 +338,34 @@ $("#crossCorrInit").click(function () {
     win.on('closed', () => {
         win = null
         $("#crossCorrInit").show();
+        updateResultsFilesList();
     })
     win.loadURL('file://' + __dirname + '/cross_init.html');
     $("#crossCorrInit").hide();
     win.webContents.openDevTools()
 });
+
+function openPreviewCross() {
+    // write a file that has the image names, etc
+    var fileName = workingDirectory;
+    if(os.platform()=='win32'){
+        fileName += '\\right_projected_to_left_color.tif';
+    }else{
+        fileName += '/right_projected_to_left_color.tif';
+    }
+    var content = 'var previewFileName = "' + fileName + '"\n';
+    fs.writeFile('.dice-preview-info.js', content, function (err) {
+        if(err){
+            alert("ERROR: an error ocurred creating the .dice-preview-info.js file "+ err.message)
+        }
+        consoleMsg('.dice-preview-info.js file has been successfully saved');
+    }); 
+    var win = new BrowserWindow({ width: 1200, height: 1000 });
+    win.on('closed', () => {
+        win = null
+    })
+    win.loadURL('file://' + __dirname + '/preview_cross.html');
+    win.webContents.openDevTools()
+}
 
 

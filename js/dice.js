@@ -6,7 +6,7 @@ document.getElementById("runLi").onclick = function() {
         fileName += '\\results';
     }else{
         fileName += '/results';
-    }
+     }
     fs.stat(fileName, function(err, stat) {
         if(err == null) {
             if (confirm('existing results files found in the working directory, overwrite?')) {
@@ -25,6 +25,30 @@ document.getElementById("runLi").onclick = function() {
     });
 };
 
+document.getElementById("previewCross").onclick = function() {
+    callCrossInitExec();
+}
+document.getElementById("clearCross").onclick = function() {
+    var fileName = workingDirectory;
+    if(os.platform()=='win32'){
+        fileName += '\\projection_points.dat';
+    }else{
+        fileName += '/projection_points.dat';
+     }
+    fs.stat(fileName, function(err, stat) {
+        if(err == null) {
+            if (confirm('delete nonlinear warp seed file ' + fileName +'?')) {
+                fs.unlink(fileName, (err) => {
+                    if (err) throw err;
+                    console.log('successfully deleted '+fileName);
+                });
+                updateResultsFilesList();
+            }else{
+                return false;
+            }
+        }
+    });
+}
 function callDICeExec() {
 
     var inputFile = workingDirectory;
@@ -67,6 +91,56 @@ function callDICeExec() {
             showParaviewMsg();
         }
     });    
+}
+
+function callCrossInitExec() {
+
+    var child_process = require('child_process');
+    var readline      = require('readline');
+    var proc;
+
+        // see if the .dice file exists:
+    var fileName = workingDirectory;
+    if(os.platform()=='win32'){
+        fileName += '\\projection_points.dat';
+    }else{
+        fileName += '/projection_points.dat';
+     }
+    fs.stat(fileName, function(err, stat) {
+        if(err == null) {
+            console.log("found nonlinear seed file: projection_points.dat in the execution directory, enabling nonlinear warp");
+            proc = child_process.execFile(execCrossInitPath, [refImagePathLeft,refImagePathRight,'1'],{cwd:workingDirectory})
+            startProgress();
+        }
+        else{
+            console.log("nonlinear seed file projection_points.dat not found");
+            proc = child_process.execFile(execCrossInitPath, [refImagePathLeft,refImagePathRight,'0'],{cwd:workingDirectory})
+            startProgress();
+        }
+        readline.createInterface({
+            input     : proc.stdout,
+            terminal  : false
+        }).on('line', function(line) {                
+            consoleMsg(line);
+        });
+        proc.on('error', function(){
+            alert('DICe cross correlation initialization failed: invalid executable: ' + execCrossInitPath);
+            endProgress(false);
+        });
+        proc.on('close', (code) => {
+            console.log(`child process exited with code ${code}`);
+            updateResultsFilesList();
+            if(code!=0){
+                alert('DICe cross correlation initialization failed (may need to seed a nonlinear warp for this image set)');
+                endProgress(false);
+             }
+            else{
+                endProgress(true);
+                // load preview window ...
+                openPreviewCross();
+             }
+        });    
+    });
 }
 
 function showParaviewMsg(){
@@ -286,17 +360,20 @@ function checkValidInput() {
         }
     }
 
-    if(showStereoPane){
-        consoleMsg('running in stereo has not been enabled yet');
-        validInput = false;
-    }
+//    if(showStereoPane){
+//        consoleMsg('running in stereo has not been enabled yet');
+//        validInput = false;
+//    }
     
     // TODO check right images ...
     // see if the right reference image is set:
     if(refImagePathRight=='undefined') {
         consoleMsg('right reference image not set yet');
         enableCross = false;
+        if(showStereoPane)
+            validInput = false;
     }
+    
     // TODO see if the left and right ref have the same dimensions
     // TODO check the number of def images left and right
     
@@ -305,9 +382,11 @@ function checkValidInput() {
     }else{
         $("#runLi").hide();
     }
-    if(enableCross){  
-        $("#crossCorrInit").show();
+    if(enableCross){
+        $("#previewCross").show();
+        $("#initCross").show();
     }else{
-        $("#crossCorrInit").hide();
+        $("#previewCross").hide();
+        $("#initCross").hide();
     }
 }

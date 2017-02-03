@@ -73,10 +73,6 @@
                 load deformed    
               </label>
               <input id="rightDefInput" type="file" multiple>                  
-              <label id="crossCorrInit" class="custom-file-input action-li">
-                <i class="material-icons md-dark md-br-pad">photo_size_select_large</i>
-                 initialize cross corr   
-              </label>
               <div id="defImageListRightContainer" class="def-image-list-container">
                 <ul id="defImageListRight" class="def-image-ul">
                 </ul>
@@ -132,7 +128,7 @@
                     <i id="addExcludeds" class="material-icons md-dark action-li" title="add exclusions">add_circle_outline</i>
                     <i id="removeLastROI" class="material-icons md-dark action-li" title="remove last ROI">remove_circle</i>
                     <i id="removeLastExcluded"class="material-icons md-dark action-li" title="remove last exclusion">remove_circle_outline</i>
-                    <i id="resetROIs"class="material-icons md-dark action-li" title="reset ROIs">cancel</i>
+                    <i id="resetROIs"class="material-icons md-dark action-li" title="reset ROIs">block</i>
                     <label id="ROIProgress"></label>
                   </div> <!-- end toggle div body -->
                 </div> <!-- end toggle div -->
@@ -164,12 +160,13 @@
                 </div> <!-- end toggle div -->
                 <div class="toggle-div">
                   <div class="toggle-div-banner">
-                    <span class="toggle-title">LEFT TO RIGHT UTILITIES</span>
+                    <span class="toggle-title">CROSS CORRELATION UTILS</span>
                     <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
                   </div> <!-- end toggle div banner -->
-                  <div class="toggle-div-body">
-                    <i class="material-icons md-dark action-li" title="zoom in">zoom_in</i>
-                    Utilities go here
+                  <div class="toggle-div-body" style="min-height:30px;">
+                    <i id="previewCross" class="material-icons md-dark action-li" title="preview cross initialization">collections</i>
+                    <i id="initCross" class="material-icons md-dark action-li" title="seed nonlinear warp">photo_size_select_large</i>
+                    <i id="clearCross" class="material-icons md-dark action-li" title="clear nonlinear warp">block</i>
                   </div> <!-- end toggle div body -->
                 </div> <!-- end toggle div -->
 
@@ -184,7 +181,7 @@
                    <div class="toggle-div-banner">
                        <span class="toggle-title">CONSOLE</span>
                        <span class="toggle-icon action-li">
-                         <i id="clearConsoleIcon" class="material-icons md-dark action-li" title="clear console">clear</i>
+                         <i id="clearConsoleIcon" class="material-icons md-dark action-li" title="clear console">block</i>
                          <i id="consoleToggle" class="material-icons md-dark toggler">swap_vertical_circle</i>
                        </span>
                    </div> <!-- end toggle div banner -->
