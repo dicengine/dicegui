@@ -25,9 +25,11 @@ $(window).load(function(){
                 }
                 if(showStereoPaneState){
                     $('#runLi span').text('run stereo');
+                    $('#x1x2').text('x 1');
                     showStereoViewer();
                 }else{
                     $('#runLi span').text('run 2d');
+                    $('#x1x2').text('x 2');
                     hideStereoViewer();
                 }
                 if(viewersStackedState){
@@ -242,12 +244,12 @@ $("#stereoButton").click(function(){
     var oldText = $('#runLi span').text();
     if(oldText=='run 2d'){
         $('#runLi span').text('run stereo');
-        $('#x1x2').text('x 2');
+        $('#x1x2').text('x 1');
         showStereoViewer();
         checkValidInput();
     }else{
         $('#runLi span').text('run 2d');
-        $('#x1x2').text('x 1');
+        $('#x1x2').text('x 2');
         hideStereoViewer();
         checkValidInput();
     }

@@ -197,6 +197,9 @@ function writeInputFile(only_write) {
     content += '<Parameter name="step_size" type="int" value="'+$("#stepSize").val()+'" />\n';
     content += '<Parameter name="separate_output_file_for_each_subset" type="bool" value="false" />\n';
     content += '<Parameter name="create_separate_run_info_file" type="bool" value="true" />\n';
+    if($("#omitTextCheck")[0].checked){
+        content += '<Parameter name="no_text_output_files" type="bool" value="true" />\n';
+    }
     content += '<Parameter name="reference_image" type="string" value="' + refImagePathLeft + '" />\n';
     content += '<ParameterList name="deformed_images">\n';
     // add the deformed images
