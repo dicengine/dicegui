@@ -25,6 +25,10 @@ document.getElementById("runLi").onclick = function() {
     });
 };
 
+document.getElementById("writeLi").onclick = function() {
+    writeInputFile(true);
+};
+
 document.getElementById("previewCross").onclick = function() {
     callCrossInitExec();
 }
@@ -390,8 +394,10 @@ function checkValidInput() {
     
     if(validInput){       
         $("#runLi").show();
+        $("#writeLi").show();
     }else{
         $("#runLi").hide();
+        $("#writeLi").hide();
     }
     if(enableCross){
         $("#previewCross").show();

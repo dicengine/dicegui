@@ -61,6 +61,7 @@ $(window).load(function(){
     updateWorkingDirLabel();
     // hide the run button until the input is valid
     $("#runLi").hide();
+    $("#writeLi").hide();
     // hide the stereo utilities
     $("#previewCross").hide();
     $("#initCross").hide();
