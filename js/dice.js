@@ -97,6 +97,112 @@ function callDICeExec() {
     });    
 }
 
+function callCineStatExec(fileName) {
+
+    var child_process = require('child_process');
+    var readline      = require('readline');
+    var proc;
+
+    fs.stat(fileName, function(err, stat) {
+        if(err != null) {
+            alert("could not find .cine file: " + fileName);
+            return;
+        }
+        else{
+            console.log("getting frame range of cine file: " + fileName);
+            var proc = child_process.execFile(execCineStatPath, [fileName],{cwd:workingDirectory})
+        }
+        readline.createInterface({
+            input     : proc.stdout,
+            terminal  : false
+        }).on('line', function(line) {                
+            consoleMsg(line);
+        });
+        proc.on('error', function(){
+            alert('DICe .cine file stat failed: invalid executable: ' + execCineStatPath);
+        });
+        proc.on('close', (code) => {
+            console.log(`child process exited with code ${code}`);
+            if(code!=0){
+                alert('DICe .cine file stat failed');
+            }
+            else{
+                // read the output file:
+                var statFileName = workingDirectory;
+                var tiffImageName = workingDirectory;
+                if(os.platform()=='win32'){
+                    statFileName += '\\cine_stats.dat';
+                    tiffImageName += '\\cine_to_tif_';
+                }else{
+                    statFileName += '/cine_stats.dat';
+                    tiffImageName += '/cine_to_tif_';
+                }
+                fs.stat(statFileName, function(err, stat) {
+                    if(err != null) {
+                        alert("could not find .cine stats file: " + statFileName);
+                        return;
+                    }else{
+                         fs.readFile(statFileName, 'utf8', function (err,data) {                                              
+                             if (err) {                                                                                    
+                                return console.log(err);                                                                  
+                             }                                                                                             
+                             //console.log(data);                                                                         
+                             var stats = data.toString().split(/\s+/g).map(Number);
+                             //alert(stats[0]);
+                             //alert(stats[1]);
+                             //alert(stats[2]);
+                             $("#cineStartPreview span").text(stats[1]);
+                             $("#cineEndPreview span").text(stats[2]);
+                             $("#cineRefIndex").val(stats[1]);
+                             $("#cineStartIndex").val(stats[1]);
+                             $("#cineEndIndex").val(stats[2]);
+                             // convert the cine to tiff
+                             // always start with the ref index for the initial display
+                             var procConv = child_process.execFile(execCineToTiffPath, [fileName,"0","0","cine_to_tif_"],{cwd:workingDirectory})
+                             readline.createInterface({
+                                 input     : procConv.stdout,
+                                 terminal  : false
+                             }).on('line', function(line) {
+                                  consoleMsg(line);
+                             });
+                             procConv.on('error', function(){
+                                 alert('DICe .cine file converstion to .tiff failed: invalid executable: ' + execCineToTiffPath);
+                             });
+                             procConv.on('close', (code) => {
+                                 console.log(`child process exited with code ${code}`);
+                                 if(code!=0){
+                                     alert('DICe .cine file conversion to .tiff failed');
+                                 }
+                                 else{
+                                     var tmpNum = stats[0];
+                                     var digits = 0;
+                                     if(tmpNum==0)
+                                         digits = 1;
+                                     else{
+                                         while (tmpNum>=1) {tmpNum /= 10; digits++;}
+                                     }
+                                     if(digits > 1)
+                                         for(j=0;j<digits-1;++j){
+                                             tiffImageName += "0";
+                                         }
+                                     tiffImageName += "0.tif";
+                                     // load the image       
+                                     getFileObject(tiffImageName, function (fileObject) {
+                                         loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","");
+                                     });
+                                 }
+                             });
+                         });                          
+                        // update stats and load the image
+                    
+                    } // end else
+                }); // end fs.stat on cine stats file 
+            }
+        }); // end proc.on    
+    }); // end fileName fs.stat
+}
+
+
 function callCrossInitExec() {
 
     var child_process = require('child_process');

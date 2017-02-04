@@ -106,7 +106,30 @@
             <!-- end sequence input -->
             <!-- begin cine input -->
             <div class="nav-cine">
-              I AM IN CINE
+              <label for="leftCineInput" class="custom-file-input action-li">
+                <i class="material-icons md-dark md-br-pad">add_a_photo</i>
+                load cine   
+              </label>
+             <div id="cineLeftPreview" style="word-wrap: break-word; margin-bottom:10px;"><span id="cineLeftPreviewSpan"></span></div>
+             <input id="leftCineInput" type="file">
+            <div class="nav-two-cam">
+              <label for="rightCineInput" class="custom-file-input action-li">
+                <i class="material-icons md-dark md-br-pad">add_a_photo</i>
+                load stereo cine   
+              </label>
+              <input id="rightCineInput" type="file">
+              <div id="cineRightPreview" style="word-wrap: break-word; margin-bottom:10px;"><span id="cineRightPreviewSpan"></span></div>
+            </div> <!-- end nav two cam -->
+              <div id="cineStartPreview" style="word-wrap: break-word; margin-bottom:10px;">first frame: <span id="cineStartPreviewSpan"></span></div>
+              <div id="cineEndPreview" style="word-wrap: break-word; margin-bottom:10px;">last frame: <span id="cineEndPreviewSpan"></span></div>
+              <div>ref index</div>
+              <input type="text" id="cineRefIndex" name="cineRefIndex" value="0" style="width:100%;">
+              <div>start index</div>
+              <input type="text" id="cineStartIndex" name="cineStartIndex" value="0" style="width:100%;">
+              <div>end index</div>
+              <input type="text" id="cineEndIndex" name="cineEndIndex" value="0" style="width:100%;">
+              <div>frame interval</div>
+              <input type="text" id="cineSkipIndex" name="cineSkipIndex" value="1" style="width:100%;">
             </div>
             <!-- end cine input -->
           </div>

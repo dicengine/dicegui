@@ -103,7 +103,7 @@ input[type="file"] {
 }
 .nav-cine {
     display: none;
-    padding-left: 10px;
+    /*padding-left: 10px;*/
 }
 .banner-button {
     position: absolute;

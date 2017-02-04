@@ -299,6 +299,17 @@ $("#loadRef").click(function (){
     });
 });
 
+$("#leftCineInput").change(function (evt) {
+    var tgt = evt.target || window.event.srcElement,
+        file = tgt.files[0];
+    if(file){
+        $("#cineLeftPreview span").text(file.name);        
+        // create a tiff image of the selected reference frame
+        callCineStatExec(file.path);
+    }
+});
+
+
 $("#rightRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
