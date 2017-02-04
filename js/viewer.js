@@ -256,66 +256,53 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCl
     }
 }
 
+function flagSequenceImages(){
+    refImagePathLeft = "sequence";
+    refImagePathRight = "sequence";
+    defImagePathsLeft = ["sequence"];
+    defImagePathsRight = ["sequence"];
+}
+
 $("#loadRef").click(function (){
-    var fullImageName = $("#imageFolderSpan").text();
-    var fullStereoImageName = $("#imageFolderSpan").text();
-    if(os.platform()=='win32'){
-        fullImageName += '\\';
-        fullStereoImageName += '\\';
-    }else{
-        fullImageName += '/';
-        fullStereoImageName += '/';
-    }
-    fullImageName += $("#imagePrefix").val();
-    fullStereoImageName += $("#imagePrefix").val();
-    // get the number of digits in the ref index
-    var tmpNum = Number($("#refIndex").val());
-    var defDig = 0;
-    if(tmpNum==0)
-        defDig = 1;
-    else{
-        while (tmpNum) {tmpNum /= 10; defDig++;}
-    }
-    var digits = Number($("#numDigits").val());
-    if(digits > 1)
-        for(j=0;j<digits - defDig;++j){
-            fullImageName += "0";
-            fullStereoImageName += "0";
+    var fullImageName = concatImageSequenceName(false);
+    var fullStereoImageName = concatImageSequenceName(true);
+    updateImageSequencePreview();
+
+    fs.stat(fullImageName, function(err, stat) {
+        if(err != null) {
+            alert("Invalid image file name: " + fullImageName);
+            return;
         }
-    fullImageName += $("#refIndex").val();
-    fullStereoImageName += $("#refIndex").val();
-    if(showStereoPane){
-        fullImageName += $("#stereoLeftSuffix").val();
-        fullStereoImageName += $("#stereoRightSuffix").val();
-    }
-    fullImageName += $("#imageExtension").val();
-    fullStereoImageName += $("#imageExtension").val();
-    if(showStereoPane){
-        if (confirm('load reference images (from sequence): ' + fullImageName + ' and ' + fullStereoImageName)) {
-            getFileObject(fullImageName, function (fileObject) {
-                 loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","");
-             });
-            getFileObject(fullStereoImageName, function (fileObject) {
-                 loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","");
-             });
-      }else{
-         return false;
-      }
-    }
-    else{
-        if (confirm('load reference image (from sequence): ' + fullImageName)) {
-             getFileObject(fullImageName, function (fileObject) {
-                 loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","");
-             });
-      }else{
-         return false;
-      }
-    }
+        else{
+            if(showStereoPane){
+                fs.stat(fullStereoImageName, function(err, stat) {
+                    if(err != null) {
+                      alert("Invalid stereo image file name: " + fullStereoImageName);
+                      return;
+                    }
+                    getFileObject(fullImageName, function (fileObject) {
+                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","");
+                    });
+                    getFileObject(fullStereoImageName, function (fileObject) {
+                    loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","");
+                    });
+                    flagSequenceImages();
+                });
+            }
+            else{
+                 getFileObject(fullImageName, function (fileObject) {
+                     loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","");
+                 });
+                 flagSequenceImages();
+            }
+        }
+    });
 });
 
 $("#rightRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
+    $("#refImageTextRight span").text(file.name);
     loadImage(file,"#panzoomRight","auto","auto",1,false,false,"","");
 });
 
@@ -333,6 +320,7 @@ $("#calInput").change(function (evt) {
 $("#leftRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
+    $("#refImageText span").text(file.name);
     loadImage(file,"#panzoomLeft","auto","auto",1,false,true,"","");
 });
 

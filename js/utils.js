@@ -23,6 +23,7 @@ $(window).load(function(){
                 }else{
                     hideParams();
                 }
+                $("#fileSelectMode").val(fileSelectMode).change();
                 if(showStereoPaneState){
                     $('#runLi span').text('run stereo');
                     $('#x1x2').text('x 1');
@@ -93,8 +94,53 @@ $("#changeImageFolder").click(function(){
     var path =  dialog.showOpenDialog({defaultPath: workingDirectory, properties: ['openDirectory']});
     if(path){
         $('#imageFolder span').text(path[0]);
+        updateImageSequencePreview();
     }
 });
+
+$("#imagePrefix,#refIndex,#numDigits,#imageExtension,#stereoLeftSuffix,#stereoRightSuffix").on('keyup',function(){
+    updateImageSequencePreview();
+});
+
+
+function concatImageSequenceName(isStereo){
+    var fullImageName = "";
+    $('#imageSequencePreview span').text('');    
+    fullImageName = $("#imageFolderSpan").text();
+    if(os.platform()=='win32'){
+        fullImageName += '\\';
+    }else{
+        fullImageName += '/';
+    }
+    fullImageName += $("#imagePrefix").val();
+    // get the number of digits in the ref index                                                                     
+    var tmpNum = Number($("#refIndex").val());
+    var defDig = 0;
+    if(tmpNum==0)
+        defDig = 1;
+    else{
+        while (tmpNum) {tmpNum /= 10; defDig++;}
+    }
+    var digits = Number($("#numDigits").val());
+    if(digits > 1)
+        for(j=0;j<digits - defDig;++j){
+            fullImageName += "0";
+        }
+    fullImageName += $("#refIndex").val();
+    if(showStereoPane&&isStereo){                                                                                             
+        fullImageName += $("#stereoRightSuffix").val();
+    }else if(showStereoPane){
+        fullImageName += $("#stereoLeftSuffix").val();                                                       
+    }                                                                                                               
+    fullImageName += $("#imageExtension").val();
+    return fullImageName;
+}
+
+
+function updateImageSequencePreview(){
+    var fullImageName = concatImageSequenceName(false);
+    $('#imageSequencePreview span').text(fullImageName);    
+}
 
 function updateWorkingDirLabel(){
     $("#workingDirLabel").text(workingDirectory);
@@ -397,6 +443,7 @@ function saveStateFile() {
     }else{
         content += 'var showConsoleState = false;\n';
     }
+    content += 'var fileSelectMode = "'+$("#fileSelectMode").val() +'";\n';
     if(paraviewMsg){
         content += 'var paraviewMsgState = true;\n';
     }else{

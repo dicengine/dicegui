@@ -190,7 +190,6 @@ function writeInputFile(only_write) {
     content += '<!-- Auto generated input file from DICe GUI -->\n';
     content += '<ParameterList>\n';
     content += '<Parameter name="output_folder" type="string" value="' + outputFolder + '" /> \n';
-    content += '<Parameter name="image_folder" type="string" value="" />\n';
     content += '<Parameter name="correlation_parameters_file" type="string" value="' + paramsFile + '" />\n';
     if(ROIDefsX.length>=3){
         content += '<Parameter name="subset_file" type="string" value="' + subsetFile + '" />\n';
@@ -202,22 +201,48 @@ function writeInputFile(only_write) {
     if($("#omitTextCheck")[0].checked){
         content += '<Parameter name="no_text_output_files" type="bool" value="true" />\n';
     }
-    content += '<Parameter name="reference_image" type="string" value="' + refImagePathLeft + '" />\n';
-    content += '<ParameterList name="deformed_images">\n';
-    // add the deformed images
-    for(var i = 0, l = defImagePathsLeft.length; i < l; i++) {
-        content += '<Parameter name="'+defImagePathsLeft[i].path+'" type="bool" value="true" />\n';        
-    }
-    content += '</ParameterList>\n';
     if(showStereoPane){
         content += '<Parameter name="calibration_parameters_file" type="string" value="' + calPath + '" />\n';
-        content += '<Parameter name="stereo_reference_image" type="string" value="' + refImagePathRight + '" />\n';
-        content += '<ParameterList name="stereo_deformed_images">\n';
-        // add the deformed images
-        for(var i = 0, l = defImagePathsRight.length; i < l; i++) {
-            content += '<Parameter name="'+defImagePathsRight[i].path+'" type="bool" value="true" />\n';        
+    }
+    var fileSelectMode = $("#fileSelectMode").val();
+    if(fileSelectMode=="list"){
+      content += '<Parameter name="image_folder" type="string" value="" />\n';
+      content += '<Parameter name="reference_image" type="string" value="' + refImagePathLeft + '" />\n';
+      content += '<ParameterList name="deformed_images">\n';
+      // add the deformed images
+      for(var i = 0, l = defImagePathsLeft.length; i < l; i++) {
+        content += '<Parameter name="'+defImagePathsLeft[i].path+'" type="bool" value="true" />\n';        
+      }
+      content += '</ParameterList>\n';
+      if(showStereoPane){
+          content += '<Parameter name="stereo_reference_image" type="string" value="' + refImagePathRight + '" />\n';
+          content += '<ParameterList name="stereo_deformed_images">\n';
+          // add the deformed images
+          for(var i = 0, l = defImagePathsRight.length; i < l; i++) {
+              content += '<Parameter name="'+defImagePathsRight[i].path+'" type="bool" value="true" />\n';        
+          }
+          content += '</ParameterList>\n';
+      }
+    }
+    else if(fileSelectMode=="sequence"){
+        var folderName = $("#imageFolderSpan").text();
+        if(os.platform()=='win32'){
+            folderName += '\\';
+        }else{
+            folderName += '/';
         }
-        content += '</ParameterList>\n';
+        content += '<Parameter name="image_folder" type="string" value="'+folderName +'" />\n';
+        content += '<Parameter name="reference_image_index" type="int" value="'+$("#refIndex").val()+'" />\n';
+        content += '<Parameter name="start_image_index" type="int" value="'+$("#startIndex").val()+'" />\n';
+        content += '<Parameter name="end_image_index" type="int" value="'+$("#endIndex").val()+'" />\n';
+        content += '<Parameter name="skip_image_index" type="int" value="'+$("#skipIndex").val()+'" />\n';
+        content += '<Parameter name="num_file_suffix_digits" type="int" value="'+$("#numDigits").val()+'" />\n';
+        content += '<Parameter name="image_file_extension" type="string" value="'+$("#imageExtension").val()+'" />\n';
+        content += '<Parameter name="image_file_prefix" type="string" value="'+$("#imagePrefix").val()+'" />\n';
+        if(showStereoPane){
+            content += '<Parameter name="stereo_left_suffix" type="string" value="'+$("#stereoLeftSuffix").val()+'"/>\n';
+            content += '<Parameter name="stereo_right_suffix" type="string" value="'+$("#stereoRightSuffix").val()+'" />\n';
+        }
     }
     content += '</ParameterList>\n';
     fs.writeFile(fileName, content, function (err) {
@@ -355,7 +380,8 @@ function writeSubsetFile(only_write){
           callDICeExec();
     });
   }else{
-      callDICeExec();
+      if(!only_write)
+          callDICeExec();
   }
 }
 
@@ -363,8 +389,9 @@ function checkValidInput() {
     consoleMsg('checking if input requirements met to enable running DICe ...');
     var validInput = true;
     var enableCross = true;
+    var isSequence = $("#fileSelectMode").val()=='sequence';
     // see if the left reference image is set:
-    if(refImagePathLeft=='undefined') {
+    if(refImagePathLeft=='undefined'||(refImagePathLeft=='sequence' && !isSequence)) {
         consoleMsg('left reference image not set yet');
         validInput = false;
         enableCross = false;
@@ -376,22 +403,33 @@ function checkValidInput() {
         validInput = false;
     }
     // check all the deformed images
-    for(var i = 0, l = defImagePathsLeft.length; i < l; i++) {
+    if(!isSequence){
+      for(var i = 0, l = defImagePathsLeft.length; i < l; i++) {
         var defExtension = defImagePathsLeft[i].name.split('.').pop().toLowerCase();
         if(refExtension!=defExtension){
             consoleMsg('deformed image ' + defImagePathsLeft[i].name + ' extension does not match ref extension');
             validInput = false;
         }
+      }
     }
 
     if(showStereoPane){
-        if(calPath=='undefined')
-            validInput = false;
+      if(calPath=='undefined')
+          validInput = false;
+      if(!isSequence){
+        for(var i = 0, l = defImagePathsRight.length; i < l; i++) {
+          var defExtension = defImagePathsRight[i].name.split('.').pop().toLowerCase();
+          if(refExtension!=defExtension){
+              consoleMsg('deformed image ' + defImagePathsRight[i].name + ' extension does not match ref extension');
+              validInput = false;
+          }
+        }
+      }
     }
     
     // TODO check right images ...
     // see if the right reference image is set:
-    if(refImagePathRight=='undefined') {
+    if(refImagePathRight=='undefined'||(refImagePathRight=='sequence' && !isSequence)) {
         consoleMsg('right reference image not set yet');
         enableCross = false;
         if(showStereoPane)

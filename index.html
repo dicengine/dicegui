@@ -59,7 +59,8 @@
                 <i class="material-icons md-dark md-br-pad">add_a_photo</i>
                 load reference     
               </label>
-              <input id="leftRefInput" type="file">                  
+              <input id="leftRefInput" type="file">
+             <div id="refImageText" style="word-wrap: break-word; margin-left:10px;"><span id="refImageTextSpan"></span></div>
               <label for="leftDefInput" class="custom-file-input action-li">
                 <i class="material-icons md-dark md-br-pad">add_a_photo</i>
                 load deformed    
@@ -95,6 +96,8 @@
              <input class="nav-two-cam" type="text" id="stereoRightSuffix" name="stereoRightSuffix" value="_1" style="width:100%;">
              <div>extension</div>
              <input type="text" id="imageExtension" name="imageExtension" value="" style="width:100%; margin-bottom:10px;">
+             <div style="margin-bottom:4px;">reference image</div>
+             <div id="imageSequencePreview" style="word-wrap: break-word; margin-bottom:10px;"><span id="imageSequencePreviewSpan"></span></div>
              <label id="loadRef" class="action-li">
                 <i class="material-icons md-dark md-br-pad">add_a_photo</i>
                 load reference     
@@ -117,6 +120,7 @@
                 load reference     
               </label>
               <input id="rightRefInput" type="file">                  
+              <div id="refImageTextRight" style="word-wrap: break-word; margin-left:10px;"><span id="refImageTextRightSpan"></span></div>
               <label for="rightDefInput" class="custom-file-input action-li">
                 <i class="material-icons md-dark md-br-pad">add_a_photo</i>
                 load deformed    
@@ -128,7 +132,7 @@
               </div>
             </div>
             <!-- end list -->
-              <div style="margin-top:15px; margin-bottom:5px;">CALIBRATION</div>
+              <h1 style="margin-top:30px;">CALIBRATION</h1>
               <label for="calInput" class="custom-file-input action-li">
                 <i class="material-icons md-dark md-br-pad">image_aspect_ratio</i>
                 load cal file   
@@ -296,7 +300,7 @@
                    <div class="toggle-div-body">
                      <p>Select at least one reference and deformed image. Then the "run" and "write input" buttons should appear. (For stereo analysis, a reference image and deformed image must be selected for the right camera as well as a calibration file for the buttons to appear.) </p>
                      <p>Press "run 2d" or "run stereo" if you want to run the DICe executable in serial on this machine. Choose "write input" if you want to write the input files to be run via the command line later (do this to run on an HPC system in parallel). </p>
-                     <p>Visualize the output in the results folder using ParaView.</p>
+                     <p>Visualize the ExodusII output file in the results folder using ParaView.</p>
                      <p>Having trouble? Take a deep breath (after all, you got this code for free) and submit an issue at: <a href="http://github.com/dicengine/dice/issues" alt="">issues</a></p>
                      <p><a href="http://dicengine.github.io/dice/" alt="">class and namespace documentation</a></p>
                      <p><a href="http://github.com/dicengine/dice" alt="">source code</a></p>
