@@ -71,6 +71,7 @@ $(window).load(function(){
     // hide the run button until the input is valid
     $("#runLi").hide();
     $("#writeLi").hide();
+    $("#resolutionLi").hide();
     // hide the stereo utilities
     $("#previewCross").hide();
     $("#initCross").hide();

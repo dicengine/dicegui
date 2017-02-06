@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Spatial Resolution Estimation</title>
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+    <script>if (window.module) module = window.module;</script>
+    <!-- Panzoom -->
+    <script src="./js/jquery.panzoom.min.js" defer></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="./js/resolution.js" defer></script>
+    <!-- Custom JS -->
+    <link rel="stylesheet" type="text/css" href="cross_style.css">
+    <!-- Google fonts and icons -->
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  </head>
+  <body>
+    <div class="content">
+      <div id="scatterchart_material"></div>
+      <div id="resControls" class="cross-controls">
+        <button class="cross-button float-left" id="previewCloseButton" typ="button">close</button>
+      </div>
+    </div> <!-- end content-->
+  </body>
+</html>

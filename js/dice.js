@@ -24,6 +24,10 @@ document.getElementById("runLi").onclick = function() {
         writeInputFile(false);
     });
 };
+document.getElementById("resolutionLi").onclick = function() {
+    startProgress();
+    writeInputFile(false,true);
+};
 
 document.getElementById("writeLi").onclick = function() {
     writeInputFile(true);
@@ -53,7 +57,7 @@ document.getElementById("clearCross").onclick = function() {
         }
     });
 }
-function callDICeExec() {
+function callDICeExec(resolution) {
 
     var inputFile = workingDirectory;
     if(os.platform()=='win32'){
@@ -92,7 +96,27 @@ function callDICeExec() {
         }
         else{
             endProgress(true);
-            showParaviewMsg();
+            if(resolution){
+                var content = 'var workingDirectory = "' + workingDirectory + '"\n';
+                fs.writeFile('.dice-res-info.js', content, function (err) {
+                    if(err){
+                        alert("ERROR: an error ocurred creating the .dice-res-info.js file "+ err.message)
+                        return;
+                    }
+                    else{
+                        consoleMsg('.dice-res-info.js file has been successfully saved');
+                                    // bring up the resolution graph
+                        var win = new BrowserWindow({ width: 1200, height: 1000 });
+                        win.on('closed', () => {
+                            win = null
+                        })
+                        win.loadURL('file://' + __dirname + '/resolution.html');
+                        win.webContents.openDevTools()
+                    }       
+                }); // end write file
+            }else{
+                showParaviewMsg();
+            }
         }
     });    
 }
@@ -302,7 +326,7 @@ function endProgress (success){
     }
 }
 
-function writeInputFile(only_write) {
+function writeInputFile(only_write,resolution=false) {
     fileName = workingDirectory;
     outputFolder = workingDirectory;
     paramsFile = workingDirectory;
@@ -334,7 +358,7 @@ function writeInputFile(only_write) {
     if($("#omitTextCheck")[0].checked){
         content += '<Parameter name="no_text_output_files" type="bool" value="true" />\n';
     }
-    if(showStereoPane){
+    if(showStereoPane&&!resolution){
         content += '<Parameter name="calibration_parameters_file" type="string" value="' + calPath + '" />\n';
     }
     var fileSelectMode = $("#fileSelectMode").val();
@@ -342,12 +366,17 @@ function writeInputFile(only_write) {
       content += '<Parameter name="image_folder" type="string" value="" />\n';
       content += '<Parameter name="reference_image" type="string" value="' + refImagePathLeft + '" />\n';
       content += '<ParameterList name="deformed_images">\n';
-      // add the deformed images
-      for(var i = 0, l = defImagePathsLeft.length; i < l; i++) {
-        content += '<Parameter name="'+defImagePathsLeft[i].path+'" type="bool" value="true" />\n';        
-      }
+        // add the deformed images
+        if(resolution){
+            content += '<Parameter name="'+refImagePathLeft+'" type="bool" value="true" />\n';        
+        }
+        else{
+            for(var i = 0, l = defImagePathsLeft.length; i < l; i++) {
+                content += '<Parameter name="'+defImagePathsLeft[i].path+'" type="bool" value="true" />\n';        
+            }
+        }
       content += '</ParameterList>\n';
-      if(showStereoPane){
+      if(showStereoPane&&!resolution){
           content += '<Parameter name="stereo_reference_image" type="string" value="' + refImagePathRight + '" />\n';
           content += '<ParameterList name="stereo_deformed_images">\n';
           // add the deformed images
@@ -384,7 +413,7 @@ function writeInputFile(only_write) {
         content += '<Parameter name="cine_start_index" type="int" value="'+$("#cineStartIndex").val()+'" />\n';
         content += '<Parameter name="cine_skip_index" type="int" value="'+$("#cineSkipIndex").val()+'" />\n';
         content += '<Parameter name="cine_end_index" type="int" value="'+$("#cineEndIndex").val()+'" />\n';
-        if(showStereoPane){
+        if(showStereoPane&&!resolution){
             content += '<Parameter name="stereo_cine_file" type="string" value="'+cinePathRight+'" />\n';
         }
     }
@@ -394,11 +423,11 @@ function writeInputFile(only_write) {
             alert("Error: an error ocurred creating the file "+ err.message)
          }
         consoleMsg('input.xml file has been successfully saved');
-        writeParamsFile(only_write);
+        writeParamsFile(only_write,resolution);
     });
 }
 
-function writeParamsFile(only_write) {
+function writeParamsFile(only_write,resolution) {
     paramsFile = workingDirectory;
     if(os.platform()=='win32'){
         paramsFile += '\\params.xml';
@@ -409,6 +438,16 @@ function writeParamsFile(only_write) {
     var content = '';
     content += '<!-- Auto generated parameters file from DICe GUI -->\n';
     content += '<ParameterList>\n';
+    if(resolution){
+        // add estimate spatial resoltion options
+        content += '<Parameter name="estimate_resolution_error" type="bool" value="true" />\n';
+        content += '<Parameter name="estimate_resolution_error_min_period" type="double" value="100.0" />\n';
+        content += '<Parameter name="estimate_resolution_error_max_period" type="double" value="100.0" />\n';
+        content += '<Parameter name="estimate_resolution_error_period_factor" type="double" value="0.5" />\n';
+        content += '<Parameter name="estimate_resolution_error_min_amplitude" type="double" value="1.0" />\n';
+        content += '<Parameter name="estimate_resolution_error_max_amplitude" type="double" value="1.0" />\n';
+        content += '<Parameter name="estimate_resolution_error_amplitude_step" type="double" value="1.0" />\n';
+    }
     content += '<Parameter name="interpolation_method" type="string" value="KEYS_FOURTH" />\n';
     content += '<Parameter name="optimization_method" type="string" value="GRADIENT_BASED" />\n';
     content += '<Parameter name="initialization_method" type="string" value="USE_FIELD_VALUES" />\n';
@@ -463,11 +502,11 @@ function writeParamsFile(only_write) {
             alert("Error: an error ocurred creating the file "+ err.message)
          }
         consoleMsg('params.xml file has been successfully saved');
-        writeSubsetFile(only_write);
+        writeSubsetFile(only_write,resolution);
     });
 }
 
-function writeSubsetFile(only_write){
+function writeSubsetFile(only_write,resolution){
   if(ROIDefsX.length>=3){
     subsetFile = workingDirectory;
     if(os.platform()=='win32'){
@@ -521,11 +560,11 @@ function writeSubsetFile(only_write){
          }
         consoleMsg('subset_defs.txt file has been successfully saved');
         if(!only_write)
-          callDICeExec();
+          callDICeExec(resolution);
     });
   }else{
       if(!only_write)
-          callDICeExec();
+          callDICeExec(resolution);
   }
 }
 
@@ -533,12 +572,14 @@ function checkValidInput() {
     consoleMsg('checking if input requirements met to enable running DICe ...');
     var validInput = true;
     var enableCross = true;
+    var enableResolution = true;
     var isSequence = $("#fileSelectMode").val()=='sequence';
     var isCine =  $("#fileSelectMode").val()=='cine';
 
     if(isCine){
         if(cinePathLeft=="undefined"){
             validInput = false;
+            enableResolution = false;
         }
         if(showStereoPane){
             if(cinePathRight=="undefined"){
@@ -554,6 +595,7 @@ function checkValidInput() {
         consoleMsg('left reference image not set yet');
         validInput = false;
         enableCross = false;
+        enableResolution = false;
     }
     // check that the image extensions all match
     var refExtension = refImagePathLeft.split('.').pop().toLowerCase();
@@ -601,9 +643,11 @@ function checkValidInput() {
     if(validInput){       
         $("#runLi").show();
         $("#writeLi").show();
+        $("#resolutionLi").show();        
     }else{
         $("#runLi").hide();
         $("#writeLi").hide();
+        $("#resolutionLi").hide();        
     }
     if(enableCross){
         $("#previewCross").show();
@@ -611,5 +655,10 @@ function checkValidInput() {
     }else{
         $("#previewCross").hide();
         $("#initCross").hide();
+    }
+    if(enableResolution){
+        $("#resolutionLi").show();                
+    }else{
+        $("#resolutionLi").show();                
     }
 }
