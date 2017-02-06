@@ -91,6 +91,9 @@ input[type="file"] {
 .svg-container {
     position: absolute;
 }
+.nav-item {
+    margin-left: 10px;
+}
 .nav-two-cam {
     display: none;
 }

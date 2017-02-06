@@ -24,6 +24,9 @@ var refImagePathLeft = "undefined";
 var refImagePathRight = "undefined";
 var defImagePathsLeft = new Array();
 var defImagePathsRight = new Array();
+var cinePathLeft = "undefined";
+var cinePathRight = "undefined";
+var cineFirstFrame = 0;
 var calPath = "undefined";
 
 // reference image dimensions

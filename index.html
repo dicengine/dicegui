@@ -44,8 +44,8 @@
       <div id="contentDiv" class="content">
        <div class="fixed-col">
          <h1>IMAGES</h1>
-          <p>file select method:</p>
-           <select id="fileSelectMode" style="width:100%; margin-bottom:15px;">
+          <p class="nav-item">file select method:</p>
+           <select id="fileSelectMode" style="width:95%; margin-bottom:10px; margin-left:10px;">
                <option value="list">select individually</option>
                <option value="sequence">sequence of images</option>
                <option value="cine">.cine video frames</option>
@@ -110,7 +110,7 @@
                 <i class="material-icons md-dark md-br-pad">add_a_photo</i>
                 load cine   
               </label>
-             <div id="cineLeftPreview" style="word-wrap: break-word; margin-bottom:10px;"><span id="cineLeftPreviewSpan"></span></div>
+             <div id="cineLeftPreview" style="word-wrap: break-word; margin-bottom:10px;" class="nav-item"><span id="cineLeftPreviewSpan"></span></div>
              <input id="leftCineInput" type="file">
             <div class="nav-two-cam">
               <label for="rightCineInput" class="custom-file-input action-li">
@@ -118,18 +118,18 @@
                 load stereo cine   
               </label>
               <input id="rightCineInput" type="file">
-              <div id="cineRightPreview" style="word-wrap: break-word; margin-bottom:10px;"><span id="cineRightPreviewSpan"></span></div>
+              <div id="cineRightPreview" style="word-wrap: break-word; margin-bottom:20px;" class="nav-item"><span id="cineRightPreviewSpan"></span></div>
             </div> <!-- end nav two cam -->
-              <div id="cineStartPreview" style="word-wrap: break-word; margin-bottom:10px;">first frame: <span id="cineStartPreviewSpan"></span></div>
-              <div id="cineEndPreview" style="word-wrap: break-word; margin-bottom:10px;">last frame: <span id="cineEndPreviewSpan"></span></div>
-              <div>ref index</div>
-              <input type="text" id="cineRefIndex" name="cineRefIndex" value="0" style="width:100%;">
-              <div>start index</div>
-              <input type="text" id="cineStartIndex" name="cineStartIndex" value="0" style="width:100%;">
-              <div>end index</div>
-              <input type="text" id="cineEndIndex" name="cineEndIndex" value="0" style="width:100%;">
-              <div>frame interval</div>
-              <input type="text" id="cineSkipIndex" name="cineSkipIndex" value="1" style="width:100%;">
+              <div id="cineStartPreview" style="word-wrap: break-word; margin-bottom:10px;" class="nav-item">first frame: <span id="cineStartPreviewSpan"></span></div>
+              <div id="cineEndPreview" style="word-wrap: break-word; margin-bottom:10px;" class="nav-item">last frame: <span id="cineEndPreviewSpan"></span></div>
+              <div class="nav-item">ref index</div>
+              <input class="nav-item" type="text" id="cineRefIndex" name="cineRefIndex" value="0" style="width:95%;">
+              <div class="nav-item">start index</div>
+              <input class="nav-item" type="text" id="cineStartIndex" name="cineStartIndex" value="0" style="width:95%;">
+              <div class="nav-item">end index</div>
+              <input class="nav-item" type="text" id="cineEndIndex" name="cineEndIndex" value="0" style="width:95%;">
+              <div class="nav-item">frame interval</div>
+              <input class="nav-item" type="text" id="cineSkipIndex" name="cineSkipIndex" value="1" style="width:95%;">
             </div>
             <!-- end cine input -->
           </div>

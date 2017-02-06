@@ -97,16 +97,61 @@ function callDICeExec() {
     });    
 }
 
-function callCineStatExec(fileName) {
+function updateCineDisplayImage(fileName,index,left){
+    var child_process = require('child_process');
+    var readline      = require('readline');
+    var tiffImageName = workingDirectory;
+    if(os.platform()=='win32'){
+        tiffImageName += '\\cine_to_tif';
+    }else{
+        tiffImageName += '/cine_to_tif';
+    }
+    if(left)
+        tiffImageName += '_left.tif';
+    else
+        tiffImageName += '_right.tif';
+    consoleMsg("converting file " + fileName + " to .tif for display");
+    var procConv = child_process.execFile(execCineToTiffPath, [fileName,index,index,tiffImageName],{cwd:workingDirectory})
+        readline.createInterface({
+            input     : procConv.stdout,
+            terminal  : false
+        }).on('line', function(line) {
+            consoleMsg(line);
+        });
+        procConv.on('error', function(){
+            alert('DICe .cine file converstion to .tiff failed: invalid executable: ' + execCineToTiffPath);
+        });
+        procConv.on('close', (code) => {
+            console.log(`child process exited with code ${code}`);
+            if(code!=0){
+                 alert('DICe .cine file conversion to .tiff failed');
+            }
+            else{
+		if(left){
+                    getFileObject(tiffImageName, function (fileObject) {
+                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","");
+                    });
+                }else{
+                    getFileObject(tiffImageName, function (fileObject) {
+                        loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","");
+                    });
+                }
+            }
+        });
+}
+
+
+function callCineStatExec(file,left) {
 
     var child_process = require('child_process');
     var readline      = require('readline');
     var proc;
 
+    var fileName = file.path;
     fs.stat(fileName, function(err, stat) {
         if(err != null) {
             alert("could not find .cine file: " + fileName);
-            return;
+            return false;
         }
         else{
             console.log("getting frame range of cine file: " + fileName);
@@ -120,83 +165,65 @@ function callCineStatExec(fileName) {
         });
         proc.on('error', function(){
             alert('DICe .cine file stat failed: invalid executable: ' + execCineStatPath);
+            return false;
         });
         proc.on('close', (code) => {
             console.log(`child process exited with code ${code}`);
             if(code!=0){
                 alert('DICe .cine file stat failed');
+                return false;
             }
             else{
                 // read the output file:
                 var statFileName = workingDirectory;
-                var tiffImageName = workingDirectory;
                 if(os.platform()=='win32'){
                     statFileName += '\\cine_stats.dat';
-                    tiffImageName += '\\cine_to_tif_';
                 }else{
                     statFileName += '/cine_stats.dat';
-                    tiffImageName += '/cine_to_tif_';
                 }
                 fs.stat(statFileName, function(err, stat) {
                     if(err != null) {
                         alert("could not find .cine stats file: " + statFileName);
-                        return;
+                        return false;
                     }else{
-                         fs.readFile(statFileName, 'utf8', function (err,data) {                                              
-                             if (err) {                                                                                    
-                                return console.log(err);                                                                  
-                             }                                                                                             
-                             //console.log(data);                                                                         
+                         fs.readFile(statFileName, 'utf8', function (err,data) {
+                             if (err) {
+                                 console.log(err);
+                                 return false;                  
+                             }
                              var stats = data.toString().split(/\s+/g).map(Number);
                              //alert(stats[0]);
                              //alert(stats[1]);
                              //alert(stats[2]);
+                             // check that the two cine files have valid frame ranges
+                             if($("#cineStartPreview span").text()!=""||$("#cineEndPreview span").text()!="")
+                                 if($("#cineStartPreview span").text()!=stats[1]||$("#cineEndPreview span").text()!=stats[2]){
+                                     alert("Error, left and right .cine files need to have matching frame ranges");
+                                     return false;
+                                 }
+                             cineFirstFrame = stats[1];
                              $("#cineStartPreview span").text(stats[1]);
                              $("#cineEndPreview span").text(stats[2]);
-                             $("#cineRefIndex").val(stats[1]);
-                             $("#cineStartIndex").val(stats[1]);
-                             $("#cineEndIndex").val(stats[2]);
+                             if(left){
+                                 $("#cineRefIndex").val(stats[1]);
+                                 $("#cineStartIndex").val(stats[1]);
+                                 $("#cineEndIndex").val(stats[2]);
+                             }
                              // convert the cine to tiff
                              // always start with the ref index for the initial display
-                             var procConv = child_process.execFile(execCineToTiffPath, [fileName,"0","0","cine_to_tif_"],{cwd:workingDirectory})
-                             readline.createInterface({
-                                 input     : procConv.stdout,
-                                 terminal  : false
-                             }).on('line', function(line) {
-                                  consoleMsg(line);
-                             });
-                             procConv.on('error', function(){
-                                 alert('DICe .cine file converstion to .tiff failed: invalid executable: ' + execCineToTiffPath);
-                             });
-                             procConv.on('close', (code) => {
-                                 console.log(`child process exited with code ${code}`);
-                                 if(code!=0){
-                                     alert('DICe .cine file conversion to .tiff failed');
-                                 }
-                                 else{
-                                     var tmpNum = stats[0];
-                                     var digits = 0;
-                                     if(tmpNum==0)
-                                         digits = 1;
-                                     else{
-                                         while (tmpNum>=1) {tmpNum /= 10; digits++;}
-                                     }
-                                     if(digits > 1)
-                                         for(j=0;j<digits-1;++j){
-                                             tiffImageName += "0";
-                                         }
-                                     tiffImageName += "0.tif";
-                                     // load the image       
-                                     getFileObject(tiffImageName, function (fileObject) {
-                                         loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","");
-                                     });
-                                 }
-                             });
-                         });                          
-                        // update stats and load the image
-                    
-                    } // end else
-                }); // end fs.stat on cine stats file 
+                             if(left){
+                                 cinePathLeft = file.path;
+                                 $("#cineLeftPreview span").text(file.name);
+                             }
+                             else{
+                                 cinePathRight = file.path;
+                                 $("#cineRightPreview span").text(file.name);
+                             }
+                             updateCineDisplayImage(fileName,"0",left);
+                                 return true;
+                         }); // end else                           
+                    }
+                });
             }
         }); // end proc.on    
     }); // end fileName fs.stat
@@ -350,6 +377,17 @@ function writeInputFile(only_write) {
             content += '<Parameter name="stereo_right_suffix" type="string" value="'+$("#stereoRightSuffix").val()+'" />\n';
         }
     }
+    else if(fileSelectMode=="cine"){
+        content += '<Parameter name="image_folder" type="string" value="" />\n';
+        content += '<Parameter name="cine_file" type="string" value="'+cinePathLeft+'" />\n';
+        content += '<Parameter name="cine_ref_index" type="int" value="'+$("#cineRefIndex").val()+'" />\n';
+        content += '<Parameter name="cine_start_index" type="int" value="'+$("#cineStartIndex").val()+'" />\n';
+        content += '<Parameter name="cine_skip_index" type="int" value="'+$("#cineSkipIndex").val()+'" />\n';
+        content += '<Parameter name="cine_end_index" type="int" value="'+$("#cineEndIndex").val()+'" />\n';
+        if(showStereoPane){
+            content += '<Parameter name="stereo_cine_file" type="string" value="'+cinePathRight+'" />\n';
+        }
+    }
     content += '</ParameterList>\n';
     fs.writeFile(fileName, content, function (err) {
         if(err){
@@ -496,6 +534,21 @@ function checkValidInput() {
     var validInput = true;
     var enableCross = true;
     var isSequence = $("#fileSelectMode").val()=='sequence';
+    var isCine =  $("#fileSelectMode").val()=='cine';
+
+    if(isCine){
+        if(cinePathLeft=="undefined"){
+            validInput = false;
+        }
+        if(showStereoPane){
+            if(cinePathRight=="undefined"){
+                validInput = false;
+            }
+            if(calPath=='undefined')
+                validInput = false;
+        }
+    }
+    else{
     // see if the left reference image is set:
     if(refImagePathLeft=='undefined'||(refImagePathLeft=='sequence' && !isSequence)) {
         consoleMsg('left reference image not set yet');
@@ -541,7 +594,7 @@ function checkValidInput() {
         if(showStereoPane)
             validInput = false;
     }
-    
+    } // end else (not cine)
     // TODO see if the left and right ref have the same dimensions
     // TODO check the number of def images left and right
     

@@ -27,8 +27,6 @@ var getFileObject = function(filePathOrUrl, cb) {
     });
 };
 //////////////////////////////////////////////////                                                                                 
-
-
 // initialize panzooms
 $("#panzoomLeft").panzoom({
     $zoomIn: $(".zoom-in-left"),
@@ -299,14 +297,59 @@ $("#loadRef").click(function (){
     });
 });
 
+$("#leftCineInput").on("click",function () {
+    this.value = null;
+});
 $("#leftCineInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
     if(file){
-        $("#cineLeftPreview span").text(file.name);        
-        // create a tiff image of the selected reference frame
-        callCineStatExec(file.path);
+        // if a right cine file is alread loaded ask the user if it should be unloaded to
+        // to avoid frame range mismatch
+        if(cinePathRight!="undefined"&&cinePathLeft!="undefined"){
+            if (confirm('unload right cine file (this is necessary if the frame ranges are different between right and left cine)')){
+                cinePathRight = "undefined";
+                $("#cineRightPreviewSpan").text("");
+                $("#cineStartPreview span").text("");
+                $("#cineEndPreview span").text("");
+                $("#panzoomRight").html('');
+                // create a tiff image of the selected reference frame
+                callCineStatExec(file,true);
+            }
+            else{
+            }
+        } // end a right cine file exists
+        else{
+            callCineStatExec(file,true);
+        }
     }
+});
+
+$("#rightCineInput").change(function (evt) {
+    var tgt = evt.target || window.event.srcElement,
+        file = tgt.files[0];
+    if(file){
+        // create a tiff image of the selected reference frame
+        callCineStatExec(file,false);
+    }
+});
+
+// reload the left and right cine image if the ref index is changed
+$("#cineRefIndex").change(function () {
+    // filename left and right
+    var refIndex = $("#cineRefIndex").val();
+    // check that the ref index is valid
+    if(cinePathLeft!="undefined"||cinePathRight!="undefined")
+        if(refIndex < Number($("#cineStartPreviewSpan").text()) || refIndex > Number($("#cineEndPreviewSpan").text())){
+            alert("invalid reference index");
+            return;
+        }
+    var offsetIndex = Number(refIndex) - cineFirstFrame;
+    alert("offset_index " + offsetIndex);
+    if(cinePathLeft!="undefined")
+        updateCineDisplayImage(cinePathLeft,offsetIndex,true);
+    if(cinePathRight!="undefined")
+        updateCineDisplayImage(cinePathRight,offsetIndex,false);    
 });
 
 
