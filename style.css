@@ -91,6 +91,13 @@ input[type="file"] {
 .svg-container {
     position: absolute;
 }
+.reference-text{
+    width: 100%;
+    height: 150px;
+    overflow:auto;
+    margin-top: 10px;
+    margin-bottom:20px;
+}
 .nav-item {
     margin-left: 10px;
 }

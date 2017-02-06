@@ -33,6 +33,12 @@ $(window).load(function(){
                     $('#x1x2').text('x 2');
                     hideStereoViewer();
                 }
+                if(omitTextState){
+                    $("#omitTextCheck").prop("checked",true);
+                }
+                else{
+                    $("#omitTextCheck").prop("checked",false);
+                }
                 if(viewersStackedState){
                     stackViews();
                 }else{
@@ -444,6 +450,12 @@ function saveStateFile() {
         content += 'var showConsoleState = false;\n';
     }
     content += 'var fileSelectMode = "'+$("#fileSelectMode").val() +'";\n';
+    if($("#omitTextCheck")[0].checked){
+        content += 'var omitTextState = true;\n';
+    }
+    else{
+        content += 'var omitTextState = false;\n';
+    }
     if(paraviewMsg){
         content += 'var paraviewMsgState = true;\n';
     }else{

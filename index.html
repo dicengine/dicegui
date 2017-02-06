@@ -54,7 +54,7 @@
           <div id="leftImageMenu">
             <!-- begin list input -->
             <div class="nav-list">
-              <div class="nav-two-cam">LEFT</div>
+              <div class="nav-two-cam nav-item">LEFT</div>
               <label for="leftRefInput" class="custom-file-input action-li">
                 <i class="material-icons md-dark md-br-pad">add_a_photo</i>
                 load reference     
@@ -137,7 +137,7 @@
           <div id="rightImageMenu" class="nav-two-cam">
             <!-- start list -->
             <div class="nav-list">
-              <div class="nav-two-cam">RIGHT</div>
+              <div class="nav-two-cam nav-item">RIGHT</div>
               <label for="rightRefInput" class="custom-file-input action-li">
                 <i class="material-icons md-dark md-br-pad">add_a_photo</i>
                 load reference     
@@ -321,9 +321,11 @@
                        <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
                    </div> <!-- end toggle div banner -->
                    <div class="toggle-div-body">
+                     <div class="reference-text">
                      <p>Select at least one reference and deformed image. Then the "run" and "write input" buttons should appear. (For stereo analysis, a reference image and deformed image must be selected for the right camera as well as a calibration file for the buttons to appear.) </p>
                      <p>Press "run 2d" or "run stereo" if you want to run the DICe executable in serial on this machine. Choose "write input" if you want to write the input files to be run via the command line later (do this to run on an HPC system in parallel). </p>
-                     <p>Visualize the ExodusII output file in the results folder using ParaView.</p>
+                     <p>Visualize the ExodusII (*.e) output file in the results folder using ParaView. A comma separated text file with results values is also created in the results folder.</p>
+                     </div>
                      <p>Having trouble? Take a deep breath (after all, you got this code for free) and submit an issue at: <a href="http://github.com/dicengine/dice/issues" alt="">issues</a></p>
                      <p><a href="http://dicengine.github.io/dice/" alt="">class and namespace documentation</a></p>
                      <p><a href="http://github.com/dicengine/dice" alt="">source code</a></p>
