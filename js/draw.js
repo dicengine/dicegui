@@ -193,7 +193,7 @@ $("#resetROIs").click(function(){
         clearExcluded();
         // clear the drawn ROIs
         clearDrawnROIs();
-        drawDefaultROI();
+        //drawDefaultROI();
     } else {
         // Do nothing!
     }
@@ -322,18 +322,22 @@ function removeLastExcluded(){
     }
 }
 $("#removeLastROI").click(function(){
-    removeLastROI();
-    if(currentROIIndex > 0){
-        currentROIIndex -= 1;
+    if (confirm('remove last drawn ROI?')) {
+        removeLastROI();
+        if(currentROIIndex > 0){
+            currentROIIndex -= 1;
+        }
+        drawROIs();
     }
-    drawROIs();
 });
 $("#removeLastExcluded").click(function(){
-    removeLastExcluded();
-    if(currentExcludedIndex > 0){
-        currentExcludedIndex -= 1;
+    if (confirm('remove last excluded region?')) {
+        removeLastExcluded();
+        if(currentExcludedIndex > 0){
+            currentExcludedIndex -= 1;
+        }
+        drawROIs();
     }
-    drawROIs();
 });
 
 
@@ -413,4 +417,47 @@ function drawDefaultROI(){
     ROIDefsY[0] = [buf,buf,refImageHeightLeft-buf,refImageHeightLeft-buf];
     currentROIIndex += 1;
     drawROIs();
+}
+
+function drawDotsAndBoxesForSubsets(){
+    drawROIs();
+    // get the current step value
+    var stepSize = $("#stepSize").val();
+    var locsFile = workingDirectory;
+    if(os.platform()=='win32'){
+        locsFile += '\\subset_locs.txt';
+    }else{
+        locsFile += '/subset_locs.txt';
+    }
+    fs.stat(locsFile, function(err, stat) {
+        if(err == null) {
+            fs.readFile(locsFile, 'utf8', function (err,dataS) {
+                if (err) {
+                   return console.log(err);
+                }
+                //else{
+                   //console.log(dataS);
+                //}
+                var locsData = dataS.toString().split(/\s+/g).map(Number);
+                //console.log(locsData);
+                var draw = SVG('panzoomLeft').size(refImageWidthLeft, refImageHeightLeft);
+                var stride = 2;
+                if(stepSize <=3) stride = 4;
+                if(stepSize <=2) stride = 6;
+                if(stepSize <=1) stride = 8;
+                for(i=0;i<locsData.length-1;i+=stride){
+                    var x = locsData[i];
+                    var y = locsData[i+1];
+                    var dot = draw.circle(5).move(x,y).fill('#ffff00');
+                }
+                draw.style('opacity',0.75);
+                draw.style('z-index',2);
+                draw.style('position','absolute');
+            }); // end readFile                                                                                   
+        } // end null                                                                                              
+        else{
+            alert("could not read subset_locs.txt");
+            return;
+	}
+    }); 
 }

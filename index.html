@@ -198,6 +198,7 @@
                     <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
                   </div> <!-- end toggle div banner -->
                   <div class="toggle-div-body">
+                    <i id="sssigPreview" class="material-icons md-dark action-li" title="preview sssig mask">check_circle</i>
                     <i class="material-icons md-dark action-li zoom-in-left" title="zoom in">zoom_in</i>
                     <i class="material-icons md-dark action-li zoom-out-left" title="zoom out">zoom_out</i>
                     <input type="range" class="zoom-range-left">                   
@@ -294,6 +295,8 @@
                            <option value="subset">subset</option>
                        </select>
                        <div id="subsetParams" class="param-options">
+                           <p>sssig threshold: <label id="sssigLabel">150</label></p>
+                           <input id="sssigThresh" type="range" min="0" max="500.0" defaultValue="150" value="150" step="25">
                            <p>subset size: <label id="subsetSizeLabel">31</label> (pixels)</p>
                            <input id="subsetSize" type="range" min="9" max="51" defaultValue="31" value="31" step="2">
                            <p>step size: <label id="stepSizeLabel">15</label> (pixels)</p>

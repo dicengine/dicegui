@@ -400,6 +400,10 @@ $("#subsetSize").on('input',function(){
     $("#subsetSizeLabel").text($(this).val());
 });
 
+$("#sssigThresh").on('input',function(){
+    $("#sssigLabel").text($(this).val());
+});
+
 $("#stepSize").on('input',function(){
     $("#stepSizeLabel").text($(this).val());
 });

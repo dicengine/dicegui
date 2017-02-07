@@ -48,6 +48,15 @@ document.getElementById("resolutionLi").onclick = function() {
     }); // end stat
 };
 
+document.getElementById("sssigPreview").onclick = function() {
+    if(refImagePathLeft=="undefined") return;
+    else{
+        startProgress();
+        writeInputFile(false,false,true);
+    }
+};
+
+
 document.getElementById("writeLi").onclick = function() {
     writeInputFile(true);
 };
@@ -76,7 +85,7 @@ document.getElementById("clearCross").onclick = function() {
         }
     });
 }
-function callDICeExec(resolution) {
+function callDICeExec(resolution,ss_locs) {
 
     var inputFile = workingDirectory;
     if(os.platform()=='win32'){
@@ -86,8 +95,12 @@ function callDICeExec(resolution) {
     }   
     var child_process = require('child_process');
     var readline      = require('readline');
-    var proc          = child_process.execFile(execPath, ['-i',inputFile,'-v','-t'],{cwd:workingDirectory});
-
+    var proc;
+    if(ss_locs)
+        proc = child_process.execFile(execPath, ['-i',inputFile,'-v','-t','--ss_locs'],{cwd:workingDirectory});
+    else
+        proc = child_process.execFile(execPath, ['-i',inputFile,'-v','-t'],{cwd:workingDirectory});
+        
     readline.createInterface({
         input     : proc.stdout,
         terminal  : false
@@ -133,6 +146,8 @@ function callDICeExec(resolution) {
                         win.webContents.openDevTools()
                     }       
                 }); // end write file
+            }else if(ss_locs){
+                drawDotsAndBoxesForSubsets();
             }else{
                 showParaviewMsg();
             }
@@ -345,7 +360,7 @@ function endProgress (success){
     }
 }
 
-function writeInputFile(only_write,resolution=false) {
+function writeInputFile(only_write,resolution=false,ss_locs=false) {
     fileName = workingDirectory;
     outputFolder = workingDirectory;
     paramsFile = workingDirectory;
@@ -367,7 +382,7 @@ function writeInputFile(only_write,resolution=false) {
     content += '<ParameterList>\n';
     content += '<Parameter name="output_folder" type="string" value="' + outputFolder + '" /> \n';
     content += '<Parameter name="correlation_parameters_file" type="string" value="' + paramsFile + '" />\n';
-    if(ROIDefsX.length>=3){
+    if(ROIDefsX[0].length>=3){
         content += '<Parameter name="subset_file" type="string" value="' + subsetFile + '" />\n';
     }
     content += '<Parameter name="subset_size" type="int" value="'+$("#subsetSize").val()+'" />\n';
@@ -377,7 +392,7 @@ function writeInputFile(only_write,resolution=false) {
     if($("#omitTextCheck")[0].checked){
         content += '<Parameter name="no_text_output_files" type="bool" value="true" />\n';
     }
-    if(showStereoPane&&!resolution){
+    if(showStereoPane&&!resolution&&!ss_locs){
         content += '<Parameter name="calibration_parameters_file" type="string" value="' + calPath + '" />\n';
     }
     var fileSelectMode = $("#fileSelectMode").val();
@@ -386,7 +401,7 @@ function writeInputFile(only_write,resolution=false) {
       content += '<Parameter name="reference_image" type="string" value="' + refImagePathLeft + '" />\n';
       content += '<ParameterList name="deformed_images">\n';
         // add the deformed images
-        if(resolution){
+        if(resolution||ss_locs){
             content += '<Parameter name="'+refImagePathLeft+'" type="bool" value="true" />\n';        
         }
         else{
@@ -395,7 +410,7 @@ function writeInputFile(only_write,resolution=false) {
             }
         }
       content += '</ParameterList>\n';
-      if(showStereoPane&&!resolution){
+      if(showStereoPane&&!resolution&&!ss_locs){
           content += '<Parameter name="stereo_reference_image" type="string" value="' + refImagePathRight + '" />\n';
           content += '<ParameterList name="stereo_deformed_images">\n';
           // add the deformed images
@@ -432,7 +447,7 @@ function writeInputFile(only_write,resolution=false) {
         content += '<Parameter name="cine_start_index" type="int" value="'+$("#cineStartIndex").val()+'" />\n';
         content += '<Parameter name="cine_skip_index" type="int" value="'+$("#cineSkipIndex").val()+'" />\n';
         content += '<Parameter name="cine_end_index" type="int" value="'+$("#cineEndIndex").val()+'" />\n';
-        if(showStereoPane&&!resolution){
+        if(showStereoPane&&!resolution&&!ss_locs){
             content += '<Parameter name="stereo_cine_file" type="string" value="'+cinePathRight+'" />\n';
         }
     }
@@ -442,11 +457,11 @@ function writeInputFile(only_write,resolution=false) {
             alert("Error: an error ocurred creating the file "+ err.message)
          }
         consoleMsg('input.xml file has been successfully saved');
-        writeParamsFile(only_write,resolution);
+        writeParamsFile(only_write,resolution,ss_locs);
     });
 }
 
-function writeParamsFile(only_write,resolution) {
+function writeParamsFile(only_write,resolution,ss_locs) {
     paramsFile = workingDirectory;
     if(os.platform()=='win32'){
         paramsFile += '\\params.xml';
@@ -467,6 +482,7 @@ function writeParamsFile(only_write,resolution) {
         content += '<Parameter name="estimate_resolution_error_max_amplitude" type="double" value="1.0" />\n';
         content += '<Parameter name="estimate_resolution_error_amplitude_step" type="double" value="1.0" />\n';
     }
+    content += '<Parameter name="sssig_threshold" type="double" value="'+$("#sssigThresh").val()+'" />\n';
     content += '<Parameter name="interpolation_method" type="string" value="KEYS_FOURTH" />\n';
     content += '<Parameter name="optimization_method" type="string" value="GRADIENT_BASED" />\n';
     content += '<Parameter name="initialization_method" type="string" value="USE_FIELD_VALUES" />\n';
@@ -521,12 +537,12 @@ function writeParamsFile(only_write,resolution) {
             alert("Error: an error ocurred creating the file "+ err.message)
          }
         consoleMsg('params.xml file has been successfully saved');
-        writeSubsetFile(only_write,resolution);
+        writeSubsetFile(only_write,resolution,ss_locs);
     });
 }
 
-function writeSubsetFile(only_write,resolution){
-  if(ROIDefsX.length>=3){
+function writeSubsetFile(only_write,resolution,ss_locs){
+  if(ROIDefsX[0].length>=3){
     subsetFile = workingDirectory;
     if(os.platform()=='win32'){
         subsetFile += '\\subset_defs.txt';
@@ -579,11 +595,11 @@ function writeSubsetFile(only_write,resolution){
          }
         consoleMsg('subset_defs.txt file has been successfully saved');
         if(!only_write)
-          callDICeExec(resolution);
+            callDICeExec(resolution,ss_locs);
     });
   }else{
       if(!only_write)
-          callDICeExec(resolution);
+          callDICeExec(resolution,ss_locs);
   }
 }
 

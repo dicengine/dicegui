@@ -1,1 +1,1 @@
-var workingDirectory = "/Users/dzturne"
+var workingDirectory = "/Users/dzturne/problems/dic_grad_mask"
