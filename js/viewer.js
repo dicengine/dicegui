@@ -480,7 +480,7 @@ $("#initCross").click(function () {
     })
     win.loadURL('file://' + __dirname + '/cross_init.html');
     $("#crossCorrInit").hide();
-    win.webContents.openDevTools()
+    //win.webContents.openDevTools()
 });
 
 function openPreviewCross() {
@@ -503,7 +503,7 @@ function openPreviewCross() {
         win = null
     })
     win.loadURL('file://' + __dirname + '/preview_cross.html');
-    win.webContents.openDevTools()
+    //win.webContents.openDevTools()
 }
 
 

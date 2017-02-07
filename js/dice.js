@@ -143,7 +143,7 @@ function callDICeExec(resolution,ss_locs) {
                             win = null
                         })
                         win.loadURL('file://' + __dirname + '/resolution.html');
-                        win.webContents.openDevTools()
+                        //win.webContents.openDevTools()
                     }       
                 }); // end write file
             }else if(ss_locs){
