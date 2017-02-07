@@ -279,7 +279,7 @@ function callCrossInitExec() {
     var readline      = require('readline');
     var proc;
 
-        // see if the .dice file exists:
+    // see if the .dice file exists:
     var fileName = workingDirectory;
     if(os.platform()=='win32'){
         fileName += '\\projection_points.dat';
@@ -599,13 +599,16 @@ function checkValidInput() {
         if(cinePathLeft=="undefined"){
             validInput = false;
             enableResolution = false;
+            enableCross = false;
         }
         if(showStereoPane){
             if(cinePathRight=="undefined"){
                 validInput = false;
+                enableCross = false;
             }
-            if(calPath=='undefined')
+            if(calPath=='undefined'){
                 validInput = false;
+            }
         }
     }
     else{
