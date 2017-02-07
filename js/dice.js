@@ -10,7 +10,7 @@ document.getElementById("runLi").onclick = function() {
     fs.stat(fileName, function(err, stat) {
         if(err == null) {
             if (confirm('existing results files found in the working directory, overwrite?')) {
-                // all the input file writes are chained via callbacks with the
+                // all the inpu file writes are chained via callbacks with the
                 // last callback executing DICe
                 startProgress();
                 writeInputFile(false);
@@ -25,8 +25,27 @@ document.getElementById("runLi").onclick = function() {
     });
 };
 document.getElementById("resolutionLi").onclick = function() {
-    startProgress();
-    writeInputFile(false,true);
+    // remove the synthetic folders if they exist
+    var fileName = workingDirectory;
+    if(os.platform()=='win32'){
+        fileName += '\\synthetic_results\\spatial_resolution.txt';
+    }else{
+        fileName += '/synthetic_results/spatial_resolution.txt';
+     }
+    fs.stat(fileName, function(err, stat) {
+        if(err == null) {
+                fs.unlink(fileName, (err) => {
+                    if (err) throw err;
+                    console.log('successfully deleted '+fileName);
+                    startProgress();
+                    writeInputFile(false,true);
+                }) // end unlink
+        } // end null
+        else{
+            startProgress();
+            writeInputFile(false,true);
+        }
+    }); // end stat
 };
 
 document.getElementById("writeLi").onclick = function() {
@@ -106,7 +125,7 @@ function callDICeExec(resolution) {
                     else{
                         consoleMsg('.dice-res-info.js file has been successfully saved');
                                     // bring up the resolution graph
-                        var win = new BrowserWindow({ width: 1200, height: 1000 });
+                        var win = new BrowserWindow({ width: 850, height: 1000 });
                         win.on('closed', () => {
                             win = null
                         })
@@ -441,9 +460,9 @@ function writeParamsFile(only_write,resolution) {
     if(resolution){
         // add estimate spatial resoltion options
         content += '<Parameter name="estimate_resolution_error" type="bool" value="true" />\n';
-        content += '<Parameter name="estimate_resolution_error_min_period" type="double" value="100.0" />\n';
-        content += '<Parameter name="estimate_resolution_error_max_period" type="double" value="100.0" />\n';
-        content += '<Parameter name="estimate_resolution_error_period_factor" type="double" value="0.5" />\n';
+        content += '<Parameter name="estimate_resolution_error_min_period" type="double" value="10.0" />\n';
+        content += '<Parameter name="estimate_resolution_error_max_period" type="double" value="200.0" />\n';
+        content += '<Parameter name="estimate_resolution_error_period_factor" type="double" value="0.73" />\n';
         content += '<Parameter name="estimate_resolution_error_min_amplitude" type="double" value="1.0" />\n';
         content += '<Parameter name="estimate_resolution_error_max_amplitude" type="double" value="1.0" />\n';
         content += '<Parameter name="estimate_resolution_error_amplitude_step" type="double" value="1.0" />\n';
