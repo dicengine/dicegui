@@ -1,8 +1,25 @@
-const electron = require('electron');
-const shell = electron.shell;
-const {dialog} = electron.remote;
-const homeDir = os.homedir();
-const fs = require('fs');
+//const electron = require('electron');
+//const shell = electron.shell;
+//const {dialog} = electron.remote;
+//const homeDir = os.homedir();
+//const fs = require('fs');
+
+function fullPath(path,file=''){
+    var filePath = workingDirectory;
+    if(os.platform()=='win32'){
+        filePath += '\\' + path;
+    }else{
+        filePath += '/' + path;
+    }
+    if(file!=''){
+        if(os.platform()=='win32'){
+            filePath += '\\' + file;
+        }else{
+            filePath += '/' + file;
+        }
+    }
+    return filePath;
+}
 
 // tasks for when window loads
 $(window).load(function(){

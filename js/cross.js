@@ -1,6 +1,6 @@
 //const remote2 = require('electron').remote;
-const fs = require('fs');
-const os = require('os');
+//const fs = require('fs');
+//const os = require('os');
 
 // global vars
 var crossLeftX = [0,0,0,0];
@@ -15,12 +15,6 @@ $("#crossCancelButton").click(function () {
 //    resetProjection();
     var win = remote.getCurrentWindow();
     win.close();
-});
-
-$("#crossAcceptButton").click(function () {
-    alert("I was ACCEPTED");
-    var window = remote.getCurrentWindow();
-    window.close();
 });
 
 // initialize panzooms
@@ -398,103 +392,29 @@ var lHeight = 0;
 var crossScale = 0;
 
 $(document).ready(function(){
-    var fileName = '.dice-bw-info.js';
-    fs.stat(fileName, function(err, stat) {
-        if(err == null) {
-            console.log('loading browser window info from ' + fileName);
-            $.getScript( fileName )
-                .done(function( s, Status ) {
-                    console.warn( Status );
-                    lWidth = leftWidth;
-                    lHeight = leftHeight;
-                    rWidth = rightWidth;
-                    rHeight = rightHeight;
-                    console.log('leftWidth ' + leftWidth + ' leftHeight ' + lHeight)
-                    getFileObject(leftFileName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomCrossLeft1","auto","auto",1,false,false,"","");
-                        loadImage(fileObject,"#panzoomCrossLeft2","auto","auto",1,false,false,"","");
-                        loadImage(fileObject,"#panzoomCrossLeft3","auto","auto",1,false,false,"","");
-                        loadImage(fileObject,"#panzoomCrossLeft4","auto","auto",1,false,false,"","");
-                    });
-                    getFileObject(rightFileName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomCrossRight1","auto","auto",1,false,false,"","");
-                        loadImage(fileObject,"#panzoomCrossRight2","auto","auto",1,false,false,"","");
-                        loadImage(fileObject,"#panzoomCrossRight3","auto","auto",1,false,false,"","");
-                        loadImage(fileObject,"#panzoomCrossRight4","auto","auto",1,false,false,"","");
-                    });
-
-                    // read the points file if it alread exists
-
-//                    var fileName = workingDirectory;
-//                    if(os.platform()=='win32'){
-//                        fileName += '\\projection_points.dat';
-//                    }else{
-//                        fileName += '/projection_points.dat';
-//                    }
-//                    fs.stat(fileName, function(err, stat) {
-//                        if(err == null) {
-//                           if (confirm('use existing warp seed file ' + fileName +'?')) {
-//                                fs.readFile(fileName, 'utf8', function (err,data) {
-//                                   if (err) {
-//                                       return console.log(err);
-//                                   }
-//                                    //console.log(data);
-//                                    var positions = data.toString().split(/\s+/g).map(Number);
-//                                    if(positions.length >= 16){
-//                                        for(i=0;i<16;i+=4)
-//                                        crossLeftX[i/4] = positions[i];
-//                                        crossLeftY[i/4] = positions[i+1];
-//                                        crossRightX[i/4] = positions[i+2];
-//                                        crossRightY[i/4] = positions[i+3];
-//                                    }
-//                                    //console.log(positions);
-//                                   var draw = SVG('panzoomCrossRight2').size(rWidth,rHeight);
-//                                  var circle = draw.circle(3).move(imgX-2,imgY-1).fill('#00ff00');
-//                                   var circle2 = draw.circle(20).move(imgX-10,imgY-10).fill('none').stroke('#00ff00').attr({'stroke-width':2});
-//                                   draw.style('z-index',2);
-//                                   draw.style('position','absolute');
-//                                   crossRightX[1] = imgX;
-//                                   crossRightY[1] = imgY;
-//                                   checkCrossCalcReady(); 
-//                                });
-//                            }else{
-//                            return false;
-//                            }
-//                        }
-//                   });
-
-                    // assume a parent div size of 1350 x 900 with pad left and bottom of 100px
- 
-                    // check if the height or width is the limiting dim:
-                    //rWidth = 1200;
-                    //rHeight = "auto";
-                    //crossScale = (1200.0/rightWidth);
-                    //lWidth = Math.round(crossScale*leftWidth);
-                    //lHeight = "auto";
-                    //getFileObject(rightFileName, function (fileObject) {
-                    //    console.log(fileObject);
-                    //    if(rightWidth/rightHeight < 1200.0/800.0){ // height limited
-                    //        rWidth = "auto"
-                    //        rHeight = 800;
-                    //        lWidth = "auto";
-                    //        crossScale = (800.0/rightHeight); 
-                    //        lHeight = Math.round(crossScale*leftHeight);
-                    //    }
-                    //    loadImage(fileObject,"#panzoomCrossBottom",rWidth,rHeight,0,false,false,"bottom-image","");
-                    //    getFileObject(leftFileName, function (fileObject) {
-                    //       loadImage(fileObject,"#panzoomCrossTop",lWidth,lHeight,1,false,false,"top-image sepia","topImage");
-                    //    });
-                    //});
-                })
-                .fail(function( jqxhr, settings, exception ) {
-                    console.warn( "Something went wrong"+exception );
-                });
-        } else if(err.code == 'ENOENT') {
-            // file does not exist
-            console.log('browser window info file does not exist');
-        } else {
-            console.log('error occurred trying to load browser window info');
-        }
+    rightFileName = localStorage.getItem("rightFileName");
+    leftFileName = localStorage.getItem("leftFileName");
+    rightWidth = localStorage.getItem("rightWidth");
+    rightHeight = localStorage.getItem("rightHeight");
+    leftWidth = localStorage.getItem("leftWidth");
+    leftHeight = localStorage.getItem("leftHeight");
+    workingDirectory = localStorage.getItem("workingDirectory");
+    lWidth = leftWidth;
+    lHeight = leftHeight;
+    rWidth = rightWidth;
+    rHeight = rightHeight;
+    console.log('leftWidth ' + leftWidth + ' leftHeight ' + lHeight)
+    getFileObject(leftFileName, function (fileObject) {
+        loadImage(fileObject,"#panzoomCrossLeft1","auto","auto",1,false,false,"","");
+        loadImage(fileObject,"#panzoomCrossLeft2","auto","auto",1,false,false,"","");
+        loadImage(fileObject,"#panzoomCrossLeft3","auto","auto",1,false,false,"","");
+        loadImage(fileObject,"#panzoomCrossLeft4","auto","auto",1,false,false,"","");
+    });
+    getFileObject(rightFileName, function (fileObject) {
+        loadImage(fileObject,"#panzoomCrossRight1","auto","auto",1,false,false,"","");
+        loadImage(fileObject,"#panzoomCrossRight2","auto","auto",1,false,false,"","");
+        loadImage(fileObject,"#panzoomCrossRight3","auto","auto",1,false,false,"","");
+        loadImage(fileObject,"#panzoomCrossRight4","auto","auto",1,false,false,"","");
     });
 })
 
@@ -561,12 +481,7 @@ $("#crossCalculateButton").click(function () {
     for (i=0; i<crossLeftX.length;i++){
         content += crossLeftX[i] + ' ' + crossLeftY[i] + ' ' + crossRightX[i] + ' ' + crossRightY[i] + '\n';
     }
-    var fileName = workingDirectory;
-    if(os.platform()=='win32'){
-        fileName += '\\projection_points.dat';
-    }else{
-        fileName += '/projection_points.dat';
-     }
+    var fileName = 'projection_points.dat';//fullPath('projection_points.dat');
     fs.writeFile(fileName, content, function (err) {
         if(err){
             alert("ERROR: an error ocurred creating the projection_points.dat file "+ err.message)

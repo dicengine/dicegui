@@ -423,12 +423,7 @@ function drawDotsAndBoxesForSubsets(){
     drawROIs();
     // get the current step value
     var stepSize = $("#stepSize").val();
-    var locsFile = workingDirectory;
-    if(os.platform()=='win32'){
-        locsFile += '\\subset_locs.txt';
-    }else{
-        locsFile += '/subset_locs.txt';
-    }
+    var locsFile = fullPath('subset_locs.txt');
     fs.stat(locsFile, function(err, stat) {
         if(err == null) {
             fs.readFile(locsFile, 'utf8', function (err,dataS) {

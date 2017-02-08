@@ -1,6 +1,6 @@
 //const remote2 = require('electron').remote;
-const fs = require('fs');
-const os = require('os');
+//const fs = require('fs');
+//const os = require('os');
 
 $("#previewCloseButton").click(function () {
     var win = remote.getCurrentWindow();
@@ -23,6 +23,11 @@ $("#panzoomCross").parent().on('mousewheel.focal', function( e ) {
         animate: false,
         focal: e
     });
+});
+
+var ipcRenderer = require('electron').ipcRenderer;
+ipcRenderer.on('workingDir',function(workingDir){
+    alert("I was recieved: " + workingDir);
 });
 
 ///////////////////////////////////////////////////
@@ -54,28 +59,13 @@ var getFileObject = function(filePathOrUrl, cb) {
 //////////////////////////////////////////////////////
 
 $(document).ready(function(){
-    var fileName = '.dice-preview-info.js';
-    fs.stat(fileName, function(err, stat) {
-        if(err == null) {
-            console.log('loading browser window info from ' + fileName);
-            $.getScript( fileName )
-                .done(function( s, Status ) {
-                    console.warn( Status );
-                    //previewWidth = leftWidth;
-                    //previewHeight = leftHeight;
-                    //console.log('preview width ' + rWidth + ' preview height ' + rHeight)
-                    getFileObject(previewFileName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomCross","auto","auto",1,false,false,"","");
-                    });
-                })
-                .fail(function( jqxhr, settings, exception ) {
-                    console.warn( "Something went wrong"+exception );
-                });
-        } else if(err.code == 'ENOENT') {
-            // file does not exist
-            console.log('browser window info file does not exist');
-        } else {
-            console.log('error occurred trying to load browser window info');
-        }
+    var previewFileName = localStorage.getItem("workingDirectory");
+    if(os.platform()=='win32'){
+        previewFileName += '\\right_projected_to_left_color.tif';
+    }else{
+        previewFileName += '/right_projected_to_left_color.tif';
+    }                      
+    getFileObject(previewFileName, function (fileObject) {
+        loadImage(fileObject,"#panzoomCross","auto","auto",1,false,false,"","");
     });
 })

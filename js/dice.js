@@ -1,12 +1,7 @@
 document.getElementById("runLi").onclick = function() {
    // check if any of the results files exist, if so warn user
-    // see if the .dice file exists:
-    var fileName = workingDirectory;
-    if(os.platform()=='win32'){
-        fileName += '\\results';
-    }else{
-        fileName += '/results';
-     }
+    // see if the results folder exists:
+    var fileName = fullPath('results');
     fs.stat(fileName, function(err, stat) {
         if(err == null) {
             if (confirm('existing results files found in the working directory, overwrite?')) {
@@ -26,12 +21,7 @@ document.getElementById("runLi").onclick = function() {
 };
 document.getElementById("resolutionLi").onclick = function() {
     // remove the synthetic folders if they exist
-    var fileName = workingDirectory;
-    if(os.platform()=='win32'){
-        fileName += '\\synthetic_results\\spatial_resolution.txt';
-    }else{
-        fileName += '/synthetic_results/spatial_resolution.txt';
-     }
+    var fileName = fullPath('synthetic_results','spatial_resolution.txt');
     fs.stat(fileName, function(err, stat) {
         if(err == null) {
                 fs.unlink(fileName, (err) => {
@@ -65,12 +55,7 @@ document.getElementById("previewCross").onclick = function() {
     callCrossInitExec();
 }
 document.getElementById("clearCross").onclick = function() {
-    var fileName = workingDirectory;
-    if(os.platform()=='win32'){
-        fileName += '\\projection_points.dat';
-    }else{
-        fileName += '/projection_points.dat';
-     }
+    var fileName = fullPath('projection_points.dat');
     fs.stat(fileName, function(err, stat) {
         if(err == null) {
             if (confirm('delete nonlinear warp seed file ' + fileName +'?')) {
@@ -87,12 +72,7 @@ document.getElementById("clearCross").onclick = function() {
 }
 function callDICeExec(resolution,ss_locs) {
 
-    var inputFile = workingDirectory;
-    if(os.platform()=='win32'){
-        inputFile += '\\input.xml';
-    }else{
-        inputFile += '/input.xml';
-    }   
+    var inputFile = fullPath('input.xml');
     var child_process = require('child_process');
     var readline      = require('readline');
     var proc;
@@ -129,23 +109,13 @@ function callDICeExec(resolution,ss_locs) {
         else{
             endProgress(true);
             if(resolution){
-                var content = 'var workingDirectory = "' + workingDirectory + '"\n';
-                fs.writeFile('.dice-res-info.js', content, function (err) {
-                    if(err){
-                        alert("ERROR: an error ocurred creating the .dice-res-info.js file "+ err.message)
-                        return;
-                    }
-                    else{
-                        consoleMsg('.dice-res-info.js file has been successfully saved');
-                                    // bring up the resolution graph
-                        var win = new BrowserWindow({ width: 850, height: 1000 });
-                        win.on('closed', () => {
-                            win = null
-                        })
-                        win.loadURL('file://' + __dirname + '/resolution.html');
-                        //win.webContents.openDevTools()
-                    }       
-                }); // end write file
+                localStorage.setItem("workingDirectory",workingDirectory);
+                var win = new BrowserWindow({ width: 850, height: 1000 });
+                win.on('closed', () => {
+                    win = null
+                })
+                win.loadURL('file://' + __dirname + '/resolution.html');
+                //win.webContents.openDevTools()
             }else if(ss_locs){
                 drawDotsAndBoxesForSubsets();
             }else{
@@ -158,12 +128,7 @@ function callDICeExec(resolution,ss_locs) {
 function updateCineDisplayImage(fileName,index,left){
     var child_process = require('child_process');
     var readline      = require('readline');
-    var tiffImageName = workingDirectory;
-    if(os.platform()=='win32'){
-        tiffImageName += '\\cine_to_tif';
-    }else{
-        tiffImageName += '/cine_to_tif';
-    }
+    var tiffImageName = fullPath('cine_to_tif');
     if(left)
         tiffImageName += '_left.tif';
     else
@@ -233,12 +198,7 @@ function callCineStatExec(file,left) {
             }
             else{
                 // read the output file:
-                var statFileName = workingDirectory;
-                if(os.platform()=='win32'){
-                    statFileName += '\\cine_stats.dat';
-                }else{
-                    statFileName += '/cine_stats.dat';
-                }
+                var statFileName = fullPath('cine_stats.dat');
                 fs.stat(statFileName, function(err, stat) {
                     if(err != null) {
                         alert("could not find .cine stats file: " + statFileName);
@@ -294,13 +254,8 @@ function callCrossInitExec() {
     var readline      = require('readline');
     var proc;
 
-    // see if the .dice file exists:
-    var fileName = workingDirectory;
-    if(os.platform()=='win32'){
-        fileName += '\\projection_points.dat';
-    }else{
-        fileName += '/projection_points.dat';
-     }
+    // see if the projection_points.dat file exists:
+    var fileName = fullPath('projection_points.dat');
     fs.stat(fileName, function(err, stat) {
         if(err == null) {
             console.log("found nonlinear seed file: projection_points.dat in the execution directory, enabling nonlinear warp");
@@ -361,21 +316,10 @@ function endProgress (success){
 }
 
 function writeInputFile(only_write,resolution=false,ss_locs=false) {
-    fileName = workingDirectory;
-    outputFolder = workingDirectory;
-    paramsFile = workingDirectory;
-    subsetFile = workingDirectory;
-    if(os.platform()=='win32'){
-        fileName += '\\input.xml';
-        outputFolder += '\\results\\';
-        paramsFile += '\\params.xml';
-        subsetFile += '\\subset_defs.txt';
-    }else{
-        fileName += '/input.xml';
-        outputFolder += '/results/';
-        paramsFile += '/params.xml';
-        subsetFile += '/subset_defs.txt';
-    }
+    fileName     = fullPath('input.xml');
+    outputFolder = fullPath('results');
+    paramsFile   = fullPath('params.xml');
+    subsetFile   = fullPath('subset_defs.txt');
     consoleMsg('writing input file ' + fileName);
     var content = '';
     content += '<!-- Auto generated input file from DICe GUI -->\n';
@@ -462,12 +406,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
 }
 
 function writeParamsFile(only_write,resolution,ss_locs) {
-    paramsFile = workingDirectory;
-    if(os.platform()=='win32'){
-        paramsFile += '\\params.xml';
-    }else{
-        paramsFile += '/params.xml';
-    }
+    var paramsFile = fullPath('params.xml');
     consoleMsg('writing parameters file ' + paramsFile);
     var content = '';
     content += '<!-- Auto generated parameters file from DICe GUI -->\n';
@@ -543,12 +482,7 @@ function writeParamsFile(only_write,resolution,ss_locs) {
 
 function writeSubsetFile(only_write,resolution,ss_locs){
   if(ROIDefsX[0].length>=3){
-    subsetFile = workingDirectory;
-    if(os.platform()=='win32'){
-        subsetFile += '\\subset_defs.txt';
-    }else{
-        subsetFile += '/subset_defs.txt';
-    }
+    var subsetFile = fullPath('subset_defs.txt');
     consoleMsg('writing subset file ' + subsetFile);
     var content = '';
     content += '# Auto generated subset file from DICe GUI\n';
@@ -674,6 +608,8 @@ function checkValidInput() {
         if(showStereoPane)
             validInput = false;
     }
+    if(!isSequence&&defImagePathsRight.length<1)
+        validInput = false;
     } // end else (not cine)
     // TODO see if the left and right ref have the same dimensions
     // TODO check the number of def images left and right

@@ -1,5 +1,5 @@
-const remote = require('electron').remote;
-const BrowserWindow = remote.BrowserWindow;
+//const remote = require('electron').remote;
+//const BrowserWindow = remote.BrowserWindow;
 ///////////////////////////////////////////////////                                                                                
 // these three transform a string into a file object                                                                               
 var getFileBlob = function (url, cb) {
@@ -458,20 +458,13 @@ function updateDimsLabels (){
 }
 
 $("#initCross").click(function () {
-    // write a file that has the image names, etc
-    var content = 'var rightFileName = "' + refImagePathRight + '"\n';
-    content += 'var leftFileName = "' + refImagePathLeft + '"\n';
-    content += 'var rightWidth = ' + refImageWidthRight + '\n';
-    content += 'var rightHeight = ' + refImageHeightRight + '\n';
-    content += 'var leftWidth = ' + refImageWidthLeft + '\n';
-    content += 'var leftHeight = ' + refImageHeightLeft + '\n';
-    content += 'var workingDirectory = "' + workingDirectory + '"\n';
-    fs.writeFile('.dice-bw-info.js', content, function (err) {
-        if(err){
-            alert("ERROR: an error ocurred creating the .dice-bw-info.js file "+ err.message)
-        }
-        consoleMsg('.dice-bw-info.js file has been successfully saved');
-    }); 
+    localStorage.setItem("rightFileName",refImagePathRight);
+    localStorage.setItem("leftFileName",refImagePathLeft);
+    localStorage.setItem("rightWidth",refImageWidthRight);
+    localStorage.setItem("rightHeight",refImageHeightRight);
+    localStorage.setItem("leftWidth",refImageWidthLeft);
+    localStorage.setItem("leftHeight",refImageHeightLeft);
+    localStorage.setItem("workingDirectory",workingDirectory);
     var win = new BrowserWindow({ width: 1200, height: 1000 });
     win.on('closed', () => {
         win = null
@@ -484,26 +477,13 @@ $("#initCross").click(function () {
 });
 
 function openPreviewCross() {
-    // write a file that has the image names, etc
-    var fileName = workingDirectory;
-    if(os.platform()=='win32'){
-        fileName += '\\right_projected_to_left_color.tif';
-    }else{
-        fileName += '/right_projected_to_left_color.tif';
-    }
-    var content = 'var previewFileName = "' + fileName + '"\n';
-    fs.writeFile('.dice-preview-info.js', content, function (err) {
-        if(err){
-            alert("ERROR: an error ocurred creating the .dice-preview-info.js file "+ err.message)
-        }
-        consoleMsg('.dice-preview-info.js file has been successfully saved');
-    }); 
+    localStorage.setItem("workingDirectory",workingDirectory);
     var win = new BrowserWindow({ width: 1200, height: 1000 });
     win.on('closed', () => {
         win = null
     })
     win.loadURL('file://' + __dirname + '/preview_cross.html');
-    //win.webContents.openDevTools()
+    win.webContents.openDevTools()
 }
 
 
