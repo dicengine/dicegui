@@ -4,19 +4,19 @@
 //const homeDir = os.homedir();
 //const fs = require('fs');
 
-function fullPath(path,file=''){
+function fullPath(folder,file){
     var filePath = workingDirectory;
-    if(os.platform()=='win32'){
-        filePath += '\\' + path;
-    }else{
-        filePath += '/' + path;
-    }
-    if(file!=''){
+    if(folder!=''){
         if(os.platform()=='win32'){
-            filePath += '\\' + file;
+            filePath += '\\' + folder;
         }else{
-            filePath += '/' + file;
+            filePath += '/' + folder;
         }
+    }
+    if(os.platform()=='win32'){
+        filePath += '\\' + file;
+    }else{
+        filePath += '/' + file;
     }
     return filePath;
 }

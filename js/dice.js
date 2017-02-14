@@ -1,7 +1,7 @@
 document.getElementById("runLi").onclick = function() {
    // check if any of the results files exist, if so warn user
     // see if the results folder exists:
-    var fileName = fullPath('results');
+    var fileName = fullPath('results','');
     fs.stat(fileName, function(err, stat) {
         if(err == null) {
             if (confirm('existing results files found in the working directory, overwrite?')) {
@@ -55,7 +55,7 @@ document.getElementById("previewCross").onclick = function() {
     callCrossInitExec();
 }
 document.getElementById("clearCross").onclick = function() {
-    var fileName = fullPath('projection_points.dat');
+    var fileName = fullPath('','projection_points.dat');
     fs.stat(fileName, function(err, stat) {
         if(err == null) {
             if (confirm('delete nonlinear warp seed file ' + fileName +'?')) {
@@ -72,7 +72,7 @@ document.getElementById("clearCross").onclick = function() {
 }
 function callDICeExec(resolution,ss_locs) {
 
-    var inputFile = fullPath('input.xml');
+    var inputFile = fullPath('','input.xml');
     var child_process = require('child_process');
     var readline      = require('readline');
     var proc;
@@ -128,7 +128,7 @@ function callDICeExec(resolution,ss_locs) {
 function updateCineDisplayImage(fileName,index,left){
     var child_process = require('child_process');
     var readline      = require('readline');
-    var tiffImageName = fullPath('cine_to_tif');
+    var tiffImageName = fullPath('','cine_to_tif');
     if(left)
         tiffImageName += '_left.tif';
     else
@@ -198,7 +198,7 @@ function callCineStatExec(file,left) {
             }
             else{
                 // read the output file:
-                var statFileName = fullPath('cine_stats.dat');
+                var statFileName = fullPath('','cine_stats.dat');
                 fs.stat(statFileName, function(err, stat) {
                     if(err != null) {
                         alert("could not find .cine stats file: " + statFileName);
@@ -255,7 +255,7 @@ function callCrossInitExec() {
     var proc;
 
     // see if the projection_points.dat file exists:
-    var fileName = fullPath('projection_points.dat');
+    var fileName = fullPath('','projection_points.dat');
     fs.stat(fileName, function(err, stat) {
         if(err == null) {
             console.log("found nonlinear seed file: projection_points.dat in the execution directory, enabling nonlinear warp");
@@ -316,10 +316,10 @@ function endProgress (success){
 }
 
 function writeInputFile(only_write,resolution=false,ss_locs=false) {
-    fileName     = fullPath('input.xml');
-    outputFolder = fullPath('results');
-    paramsFile   = fullPath('params.xml');
-    subsetFile   = fullPath('subset_defs.txt');
+    fileName     = fullPath('','input.xml');
+    outputFolder = fullPath('results','');
+    paramsFile   = fullPath('','params.xml');
+    subsetFile   = fullPath('','subset_defs.txt');
     consoleMsg('writing input file ' + fileName);
     var content = '';
     content += '<!-- Auto generated input file from DICe GUI -->\n';
@@ -406,7 +406,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
 }
 
 function writeParamsFile(only_write,resolution,ss_locs) {
-    var paramsFile = fullPath('params.xml');
+    var paramsFile = fullPath('','params.xml');
     consoleMsg('writing parameters file ' + paramsFile);
     var content = '';
     content += '<!-- Auto generated parameters file from DICe GUI -->\n';
@@ -482,7 +482,7 @@ function writeParamsFile(only_write,resolution,ss_locs) {
 
 function writeSubsetFile(only_write,resolution,ss_locs){
   if(ROIDefsX[0].length>=3){
-    var subsetFile = fullPath('subset_defs.txt');
+      var subsetFile = fullPath('','subset_defs.txt');
     consoleMsg('writing subset file ' + subsetFile);
     var content = '';
     content += '# Auto generated subset file from DICe GUI\n';

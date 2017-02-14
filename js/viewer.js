@@ -483,7 +483,7 @@ function openPreviewCross() {
         win = null
     })
     win.loadURL('file://' + __dirname + '/preview_cross.html');
-    win.webContents.openDevTools()
+    //win.webContents.openDevTools()
 }
 
 

@@ -481,7 +481,7 @@ $("#crossCalculateButton").click(function () {
     for (i=0; i<crossLeftX.length;i++){
         content += crossLeftX[i] + ' ' + crossLeftY[i] + ' ' + crossRightX[i] + ' ' + crossRightY[i] + '\n';
     }
-    var fileName = 'projection_points.dat';//fullPath('projection_points.dat');
+    var fileName = fullPath('','projection_points.dat');
     fs.writeFile(fileName, content, function (err) {
         if(err){
             alert("ERROR: an error ocurred creating the projection_points.dat file "+ err.message)
