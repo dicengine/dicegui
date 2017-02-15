@@ -11,12 +11,13 @@ if(os.platform()=='win32'){
     execCrossInitPath = 'C:\\Program Files (x86)\\Digital Image Correlation Engine\\DICe_CrossInit.exe';
     execCineStatPath = 'C:\\Program Files (x86)\\Digital Image Correlation Engine\\DICe_CineStat.exe';
     execCineToTiffPath = 'C:\\Program Files (x86)\\Digital Image Correlation Engine\\DICe_CineToTiff.exe';
+    execCalPath = 'C:\\Program Files (x86)\\Digital Image Correlation Engine\\DICe_Cal.exe';
 }else{
     execPath = '/Users/dzturne/code/KDICe/build_global_release/bin/dice';
     execCrossInitPath = '/Users/dzturne/code/KDICe/build_global_release/bin/DICe_CrossInit';
     execCineStatPath = '/Users/dzturne/code/KDICe/build_global_release/bin/DICe_CineStat';
     execCineToTiffPath = '/Users/dzturne/code/KDICe/build_global_release/bin/DICe_CineToTiff';
-    //var execPath =  "/Applications/DICe.app/Contents/MacOS/dice";
+    execCalPath = '/Users/dzturne/code/KDICe/build_global_release/bin/DICe_Cal';
 }
 
 // image sets

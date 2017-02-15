@@ -394,6 +394,20 @@ $("#leftDefInput").change(function (evt) {
     checkValidInput();
 });
 
+function createCalPreview(event){
+    // create an absolute position div and add it to the body
+    div = $("<div />")
+    div.html('<iframe id="calIframe" src="'+calPath+'" width="300", height="500"></iframe>');
+    div.attr({id: 'previewCalDiv', class: 'preview'});
+    var topCoord = event.pageY - 100;
+    div.css({position: 'absolute', top: topCoord, left: '194px', 'z-index': 3, padding: '5px', 'background-color':'white',width: 'auto', height: 'auto'});
+    $("#contentDiv").append(div);
+}
+
+function removeCalPreview(){
+    $("#previewCalDiv").remove();
+}
+
 function createPreview(index,isLeft,event){
     // create an absolute position div and add it to the body
     div = $("<div />")
@@ -417,6 +431,14 @@ function removePreview(){
     $("#previewDiv").remove();
     $("#previewDivTri").remove();
 }
+
+$("#calList").on("mouseover", ".calListLi" ,function(event){
+    createCalPreview(event);
+});
+
+$("#calList").on("mouseout", ".calListLi",function(){
+    removeCalPreview();
+});
 
 $("#defImageListLeft").on("mouseover", ".defListLi" ,function(event){
     var index = $(this).index();
@@ -473,6 +495,16 @@ $("#initCross").click(function () {
     })
     win.loadURL('file://' + __dirname + '/cross_init.html');
     $("#crossCorrInit").hide();
+    //win.webContents.openDevTools()
+});
+
+$("#performCal").click(function () {
+    localStorage.setItem("workingDirectory",workingDirectory);
+    var win = new BrowserWindow({ width: 600, height: 1000 });
+    win.on('closed', () => {
+        win = null
+    })
+    win.loadURL('file://' + __dirname + '/cal.html');
     //win.webContents.openDevTools()
 });
 

@@ -98,7 +98,7 @@
              <div>extension</div>
              <input type="text" id="imageExtension" name="imageExtension" value="" style="width:100%; margin-bottom:10px;">
              <div style="margin-bottom:4px;">reference image</div>
-             <div id="imageSequencePreview" style="word-wrap: break-word; margin-bottom:10px;"><span id="imageSequencePreviewSpan"></span></div>
+             <div id="imageSequencePreview" class="sample-filename" style="word-wrap: break-word; margin-bottom:10px;"><span id="imageSequencePreviewSpan"></span></div>
              <label id="loadRef" class="action-li">
                 <i class="material-icons md-dark md-br-pad">add_a_photo</i>
                 load reference     
@@ -157,6 +157,10 @@
             </div>
             <!-- end list -->
               <h1 style="margin-top:30px;">CALIBRATION</h1>
+              <label id="performCal" class="custom-file-input action-li">
+                <i class="material-icons md-dark md-br-pad">grain</i>
+                perform cal
+              </label>
               <label for="calInput" class="custom-file-input action-li">
                 <i class="material-icons md-dark md-br-pad">image_aspect_ratio</i>
                 load cal file   

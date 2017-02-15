@@ -143,7 +143,7 @@ function concatImageSequenceName(isStereo){
     if(tmpNum==0)
         defDig = 1;
     else{
-        while (tmpNum) {tmpNum /= 10; defDig++;}
+        while (tmpNum) {tmpNum = Math.floor(tmpNum / 10); defDig++;}
     }
     var digits = Number($("#numDigits").val());
     if(digits > 1)
@@ -163,7 +163,17 @@ function concatImageSequenceName(isStereo){
 
 function updateImageSequencePreview(){
     var fullImageName = concatImageSequenceName(false);
-    $('#imageSequencePreview span').text(fullImageName);    
+    $('#imageSequencePreview span').text(fullImageName);
+
+    // see if the file exists:
+    fs.stat(fullImageName, function(err, stat) {
+        if(err == null) {
+            $("#imageSequencePreview").css({color:"#009933"})
+        }
+        else{
+            $("#imageSequencePreview").css({color:"#ff0000"})
+        }
+    });    
 }
 
 function updateWorkingDirLabel(){
