@@ -617,11 +617,9 @@ function checkValidInput() {
     if(validInput){       
         $("#runLi").show();
         $("#writeLi").show();
-        $("#resolutionLi").show();        
     }else{
         $("#runLi").hide();
         $("#writeLi").hide();
-        $("#resolutionLi").hide();        
     }
     if(enableCross){
         $("#previewCross").show();
@@ -633,6 +631,6 @@ function checkValidInput() {
     if(enableResolution){
         $("#resolutionLi").show();                
     }else{
-        $("#resolutionLi").show();                
+        $("#resolutionLi").hide();                
     }
 }
