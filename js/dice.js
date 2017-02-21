@@ -609,7 +609,8 @@ function checkValidInput() {
             validInput = false;
     }
     if(!isSequence&&defImagePathsRight.length<1)
-        validInput = false;
+        if(showStereoPane)
+          validInput = false;
     } // end else (not cine)
     // TODO see if the left and right ref have the same dimensions
     // TODO check the number of def images left and right
