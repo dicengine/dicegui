@@ -371,6 +371,14 @@ $("#calInput").change(function (evt) {
     }
 });
 
+$("#calInfo").click(function(){
+    var win = new BrowserWindow({ width: 500, height: 800 });
+    win.on('closed', () => {
+        win = null
+    })
+    win.loadURL('file://' + __dirname + '/cal_help.html');
+});
+
 $("#leftRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
