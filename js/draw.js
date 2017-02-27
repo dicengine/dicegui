@@ -193,6 +193,7 @@ $("#resetROIs").click(function(){
         clearExcluded();
         // clear the drawn ROIs
         clearDrawnROIs();
+        drawROIs();
         //drawDefaultROI();
     } else {
         // Do nothing!
@@ -277,6 +278,9 @@ function drawROIs(){
         var mask = draw.mask().add(backMask).add(excluded);
         polygon.maskWith(mask);
     }
+    // draw a default subset on the image in the center
+    var ss_size = $("#subsetSize").val();
+    polygon = draw.rect(ss_size,ss_size).move(refImageWidthLeft/2,refImageHeightLeft/2).attr({ fill: 'none', stroke: '#ffff00', 'stroke-opacity': '0.8','stroke-width': '2', 'stroke-linecap':'round' });    
     draw.style('z-index',2);
     draw.style('position','absolute');    
 }
@@ -322,6 +326,7 @@ function removeLastExcluded(){
     }
 }
 $("#removeLastROI").click(function(){
+    if(ROIDefsX[0].length<3) return;
     if (confirm('remove last drawn ROI?')) {
         removeLastROI();
         if(currentROIIndex > 0){
@@ -331,6 +336,7 @@ $("#removeLastROI").click(function(){
     }
 });
 $("#removeLastExcluded").click(function(){
+    if(excludedDefsX[0].length<3) return;
     if (confirm('remove last excluded region?')) {
         removeLastExcluded();
         if(currentExcludedIndex > 0){

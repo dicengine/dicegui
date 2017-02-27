@@ -152,7 +152,7 @@ function updateCineDisplayImage(fileName,index,left){
             else{
 		if(left){
                     getFileObject(tiffImageName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","");
+                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,true,"","");
                     });
                 }else{
                     getFileObject(tiffImageName, function (fileObject) {
@@ -286,7 +286,7 @@ function callCrossInitExec() {
              }
             else{
                 endProgress(true);
-                // load preview window ...
+                // loadpreview window ...
                 openPreviewCross();
              }
         });    

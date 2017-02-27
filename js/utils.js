@@ -425,6 +425,7 @@ $("#fileSelectMode").on('change',function (){
 
 $("#subsetSize").on('input',function(){
     $("#subsetSizeLabel").text($(this).val());
+    drawROIs();
 });
 
 $("#sssigThresh").on('input',function(){

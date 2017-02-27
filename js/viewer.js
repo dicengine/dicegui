@@ -225,7 +225,7 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCl
                         clearExcluded();
                         // clear the drawn ROIs
                         clearDrawnROIs();
-                        //drawDefaultROI();
+                        drawROIs();
                     }
                     return true;
                 }
@@ -247,7 +247,7 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCl
                 clearExcluded();
                 // clear the drawn ROIs
                 clearDrawnROIs();
-                //drawDefaultROI();
+                drawROIs();
             }
         }
         fr.readAsArrayBuffer(file);
@@ -279,7 +279,7 @@ $("#loadRef").click(function (){
                       return;
                     }
                     getFileObject(fullImageName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","");
+                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,true,"","");
                     });
                     getFileObject(fullStereoImageName, function (fileObject) {
                     loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","");
@@ -289,7 +289,7 @@ $("#loadRef").click(function (){
             }
             else{
                  getFileObject(fullImageName, function (fileObject) {
-                     loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","");
+                     loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,true,"","");
                  });
                  flagSequenceImages();
             }
