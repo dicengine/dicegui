@@ -305,7 +305,7 @@
                        </select>
                        <div id="subsetParams" class="param-options">
                            <p>sssig threshold: <label id="sssigLabel">150</label></p>
-                           <input id="sssigThresh" type="range" min="0" max="500.0" defaultValue="150" value="150" step="25">
+                           <input id="sssigThresh" type="range" min="0" max="500.0" defaultValue="150" value="150" step="2">
                            <p>subset size: <label id="subsetSizeLabel">31</label> (pixels)</p>
                            <input id="subsetSize" type="range" min="9" max="51" defaultValue="31" value="31" step="2">
                            <p>step size: <label id="stepSizeLabel">15</label> (pixels)</p>
@@ -337,10 +337,15 @@
                    </div> <!-- end toggle div banner -->
                    <div class="toggle-div-body">
                      <div class="reference-text">
+                     <h3>Running an Analysis</h3>
                      <p>Select at least one reference and deformed image. Then the "run" and "write input" buttons should appear. (For stereo analysis, a reference image and deformed image must be selected for the right camera as well as a calibration file for the buttons to appear.) </p>
                      <p>Press "run 2d" or "run stereo" if you want to run the DICe executable in serial on this machine. Choose "write input" if you want to write the input files to be run via the command line later (do this to run on an HPC system in parallel). </p>
-                     <p>Visualize the ExodusII (*.e) output file in the results folder using ParaView. A comma separated text file with results values is also created in the results folder.</p>
+                     <p>To preview the areas of the image that will be analyzed click the <i class="material-icons md-dark">check_circle</i> button. Automatic detection of speckled potions of the image is basded on the SSSIG contrast criteria. Change the SSSIG threshold in the OPTIONS pane to increase or decrease the necessary contrast. The user can also use the ROI tools to mask off a partiular portion of the image.</p>
+                     <h3>Visualizing Results</h3>
+                     <p>Visualize the ExodusII (*.e) output file in the results folder using ParaView (an open source visulaization software with lots of plotting utilities). A comma separated text file with results values is also created in the results folder.</p>
                      <p>Note that the default working directory is your home directory. Results files and folders will be gnerated in the working directory</p>
+                     <h3>View Control</h3>
+                     <p>Use the left mouse button to draw ROI vertices, the middle mouse button to drag the image, wheel to zoom, and the right mouse button to end drawing an ROI polygon. View control buttons are also provided at the top of each view.</p>
                      </div>
                      <p>Having trouble? Submit an issue at: <a href="http://github.com/dicengine/dice/issues" alt="">issues</a></p>
                      <p><a href="http://dicengine.github.io/dice/" alt="">class and namespace documentation</a></p>

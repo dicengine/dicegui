@@ -40,7 +40,7 @@ function drawChart () {
             //console.log(speckleData);
             var i = 0;
             while(i < speckleData.length){
-                data.addRow([speckleData[i+0],speckleData[i+1]]);
+                data.addRow([speckleData[i+0],speckleData[i+1]*100.0]);
                 i += 3;
             }
             var options = {
@@ -48,7 +48,7 @@ function drawChart () {
                 height: 500,
                 title: 'SPECKLE SIZE CHARACTERIZATION',
                 hAxis: {title: 'Speckle size (px)', ticks: [0,2,4,6,8,10,12,14,16,18,20,22]},
-                vAxis: {title: 'Image coverage (%)',ticks:[0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]},
+                vAxis: {title: 'Image coverage (%)',ticks:[0.0,10,20,30,40,50,60,70,80,90,100]},
                 legend: {position: 'none'}
              };
              var chart = new google.visualization.LineChart(document.getElementById('speckleChart'));

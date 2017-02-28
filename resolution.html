@@ -19,13 +19,26 @@
   <body style="background-color:white;">
     <div style="background-color:white;">
       <div style="padding:20px;">
+        <p>folder: synthetic_results, file: spatial_resolution.txt</p>
+      </div>
+      <div id="resChart"></div>
+      <div style="padding:20px;">
         <p>folder: synthetic_results, file: speckle_stats.txt</p>
       </div>
       <div id="speckleChart"></div>
       <div style="padding:20px;">
-        <p>folder: synthetic_results, file: spatial_resolution.txt</p>
+      <h2>Notes on Spatial Resolution</h2>
+      <p>The spatial resolution results are based on sythetically deforming the reference image with a known displacement profile in the shape of a two-dimensional sine wave and comparing the computed diplacement and strain from DIC with the known solution. The comparison is made by taking the difference of the computed and known solutions for each peak of the sin wave. The results are directly dependent on the following factors:</p>
+      <ul>
+        <li>speckle pattern</li>
+        <li>subset size</li>
+        <li>amount of image noise</li>
+        <li>step size</li>
+        <li>DIC algorithm (shape function, regularization, etc.)</li>
+      </ul>
+      <p>The intention is to give the user some idea of the quality of the DIC results in terms of error and variation. In some cases, the error drops considerably for a particular period of imposed motion. This is due to error cancelation that can happen based on how the error is calculated. These anomalous points should be disregarded.</p>
+      <p>The data for these plots is provided in the files listed above in case the user would like to plot them using another plotting tool.</p>
       </div>
-      <div id="resChart"></div>
     </div> <!-- end content-->
   </body>
 </html>

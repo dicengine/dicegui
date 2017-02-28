@@ -20,18 +20,27 @@ document.getElementById("runLi").onclick = function() {
     });
 };
 document.getElementById("resolutionLi").onclick = function() {
-    // remove the synthetic folders if they exist
+    // check if there are existing results
     var fileName = fullPath('synthetic_results','spatial_resolution.txt');
     fs.stat(fileName, function(err, stat) {
-        if(err == null) {
+        if(err == null) {            
+            if (confirm('existing results found, click "OK" to plot these results or "Cancel" to recompute')) {
+                localStorage.setItem("workingDirectory",workingDirectory);
+                var win = new BrowserWindow({ width: 850, height: 1000 });
+                win.on('closed', () => {
+                    win = null
+                })
+                win.loadURL('file://' + __dirname + '/resolution.html');                
+            }else{
                 fs.unlink(fileName, (err) => {
                     if (err) throw err;
                     console.log('successfully deleted '+fileName);
                     startProgress();
                     writeInputFile(false,true);
-                }) // end unlink
+                }) // end unlink                
+            } // end else confirm
         } // end null
-        else{
+        else{ // files don't exist to run the analysis
             startProgress();
             writeInputFile(false,true);
         }
