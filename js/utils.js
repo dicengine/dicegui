@@ -68,6 +68,8 @@ $(window).load(function(){
                     defaultConsole();
                 }
                 paraviewMsg = paraviewMsgState;
+                workingDirectory = WD;
+                updateWorkingDirLabel();
             });
         } else if(err.code == 'ENOENT') {
             // file does not exist
@@ -76,15 +78,25 @@ $(window).load(function(){
             $('#runLi span').text('run 2d');
             hideStereoViewer();
             unstackViews();
+            workingDirectory = homeDir;
+            if(os.platform()=='win32'){
+                workingDirectory += '\\dice_working_dir';
+            }else{
+                workingDirectory += '/dice_working_dir';
+            }
+            fs.mkdir(workingDirectory,function(e){
+                if(!e || (e && e.code === 'EEXIST')){
+                } else {
+                    console.log(e);
+                }
+            });
+           updateWorkingDirLabel();
         } else {
             consoleMsg('error occurred trying to load previous state');
         }
     });
     // resize the full div elements
     resizeAll();
-    // set the default working dir to the home dir
-    workingDirectory = homeDir;
-    updateWorkingDirLabel();
     // hide the run button until the input is valid
     $("#runLi").hide();
     $("#writeLi").hide();
@@ -462,6 +474,7 @@ function saveStateFile() {
     }
     consoleMsg('saving GUI state and preferences to ' + fileName);
     var content = '';
+    content += 'var WD = "' + workingDirectory + '";\n';
     if(showPrefPane){
         content += 'var showPrefPaneState = true;\n';
     }else{
