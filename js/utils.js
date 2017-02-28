@@ -474,7 +474,11 @@ function saveStateFile() {
     }
     consoleMsg('saving GUI state and preferences to ' + fileName);
     var content = '';
-    content += 'var WD = "' + workingDirectory + '";\n';
+    var WD = workingDirectory;
+    if(os.platform()=='win32'){
+        WD = WD.replace(/\\/g,"\\\\");
+    }    
+    content += 'var WD = "' + WD + '";\n';
     if(showPrefPane){
         content += 'var showPrefPaneState = true;\n';
     }else{

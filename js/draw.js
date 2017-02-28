@@ -280,7 +280,7 @@ function drawROIs(){
     }
     // draw a default subset on the image in the center
     var ss_size = $("#subsetSize").val();
-    polygon = draw.rect(ss_size,ss_size).move(refImageWidthLeft/2,refImageHeightLeft/2).attr({ fill: 'none', stroke: '#ffff00', 'stroke-opacity': '0.8','stroke-width': '2', 'stroke-linecap':'round' });    
+    polygon = draw.rect(ss_size,ss_size).move(refImageWidthLeft/2 - ss_size/2,refImageHeightLeft/2 - ss_size/2).attr({ fill: 'none', stroke: '#ffff00', 'stroke-opacity': '0.8','stroke-width': '2', 'stroke-linecap':'round' });    
     draw.style('z-index',2);
     draw.style('position','absolute');    
 }
