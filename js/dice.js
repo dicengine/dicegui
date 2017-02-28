@@ -424,7 +424,6 @@ function writeParamsFile(only_write,resolution,ss_locs) {
         // add estimate spatial resoltion options
         content += '<Parameter name="estimate_resolution_error" type="bool" value="true" />\n';
         content += '<Parameter name="estimate_resolution_error_min_period" type="double" value="10.0" />\n';
-        content += '<Parameter name="estimate_resolution_error_max_period" type="double" value="200.0" />\n';
         content += '<Parameter name="estimate_resolution_error_period_factor" type="double" value="0.73" />\n';
         content += '<Parameter name="estimate_resolution_error_min_amplitude" type="double" value="1.0" />\n';
         content += '<Parameter name="estimate_resolution_error_max_amplitude" type="double" value="1.0" />\n';
