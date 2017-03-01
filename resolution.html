@@ -28,7 +28,13 @@
       <div id="speckleChart"></div>
       <div style="padding:20px;">
       <h2>Notes on Spatial Resolution</h2>
-      <p>The spatial resolution results are based on sythetically deforming the reference image with a known displacement profile in the shape of a two-dimensional sine wave and comparing the computed diplacement and strain from DIC with the known solution. The comparison is made by taking the difference of the computed and known solutions for each peak of the sin wave. The results are directly dependent on the following factors:</p>
+      <p>The spatial resolution results are based on sythetically deforming the reference image with a known displacement profile in the shape of a two-dimensional sine wave and comparing the computed diplacement and strain from DIC with the known solution. The comparison is made by taking the difference of the computed and known solutions for each peak of the sin wave.</p>
+      <p>The imposed displacement is of the form:</p>
+      <xmp>
+u = 0.5 + 0.5*sin(bx)*cos(by)
+v = 0.5 + 0.5*cos(bx)*sin(by)
+      </xmp>
+      <p>where b is 2 pi divided by the period of the motion. This provides an imposed motion with an amplitude of one pixel. The amplitude is held constant for varying period. The results are dependent on the following factors:</p>
       <ul>
         <li>speckle pattern</li>
         <li>subset size</li>
