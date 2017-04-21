@@ -407,6 +407,12 @@ function createCalPreview(event){
     div = $("<div />")
     div.html('<iframe id="calIframe" src="'+calPath+'" width="300", height="500"></iframe>');
     div.attr({id: 'previewCalDiv', class: 'preview'});
+    var closeButton = $('<button/>',
+    {
+        text: 'close',
+        click: function () { removeCalPreview(); }
+    });
+    div.append(closeButton);
     var topCoord = event.pageY - 100;
     div.css({position: 'absolute', top: topCoord, left: '194px', 'z-index': 3, padding: '5px', 'background-color':'white',width: 'auto', height: 'auto'});
     $("#contentDiv").append(div);
@@ -440,13 +446,13 @@ function removePreview(){
     $("#previewDivTri").remove();
 }
 
-$("#calList").on("mouseover", ".calListLi" ,function(event){
+$("#calList").on("click", ".calListLi" ,function(event){
     createCalPreview(event);
 });
 
-$("#calList").on("mouseout", ".calListLi",function(){
-    removeCalPreview();
-});
+//$("#calList").on("mouseout", ".calListLi",function(){
+//    removeCalPreview();
+//});
 
 $("#defImageListLeft").on("mouseover", ".defListLi" ,function(event){
     var index = $(this).index();
@@ -508,8 +514,16 @@ $("#initCross").click(function () {
 
 $("#performCal").click(function () {
     localStorage.setItem("workingDirectory",workingDirectory);
+    localStorage.setItem("calFileName","");
     var win = new BrowserWindow({ width: 600, height: 1000 });
     win.on('closed', () => {
+        calFileName = localStorage["calFileName"];
+        if(calFileName != ""){
+            $("#calList").empty();
+            calPath = calFileName;
+            $("#calList").append("<li class='calListLi'>cal.txt</li>");
+            checkValidInput();
+        }
         win = null
     })
     win.loadURL('file://' + __dirname + '/cal.html');

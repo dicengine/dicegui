@@ -1,6 +1,8 @@
 $(window).load(function(){
-  workingDirectory = localStorage.getItem("workingDirectory");
+    workingDirectory = localStorage.getItem("workingDirectory");
+    localStorage.setItem("calFileName","");
     $("#calibrateButton").prop("disabled",true);
+    $("#acceptButton").prop("disabled",true);
     $("#cancelButton").hide();
 });
                
@@ -100,12 +102,25 @@ function updateImageSequencePreview(){
         else{
             $("#imageSequencePreview").css({color:"#ff0000"})            
             $("#calibrateButton").prop("disabled",true);
+            $("#acceptButton").prop("disabled",true);
         }
     });
 }
 
 $("#calibrateButton").on('click',function(){
     writeInputFile(); 
+});
+
+$("#acceptButton").on('click',function(){
+    var outName = workingDirectory;
+    if(os.platform()=='win32'){
+        outName += '\\';
+    }else{
+        outName += '/';
+    }
+    outName += 'cal.txt';
+    localStorage.setItem("calFileName",outName);
+    window.close();
 });
 
 function writeInputFile() {
@@ -194,6 +209,7 @@ function callCalExec() {
     });
     proc.on('close', (code) => {
         console.log(`cal process exited with code ${code}`);
+        $("#acceptButton").prop("disabled",false);
         if(code!=0){
             alert('DICe cal execution failed (see cal.log for details)');
             endProgress(false);
