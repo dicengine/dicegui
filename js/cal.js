@@ -1,6 +1,7 @@
 $(window).load(function(){
   workingDirectory = localStorage.getItem("workingDirectory");
-  $("#calibrateButton").prop("disabled",true);
+    $("#calibrateButton").prop("disabled",true);
+    $("#cancelButton").hide();
 });
                
 function startProgress (){
@@ -22,10 +23,20 @@ $("#calMode").on('change',function (){
     if($(this).val()=="checkerboard"){
         $("#boardImage").attr("src","./images/CheckerboardExample.png");
         $("#patternNote").hide();
+        $("#binaryThresh").val(30);
+        $("#binaryLabel").text($("#binaryThresh").val());
     }
     else if($(this).val()=="vic3d"){
         $("#boardImage").attr("src","./images/MarkerCalExample.png");
         $("#patternNote").show();
+        $("#binaryThresh").val(30);
+        $("#binaryLabel").text($("#binaryThresh").val());
+    }
+    else if($(this).val()=="vic3dDark"){
+        $("#boardImage").attr("src","./images/DarkMarkerCalExample.png");
+        $("#patternNote").show();
+        $("#binaryThresh").val(100);
+        $("#binaryLabel").text($("#binaryThresh").val());
     }
 });
 
@@ -41,6 +52,9 @@ $("#imagePrefix,#startIndex,#numDigits,#imageExtension,#stereoLeftSuffix,#stereo
     updateImageSequencePreview();
 });
 
+$("#binaryThresh").on('input',function(){
+    $("#binaryLabel").text($(this).val());
+});
 
 function concatImageSequenceName(){
     var fullImageName = "";
@@ -81,6 +95,7 @@ function updateImageSequencePreview(){
         if(err == null) {
             $("#imageSequencePreview").css({color:"#009933"})
             $("#calibrateButton").prop("disabled",false);
+            $("#cancelButton").show();
         }
         else{
             $("#imageSequencePreview").css({color:"#ff0000"})            
@@ -127,7 +142,11 @@ function writeInputFile() {
         content += '<Parameter name="cal_mode" type="int" value="0"/>\n';
     else if($("#calMode").val()=="vic3d")
         content += '<Parameter name="cal_mode" type="int" value="1"/>\n';
+    else if($("#calMode").val()=="vic3dDark"){
+        content += '<Parameter name="cal_mode" type="int" value="2"/>\n';
+    }
     content += '<Parameter name="cal_target_spacing_size" type="double" value="'+$("#targetSpacingSize").val()+'"/>\n';
+    content += '<Parameter name="cal_binary_threshold" type="int" value="'+$("#binaryThresh").val()+'"/>\n';
     content += '</ParameterList>\n';
     fs.writeFile(fileName, content, function (err) {
         if(err){
@@ -170,6 +189,9 @@ function callCalExec() {
         //console.log(line);                                                                                          
         console.log(line);    
     });
+    $("#cancelButton").on('click',function(){
+        proc.kill(); 
+    });
     proc.on('close', (code) => {
         console.log(`cal process exited with code ${code}`);
         if(code!=0){
@@ -193,12 +215,10 @@ function callCalExec() {
                             if(resDataLines[i].includes("RMS error=")){
                                 var outputString = resDataLines[i].substring(resDataLines[i].indexOf("=")+1,resDataLines[i].length);
                                 $('#rmsPreview span').text(outputString);
-                                
                             }
                             else if(resDataLines[i].includes("epipolar")){
                                 var outputString = resDataLines[i].substring(resDataLines[i].indexOf("=")+1,resDataLines[i].length);
-                                $('#epipolarPreview span').text(outputString);
-                                
+                                $('#epipolarPreview span').text(outputString);                                
                             }
                         }
                     }); // end read file

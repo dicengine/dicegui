@@ -20,7 +20,8 @@
   <body>
     <div style="padding: 20px;">
             <select id="calMode" style="width:95%; margin-bottom:10px;">
-               <option value="vic3d">symmetric dot grid with special marker dots</option>
+               <option value="vic3d">symmetric dot grid with special corner dots</option>
+               <option value="vic3dDark">symmetric dot grid with special corner dots (white dots on black)</option>
                <option value="checkerboard">checkerboard</option>
             </select>
              <img id="boardImage" src="./images/MarkerCalExample.png" alt="example checkerboard cal target" height="250" width="auto">
@@ -48,7 +49,7 @@
              <div id="imageSequencePreview" class="sample-filename" style="word-wrap: break-word; margin-bottom:10px;"><span id="imageSequencePreviewSpan
                                                                                                          "></span></div>
             <div id="patternNote">note: pattern width and height should only include markers inside the marker dots box if special marker dots are used, the marker dots box includes the row and columns of the special marker dots</div>
-            <p>pattern width</p> 
+            <p style="margin-top:10px;">pattern width</p> 
             <select id="calWidth" style="width:30%; margin-bottom:10px;">
                <option value="3">3</option>
                <option value="4">4</option>
@@ -63,6 +64,16 @@
                <option value="13">13</option>
                <option value="14">14</option>
                <option value="15">15</option>
+               <option value="16">16</option>
+               <option value="17">17</option>
+               <option value="18">18</option>
+               <option value="19">19</option>
+               <option value="20">20</option>
+               <option value="21">21</option>
+               <option value="22">22</option>
+               <option value="23">23</option>
+               <option value="24">24</option>
+               <option value="25">25</option>
             </select>
             <p>pattern height</p>
             <select id="calHeight" style="width:30%; margin-bottom:10px;">
@@ -79,11 +90,24 @@
                <option value="13">13</option>
                <option value="14">14</option>
                <option value="15">15</option>
+               <option value="16">16</option>
+               <option value="17">17</option>
+               <option value="18">18</option>
+               <option value="19">19</option>
+               <option value="20">20</option>
+               <option value="21">21</option>
+               <option value="22">22</option>
+               <option value="23">23</option>
+               <option value="24">24</option>
+               <option value="25">25</option>
             </select>
              <div>pattern spacing size</div>
              <input type="text" id="targetSpacingSize" name="targetSpacingSize" value="1.0" style="width:100%;">
+             <div style="margin-top:20px;">binary conversion threshold: <label id="binaryLabel">30</label></div>
+             <input id="binaryThresh" type="range" min="0" max="254.0" defaultValue="30" value="30" step="2">
              <div id="runLoaderCal" class="pre-loader" style="margin-top:30px"></div>
              <button class="calib-button float-left" id="calibrateButton" typ="button">calibrate</button>
+             <button class="calib-button float-left" id="cancelButton" typ="button">cancel</button>
              <div id="calOutputPreview" style="font-weight: bold; word-wrap: break-word; margin-top:20px;">output file: <span id="calOutputPreviewSpan"></span></div>
              <div id="rmsPreview" style="font-weight: bold; word-wrap: break-word; margin-top:10px;">rms error: <span id="rmsPreviewSpan"></span></div>
              <div id="epipolarPreview" style="font-weight: bold; word-wrap: break-word; margin-top:10px;">avg epipolar error: <span id="epipolarPreviewSpan"></span></div>
