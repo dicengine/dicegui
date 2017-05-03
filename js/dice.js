@@ -477,10 +477,19 @@ function writeParamsFile(only_write,resolution,ss_locs) {
     content += '<Parameter name="COORDINATE_Y" type="bool" value="true" />\n';
     content += '<Parameter name="DISPLACEMENT_X" type="bool" value="true" />\n';
     content += '<Parameter name="DISPLACEMENT_Y" type="bool" value="true" />\n';
+    if(showStereoPane){
+        content += '<Parameter name="MODEL_COORDINATE_X" type="bool" value="true" />\n';
+        content += '<Parameter name="MODEL_COORDINATE_Y" type="bool" value="true" />\n';
+        content += '<Parameter name="MODEL_COORDINATE_Z" type="bool" value="true" />\n';
+        content += '<Parameter name="MODEL_DISPLACEMENT_X" type="bool" value="true" />\n';
+        content += '<Parameter name="MODEL_DISPLACEMENT_Y" type="bool" value="true" />\n';
+        content += '<Parameter name="MODEL_DISPLACEMENT_Z" type="bool" value="true" />\n';
+    }
     content += '<Parameter name="SIGMA" type="bool" value="true" />\n';
     content += '<Parameter name="GAMMA" type="bool" value="true" />\n';
     content += '<Parameter name="BETA" type="bool" value="true" />\n';
     content += '<Parameter name="STATUS_FLAG" type="bool" value="true" />\n';
+    content += '<Parameter name="UNCERTAINTY" type="bool" value="true" />\n';
     if($("#strainCheck")[0].checked){
         content += '<Parameter name="VSG_STRAIN_XX" type="bool" value="true" />\n';
         content += '<Parameter name="VSG_STRAIN_YY" type="bool" value="true" />\n';
