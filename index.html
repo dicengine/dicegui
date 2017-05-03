@@ -303,6 +303,12 @@
                        <select>
                            <option value="subset">subset</option>
                        </select>
+                       <p>Initialization method:</p>
+                       <select id="initSelect">
+                           <option value="featureMatching">feature matching</option>
+                           <option value="fieldValues">field values</option>
+                           <option value="neighborValues">neighbor values</option>
+                       </select>
                        <div id="subsetParams" class="param-options">
                            <p>sssig threshold: <label id="sssigLabel">150</label></p>
                            <input id="sssigThresh" type="range" min="0" max="500.0" defaultValue="150" value="150" step="2">

@@ -432,7 +432,16 @@ function writeParamsFile(only_write,resolution,ss_locs) {
     content += '<Parameter name="sssig_threshold" type="double" value="'+$("#sssigThresh").val()+'" />\n';
     content += '<Parameter name="interpolation_method" type="string" value="KEYS_FOURTH" />\n';
     content += '<Parameter name="optimization_method" type="string" value="GRADIENT_BASED" />\n';
-    content += '<Parameter name="initialization_method" type="string" value="USE_FIELD_VALUES" />\n';
+    var initMode = $("#initSelect").val();
+    if(initMode=="featureMatching"){
+        content += '<Parameter name="initialization_method" type="string" value="USE_FEATURE_MATCHING" />\n';
+    }
+    else if(initMode=="fieldValues"){
+        content += '<Parameter name="initialization_method" type="string" value="USE_FIELD_VALUES" />\n';
+    }
+    else if(initMode=="neighborValues"){
+        content += '<Parameter name="initialization_method" type="string" value="USE_NEIGHBOR_VALUES" />\n';
+    }
     if($("#translationCheck")[0].checked){
         content += '<Parameter name="enable_translation" type="bool" value="true" />\n';
     }else{
