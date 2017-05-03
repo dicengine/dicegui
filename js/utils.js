@@ -99,6 +99,7 @@ $(window).load(function(){
     resizeAll();
     // hide the run button until the input is valid
     $("#runLi").hide();
+    $("#abortLi").hide();
     $("#writeLi").hide();
     $("#resolutionLi").hide();
     // hide the stereo utilities

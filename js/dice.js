@@ -9,6 +9,7 @@ document.getElementById("runLi").onclick = function() {
                 // last callback executing DICe
                 startProgress();
                 writeInputFile(false);
+                $("#abortLi").show();
             }else{
                 return false;
             }
@@ -17,8 +18,10 @@ document.getElementById("runLi").onclick = function() {
         // last callback executing DICe
         startProgress();
         writeInputFile(false);
+        $("#abortLi").show();
     });
 };
+
 //document.getElementById("resolutionLi").onclick = function() {
 //    // check if there are existing results
 //    var fileName = fullPath('synthetic_results','spatial_resolution.txt');
@@ -106,11 +109,18 @@ function callDICeExec(resolution,ss_locs) {
     proc.on('error', function(){
         alert('DICe execution failed: invalid executable: ' + execPath);
         endProgress(false);
+        $("#abortLi").hide();
+    });
+
+    $("#abortLi").on('click',function(){
+        proc.kill();
+        $("#abortLi").hide();
     });
     
     proc.on('close', (code) => {
         console.log(`child process exited with code ${code}`);
         updateResultsFilesList();
+        $("#abortLi").hide();
         if(code!=0){
             alert('DICe execution failed (see console for details)');
             endProgress(false);
