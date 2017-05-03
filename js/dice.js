@@ -19,33 +19,33 @@ document.getElementById("runLi").onclick = function() {
         writeInputFile(false);
     });
 };
-document.getElementById("resolutionLi").onclick = function() {
-    // check if there are existing results
-    var fileName = fullPath('synthetic_results','spatial_resolution.txt');
-    fs.stat(fileName, function(err, stat) {
-        if(err == null) {            
-            if (confirm('existing results found, click "OK" to plot these results or "Cancel" to recompute')) {
-                localStorage.setItem("workingDirectory",workingDirectory);
-                var win = new BrowserWindow({ width: 850, height: 1000 });
-                win.on('closed', () => {
-                    win = null
-                })
-                win.loadURL('file://' + __dirname + '/resolution.html');                
-            }else{
-                fs.unlink(fileName, (err) => {
-                    if (err) throw err;
-                    console.log('successfully deleted '+fileName);
-                    startProgress();
-                    writeInputFile(false,true);
-                }) // end unlink                
-            } // end else confirm
-        } // end null
-        else{ // files don't exist to run the analysis
-            startProgress();
-            writeInputFile(false,true);
-        }
-    }); // end stat
-};
+//document.getElementById("resolutionLi").onclick = function() {
+//    // check if there are existing results
+//    var fileName = fullPath('synthetic_results','spatial_resolution.txt');
+//    fs.stat(fileName, function(err, stat) {
+//        if(err == null) {            
+//            if (confirm('existing results found, click "OK" to plot these results or "Cancel" to recompute')) {
+//                localStorage.setItem("workingDirectory",workingDirectory);
+//                var win = new BrowserWindow({ width: 850, height: 1000 });
+//                win.on('closed', () => {
+//                    win = null
+//                })
+//                win.loadURL('file://' + __dirname + '/resolution.html');                
+//            }else{
+//                fs.unlink(fileName, (err) => {
+//                    if (err) throw err;
+//                    console.log('successfully deleted '+fileName);
+//                    startProgress();
+//                    writeInputFile(false,true);
+//                }) // end unlink                
+//            } // end else confirm
+//        } // end null
+//        else{ // files don't exist to run the analysis
+//            startProgress();
+//            writeInputFile(false,true);
+//        }
+//    }); // end stat
+//};
 
 document.getElementById("sssigPreview").onclick = function() {
     if(refImagePathLeft=="undefined") return;
@@ -567,14 +567,14 @@ function checkValidInput() {
     consoleMsg('checking if input requirements met to enable running DICe ...');
     var validInput = true;
     var enableCross = true;
-    var enableResolution = true;
+    //var enableResolution = true;
     var isSequence = $("#fileSelectMode").val()=='sequence';
     var isCine =  $("#fileSelectMode").val()=='cine';
 
     if(isCine){
         if(cinePathLeft=="undefined"){
             validInput = false;
-            enableResolution = false;
+            //enableResolution = false;
             enableCross = false;
         }
         if(showStereoPane){
@@ -593,7 +593,7 @@ function checkValidInput() {
         consoleMsg('left reference image not set yet');
         validInput = false;
         enableCross = false;
-        enableResolution = false;
+        //enableResolution = false;
     }
     // check that the image extensions all match
     var refExtension = refImagePathLeft.split('.').pop().toLowerCase();
@@ -655,9 +655,9 @@ function checkValidInput() {
         $("#previewCross").hide();
         $("#initCross").hide();
     }
-    if(enableResolution){
-        $("#resolutionLi").show();                
-    }else{
-        $("#resolutionLi").hide();                
-    }
+    //if(enableResolution){
+    //    $("#resolutionLi").show();                
+    //}else{
+    //    $("#resolutionLi").hide();                
+    //}
 }
