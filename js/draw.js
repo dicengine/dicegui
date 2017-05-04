@@ -280,10 +280,49 @@ function drawROIs(){
     }
     // draw a default subset on the image in the center
     var ss_size = $("#subsetSize").val();
-    polygon = draw.rect(ss_size,ss_size).move(refImageWidthLeft/2 - ss_size/2,refImageHeightLeft/2 - ss_size/2).attr({ fill: 'none', stroke: '#ffff00', 'stroke-opacity': '0.8','stroke-width': '2', 'stroke-linecap':'round' });    
+    polygon = draw.rect(ss_size,ss_size).move(refImageWidthLeft/2 - ss_size/2,refImageHeightLeft/2 - ss_size/2).attr({ fill: 'none', stroke: '#ffff00', 'stroke-opacity': '0.8','stroke-width': '3', 'stroke-linecap':'round' }).id('subsetBox');    
     draw.style('z-index',2);
-    draw.style('position','absolute');    
+    draw.style('position','absolute');
+    polygon.draggable().on('dragmove',function(e){
+            e.preventDefault();
+            var scale = $("#panzoomLeft").panzoom("getMatrix")[0];
+            var imgX = Math.round(e.detail.p.x / scale);
+            var imgY = Math.round(e.detail.p.y / scale);
+            this.move(imgX,imgY);
+    });
+
+    // draw the axis for best fit plane if that is enabled
+    if($("#bestFitCheck")[0].checked && showStereoPane){
+        var hsize = 11;
+         cross_line = draw.polyline([[bestFitXOrigin,bestFitYOrigin],[bestFitXAxis,bestFitYAxis]]).attr({ stroke: '#ffffff', 'stroke-opacity': '0.8','stroke-width': '3', 'stroke-linecap':'round' });
+        cross_origin = draw.polyline([[bestFitXOrigin,bestFitYOrigin-hsize],[bestFitXOrigin,bestFitYOrigin+hsize],[bestFitXOrigin,bestFitYOrigin],[bestFitXOrigin-hsize,bestFitYOrigin],[bestFitXOrigin+hsize,bestFitYOrigin]]).attr({ fill : 'none', stroke: '#00ff00', 'stroke-opacity': '1.0','stroke-width': '3', 'stroke-linecap':'round' });
+        cross_origin.draggable().on('dragmove',function(e){
+            e.preventDefault();
+            var scale = $("#panzoomLeft").panzoom("getMatrix")[0];
+            var imgX = Math.round(e.detail.p.x / scale);
+            var imgY = Math.round(e.detail.p.y / scale);
+            this.move(imgX-hsize,imgY-hsize);
+            bestFitXOrigin = imgX;
+            bestFitYOrigin = imgY;
+            cross_line.plot([[bestFitXOrigin,bestFitYOrigin],[bestFitXAxis,bestFitYAxis]]);
+        });    
+        cross_axis = draw.polyline([[bestFitXAxis,bestFitYAxis-hsize],[bestFitXAxis,bestFitYAxis+hsize],[bestFitXAxis,bestFitYAxis],[bestFitXAxis-hsize,bestFitYAxis],[bestFitXAxis+hsize,bestFitYAxis]]).attr({ fill : 'none', stroke: '#ff0000', 'stroke-opacity': '1.0','stroke-width': '3', 'stroke-linecap':'round' });
+        cross_axis.draggable().on('dragmove',function(e){
+            e.preventDefault();
+            var scale = $("#panzoomLeft").panzoom("getMatrix")[0];
+            var imgX = Math.round(e.detail.p.x / scale);
+            var imgY = Math.round(e.detail.p.y / scale);
+            this.move(imgX-hsize,imgY-hsize);
+            bestFitXAxis = imgX;
+            bestFitYAxis = imgY;
+            cross_line.plot([[bestFitXOrigin,bestFitYOrigin],[bestFitXAxis,bestFitYAxis]]);
+        });    
+    }
 }
+
+$("#bestFitCheck").change(function(){
+    drawROIs();
+});
 
 function clearDrawnROIs(){
     $('#panzoomLeft > svg').each(function(){

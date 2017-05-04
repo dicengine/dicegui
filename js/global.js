@@ -36,6 +36,12 @@ var refImageHeightLeft = 0;
 var refImageWidthRight = 0;
 var refImageHeightRight = 0;
 
+// best fit plane locations
+var bestFitXOrigin = 0;
+var bestFitYOrigin = 0;
+var bestFitXAxis = 0;
+var bestFitYAxis = 0;
+
 // regions of interest
 var ROIDefsX = [[]];
 var ROIDefsY = [[]];

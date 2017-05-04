@@ -13,12 +13,13 @@ document.getElementById("runLi").onclick = function() {
             }else{
                 return false;
             }
+        }else {
+            // all the input file writes are chained via callbacks with the
+            // last callback executing DICe
+            startProgress();
+            writeInputFile(false);
+            $("#abortLi").show();
         }
-        // all the input file writes are chained via callbacks with the
-        // last callback executing DICe
-        startProgress();
-        writeInputFile(false);
-        $("#abortLi").show();
     });
 };
 
@@ -424,7 +425,45 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
     });
 }
 
+function writeBestFitFile() {
+            if($("#bestFitCheck")[0].checked){
+                var bestFitFile = fullPath('','best_fit_plane.dat');
+                consoleMsg('writing best fit plane file ' + bestFitFile);
+                var BFcontent = '';
+                BFcontent += '# origin of the coordinate system\n';
+                BFcontent += bestFitXOrigin + ' ' + bestFitYOrigin + '\n'
+                BFcontent += '# point on the axis \n';
+                BFcontent += bestFitXAxis + ' ' + bestFitYAxis;
+                if($("#bestFitYAxisCheck")[0].checked){
+                    BFcontent += ' YAXIS ';
+                }
+                BFcontent += '\n';
+                fs.writeFile(bestFitFile, BFcontent, function (err) {
+                if(err){
+                    alert("Error: an error ocurred creating the file "+ err.message)
+                }
+                consoleMsg('best_fit_plane.dat file has been successfully saved');
+                });
+            }
+}
+
 function writeParamsFile(only_write,resolution,ss_locs) {
+    // delete the best_fit_plane.dat file if it exists
+    var fileName = fullPath('','best_fit_plane.dat');
+    fs.stat(fileName, function(err, stat) {
+        if(err == null) {
+            fs.unlink(fileName, (err) => {
+                if (err) throw err;
+                console.log('successfully deleted '+fileName);
+            });
+            updateResultsFilesList();
+            writeBestFitFile();
+            // create a best_fit_plane.dat file if requested
+        }else{
+            writeBestFitFile();
+        }
+    });
+    
     var paramsFile = fullPath('','params.xml');
     consoleMsg('writing parameters file ' + paramsFile);
     var content = '';

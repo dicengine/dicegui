@@ -178,6 +178,10 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCl
                 if(viewer=="#panzoomLeft"){
                     refImageWidthLeft = tiff.width();
                     refImageHeightLeft = tiff.height();
+                    bestFitXOrigin = refImageWidthLeft / 2;
+                    bestFitYOrigin = refImageHeightLeft / 2;
+                    bestFitXAxis = 1.25*refImageWidthLeft / 2;
+                    bestFitYAxis = refImageHeightLeft / 2;
                     refImagePathLeft = file.path;
                     updateDimsLabels();
                     checkValidInput();
@@ -208,6 +212,10 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCl
                     if(viewer=="#panzoomLeft"){
                         refImageWidthLeft = imgWidth;
                         refImageHeightLeft = imgHeight;
+                        bestFitXOrigin = refImageWidthLeft / 2;
+                        bestFitYOrigin = refImageHeightLeft / 2;
+                        bestFitXAxis = 1.25*refImageWidthLeft / 2;
+                        bestFitYAxis = refImageHeightLeft / 2;
                         refImagePathLeft = file.path;
                         updateDimsLabels();
                         checkValidInput();

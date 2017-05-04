@@ -353,6 +353,7 @@ $("#stereoButton").click(function(){
         hideStereoViewer();
         checkValidInput();
     }
+    drawROIs();
     resizeAll();
 });
 
@@ -401,6 +402,7 @@ function hideStereoViewer(){
     $("#stackButton").css('display','none');
     showStereoPane = false;
     $('#runLi span').text('run 2d');
+    $("#stereoParams").hide();
 }
 
 function showStereoViewer(){
@@ -416,6 +418,7 @@ function showStereoViewer(){
     else {
         unstackViews();
     }
+    $("#stereoParams").show();
 }
 
 $("#fileSelectMode").on('change',function (){
@@ -437,8 +440,10 @@ $("#fileSelectMode").on('change',function (){
 });
 
 $("#subsetSize").on('input',function(){
-    $("#subsetSizeLabel").text($(this).val());
-    drawROIs();
+    var ss_size =  $(this).val();
+    $("#subsetSizeLabel").text(ss_size);
+    SVG.get('subsetBox').size(ss_size,ss_size);
+    //drawROIs();
 });
 
 $("#sssigThresh").on('input',function(){

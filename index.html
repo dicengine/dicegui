@@ -18,6 +18,7 @@
     <script src="./js/draw.js" defer></script>
     <!-- SVG -->
     <script src="./js/svg.js" defer></script>
+    <script src="./js/svg.draggable.min.js" defer></script>
     <!-- Panzoom -->
     <script src="./js/jquery.panzoom.min.js" defer></script>
     <script src="./js/viewer.js" defer></script>
@@ -331,8 +332,9 @@
                            <input id="strainGaugeSize" type="range" min="15" max="150" defaultValue="45" value="45" step="15"> 
                            <p><input id="omitTextCheck" type="checkbox" > omit text output</p>
                        </div>
-                       <div id="globalParams" class="param-options">
-                            
+                       <div id="stereoParams" class="param-options">
+                           <p><input id="bestFitCheck" type="checkbox"> use best fit plane</p>
+                           <p><input id="bestFitYAxisCheck" type="checkbox"> treat axis as y-axis</p>                            
                        </div>
                    </div> <!-- end toggle div body -->
               </div> <!-- end toggle div -->
