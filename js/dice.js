@@ -184,7 +184,7 @@ function updateCineDisplayImage(fileName,index,left){
 }
 
 
-function callCineStatExec(file,left) {
+function callCineStatExec(file,left,callback) {
 
     var child_process = require('child_process');
     var readline      = require('readline');
@@ -258,7 +258,9 @@ function callCineStatExec(file,left) {
                                  $("#cineRightPreview span").text(file.name);
                              }
                              updateCineDisplayImage(fileName,"0",left);
-                                 return true;
+                             callback = callback || $.noop;
+                             callback();
+                             return true;
                          }); // end else                           
                     }
                 });
