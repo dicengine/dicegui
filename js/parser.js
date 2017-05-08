@@ -169,7 +169,42 @@ function impl_input_xml_file(xml){
         }
     }
 
-
+    // see if there is a "best_fit_plane.dat" file in the folder
+    var bestFitFileName = fullPath('','best_fit_plane.dat');
+    fs.stat(bestFitFileName, function(err, stat) {
+        if(err == null) {
+            fs.readFile(bestFitFileName,'utf8',function(err,data){
+                if(err){
+                }else{
+                    //var pre_coord_data = data.toString().split(/\s+/g).map(Number);
+                    var lines = data.toString().split('\n');
+                    var coord_data = [];
+                    for(var line = 0; line < lines.length; line++){
+                        if(lines[line].charAt(0)=='#') continue;
+                        var tokens = lines[line].split(/\s+/g).map(Number);
+                        for(i=0;i<tokens.length;++i){
+                            if(!isNaN(tokens[i])&&tokens[i]!=0) coord_data.push(tokens[i]);
+                        }            
+                    }
+                    console.log('best fit coord data: ' + coord_data);
+                    // set the coordinates
+                    bestFitXOrigin = coord_data[0];
+                    bestFitYOrigin = coord_data[1];
+                    bestFitXAxis = coord_data[2];
+                    bestFitYAxis = coord_data[3];
+                    $("#bestFitCheck")[0].checked = true;
+                    // check for YAXIS
+                    if(data.toString().includes("YAXIS")){
+                        $("#bestFitYAxisCheck")[0].checked = true;
+                    }
+                    drawROIs();
+                }                
+            }); // end readfile
+        }else{
+            $("#bestFitCheck")[0].checked = false;
+        }
+    });
+    
     
     // see if there is a parameters file
     paramsFile = xml_get(xml,"correlation_parameters_file");
