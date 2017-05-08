@@ -442,7 +442,8 @@ $("#fileSelectMode").on('change',function (){
 $("#subsetSize").on('input',function(){
     var ss_size =  $(this).val();
     $("#subsetSizeLabel").text(ss_size);
-    SVG.get('subsetBox').size(ss_size,ss_size);
+    if(SVG.get('subsetBox'))
+        SVG.get('subsetBox').size(ss_size,ss_size);
     //drawROIs();
 });
 
