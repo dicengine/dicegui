@@ -233,8 +233,8 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCl
                         clearExcluded();
                         // clear the drawn ROIs
                         clearDrawnROIs();
-                        drawROIs();
                     }
+                    drawROIs();
                     return true;
                 }
                 var myImage = new Image();
@@ -255,8 +255,8 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCl
                 clearExcluded();
                 // clear the drawn ROIs
                 clearDrawnROIs();
-                drawROIs();
             }
+            drawROIs();
         }
         fr.readAsArrayBuffer(file);
     }
@@ -269,7 +269,7 @@ function flagSequenceImages(){
     defImagePathsRight = ["sequence"];
 }
 
-$("#loadRef").click(function (){
+function load_image_sequence(reset_ref_ROIs){
     var fullImageName = concatImageSequenceName(false);
     var fullStereoImageName = concatImageSequenceName(true);
     updateImageSequencePreview();
@@ -287,7 +287,7 @@ $("#loadRef").click(function (){
                       return;
                     }
                     getFileObject(fullImageName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,true,"","");
+                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","");
                     });
                     getFileObject(fullStereoImageName, function (fileObject) {
                     loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","");
@@ -297,12 +297,16 @@ $("#loadRef").click(function (){
             }
             else{
                  getFileObject(fullImageName, function (fileObject) {
-                     loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,true,"","");
+                     loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","");
                  });
                  flagSequenceImages();
             }
         }
-    });
+    });    
+}
+
+$("#loadRef").click(function (){
+    load_image_sequence(true);
 });
 
 $("#leftCineInput").on("click",function () {
@@ -322,13 +326,13 @@ $("#leftCineInput").change(function (evt) {
                 $("#cineEndPreview span").text("");
                 $("#panzoomRight").html('');
                 // create a tiff image of the selected reference frame
-                callCineStatExec(file,true);
+                callCineStatExec(file,true,true);
             }
             else{
             }
         } // end a right cine file exists
         else{
-            callCineStatExec(file,true);
+            callCineStatExec(file,true,true);
         }
     }
 });
@@ -338,7 +342,7 @@ $("#rightCineInput").change(function (evt) {
         file = tgt.files[0];
     if(file){
         // create a tiff image of the selected reference frame
-        callCineStatExec(file,false);
+        callCineStatExec(file,false,false);
     }
 });
 

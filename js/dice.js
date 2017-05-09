@@ -145,7 +145,7 @@ function callDICeExec(resolution,ss_locs) {
     });    
 }
 
-function updateCineDisplayImage(fileName,index,left){
+function updateCineDisplayImage(fileName,index,left,reset_ref_ROIs){
     var child_process = require('child_process');
     var readline      = require('readline');
     var tiffImageName = fullPath('','cine_to_tif');
@@ -172,7 +172,7 @@ function updateCineDisplayImage(fileName,index,left){
             else{
 		if(left){
                     getFileObject(tiffImageName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,true,"","");
+                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","");
                     });
                 }else{
                     getFileObject(tiffImageName, function (fileObject) {
@@ -184,7 +184,7 @@ function updateCineDisplayImage(fileName,index,left){
 }
 
 
-function callCineStatExec(file,left,callback) {
+function callCineStatExec(file,left,reset_ref_ROIs,callback) {
 
     var child_process = require('child_process');
     var readline      = require('readline');
@@ -257,7 +257,7 @@ function callCineStatExec(file,left,callback) {
                                  cinePathRight = file.path;
                                  $("#cineRightPreview span").text(file.name);
                              }
-                             updateCineDisplayImage(fileName,"0",left);
+                             updateCineDisplayImage(fileName,"0",left,reset_ref_ROIs);
                              callback = callback || $.noop;
                              callback();
                              return true;

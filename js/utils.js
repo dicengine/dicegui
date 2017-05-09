@@ -30,6 +30,16 @@ $(window).load(function(){
     }else{
         fileName += '/.dice.js';
     }
+    // resize the full div elements
+    resizeAll();
+    // hide the run button until the input is valid
+    $("#runLi").hide();
+    $("#abortLi").hide();
+    $("#writeLi").hide();
+    $("#resolutionLi").hide();
+    // hide the stereo utilities
+    $("#previewCross").hide();
+    $("#initCross").hide();
 
     fs.stat(fileName, function(err, stat) {
         if(err == null) {
@@ -70,6 +80,10 @@ $(window).load(function(){
                 paraviewMsg = paraviewMsgState;
                 workingDirectory = WD;
                 updateWorkingDirLabel();
+                // load the existing input file if there is one in this directory:
+                var existing_input = fullPath('','input.xml');
+                console.log('loading existing input file if it exists: ' + existing_input);
+                parse_input_xml_file(existing_input);
             });
         } else if(err.code == 'ENOENT') {
             // file does not exist
@@ -95,17 +109,6 @@ $(window).load(function(){
             consoleMsg('error occurred trying to load previous state');
         }
     });
-    // resize the full div elements
-    resizeAll();
-    // hide the run button until the input is valid
-    $("#runLi").hide();
-    $("#abortLi").hide();
-    $("#writeLi").hide();
-    $("#resolutionLi").hide();
-    // hide the stereo utilities
-    $("#previewCross").hide();
-    $("#initCross").hide();
-
 });
 
 // last items before closing browser

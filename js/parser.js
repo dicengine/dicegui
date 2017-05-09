@@ -1,27 +1,49 @@
-$("#readInput").click(function(){
-    parse_input_xml_file("/Users/dzturne/problems/born_qual/dogbone_experimental/Stereo/input.xml");
+//$("#readInput").click(function(){
+    //parse_input_xml_file("/Users/dzturne/problems/born_qual/dogbone_experimental/Stereo/input.xml");
     //parse_input_xml_file("/Users/dzturne/problems/born_qual/dogbone_experimental/Stereo/input_seq.xml");
-    //parse_input_xml_file("/Users/dzturne/problems/born_qual/dogbone_experimental/Stereo/input_cine.xml");
+//    parse_input_xml_file("/Users/dzturne/problems/born_qual/dogbone_experimental/Stereo/input_cine.xml");
     //parse_input_xml_file("/Users/dzturne/problems/born_qual/dogbone_experimental/Stereo/input_2d.xml");
     //parse_input_xml_file("/Users/dzturne/problems/born_qual/dogbone_experimental/Stereo/input_seq_2d.xml");
     //parse_input_xml_file("/Users/dzturne/problems/born_qual/dogbone_experimental/Stereo/input_cine_2d.xml");
-});
-
-
+//});
 
 function parse_input_xml_file(filename){
     console.log("parsing input file " + filename);
-    $.ajax({
-        type: "GET",
-	url: filename,
-	dataType: "xml",
-	success: function(xml) {
-            impl_input_xml_file(xml);
-	} // end success
-    }); // end ajax
+    fs.stat(filename, function(err, stat) {
+        if(err == null) {
+            $.ajax({
+                type: "GET",
+    	        url: filename,
+	        dataType: "xml",
+	        success: function(xml) {
+                    impl_input_xml_file(xml);            
+	        }, // end success
+            }); // end ajax
+        }else{ // file doesn't exist
+        }
+    }); // end stat
 }
 
 function impl_input_xml_file(xml){
+    // read the subset file if it exists:
+    // check if a subset file is used to define ROIs
+    subset_file = xml_get(xml,"subset_file");
+    if(subset_file){
+        console.log('reading subset file: ' + subset_file);
+        fs.stat(subset_file, function(err, stat) {
+            if(err == null) {
+                fs.readFile(subset_file,'utf8',function(err,data){
+                    if(err){
+                    }else{
+                        read_subset_file(data);
+                    }                
+                }); // end readfile
+            }else{ // file doesn't exist
+            }
+        }); // end stat subset file
+    }  // end has subset_file
+    
+    
     // set the step size
     step_size = xml_get(xml,"step_size");
     console.log('step_size: ' + step_size);
@@ -64,7 +86,7 @@ function impl_input_xml_file(xml){
         full_name = image_folder + cine_file;
         getFileObject(full_name, function (fileObject) {
             $("#panzoomLeft").html('');
-            callCineStatExec(fileObject,true,function(){update_cine_indices(xml)});
+            callCineStatExec(fileObject,true,false,function(){update_cine_indices(xml)});
         });
         if(stereo_cine_file){
             console.log('reading stereo cine file: ' + image_folder + stereo_cine_file);
@@ -89,7 +111,7 @@ function impl_input_xml_file(xml){
             name_splits = full_name.split(/[\\\/]/);
             $("#refImageText span").text(name_splits[name_splits.length-1]);
             getFileObject(full_name, function (fileObject) {
-                loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,true,"","");
+                loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","");
             });
             // load the deformed image list
             deformed_list = $(xml).find('ParameterList[name="deformed_images"]');
@@ -165,7 +187,7 @@ function impl_input_xml_file(xml){
             if(image_prefix) $("#imagePrefix").val(image_prefix);
             image_ext = xml_get(xml,"image_file_extension");
             if(image_ext) $("#imageExtension").val(image_ext);
-            $("#loadRef").click();
+            load_image_sequence(false);
         }
     }
 
@@ -204,15 +226,76 @@ function impl_input_xml_file(xml){
             $("#bestFitCheck")[0].checked = false;
         }
     });
-    
-    
+
     // see if there is a parameters file
     paramsFile = xml_get(xml,"correlation_parameters_file");
     if(paramsFile){
         parse_params_xml_file(paramsFile);
     }
-    
     checkValidInput();
+}
+
+function read_subset_file(data){
+    hierarchy = [];
+    clearROIs();
+    clearExcluded();
+    var max_vertices = 500;
+    var lines = data.toString().split('\n');
+    for(line = 0;line < lines.length; line++){
+        var split_line = lines[line].match(/\S+/g);
+        if(split_line){
+            console.log('split line: ' + split_line);
+            if(split_line[0]=='begin'){
+                hierarchy.push(split_line[1]);
+                
+                // see if this is a set of vertices
+                if(split_line[1]=='vertices'){
+                    // read the sets of vertices
+                    var vertex = 0;
+                    var vertex_x = [];
+                    var vertex_y = [];
+                    while(vertex < max_vertices){
+                        num_line = lines[line+1+vertex].match(/\S+/g).map(Number);
+                        if(isNaN(num_line[0])) break;
+                        vertex++;
+                        vertex_x.push(num_line[0]);
+                        vertex_y.push(num_line[1]);
+                    }
+                    line+=vertex;
+                    console.log('vertex x: ' + vertex_x);
+                    console.log('vertex y: ' + vertex_y);
+                    if(hierarchy[hierarchy.length-3]=='boundary'){
+                        if(currentROIIndex!=0){
+                            ROIDefsX.push([]);
+                            ROIDefsY.push([]);
+                        }
+                        for(i=0;i<vertex_x.length;i++){
+                            ROIDefsX[ROIDefsX.length-1].push(vertex_x[i]);
+                            ROIDefsY[ROIDefsY.length-1].push(vertex_y[i]);
+                        }
+                        currentROIIndex += 1;
+                    }
+                    else if(hierarchy[hierarchy.length-3]=='excluded'){
+                        if(currentExcludedIndex!=0){
+                            excludedDefsX.push([]);
+                            excludedDefsY.push([]);
+                        }
+                        for(i=0;i<vertex_x.length;i++){
+                            excludedDefsX[excludedDefsX.length-1].push(vertex_x[i]);
+                            excludedDefsY[excludedDefsY.length-1].push(vertex_y[i]);
+                        }
+                        currentExcludedIndex += 1;
+                    }
+                }
+            }
+            else if(split_line[0]=='end' && hierarchy.length > 0){
+                hierarchy.pop();
+            }
+        }
+    } // end lines
+    console.log('ROIDefsX: ' + ROIDefsX);
+    console.log('ROIDefsY: ' + ROIDefsY);
+    //drawROIs();
 }
 
 function update_cine_indices(xml){
