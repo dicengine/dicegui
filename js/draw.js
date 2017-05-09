@@ -220,8 +220,6 @@ function drawROIs(){
     var draw = SVG('panzoomLeft').size(refImageWidthLeft, refImageHeightLeft);
     var polygon;
     var excluded;
-    console.log('ROIX ' + ROIDefsX);
-    console.log('ROIY ' + ROIDefsY);
     // draw existing ROIs using the svg element:
     if(ROIDefsX && ROIDefsY){
         var coordsString = '';        

@@ -657,7 +657,7 @@ function checkValidInput() {
       for(var i = 0, l = defImagePathsLeft.length; i < l; i++) {
         var defExtension = defImagePathsLeft[i].name.split('.').pop().toLowerCase();
         if(refExtension!=defExtension){
-            consoleMsg('deformed image ' + defImagePathsLeft[i].name + ' extension does not match ref extension');
+            //consoleMsg('deformed image ' + defImagePathsLeft[i].name + ' extension does not match ref extension');
             validInput = false;
         }
       }
@@ -670,7 +670,7 @@ function checkValidInput() {
         for(var i = 0, l = defImagePathsRight.length; i < l; i++) {
           var defExtension = defImagePathsRight[i].name.split('.').pop().toLowerCase();
           if(refExtension!=defExtension){
-              consoleMsg('deformed image ' + defImagePathsRight[i].name + ' extension does not match ref extension');
+              //consoleMsg('deformed image ' + defImagePathsRight[i].name + ' extension does not match ref extension');
               validInput = false;
           }
         }
@@ -695,6 +695,7 @@ function checkValidInput() {
     if(validInput){       
         $("#runLi").show();
         $("#writeLi").show();
+        consoleMsg("input requirements successful");
     }else{
         $("#runLi").hide();
         $("#writeLi").hide();
