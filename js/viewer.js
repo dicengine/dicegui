@@ -357,7 +357,7 @@ $("#cineRefIndex").change(function () {
             return;
         }
     var offsetIndex = Number(refIndex) - cineFirstFrame;
-    alert("offset_index " + offsetIndex);
+    //alert("offset_index " + offsetIndex);
     if(cinePathLeft!="undefined")
         updateCineDisplayImage(cinePathLeft,offsetIndex,true);
     if(cinePathRight!="undefined")

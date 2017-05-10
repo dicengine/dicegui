@@ -64,6 +64,45 @@ document.getElementById("writeLi").onclick = function() {
     writeInputFile(true);
 };
 
+document.getElementById("clearLi").onclick = function() {
+    if (confirm('clear working directory?\n\nThis action will clear the reference and deformed images, remove all ROIs, and reset the calibration file. Saved input files in this working directory will not be erased.')) {
+        $("#refImageText span").text('');
+        $("#refImageTextRight span").text('');
+        $("#defImageListLeft").empty();
+        $("#defImageListRight").empty();
+
+        $("#imageFolderSpan").text('');
+        $("#imageSequencePreviewSpan").text('');
+        $("#imagePrefix").val('');
+        $("#refIndex").val(0);
+        $("#startIndex").val(0);
+        $("#endIndex").val(0);
+        $("#skipIndex").val(1);
+        $("#numDigits").val(1);
+        $("#stereoLeftSuffix").val('_0');
+        $("#stereoRightSuffix").val('_1');
+        $("#imageExtension").val('');
+
+        $("#cineLeftPreviewSpan").text('');
+        $("#cineRightPreviewSpan").text('');
+        $("#cineStartPreviewSpan").text('');
+        $("#cineEndPreviewSpan").text('');
+        $("#cineRefIndex").val(0);
+        $("#cineStartIndex").val(0);
+        $("#cineEndIndex").val(0);
+        $("#cineSkipIndex").val(1);
+        
+        $("#calList").empty();
+        clearDrawnROIs();
+        clearROIs();
+        clearExcluded();
+        $("#panzoomLeft").html('');
+        $("#panzoomRight").html('');
+    }else{
+        return false;
+    }
+};
+
 document.getElementById("previewCross").onclick = function() {
     callCrossInitExec();
 }

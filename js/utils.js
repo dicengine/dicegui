@@ -21,8 +21,12 @@ function fullPath(folder,file){
     return filePath;
 }
 
-// tasks for when window loads
 $(window).load(function(){
+    initialize_gui(true);
+});
+
+// tasks for when window loads
+function initialize_gui(load_existing){
     // see if the .dice file exists:
     fileName = homeDir;
     if(os.platform()=='win32'){
@@ -80,10 +84,12 @@ $(window).load(function(){
                 paraviewMsg = paraviewMsgState;
                 workingDirectory = WD;
                 updateWorkingDirLabel();
-                // load the existing input file if there is one in this directory:
-                var existing_input = fullPath('','input.xml');
-                console.log('loading existing input file if it exists: ' + existing_input);
-                parse_input_xml_file(existing_input);
+                if(load_existing){
+                    // load the existing input file if there is one in this directory:
+                    var existing_input = fullPath('','input.xml');
+                    console.log('loading existing input file if it exists: ' + existing_input);
+                    parse_input_xml_file(existing_input);
+                }
             });
         } else if(err.code == 'ENOENT') {
             // file does not exist
@@ -109,7 +115,7 @@ $(window).load(function(){
             consoleMsg('error occurred trying to load previous state');
         }
     });
-});
+};
 
 // last items before closing browser
 $(window).bind("beforeunload", function() {
