@@ -96,8 +96,16 @@ document.getElementById("clearLi").onclick = function() {
         clearDrawnROIs();
         clearROIs();
         clearExcluded();
+        $("#runLoader").removeClass('post-loader-success');
+        $("#runLoader").removeClass('post-loader-fail');
+        $("#runLoader").removeClass('loader');    
+
         $("#panzoomLeft").html('');
         $("#panzoomRight").html('');
+
+        $("#previewCross").hide();
+        $("#initCross").hide();
+        
     }else{
         return false;
     }
