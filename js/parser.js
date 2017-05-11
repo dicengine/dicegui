@@ -126,6 +126,10 @@ function impl_input_xml_file(xml){
                     $("#defImageListLeft").append("<li class='defListLi' id='defListLi_"+current_length_li+"'>" + def_name_split[def_name_split.length-1] + "</li>");
                     getFileObject(full_def_name, function (fileObject) {
                         defImagePathsLeft.push(fileObject);
+                        // sort the defImagePathsLeft in case the asynch getFileObject re-ordered the list
+                        defImagePathsLeft.sort(function(a, b) {
+                            return (a.name > b.name) - (a.name < b.name);
+                        });
                     });        
                 });
             }
@@ -151,6 +155,10 @@ function impl_input_xml_file(xml){
                     $("#defImageListRight").append("<li class='defListLi' id='defListLi_"+current_length_li+"'>" + def_name_split[def_name_split.length-1] + "</li>");
                     getFileObject(full_def_name, function (fileObject) {
                         defImagePathsRight.push(fileObject);
+                        // sort the defImagePathsRight in case the asynch getFileObject re-ordered the list
+                        defImagePathsRight.sort(function(a, b) {
+                            return (a.name > b.name) - (a.name < b.name);
+                        });
                     });        
                 });
             }
