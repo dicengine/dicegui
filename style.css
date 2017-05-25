@@ -104,6 +104,9 @@ input[type="file"] {
 .nav-two-cam {
     display: none;
 }
+.nav-three-cam {
+    display: none;
+}
 .nav-list {
     display: block;
 }

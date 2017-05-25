@@ -55,14 +55,12 @@ function initialize_gui(load_existing){
                     hideParams();
                 }
                 $("#fileSelectMode").val(fileSelectMode).change();
-                if(showStereoPaneState){
-                    $('#runLi span').text('run stereo');
-                    $('#x1x2').text('x 1');
+                if(showStereoPaneState==1){
                     showStereoViewer();
+                }else if(showStereoPaneState==0){
+                    show2DViewer();
                 }else{
-                    $('#runLi span').text('run 2d');
-                    $('#x1x2').text('x 2');
-                    hideStereoViewer();
+                    showTrinocViewer();
                 }
                 if(omitTextState){
                     $("#omitTextCheck").prop("checked",true);
@@ -96,7 +94,7 @@ function initialize_gui(load_existing){
             consoleMsg('no previous state or preferences saved');
             showParams();
             $('#runLi span').text('run 2d');
-            hideStereoViewer();
+            show2DViewer();
             unstackViews();
             workingDirectory = homeDir;
             if(os.platform()=='win32'){
@@ -156,12 +154,12 @@ $("#changeImageFolder").click(function(){
     }
 });
 
-$("#imagePrefix,#refIndex,#numDigits,#imageExtension,#stereoLeftSuffix,#stereoRightSuffix").on('keyup',function(){
+$("#imagePrefix,#refIndex,#numDigits,#imageExtension,#stereoLeftSuffix,#stereoRightSuffix,#stereoMiddleSuffix").on('keyup',function(){
     updateImageSequencePreview();
 });
 
 
-function concatImageSequenceName(isStereo){
+function concatImageSequenceName(stereoImageFlag){
     var fullImageName = "";
     $('#imageSequencePreview span').text('');    
     fullImageName = $("#imageFolderSpan").text();
@@ -185,10 +183,12 @@ function concatImageSequenceName(isStereo){
             fullImageName += "0";
         }
     fullImageName += $("#refIndex").val();
-    if(showStereoPane&&isStereo){                                                                                             
-        fullImageName += $("#stereoRightSuffix").val();
-    }else if(showStereoPane){
-        fullImageName += $("#stereoLeftSuffix").val();                                                       
+    if((showStereoPane==1||showStereoPane==2)&&stereoImageFlag==0){                                                              
+        fullImageName += $("#stereoLeftSuffix").val();
+    }else if((showStereoPane==1||showStereoPane==2)&&stereoImageFlag==1){
+        fullImageName += $("#stereoRightSuffix").val();                                                       
+    }else if((showStereoPane==1||showStereoPane==2)&&stereoImageFlag==2){
+        fullImageName += $("#stereoMiddleSuffix").val();                                                       
     }                                                                                                               
     fullImageName += $("#imageExtension").val();
     return fullImageName;
@@ -196,7 +196,7 @@ function concatImageSequenceName(isStereo){
 
 
 function updateImageSequencePreview(){
-    var fullImageName = concatImageSequenceName(false);
+    var fullImageName = concatImageSequenceName(0);
     $('#imageSequencePreview span').text(fullImageName);
 
     // see if the file exists:
@@ -338,8 +338,10 @@ function resizeAll(){
     resizeFullDivs("#innerFluidRightCol");
     resizeFullDivs("#subFillDivLeft");
     resizeFullDivs("#subFillDivRight");
+    resizeFullDivs("#subFillDivMiddle");
     $("#panzoomLeft").panzoom("resetDimensions");
     $("#panzoomRight").panzoom("resetDimensions");
+    $("#panzoomMiddle").panzoom("resetDimensions");
 }
 
 // resize the elements within the target div
@@ -364,14 +366,13 @@ $("#stereoButton").click(function(){
     // get the current state of stereo on or off:
     var oldText = $('#runLi span').text();
     if(oldText=='run 2d'){
-        $('#runLi span').text('run stereo');
-        $('#x1x2').text('x 1');
         showStereoViewer();
         checkValidInput();
+    }else if(oldText=='run stereo'){
+        showTrinocViewer();
+        checkValidInput();        
     }else{
-        $('#runLi span').text('run 2d');
-        $('#x1x2').text('x 2');
-        hideStereoViewer();
+        show2DViewer();
         checkValidInput();
     }
     drawROIs();
@@ -390,9 +391,15 @@ function stackViews(){
     $('#stackIcon').css('transform','rotate(90deg)'); 
     $('#subFillDivRight').css('width','100%');
     $('#subFillDivLeft').css('width','100%');
-    if(showStereoPane){
+    $('#subFillDivMiddle').css('width','100%');
+    if(showStereoPane==1){
         $('#subFillDivRight').css('height','50%');
         $('#subFillDivLeft').css('height','50%');
+    }
+    else if(showStereoPane==2){
+        $('#subFillDivRight').css('height','33%');
+        $('#subFillDivMiddle').css('height','34%');
+        $('#subFillDivLeft').css('height','33%');
     }
     else{
         $('#subFillDivLeft').css('height','100%');
@@ -402,37 +409,49 @@ function stackViews(){
 }
 function unstackViews(){
     $('#stackIcon').css('transform','rotate(0deg)');
-    if(showStereoPane){
+    if(showStereoPane==1){
         $('#subFillDivRight').css('width','50%');
         $('#subFillDivLeft').css('width','50%');
+    }
+    else if(showStereoPane==2){
+        $('#subFillDivRight').css('width','33%');
+        $('#subFillDivMiddle').css('width','34%');
+        $('#subFillDivLeft').css('width','33%');
     }
     else{
         $('#subFillDivLeft').css('height','100%');
     }
     $('#subFillDivRight').css('height','100%');
+    $('#subFillDivMiddle').css('height','100%');
     $('#subFillDivLeft').css('height','100%');
     viewersStacked = false;
     resizeAll();    
 }
 
-function hideStereoViewer(){
+function show2DViewer(){
     $('#subFillDivRight').css('display','none');
+    $('#subFillDivMiddle').css('display','none');
     $('#subFillDivLeft').css('width','100%');
     $('#subFillDivLeft').css('height','100%');
     $(".nav-two-cam").css('display','none');
+    $(".nav-three-cam").css('display','none');
     $("#stackButton").css('display','none');
-    showStereoPane = false;
+    showStereoPane = 0;
     $('#runLi span').text('run 2d');
     $("#stereoParams").hide();
+    $('#x1x2').text('x 1');
 }
 
-function showStereoViewer(){
+function showTrinocViewer(){
+    $('#subFillDivMiddle').css('display','inline-block');
     $('#subFillDivRight').css('display','inline-block');
-    $('#subFillDivRight').css('width','50%');
-    $('#subFillDivLeft').css('width','50%');
+    $('#subFillDivRight').css('width','33%');
+    $('#subFillDivMiddle').css('width','34%');
+    $('#subFillDivLeft').css('width','33%');
     $(".nav-two-cam").css('display','block');
+    $(".nav-three-cam").css('display','block');
     $("#stackButton").css('display','block');
-    showStereoPane = true;
+    showStereoPane = 2;
     if(viewersStacked){
         stackViews();
     }
@@ -440,6 +459,28 @@ function showStereoViewer(){
         unstackViews();
     }
     $("#stereoParams").show();
+    $('#runLi span').text('run trinoc');
+    $('#x1x2').text('x 3');
+}
+
+function showStereoViewer(){
+    $('#subFillDivMiddle').css('display','none');
+    $('#subFillDivRight').css('display','inline-block');
+    $('#subFillDivRight').css('width','50%');
+    $('#subFillDivLeft').css('width','50%');
+    $(".nav-two-cam").css('display','block');
+    $(".nav-three-cam").css('display','none');
+    $("#stackButton").css('display','block');
+    showStereoPane = 1;
+    if(viewersStacked){
+        stackViews();
+    }
+    else {
+        unstackViews();
+    }
+    $("#stereoParams").show();
+    $('#runLi span').text('run stereo');
+    $('#x1x2').text('x 2');
 }
 
 $("#fileSelectMode").on('change',function (){
@@ -512,11 +553,7 @@ function saveStateFile() {
     }else{
         content += 'var showPrefPaneState = false;\n';
     }
-    if(showStereoPane){
-        content += 'var showStereoPaneState = true;\n';
-    }else{
-        content += 'var showStereoPaneState = false;\n';
-    }
+    content += 'var showStereoPaneState = ' + showStereoPane + ';\n';
     if(viewersStacked){
         content += 'var viewersStackedState = true;\n';
     }else{

@@ -46,6 +46,15 @@ $("#panzoomRight").panzoom({
     minScale: 0.05,
     cursor: "pointer"
 });
+$("#panzoomMiddle").panzoom({
+    $zoomIn: $(".zoom-in-middle"),
+    $zoomOut: $(".zoom-out-middle"),
+    $zoomRange: $(".zoom-range-middle"),
+    $reset: $(".reset-middle"),
+    which: 2,
+    minScale: 0.05,
+    cursor: "pointer"
+});
 
 function getOffset( el ) {
     var _x = 0;
@@ -82,8 +91,21 @@ function zoomToFitRight(){
     }                              
 }
 
+function zoomToFitMiddle(){
+    $("#panzoomMiddle").panzoom("resetDimensions");
+    var windowHeight = $("#viewWindowMiddle").outerHeight();
+    var imageHeight = refImageHeightMiddle;
+    var e = getOffset( document.getElementById('viewWindowMiddle') );
+    if(imageHeight>0){
+        var scale = (windowHeight-10) / imageHeight;
+        $("#panzoomMiddle").panzoom("setMatrix", [ 1, 0, 0, 1, 0, 0 ]);
+        $("#panzoomMiddle").panzoom("zoom",scale,{focal: e });
+    }                              
+}
+
 $("#zoomToFitLeft").click(function(){zoomToFitLeft();});
 $("#zoomToFitRight").click(function(){zoomToFitRight();});
+$("#zoomToFitMiddle").click(function(){zoomToFitMiddle();});
 
 // compute the image coordiates of the mouse in the left viewer
 $("#panzoomLeft").mousemove(function( event ) {
@@ -109,6 +131,18 @@ $("#panzoomRight").mousemove(function( event ) {
     }
 });
 
+// compute the image coordiates of the mouse in the right viewer
+$("#panzoomMiddle").mousemove(function( event ) {
+    var scale = $("#panzoomMiddle").panzoom("getMatrix")[0];
+    var viewX = event.pageX - $(this).offset().left;
+    var viewY = event.pageY - $(this).offset().top;
+    var imgX = Math.round(viewX / scale);
+    var imgY = Math.round(viewY / scale);
+    if(imgX>=0&&imgX<refImageWidthMiddle&&imgY>=0&&imgY<refImageHeightMiddle){
+        $("#middlePos").text("x:" + imgX + " y:" + imgY);
+    }
+});
+
 // zoom on focal point from mousewheel    
 $("#panzoomLeft").parent().on('mousewheel.focal', function( e ) {
     e.preventDefault();
@@ -127,6 +161,18 @@ $("#panzoomRight").parent().on('mousewheel.focal', function( e ) {
     var delta = e.delta || e.originalEvent.wheelDelta;
     var zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
     $("#panzoomRight").panzoom('zoom', zoomOut, {
+        increment: 0.1,
+        animate: false,
+        focal: e
+    });
+});
+
+// zoom on focal point from mousewheel    
+$("#panzoomMiddle").parent().on('mousewheel.focal', function( e ) {
+    e.preventDefault();
+    var delta = e.delta || e.originalEvent.wheelDelta;
+    var zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
+    $("#panzoomMiddle").panzoom('zoom', zoomOut, {
         increment: 0.1,
         animate: false,
         focal: e
@@ -191,6 +237,12 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCl
                     refImagePathRight = file.path;
                     updateDimsLabels();
                     checkValidInput();
+                }else if(viewer=="#panzoomMiddle"){
+                    refImageWidthMiddle = tiff.width();
+                    refImageHeightMiddle = tiff.height();
+                    refImagePathMiddle = file.path;
+                    updateDimsLabels();
+                    checkValidInput();
                 }
                 if(addBorder){
                     $(tiffCanvas).css({border: '5px solid #666666'});
@@ -223,6 +275,12 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCl
                         refImageWidthRight = imgWidth;
                         refImageHeightRight = imgHeight;
                         refImagePathRight = file.path;
+                        updateDimsLabels();
+                        checkValidInput();
+                    }else if(viewer=="#panzoomMiddle"){
+                        refImageWidthMiddle = imgWidth;
+                        refImageHeightMiddle = imgHeight;
+                        refImagePathMiddle = file.path;
                         updateDimsLabels();
                         checkValidInput();
                     }
@@ -270,8 +328,9 @@ function flagSequenceImages(){
 }
 
 function load_image_sequence(reset_ref_ROIs){
-    var fullImageName = concatImageSequenceName(false);
-    var fullStereoImageName = concatImageSequenceName(true);
+    var fullImageName = concatImageSequenceName(0);
+    var fullStereoImageName = concatImageSequenceName(1);
+    var fullTrinocImageName = concatImageSequenceName(2);
     updateImageSequencePreview();
 
     fs.stat(fullImageName, function(err, stat) {
@@ -280,7 +339,7 @@ function load_image_sequence(reset_ref_ROIs){
             return;
         }
         else{
-            if(showStereoPane){
+            if(showStereoPane==1||showStereoPane==2){
                 fs.stat(fullStereoImageName, function(err, stat) {
                     if(err != null) {
                       alert("Invalid stereo image file name: " + fullStereoImageName);
@@ -294,6 +353,18 @@ function load_image_sequence(reset_ref_ROIs){
                     });
                     flagSequenceImages();
                 });
+                if(showStereoPane==2){
+                    fs.stat(fullTrinocImageName, function(err, stat) {
+                        if(err != null) {
+                            alert("Invalid trinoc image file name: " + fullTrinocImageName);
+                            return;
+                        }
+                        getFileObject(fullTrinocImageName, function (fileObject) {
+                        loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","");
+                        });
+                        flagSequenceImages();
+                    });
+                }
             }
             else{
                  getFileObject(fullImageName, function (fileObject) {
@@ -318,31 +389,50 @@ $("#leftCineInput").change(function (evt) {
     if(file){
         // if a right cine file is alread loaded ask the user if it should be unloaded to
         // to avoid frame range mismatch
-        if(cinePathRight!="undefined"&&cinePathLeft!="undefined"){
-            if (confirm('unload right cine file (this is necessary if the frame ranges are different between right and left cine)')){
+        if((cinePathRight!="undefined"||cinePathMiddle!="undefined")&&cinePathLeft!="undefined"){
+            if (confirm('unload right (and trinoc) cine file (this is necessary if the frame ranges are different between right and left cine)')){
                 cinePathRight = "undefined";
                 $("#cineRightPreviewSpan").text("");
                 $("#cineStartPreview span").text("");
                 $("#cineEndPreview span").text("");
                 $("#panzoomRight").html('');
+                cinePathMiddle = "undefined";
+                $("#cineMiddlePreviewSpan").text("");
+                $("#panzoomMiddle").html('');
                 // create a tiff image of the selected reference frame
-                callCineStatExec(file,true,true);
+                callCineStatExec(file,0,true);
             }
             else{
             }
         } // end a right cine file exists
         else{
-            callCineStatExec(file,true,true);
+            callCineStatExec(file,0,true);
         }
     }
 });
 
+$("#rightCineInput").on("click",function () {
+    this.value = null;
+});
 $("#rightCineInput").change(function (evt) {
+    var tgt = evt.target || window.event.srcElement,
+        file = tgt.files[0];
+    alert('opening file: ' + file.path);
+    if(file){
+        // create a tiff image of the selected reference frame
+        callCineStatExec(file,1,false);
+    }
+});
+
+$("#middleCineInput").on("click",function () {
+    this.value = null;
+});
+$("#middleCineInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
     if(file){
         // create a tiff image of the selected reference frame
-        callCineStatExec(file,false,false);
+        callCineStatExec(file,2,false);
     }
 });
 
@@ -351,7 +441,7 @@ $("#cineRefIndex").change(function () {
     // filename left and right
     var refIndex = $("#cineRefIndex").val();
     // check that the ref index is valid
-    if(cinePathLeft!="undefined"||cinePathRight!="undefined")
+    if(cinePathLeft!="undefined"||cinePathRight!="undefined"||cinePathMiddle!="undefined")
         if(refIndex < Number($("#cineStartPreviewSpan").text()) || refIndex > Number($("#cineEndPreviewSpan").text())){
             alert("invalid reference index");
             return;
@@ -359,12 +449,17 @@ $("#cineRefIndex").change(function () {
     var offsetIndex = Number(refIndex) - cineFirstFrame;
     //alert("offset_index " + offsetIndex);
     if(cinePathLeft!="undefined")
-        updateCineDisplayImage(cinePathLeft,offsetIndex,true);
+        updateCineDisplayImage(cinePathLeft,offsetIndex,0);
     if(cinePathRight!="undefined")
-        updateCineDisplayImage(cinePathRight,offsetIndex,false);    
+        updateCineDisplayImage(cinePathRight,offsetIndex,1);    
+    if(cinePathMiddle!="undefined")
+        updateCineDisplayImage(cinePathMiddle,offsetIndex,2);    
 });
 
 
+$("#rightRefInput").on("click",function () {
+    this.value = null;
+});
 $("#rightRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
@@ -372,6 +467,19 @@ $("#rightRefInput").change(function (evt) {
     loadImage(file,"#panzoomRight","auto","auto",1,false,false,"","");
 });
 
+$("#middleRefInput").on("click",function () {
+    this.value = null;
+});
+$("#middleRefInput").change(function (evt) {
+    var tgt = evt.target || window.event.srcElement,
+        file = tgt.files[0];
+    $("#refImageTextMiddle span").text(file.name);
+    loadImage(file,"#panzoomMiddle","auto","auto",1,false,false,"","");
+});
+
+$("#calInput").on("click",function () {
+    this.value = null;
+});
 $("#calInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
@@ -391,6 +499,9 @@ $("#calInfo").click(function(){
     win.loadURL('file://' + __dirname + '/cal_help.html');
 });
 
+$("#leftRefInput").on("click",function () {
+    this.value = null;
+});
 $("#leftRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
@@ -398,6 +509,9 @@ $("#leftRefInput").change(function (evt) {
     loadImage(file,"#panzoomLeft","auto","auto",1,false,true,"","");
 });
 
+$("#leftDefInput").on("click",function () {
+    this.value = null;
+});
 $("#leftDefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
     files = tgt.files;
@@ -434,7 +548,7 @@ function removeCalPreview(){
     $("#previewCalDiv").remove();
 }
 
-function createPreview(index,isLeft,event){
+function createPreview(index,loc,event){
     // create an absolute position div and add it to the body
     div = $("<div />")
     div.attr({id: 'previewDiv', class: 'preview'});
@@ -446,10 +560,12 @@ function createPreview(index,isLeft,event){
     divTri.css({position: 'absolute', top: topCoordTri, left: '190px'});
     $("#contentDiv").append(divTri);
     $("#contentDiv").append(div);
-    if(isLeft){
+    if(loc==0){
         loadImage(defImagePathsLeft[index],"#previewDiv","auto","300px",4,true,false,"","");
-    }else{
+    }else if(loc==1){
         loadImage(defImagePathsRight[index],"#previewDiv","auto","300px",4,true,false,"","");
+    }else if(loc==2){
+        loadImage(defImagePathsMiddle[index],"#previewDiv","auto","300px",4,true,false,"","");
     }
 }
 
@@ -468,7 +584,7 @@ $("#calList").on("click", ".calListLi" ,function(event){
 
 $("#defImageListLeft").on("mouseover", ".defListLi" ,function(event){
     var index = $(this).index();
-    createPreview(index,true,event);
+    createPreview(index,0,event);
 });
 
 $("#defImageListLeft").on("mouseout", ".defListLi",function(){
@@ -477,13 +593,25 @@ $("#defImageListLeft").on("mouseout", ".defListLi",function(){
 
 $("#defImageListRight").on("mouseover", ".defListLi" ,function(event){
     var index = $(this).index();
-    createPreview(index,false,event);
+    createPreview(index,1,event);
 });
 
 $("#defImageListRight").on("mouseout", ".defListLi",function(){
     removePreview();
 });
 
+$("#defImageListMiddle").on("mouseover", ".defListLi" ,function(event){
+    var index = $(this).index();
+    createPreview(index,2,event);
+});
+
+$("#defImageListMiddle").on("mouseout", ".defListLi",function(){
+    removePreview();
+});
+
+$("#rightDefInput").on("click",function () {
+    this.value = null;
+});
 $("#rightDefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
     files = tgt.files;
@@ -500,9 +628,29 @@ $("#rightDefInput").change(function (evt) {
     checkValidInput();
 });
 
+$("#middleDefInput").on("click",function () {
+    this.value = null;
+});
+$("#middleDefInput").change(function (evt) {
+    var tgt = evt.target || window.event.srcElement,
+    files = tgt.files;
+    if(files){
+        $("#defImageListMiddle").empty();
+        defImagePathsRight = [];
+        for(var i = 0, l = files.length; i < l; i++) {
+            var filePath = files[i].path;
+            var fileName = files[i].name;
+            $("#defImageListMiddle").append("<li class='defListLi' id='defListLi_"+i+"'>" + fileName + "</li>");
+            defImagePathsMiddle.push(files[i]);//filePath);
+        }
+    }
+    checkValidInput();
+});
+
 function updateDimsLabels (){
     $("#leftDims").text("w:" + refImageWidthLeft  + " h:" + refImageHeightLeft);
     $("#rightDims").text("w:" + refImageWidthRight  + " h:" + refImageHeightRight);
+    $("#middleDims").text("w:" + refImageWidthMiddle  + " h:" + refImageHeightMiddle);
 }
 
 $("#initCross").click(function () {

@@ -68,8 +68,10 @@ document.getElementById("clearLi").onclick = function() {
     if (confirm('clear working directory?\n\nThis action will clear the reference and deformed images, remove all ROIs, and reset the calibration file. Saved input files in this working directory will not be erased.')) {
         $("#refImageText span").text('');
         $("#refImageTextRight span").text('');
+        $("#refImageTextMiddle span").text('');
         $("#defImageListLeft").empty();
         $("#defImageListRight").empty();
+        $("#defImageListMiddle").empty();
 
         $("#imageFolderSpan").text('');
         $("#imageSequencePreviewSpan").text('');
@@ -81,10 +83,12 @@ document.getElementById("clearLi").onclick = function() {
         $("#numDigits").val(1);
         $("#stereoLeftSuffix").val('_0');
         $("#stereoRightSuffix").val('_1');
+        $("#stereoMiddleSuffix").val('_2');
         $("#imageExtension").val('');
 
         $("#cineLeftPreviewSpan").text('');
         $("#cineRightPreviewSpan").text('');
+        $("#cineMiddlePreviewSpan").text('');
         $("#cineStartPreviewSpan").text('');
         $("#cineEndPreviewSpan").text('');
         $("#cineRefIndex").val(0);
@@ -102,9 +106,18 @@ document.getElementById("clearLi").onclick = function() {
 
         $("#panzoomLeft").html('');
         $("#panzoomRight").html('');
+        $("#panzoomMiddle").html('');
 
         $("#previewCross").hide();
         $("#initCross").hide();
+
+        refImagePathLeft = "undefined";
+        refImagePathRight = "undefined";
+        refImagePathMiddle = "undefined";
+        cinePathLeft = "undefined";
+        cinePathRight = "undefined";
+        cinePathMiddle = "undefined";
+        calPath = "undefined";
         
     }else{
         return false;
@@ -192,14 +205,16 @@ function callDICeExec(resolution,ss_locs) {
     });    
 }
 
-function updateCineDisplayImage(fileName,index,left,reset_ref_ROIs){
+function updateCineDisplayImage(fileName,index,mode,reset_ref_ROIs){
     var child_process = require('child_process');
     var readline      = require('readline');
     var tiffImageName = fullPath('','cine_to_tif');
-    if(left)
+    if(mode==0)
         tiffImageName += '_left.tif';
-    else
+    else if(mode==1)
         tiffImageName += '_right.tif';
+    else
+        tiffImageName += '_middle.tif';
     consoleMsg("converting file " + fileName + " to .tif for display");
     var procConv = child_process.execFile(execCineToTiffPath, [fileName,index,index,tiffImageName],{cwd:workingDirectory})
         readline.createInterface({
@@ -217,13 +232,17 @@ function updateCineDisplayImage(fileName,index,left,reset_ref_ROIs){
                  alert('DICe .cine file conversion to .tiff failed');
             }
             else{
-		if(left){
+		if(mode==0){
                     getFileObject(tiffImageName, function (fileObject) {
                         loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","");
                     });
-                }else{
+                }else if(mode==1){
                     getFileObject(tiffImageName, function (fileObject) {
                         loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","");
+                    });
+                }else{
+                    getFileObject(tiffImageName, function (fileObject) {
+                        loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","");
                     });
                 }
             }
@@ -231,13 +250,14 @@ function updateCineDisplayImage(fileName,index,left,reset_ref_ROIs){
 }
 
 
-function callCineStatExec(file,left,reset_ref_ROIs,callback) {
+function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
 
     var child_process = require('child_process');
     var readline      = require('readline');
     var proc;
 
     var fileName = file.path;
+    console.log('loading cine file: ' + file.path)
     fs.stat(fileName, function(err, stat) {
         if(err != null) {
             alert("could not find .cine file: " + fileName);
@@ -283,28 +303,30 @@ function callCineStatExec(file,left,reset_ref_ROIs,callback) {
                              // check that the two cine files have valid frame ranges
                              if($("#cineStartPreview span").text()!=""||$("#cineEndPreview span").text()!="")
                                  if($("#cineStartPreview span").text()!=stats[1]||$("#cineEndPreview span").text()!=stats[2]){
-                                     alert("Error, left and right .cine files need to have matching frame ranges");
+                                     alert("Error, all .cine files need to have matching frame ranges");
                                      return false;
                                  }
                              cineFirstFrame = stats[1];
                              $("#cineStartPreview span").text(stats[1]);
                              $("#cineEndPreview span").text(stats[2]);
-                             if(left){
+                             if(mode==0){
                                  $("#cineRefIndex").val(stats[1]);
                                  $("#cineStartIndex").val(stats[1]);
                                  $("#cineEndIndex").val(stats[2]);
                              }
                              // convert the cine to tiff
                              // always start with the ref index for the initial display
-                             if(left){
+                             if(mode==0){
                                  cinePathLeft = file.path;
                                  $("#cineLeftPreview span").text(file.name);
-                             }
-                             else{
+                             }else if(mode==1){
                                  cinePathRight = file.path;
                                  $("#cineRightPreview span").text(file.name);
+                             }else if(mode==2){
+                                 cinePathMiddle = file.path;
+                                 $("#cineMiddlePreview span").text(file.name);
                              }
-                             updateCineDisplayImage(fileName,"0",left,reset_ref_ROIs);
+                             updateCineDisplayImage(fileName,"0",mode,reset_ref_ROIs);
                              callback = callback || $.noop;
                              callback();
                              return true;
@@ -405,7 +427,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
     if($("#omitTextCheck")[0].checked){
         content += '<Parameter name="no_text_output_files" type="bool" value="true" />\n';
     }
-    if(showStereoPane&&!resolution&&!ss_locs){
+    if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs){
         content += '<Parameter name="calibration_parameters_file" type="string" value="' + calPath + '" />\n';
     }
     var fileSelectMode = $("#fileSelectMode").val();
@@ -423,7 +445,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
             }
         }
       content += '</ParameterList>\n';
-      if(showStereoPane&&!resolution&&!ss_locs){
+      if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs){
           content += '<Parameter name="stereo_reference_image" type="string" value="' + refImagePathRight + '" />\n';
           content += '<ParameterList name="stereo_deformed_images">\n';
           // add the deformed images
@@ -448,7 +470,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
         content += '<Parameter name="num_file_suffix_digits" type="int" value="'+$("#numDigits").val()+'" />\n';
         content += '<Parameter name="image_file_extension" type="string" value="'+$("#imageExtension").val()+'" />\n';
         content += '<Parameter name="image_file_prefix" type="string" value="'+$("#imagePrefix").val()+'" />\n';
-        if(showStereoPane){
+        if((showStereoPane==1||showStereoPane==2)){
             content += '<Parameter name="stereo_left_suffix" type="string" value="'+$("#stereoLeftSuffix").val()+'"/>\n';
             content += '<Parameter name="stereo_right_suffix" type="string" value="'+$("#stereoRightSuffix").val()+'" />\n';
         }
@@ -460,7 +482,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
         content += '<Parameter name="cine_start_index" type="int" value="'+$("#cineStartIndex").val()+'" />\n';
         content += '<Parameter name="cine_skip_index" type="int" value="'+$("#cineSkipIndex").val()+'" />\n';
         content += '<Parameter name="cine_end_index" type="int" value="'+$("#cineEndIndex").val()+'" />\n';
-        if(showStereoPane&&!resolution&&!ss_locs){
+        if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs){
             content += '<Parameter name="stereo_cine_file" type="string" value="'+cinePathRight+'" />\n';
         }
     }
@@ -575,7 +597,7 @@ function writeParamsFile(only_write,resolution,ss_locs) {
     content += '<Parameter name="COORDINATE_Y" type="bool" value="true" />\n';
     content += '<Parameter name="DISPLACEMENT_X" type="bool" value="true" />\n';
     content += '<Parameter name="DISPLACEMENT_Y" type="bool" value="true" />\n';
-    if(showStereoPane){
+    if((showStereoPane==1||showStereoPane==2)){
         content += '<Parameter name="MODEL_COORDINATE_X" type="bool" value="true" />\n';
         content += '<Parameter name="MODEL_COORDINATE_Y" type="bool" value="true" />\n';
         content += '<Parameter name="MODEL_COORDINATE_Z" type="bool" value="true" />\n';
@@ -675,7 +697,7 @@ function checkValidInput() {
             //enableResolution = false;
             enableCross = false;
         }
-        if(showStereoPane){
+        if(showStereoPane==1||showStereoPane==2){
             if(cinePathRight=="undefined"){
                 validInput = false;
                 enableCross = false;
@@ -710,7 +732,7 @@ function checkValidInput() {
       }
     }
 
-    if(showStereoPane){
+    if(showStereoPane==1||showStereoPane==2){
       if(calPath=='undefined')
           validInput = false;
       if(!isSequence){
@@ -729,11 +751,11 @@ function checkValidInput() {
     if(refImagePathRight=='undefined'||(refImagePathRight=='sequence' && !isSequence)) {
         consoleMsg('right reference image not set yet');
         enableCross = false;
-        if(showStereoPane)
+        if(showStereoPane==1||showStereoPane==2)
             validInput = false;
     }
     if(!isSequence&&defImagePathsRight.length<1)
-        if(showStereoPane)
+        if(showStereoPane==1||showStereoPane==2)
           validInput = false;
     } // end else (not cine)
     // TODO see if the left and right ref have the same dimensions

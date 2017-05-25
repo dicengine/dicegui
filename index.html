@@ -97,6 +97,8 @@
              <input class="nav-two-cam" type="text" id="stereoLeftSuffix" name="stereoLeftSuffix" value="_0" style="width:100%;">
              <div class="nav-two-cam">stereo right suffix</div>
              <input class="nav-two-cam" type="text" id="stereoRightSuffix" name="stereoRightSuffix" value="_1" style="width:100%;">
+             <div class="nav-two-cam">trinoc middle suffix</div>
+             <input class="nav-three-cam" type="text" id="stereoMiddleSuffix" name="stereoMiddleSuffix" value="_2" style="width:100%;">
              <div>extension</div>
              <input type="text" id="imageExtension" name="imageExtension" value="" style="width:100%; margin-bottom:10px;">
              <div style="margin-bottom:4px;">reference image</div>
@@ -121,8 +123,16 @@
                 load stereo cine   
               </label>
               <input id="rightCineInput" type="file" accept=".cine">
-              <div id="cineRightPreview" style="word-wrap: break-word; margin-bottom:20px;" class="nav-item"><span id="cineRightPreviewSpan"></span></div>
+              <div id="cineRightPreview" style="word-wrap: break-word; margin-bottom:10px;" class="nav-item"><span id="cineRightPreviewSpan"></span></div>
             </div> <!-- end nav two cam -->
+            <div class="nav-three-cam">
+              <label for="middleCineInput" class="custom-file-input action-li">
+                <i class="material-icons md-dark md-br-pad">camera_roll</i>
+                load trinoc cine   
+              </label>
+              <input id="middleCineInput" type="file" accept=".cine">
+              <div id="cineMiddlePreview" style="word-wrap: break-word; margin-bottom:20px;" class="nav-item"><span id="cineMiddlePreviewSpan"></span></div>
+            </div> <!-- end nav three cam -->
               <div id="cineStartPreview" style="word-wrap: break-word; margin-bottom:10px;" class="nav-item">first frame: <span id="cineStartPreviewSpan"></span></div>
               <div id="cineEndPreview" style="word-wrap: break-word; margin-bottom:10px;" class="nav-item">last frame: <span id="cineEndPreviewSpan"></span></div>
               <div class="nav-item">ref index</div>
@@ -136,6 +146,30 @@
             </div>
             <!-- end cine input -->
           </div>
+          <!-- start nav-three-cam -->
+          <div id="middleImageMenu" class="nav-three-cam">
+            <!-- start list -->
+            <div class="nav-list">
+              <div class="nav-three-cam nav-item">MIDDLE</div>
+              <label for="middleRefInput" class="custom-file-input action-li">
+                <i class="material-icons md-dark md-br-pad">add_a_photo</i>
+                load reference     
+              </label>
+              <input id="middleRefInput" type="file" accept="image/*">                  
+              <div id="refImageTextMiddle" style="word-wrap: break-word; margin-left:10px;"><span id="refImageTextMiddleSpan"></span></div>
+              <label for="middleDefInput" class="custom-file-input action-li">
+                <i class="material-icons md-dark md-br-pad">add_a_photo</i>
+                load deformed    
+              </label>
+              <input id="middleDefInput" type="file" multiple accept="image/*">                  
+              <div id="defImageListMiddleContainer" class="def-image-list-container">
+                <ul id="defImageListMiddle" class="def-image-ul">
+                </ul>
+              </div>
+            </div>
+            <!-- end list -->            
+          </div>
+          <!-- end nav-three-cam -->
           <!-- start nav-two-cam -->
           <div id="rightImageMenu" class="nav-two-cam">
             <!-- start list -->
@@ -247,6 +281,34 @@
                  </div>
               </div> <!-- end fill div left -->
 
+              <div id="subFillDivMiddle" class="sub-fill-div">
+                <div class="toggle-div">
+                <div class="toggle-div-banner">
+                    <span class="toggle-title">VIEW CONTROL</span>
+                    <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
+                </div> <!-- end toggle div banner -->
+                <div class="toggle-div-body">
+                    <i class="material-icons md-dark action-li zoom-in-middle" title="zoom in">zoom_in</i>
+                    <i class="material-icons md-dark action-li zoom-out-middle" title="zoom out">zoom_out</i>
+                    <input type="range" class="zoom-range-middle">                   
+                    <i class="material-icons md-dark action-li reset-middle" title="actual size">aspect_ratio</i>
+                    <i class="material-icons md-dark action-li" id="zoomToFitMiddle" title="zoom to fit">zoom_out_map</i>
+                    <label id="middleDims"></label>
+                    <label id="middlePos"></label>
+                   </div> <!-- end toggle div body -->
+                </div> <!-- end toggle div -->
+                <div class="toggle-div">
+                  <div class="toggle-div-banner">
+                    <span class="toggle-title">TRINOCULAR UTILS</span>
+                    <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
+                  </div> <!-- end toggle div banner -->
+                  <div class="toggle-div-body" style="min-height:30px;">
+                  </div> <!-- end toggle div body -->
+                </div> <!-- end toggle div -->
+                 <div id="viewWindowMiddle" class="fill-div"  style="background-color:darkgray;">
+                   <div id="panzoomMiddle" class="panzoom"></div>
+                 </div>
+               </div> <!-- end fill div middle -->
               <div id="subFillDivRight" class="sub-fill-div">
                 <div class="toggle-div">
                 <div class="toggle-div-banner">

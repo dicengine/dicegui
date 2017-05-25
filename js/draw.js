@@ -292,7 +292,7 @@ function drawROIs(){
     });
 
     // draw the axis for best fit plane if that is enabled
-    if($("#bestFitCheck")[0].checked && showStereoPane){
+    if($("#bestFitCheck")[0].checked && (showStereoPane==1||showStereoPane==2)){
         var hsize = 11;
          cross_line = draw.polyline([[bestFitXOrigin,bestFitYOrigin],[bestFitXAxis,bestFitYAxis]]).attr({ stroke: '#ffffff', 'stroke-opacity': '0.8','stroke-width': '3', 'stroke-linecap':'round' });
         cross_origin = draw.polyline([[bestFitXOrigin,bestFitYOrigin-hsize],[bestFitXOrigin,bestFitYOrigin+hsize],[bestFitXOrigin,bestFitYOrigin],[bestFitXOrigin-hsize,bestFitYOrigin],[bestFitXOrigin+hsize,bestFitYOrigin]]).attr({ fill : 'none', stroke: '#00ff00', 'stroke-opacity': '1.0','stroke-width': '3', 'stroke-linecap':'round' });

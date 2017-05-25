@@ -1,11 +1,3 @@
-//$("#readInput").click(function(){
-    //parse_input_xml_file("/Users/dzturne/problems/born_qual/dogbone_experimental/Stereo/input.xml");
-    //parse_input_xml_file("/Users/dzturne/problems/born_qual/dogbone_experimental/Stereo/input_seq.xml");
-//    parse_input_xml_file("/Users/dzturne/problems/born_qual/dogbone_experimental/Stereo/input_cine.xml");
-    //parse_input_xml_file("/Users/dzturne/problems/born_qual/dogbone_experimental/Stereo/input_2d.xml");
-    //parse_input_xml_file("/Users/dzturne/problems/born_qual/dogbone_experimental/Stereo/input_seq_2d.xml");
-    //parse_input_xml_file("/Users/dzturne/problems/born_qual/dogbone_experimental/Stereo/input_cine_2d.xml");
-//});
 
 function parse_input_xml_file(filename){
     console.log("parsing input file " + filename);
@@ -82,7 +74,7 @@ function impl_input_xml_file(xml){
         $("#fileSelectMode").change();
         stereo_cine_file = xml_get(xml,"stereo_cine_file");
         if(stereo_cine_file) showStereoViewer();
-        else hideStereoViewer();
+        else show2DViewer();
         full_name = image_folder + cine_file;
         getFileObject(full_name, function (fileObject) {
             $("#panzoomLeft").html('');
@@ -105,7 +97,7 @@ function impl_input_xml_file(xml){
             $("#fileSelectMode").change();
             stereo_ref_image = xml_get(xml,"stereo_reference_image");
             if(stereo_ref_image) showStereoViewer();
-            else hideStereoViewer();
+            else show2DViewer();
             // load the ref image
             full_name = image_folder + ref_image;
             name_splits = full_name.split(/[\\\/]/);
@@ -171,7 +163,7 @@ function impl_input_xml_file(xml){
             $("#imageFolderSpan").text(image_folder);
             stereo_right_suffix = xml_get(xml,"stereo_right_suffix");
             if(stereo_right_suffix) showStereoViewer();
-            else hideStereoViewer();
+            else show2DViewer();
             ref_image_index = xml_get(xml,"reference_image_index");
             console.log('ref image index: ' + ref_image_index);
             if(ref_image_index) $("#refIndex").val(ref_image_index);
