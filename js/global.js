@@ -12,12 +12,14 @@ if(os.platform()=='win32'){
     execCineStatPath = 'C:\\Program Files (x86)\\Digital Image Correlation Engine\\DICe_CineStat.exe';
     execCineToTiffPath = 'C:\\Program Files (x86)\\Digital Image Correlation Engine\\DICe_CineToTiff.exe';
     execCalPath = 'C:\\Program Files (x86)\\Digital Image Correlation Engine\\DICe_Cal.exe';
+    execOpenCVServerPath = 'C:\\Program Files (x86)\\Digital Image Correlation Engine\\DICe_OpenCVServer.exe';
 }else{
     execPath = '/Applications/DICe.app/Contents/Resources/app/bin/dice';
     execCrossInitPath = '/Applications/DICe.app/Contents/Resources/app/bin/DICe_CrossInit';
     execCineStatPath = '/Applications/DICe.app/Contents/Resources/app/bin/DICe_CineStat';
     execCineToTiffPath = '/Applications/DICe.app/Contents/Resources/app/bin/DICe_CineToTiff';
     execCalPath = '/Applications/DICe.app/Contents/Resources/app/bin/DICe_Cal';
+    execOpenCVServerPath = '/Applications/DICe.app/Contents/Resources/app/bin/DICe_OpenCVServer';
 }
 
 // image sets

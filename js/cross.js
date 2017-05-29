@@ -405,16 +405,16 @@ $(document).ready(function(){
     rHeight = rightHeight;
     console.log('leftWidth ' + leftWidth + ' leftHeight ' + lHeight)
     getFileObject(leftFileName, function (fileObject) {
-        loadImage(fileObject,"#panzoomCrossLeft1","auto","auto",1,false,false,"","");
-        loadImage(fileObject,"#panzoomCrossLeft2","auto","auto",1,false,false,"","");
-        loadImage(fileObject,"#panzoomCrossLeft3","auto","auto",1,false,false,"","");
-        loadImage(fileObject,"#panzoomCrossLeft4","auto","auto",1,false,false,"","");
+        loadImage(fileObject,"#panzoomCrossLeft1","auto","auto",1,false,false,"","",false);
+        loadImage(fileObject,"#panzoomCrossLeft2","auto","auto",1,false,false,"","",false);
+        loadImage(fileObject,"#panzoomCrossLeft3","auto","auto",1,false,false,"","",false);
+        loadImage(fileObject,"#panzoomCrossLeft4","auto","auto",1,false,false,"","",false);
     });
     getFileObject(rightFileName, function (fileObject) {
-        loadImage(fileObject,"#panzoomCrossRight1","auto","auto",1,false,false,"","");
-        loadImage(fileObject,"#panzoomCrossRight2","auto","auto",1,false,false,"","");
-        loadImage(fileObject,"#panzoomCrossRight3","auto","auto",1,false,false,"","");
-        loadImage(fileObject,"#panzoomCrossRight4","auto","auto",1,false,false,"","");
+        loadImage(fileObject,"#panzoomCrossRight1","auto","auto",1,false,false,"","",false);
+        loadImage(fileObject,"#panzoomCrossRight2","auto","auto",1,false,false,"","",false);
+        loadImage(fileObject,"#panzoomCrossRight3","auto","auto",1,false,false,"","",false);
+        loadImage(fileObject,"#panzoomCrossRight4","auto","auto",1,false,false,"","",false);
     });
 })
 

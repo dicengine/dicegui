@@ -66,6 +66,6 @@ $(document).ready(function(){
         previewFileName += '/right_projected_to_left_color.tif';
     }                      
     getFileObject(previewFileName, function (fileObject) {
-        loadImage(fileObject,"#panzoomCross","auto","auto",1,false,false,"","");
+        loadImage(fileObject,"#panzoomCross","auto","auto",1,false,false,"","",false);
     });
 })

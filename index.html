@@ -367,17 +367,18 @@
                        <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
                    </div> <!-- end toggle div banner -->
                    <div class="toggle-div-body">
-                       <p>DIC method:</p>
-                       <select>
-                           <option value="subset">subset</option>
-                       </select>
-                       <p>Initialization method:</p>
-                       <select id="initSelect">
-                           <option value="featureMatching">feature matching</option>
-                           <option value="fieldValues">field values</option>
-                           <option value="neighborValues">neighbor values</option>
+                       <p>analysis mode:</p>
+                       <select id="analysisModeSelect">
+                           <option value="subset">subset-based full-field</option>
+                           <option value="tracking">tracking</option>
                        </select>
                        <div id="subsetParams" class="param-options">
+                           <p>initialization method:</p>
+                           <select id="initSelect">
+                               <option value="featureMatching">feature matching</option>
+                               <option value="fieldValues">field values</option>
+                               <option value="neighborValues">neighbor values</option>
+                           </select>
                            <p>sssig threshold: <label id="sssigLabel">150</label></p>
                            <input id="sssigThresh" type="range" min="0" max="500.0" defaultValue="150" value="150" step="2">
                            <p>subset size: <label id="subsetSizeLabel">31</label> (pixels)</p>
@@ -398,10 +399,33 @@
                            <p>gauge size: <label id="strainGaugeSizeLabel">45</label> (pixels)</p>
                            <input id="strainGaugeSize" type="range" min="15" max="150" defaultValue="45" value="45" step="15"> 
                            <p><input id="omitTextCheck" type="checkbox" > omit text output</p>
-                       </div>
-                       <div id="stereoParams" class="param-options">
-                           <p><input id="bestFitCheck" type="checkbox"> use best fit plane</p>
-                           <p><input id="bestFitYAxisCheck" type="checkbox"> treat axis as y-axis</p>                            
+                           <div id="stereoParams" class="param-options">
+                               <p><input id="bestFitCheck" type="checkbox"> use best fit plane</p>
+                               <p><input id="bestFitYAxisCheck" type="checkbox"> treat axis as y-axis</p>
+                           </div>
+                       </div> <!-- end subset params -->
+                       <div id="trackingParams" class="param-options">
+                         <p><input id="binaryCheck" class="binaryOption" type="checkbox"> binary threshold</p>
+                         <p class="suboption">thresholding method:</p>
+                         <p class="suboption binaryOption"><select id="binarySelect">
+                             <option value="binaryMean">local mean value</option>
+                             <option value="binaryGaussian">local gaussian weighted sum</option>
+                         </select></p>
+                           <p class="suboption binaryOption"><input id="binaryInvertedCheck" type="checkbox"> inverted</p>
+                           <p class="suboption">block size: <label id="binaryThreshBlockSizeLabel">75</label> pixels</p>
+                           <input class="suboption binaryOption" id="binaryThreshBlockSize" type="range" min="3" max="101.0" defaultValue="75" value="75" step="2">
+                           <p class="suboption">thresholding constant: <label id="binaryThreshConstantLabel">10</label> counts</p>
+                           <input class="suboption binaryOption" id="binaryThreshConstant" type="range" min="-50" max="50.0" defaultValue="10" value="10" step="1">
+                           <hr style="margin-top: 20px;">
+                           <ul>
+                           <li id="previewFilterLi" class="action-li-horiz"><i class="material-icons md-dark md-br-pad">autorenew</i>
+                             <span>preview</span>
+                           </li>
+                           <li id="previewFilterResetLi" class="action-li-horiz"><i class="material-icons md-dark md-br-pad">keyboard_backspace</i>
+                               <span>reset</span>
+                           </li>
+                           <li><input id="binaryAutoUpdateCheck" type="checkbox"> auto preview</li>
+                           </ul>
                        </div>
                    </div> <!-- end toggle div body -->
               </div> <!-- end toggle div -->

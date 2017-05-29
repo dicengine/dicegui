@@ -179,16 +179,143 @@ $("#panzoomMiddle").parent().on('mousewheel.focal', function( e ) {
     });
 });
 
-function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addClass,addID) {
+$("#previewFilterLi").click(function (){
+    callOpenCVServerExec();
+});
+
+$("#previewFilterResetLi").click(function (){
+    $("#binaryCheck")[0].checked = false;
+    $("#binaryInvertedCheck")[0].checked = false;
+    $("#binaryThreshBlockSizeLabel").text("75");
+    $("#binaryThreshBlockSize").val(75);
+    $("#binaryThreshConstantLabel").text("10");
+    $("#binaryThreshConstant").val(10);
+    // re-load the original images, but don't change the stored values of ref images in global vars
+    fs.readdir(workingDirectory, (err,dir) => {
+        for(var i = 0; i < dir.length; i++) {
+            if(dir[i].includes('.display_image_left')&&!dir[i].includes('filter')){
+                getFileObject(fullPath('',dir[i]), function (fileObject) {
+                    loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
+                });
+            }
+            if(dir[i].includes('.display_image_right')&&!dir[i].includes('filter')){
+                getFileObject(fullPath('',dir[i]), function (fileObject) {
+                    loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
+                });
+            }
+            if(dir[i].includes('.display_image_middle')&&!dir[i].includes('filter')){
+                getFileObject(fullPath('',dir[i]), function (fileObject) {
+                    loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",false);
+                });
+            }
+        }
+    });
+});
+
+function deleteDisplayImageFiles(lrm,cb){
+    var cbCalled = false;
+    cb = cb || $.noop;
+    var nameToCheck = '.display_image_';
+    if(lrm==0){
+        nameToCheck += 'left';
+    }else if(lrm==1){
+        nameToCheck += 'right';
+    }else{
+        nameToCheck += 'middle';
+    }
+    console.log('removing any existing display image files with name base ' + nameToCheck);
+    fs.readdir(workingDirectory, (err,dir) => {
+        // es5
+        // count up the number of potential files to delete
+        var numExistingFiles = 0;
+        for(var i = 0; i < dir.length; i++) {
+            if(dir[i].includes(nameToCheck))
+                numExistingFiles++;
+        }
+        console.log(numExistingFiles + ' display image files exist');
+        if(numExistingFiles==0){
+            cb();
+            return;
+        }        
+        for(var i = 0; i < dir.length; i++) {
+            (function(i) {
+                var filePath = dir[i];
+                if(filePath.includes(nameToCheck)){
+                    numExistingFiles--;
+                    console.log('attempting to delete file ' + filePath);
+                    var fullFilePath = fullPath('',filePath);
+                    fs.stat(fullFilePath, function(err, stat) {
+                        console.log('stat called on file ' + fullFilePath);
+                        if(err == null) {
+                            fs.unlink(fullFilePath, (err) => {
+                                if (err) throw err;
+                                console.log('successfully deleted '+fullFilePath+' '+i);
+                                if(numExistingFiles==0) {
+                                    cb();
+                                }
+	                    });
+                        }else{
+                            // no-op
+	                }
+                    }); // end stat
+                } //end includes
+            })(i);
+        }
+    });
+}
+
+function copyFile(source, target, cb) {
+    console.log('copying ' + source + ' to ' + target);
+    var cbCalled = false;
+    cb = cb || $.noop;
+    var rd = fs.createReadStream(source);
+    rd.on("error", function(err) {
+        done(err);
+    });
+    var wr = fs.createWriteStream(target);
+    wr.on("error", function(err) {
+        done(err);
+    });
+    wr.on("close", function(ex) {
+        done();
+    });
+    rd.pipe(wr);
+    function done(err) {
+        if (!cbCalled) {      
+            cb(err);
+            cbCalled = true;
+        }
+    }
+}
+
+function loadImage(file,viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addClass,addID,recordPath) {
     var fileTypesOther = ['jpg', 'jpeg', 'png','JPG','PNG'];  //acceptable file types
     var fileTypesTiff = ['tiff','tif','TIFF','TIF'];  //acceptable file types
     //var tgt = evt.target || window.event.srcElement,
     //    files = tgt.files;
     console.log('loading image: ' + file.name + ' path: ' + file.path);
-
+    
     if (FileReader && file){   
         var fr = new FileReader();
         var extension = file.name.split('.').pop().toLowerCase();
+        var localFileName = '.display_image_';
+        var lrm =   0;
+        if(viewer=="#panzoomLeft"){
+            localFileName += 'left.';
+            lrm = 0;
+        }else if(viewer=="#panzoomMiddle"){
+            localFileName += 'middle.';
+            lrm = 2;
+        }else{
+            localFileName += 'right.';
+            lrm = 1;
+        }
+        localFileName = fullPath('',localFileName);
+        localFileName += extension;
+        if(!file.name.includes('display_image_')){
+            // copy the image file to the working directory as the display image
+            deleteDisplayImageFiles(lrm,function(){copyFile(file.path,localFileName);});
+        }
         fr.onload = function(e) {
             if (fileTypesTiff.indexOf(extension) > -1) {
                 //Using tiff.min.js library - https://github.com/seikichi/tiff.js/tree/master
@@ -228,19 +355,19 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCl
                     if(bestFitYOrigin==0) bestFitYOrigin = refImageHeightLeft / 2;
                     if(bestFitXAxis==0) bestFitXAxis = 1.25*refImageWidthLeft / 2;
                     if(bestFitYAxis==0) bestFitYAxis = refImageHeightLeft / 2;
-                    refImagePathLeft = file.path;
+                    if(recordPath) refImagePathLeft = file.path;
                     updateDimsLabels();
                     checkValidInput();
                 }else if(viewer=="#panzoomRight"){
                     refImageWidthRight = tiff.width();
                     refImageHeightRight = tiff.height();
-                    refImagePathRight = file.path;
+                    if(recordPath) refImagePathRight = file.path;
                     updateDimsLabels();
                     checkValidInput();
                 }else if(viewer=="#panzoomMiddle"){
                     refImageWidthMiddle = tiff.width();
                     refImageHeightMiddle = tiff.height();
-                    refImagePathMiddle = file.path;
+                    if(recordPath) refImagePathMiddle = file.path;
                     updateDimsLabels();
                     checkValidInput();
                 }
@@ -268,19 +395,19 @@ function loadImage(file, viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCl
                         if(bestFitYOrigin==0) bestFitYOrigin = refImageHeightLeft / 2;
                         if(bestFitXAxis==0) bestFitXAxis = 1.25*refImageWidthLeft / 2;
                         if(bestFitYAxis==0) bestFitYAxis = refImageHeightLeft / 2;
-                        refImagePathLeft = file.path;
+                        if(recordPath) refImagePathLeft = file.path;
                         updateDimsLabels();
                         checkValidInput();
                     }else if(viewer=="#panzoomRight"){
                         refImageWidthRight = imgWidth;
                         refImageHeightRight = imgHeight;
-                        refImagePathRight = file.path;
+                        if(recordPath) refImagePathRight = file.path;
                         updateDimsLabels();
                         checkValidInput();
                     }else if(viewer=="#panzoomMiddle"){
                         refImageWidthMiddle = imgWidth;
                         refImageHeightMiddle = imgHeight;
-                        refImagePathMiddle = file.path;
+                        if(recordPath) refImagePathMiddle = file.path;
                         updateDimsLabels();
                         checkValidInput();
                     }
@@ -346,10 +473,10 @@ function load_image_sequence(reset_ref_ROIs){
                       return;
                     }
                     getFileObject(fullImageName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","");
+                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true);
                     });
                     getFileObject(fullStereoImageName, function (fileObject) {
-                    loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","");
+                        loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true);
                     });
                     flagSequenceImages();
                 });
@@ -360,7 +487,7 @@ function load_image_sequence(reset_ref_ROIs){
                             return;
                         }
                         getFileObject(fullTrinocImageName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","");
+                            loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",true);
                         });
                         flagSequenceImages();
                     });
@@ -368,7 +495,7 @@ function load_image_sequence(reset_ref_ROIs){
             }
             else{
                  getFileObject(fullImageName, function (fileObject) {
-                     loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","");
+                     loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true);
                  });
                  flagSequenceImages();
             }
@@ -417,7 +544,6 @@ $("#rightCineInput").on("click",function () {
 $("#rightCineInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
-    alert('opening file: ' + file.path);
     if(file){
         // create a tiff image of the selected reference frame
         callCineStatExec(file,1,false);
@@ -464,7 +590,7 @@ $("#rightRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
     $("#refImageTextRight span").text(file.name);
-    loadImage(file,"#panzoomRight","auto","auto",1,false,false,"","");
+    loadImage(file,"#panzoomRight","auto","auto",1,false,false,"","",true);
 });
 
 $("#middleRefInput").on("click",function () {
@@ -474,7 +600,7 @@ $("#middleRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
     $("#refImageTextMiddle span").text(file.name);
-    loadImage(file,"#panzoomMiddle","auto","auto",1,false,false,"","");
+    loadImage(file,"#panzoomMiddle","auto","auto",1,false,false,"","",true);
 });
 
 $("#calInput").on("click",function () {
@@ -506,7 +632,7 @@ $("#leftRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
     $("#refImageText span").text(file.name);
-    loadImage(file,"#panzoomLeft","auto","auto",1,false,true,"","");
+    loadImage(file,"#panzoomLeft","auto","auto",1,false,true,"","",true);
 });
 
 $("#leftDefInput").on("click",function () {
@@ -561,11 +687,11 @@ function createPreview(index,loc,event){
     $("#contentDiv").append(divTri);
     $("#contentDiv").append(div);
     if(loc==0){
-        loadImage(defImagePathsLeft[index],"#previewDiv","auto","300px",4,true,false,"","");
+        loadImage(defImagePathsLeft[index],"#previewDiv","auto","300px",4,true,false,"","",false);
     }else if(loc==1){
-        loadImage(defImagePathsRight[index],"#previewDiv","auto","300px",4,true,false,"","");
+        loadImage(defImagePathsRight[index],"#previewDiv","auto","300px",4,true,false,"","",false);
     }else if(loc==2){
-        loadImage(defImagePathsMiddle[index],"#previewDiv","auto","300px",4,true,false,"","");
+        loadImage(defImagePathsMiddle[index],"#previewDiv","auto","300px",4,true,false,"","",false);
     }
 }
 

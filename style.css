@@ -51,6 +51,9 @@ body {
     to {left: 100%;}
 }
 
+.suboption {
+    margin-left: 20px;    
+}
 
 /* Rules for sizing the icon. */
 .material-icons.md-18 { font-size: 18px; }
@@ -243,6 +246,16 @@ ul {
     cursor: pointer;
 }
 .action-li:hover {
+    color: rgba(0, 0, 0, 1.0);
+}
+.action-li-horiz {
+    color: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    display: block;
+    float: left;
+    padding: 0px 20px 0px 0px;
+}
+.action-li-horiz:hover {
     color: rgba(0, 0, 0, 1.0);
 }
 h1 {

@@ -103,7 +103,7 @@ function impl_input_xml_file(xml){
             name_splits = full_name.split(/[\\\/]/);
             $("#refImageText span").text(name_splits[name_splits.length-1]);
             getFileObject(full_name, function (fileObject) {
-                loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","");
+                loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",true);
             });
             // load the deformed image list
             deformed_list = $(xml).find('ParameterList[name="deformed_images"]');
@@ -131,7 +131,7 @@ function impl_input_xml_file(xml){
                 stereo_name_splits = stereo_full_name.split(/[\\\/]/);
                 $("#refImageTextRight span").text(stereo_name_splits[stereo_name_splits.length-1]);
                 getFileObject(stereo_full_name, function (fileObject) {
-                    loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","");
+                    loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true);
                 });
             }
             // load the stereo deformed image list

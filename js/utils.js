@@ -55,6 +55,7 @@ function initialize_gui(load_existing){
                     hideParams();
                 }
                 $("#fileSelectMode").val(fileSelectMode).change();
+                $("#analysisModeSelect").val(analysisModeSelect).change();
                 if(showStereoPaneState==1){
                     showStereoViewer();
                 }else if(showStereoPaneState==0){
@@ -82,6 +83,10 @@ function initialize_gui(load_existing){
                 paraviewMsg = paraviewMsgState;
                 workingDirectory = WD;
                 updateWorkingDirLabel();
+                // remove all the display images:
+                deleteDisplayImageFiles(0);
+                deleteDisplayImageFiles(1);
+                deleteDisplayImageFiles(2);
                 if(load_existing){
                     // load the existing input file if there is one in this directory:
                     var existing_input = fullPath('','input.xml');
@@ -108,7 +113,11 @@ function initialize_gui(load_existing){
                     console.log(e);
                 }
             });
-           updateWorkingDirLabel();
+            updateWorkingDirLabel();
+            // remove all the display images:
+            deleteDisplayImageFiles(0);
+            deleteDisplayImageFiles(1);
+            deleteDisplayImageFiles(2);
         } else {
             consoleMsg('error occurred trying to load previous state');
         }
@@ -483,6 +492,17 @@ function showStereoViewer(){
     $('#x1x2').text('x 2');
 }
 
+$("#analysisModeSelect").on('change',function() {
+    if($(this).val()=="subset"){
+        $("#subsetParams").show();
+        $("#trackingParams").hide();
+    }
+    else if($(this).val()=="tracking"){
+        $("#subsetParams").hide();
+        $("#trackingParams").show();
+    }
+});
+
 $("#fileSelectMode").on('change',function (){
     if($(this).val()=="sequence"){
         $(".nav-sequence").css('display','block');
@@ -534,6 +554,15 @@ $("#filterSize").on('input',function(){
     $("#filterSizeLabel").text($(this).val());
 });
 
+$("#binaryThreshBlockSize").on('input',function(){
+    $("#binaryThreshBlockSizeLabel").text($(this).val());
+});
+
+$("#binaryThreshConstant").on('input',function(){
+    $("#binaryThreshConstantLabel").text($(this).val());
+});
+
+
 function saveStateFile() {  
     fileName = homeDir;
     if(os.platform()=='win32'){
@@ -565,6 +594,7 @@ function saveStateFile() {
         content += 'var showConsoleState = false;\n';
     }
     content += 'var fileSelectMode = "'+$("#fileSelectMode").val() +'";\n';
+    content += 'var analysisModeSelect = "'+$("#analysisModeSelect").val() +'";\n';
     if($("#omitTextCheck")[0].checked){
         content += 'var omitTextState = true;\n';
     }

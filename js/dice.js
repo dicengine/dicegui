@@ -118,7 +118,10 @@ document.getElementById("clearLi").onclick = function() {
         cinePathRight = "undefined";
         cinePathMiddle = "undefined";
         calPath = "undefined";
-        
+
+        deleteDisplayImageFiles(0);
+        deleteDisplayImageFiles(1);
+        deleteDisplayImageFiles(2);
     }else{
         return false;
     }
@@ -208,13 +211,13 @@ function callDICeExec(resolution,ss_locs) {
 function updateCineDisplayImage(fileName,index,mode,reset_ref_ROIs){
     var child_process = require('child_process');
     var readline      = require('readline');
-    var tiffImageName = fullPath('','cine_to_tif');
+    var tiffImageName = fullPath('','.display_image_');
     if(mode==0)
-        tiffImageName += '_left.tif';
+        tiffImageName += 'left.tif';
     else if(mode==1)
-        tiffImageName += '_right.tif';
+        tiffImageName += 'right.tif';
     else
-        tiffImageName += '_middle.tif';
+        tiffImageName += 'middle.tif';
     consoleMsg("converting file " + fileName + " to .tif for display");
     var procConv = child_process.execFile(execCineToTiffPath, [fileName,index,index,tiffImageName],{cwd:workingDirectory})
         readline.createInterface({
@@ -234,15 +237,15 @@ function updateCineDisplayImage(fileName,index,mode,reset_ref_ROIs){
             else{
 		if(mode==0){
                     getFileObject(tiffImageName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","");
+                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true);
                     });
                 }else if(mode==1){
                     getFileObject(tiffImageName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","");
+                        loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true);
                     });
                 }else{
                     getFileObject(tiffImageName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","");
+                        loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",true);
                     });
                 }
             }
@@ -326,7 +329,7 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
                                  cinePathMiddle = file.path;
                                  $("#cineMiddlePreview span").text(file.name);
                              }
-                             updateCineDisplayImage(fileName,"0",mode,reset_ref_ROIs);
+                             deleteDisplayImageFiles(mode,function(){updateCineDisplayImage(fileName,"0",mode,reset_ref_ROIs);});
                              callback = callback || $.noop;
                              callback();
                              return true;
@@ -338,6 +341,97 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
     }); // end fileName fs.stat
 }
 
+var binaryElements = document.getElementsByClassName("binaryOption");
+for (var i = 0; i < binaryElements.length; i++) {
+    binaryElements[i].addEventListener('change', function() {
+        if(!$("#binaryAutoUpdateCheck")[0].checked) return;
+        callOpenCVServerExec();
+  });
+}
+
+function callOpenCVServerExec() {
+    // check to see that there is at least one image selected:
+    if(refImagePathLeft=='undefined'&&refImagePathRight=='undefined'&&refImagePathMiddle=='undefined') return;
+    
+    // check to see if any filters are applied:
+    if(!$("#binaryCheck")[0].checked){
+        return;
+    }
+    // generate the command line
+    var args = [];
+    // get the files to filter:
+    fs.readdir(workingDirectory, (err,dir) => {
+        for(var i = 0; i < dir.length; i++) {
+            if(dir[i].includes('.display_image')&&!dir[i].includes('filter')){
+                args.push(dir[i]);
+            }
+        }
+        if($("#binaryCheck")[0].checked){
+            args.push('Filter:BinaryThreshold');
+            if($("#binarySelect").val()=="binaryMean"){
+                args.push(1);
+            }else{
+                args.push(0);
+            }
+            args.push($("#binaryThreshBlockSize").val());
+            args.push($("#binaryThreshConstant").val());
+            if($("#binaryInvertedCheck")[0].checked){
+                args.push(1);
+            }else{
+                args.push(0);
+            }            
+        }
+        consoleMsg('calling OpenCVServerExec with args ' + args);    
+    
+        // call the filter exec
+        var child_process = require('child_process');
+        var readline      = require('readline');
+        var proc = child_process.execFile(execOpenCVServerPath,args,{cwd:workingDirectory});
+
+        proc.on('error', function(){
+            alert('DICe OpenCVServer failed: invalid executable: ' + execOpenCVServerPath);
+        });
+        proc.on('close', (code) => {
+            console.log(`OpenCVServer exited with code ${code}`);
+            if(code!=0){
+                alert('OpenCVServer failed');
+            }
+            else{
+                // load new preview images
+                fs.stat(fullPath('','.display_image_left_filter.png'), function(err, stat) {
+                    if(err == null) {
+                        getFileObject(fullPath('','.display_image_left_filter.png'), function (fileObject) {
+                            loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,true,"","",false);
+                        });                 
+                    }else{
+                    }
+                });
+                fs.stat(fullPath('','.display_image_right_filter.png'), function(err, stat) {
+                    if(err == null) {
+                        getFileObject(fullPath('','.display_image_right_filter.png'), function (fileObject) {
+                            loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
+                        });                 
+                    }else{
+                    }
+                });
+                fs.stat(fullPath('','.display_image_middle_filter.png'), function(err, stat) {
+                    if(err == null) {
+                        getFileObject(fullPath('','.display_image_middle_filter.png'), function (fileObject) {
+                            loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",false);
+                        });                 
+                    }else{
+                    }
+                });
+            }
+        });
+        readline.createInterface({
+            input     : proc.stdout,
+            terminal  : false
+        }).on('line', function(line) {
+            consoleMsg(line);
+        });
+    });
+}
 
 function callCrossInitExec() {
 
