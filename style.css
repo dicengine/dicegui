@@ -230,6 +230,21 @@ input[type="file"] {
     padding: 0;
     overflow: hidden;
 }
+.minimized-bar {
+    width: 32px;
+    height: 100%;
+    float: left;
+    padding: 3px 3px 5px 0px;
+    overflow: hidden;    
+}
+.minimized-bar-banner {
+    width: 100%;
+    height: 100%;
+    padding: 3px 3px 0px 0px;
+    border-radius: 5px 5px 5px 5px;
+    background-color: #f2f2f2;
+    text-align: center;
+}
 p {
     margin-bottom: 5px;
 }

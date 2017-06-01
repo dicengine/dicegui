@@ -45,6 +45,11 @@ function initialize_gui(load_existing){
     $("#previewCross").hide();
     $("#initCross").hide();
 
+    // hide the minimized bars for closed views
+    $("#leftMinimized").hide();
+    $("#rightMinimized").hide();
+    $("#middleMinimized").hide();
+
     fs.stat(fileName, function(err, stat) {
         if(err == null) {
             consoleMsg('loading GUI state and preferences from ' + fileName);
@@ -69,16 +74,16 @@ function initialize_gui(load_existing){
                 else{
                     $("#omitTextCheck").prop("checked",false);
                 }
-                if(viewersStackedState){
-                    stackViews();
-                }else{
-                    unstackViews();
-                }
                 if(showConsoleState){
                     defaultConsole();
                 }else{
                     showConsole = false;
                     defaultConsole();
+                }
+                if(viewersStackedState){
+                    stackViews();
+                }else{
+                    unstackViews();
                 }
                 paraviewMsg = paraviewMsgState;
                 workingDirectory = WD;
@@ -275,13 +280,15 @@ document.getElementById("paramsButton").onclick = function(){
 function showParams(){
     $('#innerFluidRightCol').css('display','inline-block');
     $('#innerFluidRightCol').css('width','25%');
-    $('#innerFluidLeftCol').css('width','75%');    
+    $('#innerFluidLeftCol').css('width','75%');
+    resizeViewerFillDivs();
     resizeAll();
     showPrefPane = true;
 }
 function hideParams(){
     $('#innerFluidRightCol').css('display','none');
     $('#innerFluidLeftCol').css('width','100%');
+    resizeViewerFillDivs();
     resizeAll();
     showPrefPane = false;
 }
@@ -300,6 +307,49 @@ function consoleMsg(string){
 
 // resize the full divs on window resize
 window.addEventListener('resize', function(){resizeAll();}, true);
+
+// toggle columns open or closed
+$(".pane-opener").click(function(){
+    // show the correct panel
+    var myId = $(this).parent().parent().parent().attr('id');
+    if(myId=="leftMinimized"){
+        $("#subFillDivLeft").show();
+    }else if(myId=="rightMinimized"){
+        $("#subFillDivRight").show();
+    }else if(myId=="middleMinimized"){
+        $("#subFillDivMiddle").show();
+    }
+    // hide this element
+    $(this).parent().parent().parent().hide();
+    resizeViewerFillDivs();
+    resizeAll();
+})
+
+$(".pane-closer").click(function(){
+    // gather the outer height and width of all columns
+    var widths = [];
+    var heights = [];
+    $(".pane-closer").each(function( index ) {
+        heights.push($(this).parent().parent('div').parent('div').parent('div').outerHeight());
+        widths.push($(this).parent().parent('div').parent('div').parent('div').outerWidth());
+        console.log('column height ' + heights[heights.length-1] + ' width ' + widths[widths.length - 1]);        
+    });
+
+    // hide this pannel
+    $(this).parent().parent('div').parent('div').parent('div').hide();
+
+    var parentId = $(this).parent().parent('div').parent('div').parent('div').attr('id');
+    if(parentId=="subFillDivLeft"){    
+        $("#leftMinimized").show();
+    }else if(parentId=="subFillDivRight"){    
+        $("#rightMinimized").show();
+    }else if(parentId=="subFillDivMiddle"){    
+        $("#middleMinimized").show();
+    }
+    
+    resizeViewerFillDivs();
+    resizeAll();
+})
 
 // toggle boxes up and down
 $(".toggler").click(function(){resizeView(this);});
@@ -348,6 +398,7 @@ function resizeAll(){
     resizeFullDivs("#subFillDivLeft");
     resizeFullDivs("#subFillDivRight");
     resizeFullDivs("#subFillDivMiddle");
+    //resizeFullDivs("#leftMinimized");
     $("#panzoomLeft").panzoom("resetDimensions");
     $("#panzoomRight").panzoom("resetDimensions");
     $("#panzoomMiddle").panzoom("resetDimensions");
@@ -388,6 +439,44 @@ $("#stereoButton").click(function(){
     resizeAll();
 });
 
+function resizeViewerFillDivs(){
+    // get the total height and width of the viewer
+    var totalHeight = $("#viewerFillDiv").outerHeight();
+    var totalWidth = $("#viewerFillDiv").outerWidth();
+    // iterate the divs inside the viewer currently being displayed
+    var numActiveDivs = 0;
+    var numTotalDivs = 0;
+    $("#viewerFillDiv" + '> div').each(function() {
+        if($(this).is(":visible")){
+            numTotalDivs++;
+            if($(this).hasClass("sub-fill-div")){
+                numActiveDivs++;
+            }
+        }
+    });
+    var numMinimized = numTotalDivs - numActiveDivs;
+    
+    if(viewersStacked){
+        var newHeight = Math.floor((totalHeight - numMinimized*32-1)/numActiveDivs);
+        $("#viewerFillDiv" + '> div').each(function() {
+            if($(this).is(":visible")&&$(this).hasClass("sub-fill-div")){
+                $(this).css('width','100%');
+                $(this).css('height',newHeight);
+            }
+        });        
+    }else{
+        // each inactive view is 32 pixels wide
+        var newWidth = Math.floor((totalWidth - numMinimized*32-1)/numActiveDivs);
+        $("#viewerFillDiv" + '> div').each(function() {
+            if($(this).is(":visible")&&$(this).hasClass("sub-fill-div")){
+                $(this).css('width',newWidth);
+                $(this).css('height','100%');
+            }
+        });
+    }
+}
+
+
 $("#stackButton").click(function(){
     if(viewersStacked==false){
         stackViews();
@@ -397,49 +486,44 @@ $("#stackButton").click(function(){
 });
 
 function stackViews(){
-    $('#stackIcon').css('transform','rotate(90deg)'); 
-    $('#subFillDivRight').css('width','100%');
-    $('#subFillDivLeft').css('width','100%');
-    $('#subFillDivMiddle').css('width','100%');
-    if(showStereoPane==1){
-        $('#subFillDivRight').css('height','50%');
-        $('#subFillDivLeft').css('height','50%');
-    }
-    else if(showStereoPane==2){
-        $('#subFillDivRight').css('height','33%');
-        $('#subFillDivMiddle').css('height','34%');
-        $('#subFillDivLeft').css('height','33%');
-    }
-    else{
-        $('#subFillDivLeft').css('height','100%');
-    }
+    $('#stackIcon').css('transform','rotate(90deg)');
+    $('.pane-opener').css('transform','rotate(180deg)')
+    //$('.pane-opener').parent('div').css('padding','0px 3px 0px 0px');    
+    $('.pane-closer').css('transform','rotate(0deg)');
+    $("#viewerFillDiv" + '> div').each(function() {
+       if($(this).hasClass("minimized-bar")){
+            $(this).css('width','100%');
+            $(this).css('height','32px');
+        }
+    });
     viewersStacked = true;
+    resizeViewerFillDivs();
     resizeAll();    
 }
 function unstackViews(){
     $('#stackIcon').css('transform','rotate(0deg)');
-    if(showStereoPane==1){
-        $('#subFillDivRight').css('width','50%');
-        $('#subFillDivLeft').css('width','50%');
-    }
-    else if(showStereoPane==2){
-        $('#subFillDivRight').css('width','33%');
-        $('#subFillDivMiddle').css('width','34%');
-        $('#subFillDivLeft').css('width','33%');
-    }
-    else{
-        $('#subFillDivLeft').css('height','100%');
-    }
-    $('#subFillDivRight').css('height','100%');
-    $('#subFillDivMiddle').css('height','100%');
-    $('#subFillDivLeft').css('height','100%');
+    $('.pane-opener').css('transform','rotate(90deg)');    
+    //$('.pane-opener').parent().css('padding','3px 3px 0px 0px');    
+    $('.pane-closer').css('transform','rotate(270deg)');    
+    $("#viewerFillDiv" + '> div').each(function() {
+        if($(this).hasClass("minimized-bar")){
+            $(this).css('height','100%');
+            $(this).css('width','32px');
+        }
+    });
     viewersStacked = false;
+    resizeViewerFillDivs();
     resizeAll();    
 }
 
 function show2DViewer(){
+    $('#subFillDivLeft').css('display','inline-block');
     $('#subFillDivRight').css('display','none');
     $('#subFillDivMiddle').css('display','none');
+    $("#rightMinimized").hide();
+    $("#middleMinimized").hide();
+    $("#leftMinimized").hide();
+    $("#leftPaneToggle").hide();
     $('#subFillDivLeft').css('width','100%');
     $('#subFillDivLeft').css('height','100%');
     $(".nav-two-cam").css('display','none');
@@ -452,8 +536,13 @@ function show2DViewer(){
 }
 
 function showTrinocViewer(){
+    $('#subFillDivLeft').css('display','inline-block');
     $('#subFillDivMiddle').css('display','inline-block');
     $('#subFillDivRight').css('display','inline-block');
+    $("#rightMinimized").hide();
+    $("#middleMinimized").hide();
+    $("#leftMinimized").hide();
+    $("#leftPaneToggle").show();
     $('#subFillDivRight').css('width','33%');
     $('#subFillDivMiddle').css('width','34%');
     $('#subFillDivLeft').css('width','33%');
@@ -474,9 +563,14 @@ function showTrinocViewer(){
 
 function showStereoViewer(){
     $('#subFillDivMiddle').css('display','none');
+    $('#subFillDivLeft').css('display','inline-block');
     $('#subFillDivRight').css('display','inline-block');
     $('#subFillDivRight').css('width','50%');
     $('#subFillDivLeft').css('width','50%');
+    $("#rightMinimized").hide();
+    $("#middleMinimized").hide();
+    $("#leftMinimized").hide();
+    $("#leftPaneToggle").show();
     $(".nav-two-cam").css('display','block');
     $(".nav-three-cam").css('display','none');
     $("#stackButton").css('display','block');

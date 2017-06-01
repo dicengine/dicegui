@@ -240,11 +240,17 @@
         <div class="fluid-col">
           <div id="innerFluidLeftCol" class="inner-fluid-left-col">
             <div id="viewerFillDiv" class="fill-div">
+              <div id="leftMinimized" class="minimized-bar">
+                <div class="minimized-bar-banner">
+                    <span class="toggle-icon action-li" title="show this view"><i class="material-icons md-dark pane-opener" style="transform:rotate(90deg)">open_in_browser</i></span>
+                </div>
+              </div>
               <div id="subFillDivLeft" class="sub-fill-div">
                 <div class="toggle-div">
                   <div class="toggle-div-banner">
                     <span class="toggle-title">VIEW CONTROL</span>
                     <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
+                    <span class="toggle-icon action-li" id="leftPaneToggle" title="hide this view"><i class="material-icons md-dark pane-closer" style="transform:rotate(270deg)">open_in_browser</i></span>
                   </div> <!-- end toggle div banner -->
                   <div class="toggle-div-body">
                     <i id="sssigPreview" class="material-icons md-dark action-li" title="preview sssig mask">check_circle</i>
@@ -281,11 +287,17 @@
                  </div>
               </div> <!-- end fill div left -->
 
+              <div id="middleMinimized" class="minimized-bar">
+                <div class="minimized-bar-banner">
+                    <span class="toggle-icon action-li" title="show this view"><i class="material-icons md-dark pane-opener" style="transform:rotate(90deg)">open_in_browser</i></span>
+                </div>
+              </div>
               <div id="subFillDivMiddle" class="sub-fill-div">
                 <div class="toggle-div">
                 <div class="toggle-div-banner">
                     <span class="toggle-title">VIEW CONTROL</span>
                     <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
+                    <span class="toggle-icon action-li" title="hide this view"><i class="material-icons md-dark pane-closer" style="transform:rotate(270deg)">open_in_browser</i></span>
                 </div> <!-- end toggle div banner -->
                 <div class="toggle-div-body">
                     <i class="material-icons md-dark action-li zoom-in-middle" title="zoom in">zoom_in</i>
@@ -308,12 +320,18 @@
                  <div id="viewWindowMiddle" class="fill-div"  style="background-color:darkgray;">
                    <div id="panzoomMiddle" class="panzoom"></div>
                  </div>
-               </div> <!-- end fill div middle -->
+              </div> <!-- end fill div middle -->
+              <div id="rightMinimized" class="minimized-bar">
+                <div class="minimized-bar-banner">
+                    <span class="toggle-icon action-li" title="show this view"><i class="material-icons md-dark pane-opener" style="transform:rotate(90deg)">open_in_browser</i></span>
+                </div>
+              </div>
               <div id="subFillDivRight" class="sub-fill-div">
                 <div class="toggle-div">
                 <div class="toggle-div-banner">
                     <span class="toggle-title">VIEW CONTROL</span>
                     <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
+                    <span class="toggle-icon action-li" title="hide this view"><i class="material-icons md-dark pane-closer" style="transform:rotate(270deg)">open_in_browser</i></span>
                 </div> <!-- end toggle div banner -->
                 <div class="toggle-div-body">
                     <i class="material-icons md-dark action-li zoom-in-right" title="zoom in">zoom_in</i>
