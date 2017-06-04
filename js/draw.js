@@ -279,17 +279,19 @@ function drawROIs(){
         polygon.maskWith(mask);
     }
     // draw a default subset on the image in the center
-    var ss_size = $("#subsetSize").val();
-    polygon = draw.rect(ss_size,ss_size).move(refImageWidthLeft/2 - ss_size/2,refImageHeightLeft/2 - ss_size/2).attr({ fill: 'none', stroke: '#ffff00', 'stroke-opacity': '0.8','stroke-width': '3', 'stroke-linecap':'round' }).id('subsetBox');    
-    draw.style('z-index',2);
-    draw.style('position','absolute');
-    polygon.draggable().on('dragmove',function(e){
+    if($("#analysisModeSelect").val()=="subset"){
+        var ss_size = $("#subsetSize").val();
+        polygon = draw.rect(ss_size,ss_size).move(refImageWidthLeft/2 - ss_size/2,refImageHeightLeft/2 - ss_size/2).attr({ fill: 'none', stroke: '#ffff00', 'stroke-opacity': '0.8','stroke-width': '3', 'stroke-linecap':'round' }).id('subsetBox');    
+        draw.style('z-index',2);
+        draw.style('position','absolute');
+        polygon.draggable().on('dragmove',function(e){
             e.preventDefault();
             var scale = $("#panzoomLeft").panzoom("getMatrix")[0];
             var imgX = Math.round(e.detail.p.x / scale);
             var imgY = Math.round(e.detail.p.y / scale);
             this.move(imgX,imgY);
-    });
+        });
+    }
 
     // draw the axis for best fit plane if that is enabled
     if($("#bestFitCheck")[0].checked && (showStereoPane==1||showStereoPane==2)){

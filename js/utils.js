@@ -590,10 +590,12 @@ $("#analysisModeSelect").on('change',function() {
     if($(this).val()=="subset"){
         $("#subsetParams").show();
         $("#trackingParams").hide();
+        drawROIs();
     }
     else if($(this).val()=="tracking"){
         $("#subsetParams").hide();
         $("#trackingParams").show();
+        clearDrawnROIs();
     }
 });
 
