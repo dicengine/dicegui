@@ -237,15 +237,15 @@ function updateCineDisplayImage(fileName,index,mode,reset_ref_ROIs){
             else{
 		if(mode==0){
                     getFileObject(tiffImageName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true);
+                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
                     });
                 }else if(mode==1){
                     getFileObject(tiffImageName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true);
+                        loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
                     });
                 }else{
                     getFileObject(tiffImageName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",true);
+                        loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
                     });
                 }
             }
@@ -304,18 +304,21 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
                              //alert(stats[1]);
                              //alert(stats[2]);
                              // check that the two cine files have valid frame ranges
-                             if($("#cineStartPreview span").text()!=""||$("#cineEndPreview span").text()!="")
-                                 if($("#cineStartPreview span").text()!=stats[1]||$("#cineEndPreview span").text()!=stats[2]){
+                             if($("#cineStartPreviewSpan").text()!=""||$("#cineEndPreviewSpan").text()!="")
+                                 if($("#cineStartPreviewSpan").text()!=stats[1]||$("#cineEndPreviewSpan").text()!=stats[2]){
                                      alert("Error, all .cine files need to have matching frame ranges");
                                      return false;
                                  }
                              cineFirstFrame = stats[1];
-                             $("#cineStartPreview span").text(stats[1]);
-                             $("#cineEndPreview span").text(stats[2]);
+                             $("#cineStartPreviewSpan").text(stats[1]);
+                             $("#cineEndPreviewSpan").text(stats[2]);
                              if(mode==0){
                                  $("#cineRefIndex").val(stats[1]);
+                                 $("#frameScroller").val(stats[1]);
                                  $("#cineStartIndex").val(stats[1]);
+                                 $("#frameScroller").attr('min',stats[1]);
                                  $("#cineEndIndex").val(stats[2]);
+                                 $("#frameScroller").attr('max',stats[2]);
                              }
                              // convert the cine to tiff
                              // always start with the ref index for the initial display
@@ -350,6 +353,7 @@ for (var i = 0; i < binaryElements.length; i++) {
 }
 
 function callOpenCVServerExec() {
+    if($("#analysisModeSelect").val()!="tracking") return;
     // check to see that there is at least one image selected:
     if(refImagePathLeft=='undefined'&&refImagePathRight=='undefined'&&refImagePathMiddle=='undefined') return;
     

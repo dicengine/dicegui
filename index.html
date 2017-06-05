@@ -133,8 +133,9 @@
               <input id="middleCineInput" type="file" accept=".cine">
               <div id="cineMiddlePreview" style="word-wrap: break-word; margin-bottom:20px;" class="nav-item"><span id="cineMiddlePreviewSpan"></span></div>
             </div> <!-- end nav three cam -->
-              <div id="cineStartPreview" style="word-wrap: break-word; margin-bottom:10px;" class="nav-item">first frame: <span id="cineStartPreviewSpan"></span></div>
-              <div id="cineEndPreview" style="word-wrap: break-word; margin-bottom:10px;" class="nav-item">last frame: <span id="cineEndPreviewSpan"></span></div>
+              <p class="nav-item">frames:</p>
+              <div id="cineRangePreview" class="nav-item"><span id="cineStartPreviewSpan" style="display:block; float:left; width:75px;"></span><span id="cineEndPreviewSpan" style="display:block; text-align:right; float:right; width:75px;"></span></div>
+              <input class="nav-item" style="width:95%;" id="frameScroller" type="range" min="0" max="1" defaultValue="0" value="0" step="1">
               <div class="nav-item">ref index</div>
               <input class="nav-item" type="text" id="cineRefIndex" name="cineRefIndex" value="0" style="width:95%;">
               <div class="nav-item">start index</div>
