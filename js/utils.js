@@ -590,11 +590,13 @@ $("#analysisModeSelect").on('change',function() {
     if($(this).val()=="subset"){
         $("#subsetParams").show();
         $("#trackingParams").hide();
+        $("#sssigPreview").show();
         drawROIs();
     }
     else if($(this).val()=="tracking"){
         $("#subsetParams").hide();
         $("#trackingParams").show();
+        $("#sssigPreview").hide();
         clearDrawnROIs();
     }
 });
