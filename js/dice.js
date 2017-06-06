@@ -64,8 +64,7 @@ document.getElementById("writeLi").onclick = function() {
     writeInputFile(true);
 };
 
-document.getElementById("clearLi").onclick = function() {
-    if (confirm('clear working directory?\n\nThis action will clear the reference and deformed images, remove all ROIs, and reset the calibration file. Saved input files in this working directory will not be erased.')) {
+function resetWorkingDirectory(){
         $("#refImageText span").text('');
         $("#refImageTextRight span").text('');
         $("#refImageTextMiddle span").text('');
@@ -122,6 +121,11 @@ document.getElementById("clearLi").onclick = function() {
         deleteDisplayImageFiles(0);
         deleteDisplayImageFiles(1);
         deleteDisplayImageFiles(2);
+}
+
+document.getElementById("clearLi").onclick = function() {
+    if (confirm('clear working directory?\n\nThis action will clear the reference and deformed images, remove all ROIs, and reset the calibration file. Saved input files in this working directory will not be erased.')) {
+        resetWorkingDirectory();
     }else{
         return false;
     }

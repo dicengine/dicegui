@@ -373,6 +373,7 @@ function resizeView(toggler) {
 
     // the console tag should call the resize method here
     if($(toggler).attr('id')=='consoleToggle'){
+        resizeViewerFillDivs();
         resizeAll();
         showConsole = !showConsole;
     }
@@ -617,6 +618,7 @@ $("#fileSelectMode").on('change',function (){
         $(".nav-list").css('display','none');
         $(".nav-cine").css('display','block');
     }
+    resetWorkingDirectory();
 });
 
 $("#subsetSize").on('input',function(){

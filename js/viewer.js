@@ -228,6 +228,7 @@ function deleteDisplayImageFiles(lrm,cb){
         // es5
         // count up the number of potential files to delete
         var numExistingFiles = 0;
+        if(!dir)return;
         for(var i = 0; i < dir.length; i++) {
             if(dir[i].includes(nameToCheck))
                 numExistingFiles++;
