@@ -51,8 +51,21 @@ body {
     to {left: 100%;}
 }
 
+.suboption-wrapper {
+    width: 100%;
+    float: left;
+}
+.suboption-col {
+    width: 50%;
+    min-width: 175px;
+    float: left;
+}
+
 .suboption {
     margin-left: 20px;    
+}
+.subsuboption {
+    margin-left: 40px;    
 }
 
 /* Rules for sizing the icon. */

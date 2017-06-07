@@ -348,11 +348,38 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
     }); // end fileName fs.stat
 }
 
-var binaryElements = document.getElementsByClassName("binaryOption");
+var binaryElements = document.getElementsByClassName("filterOption");
 for (var i = 0; i < binaryElements.length; i++) {
     binaryElements[i].addEventListener('change', function() {
         if(!$("#binaryAutoUpdateCheck")[0].checked) return;
         callOpenCVServerExec();
+  });
+}
+
+var blobElements = document.getElementsByClassName("blobOption");
+for (var i = 0; i < blobElements.length; i++) {
+    blobElements[i].addEventListener('change', function() {
+        // convert the id into the right label
+        var inputId = $(this).attr('id');
+        var spanLabel = '#' + inputId + 'Label';
+        var otherInputId = inputId.substr(0,inputId.length-3);
+        // ensure that the max is always greater than the min
+        var lastThree = inputId.substr(inputId.length - 3);
+        if(lastThree == "Max"){
+            otherInputId = '#' + otherInputId + 'Min';
+            var otherVal = $(otherInputId).val();
+            if(+$(this).val() < +otherVal){
+                $(this).val(otherVal);
+            }
+        }else{
+            otherInputId = '#' + otherInputId + 'Max';
+            var otherVal = $(otherInputId).val();
+            console.log('val is ' + $(this).val() + ' other val is ' + otherVal);
+            if(+$(this).val() > +otherVal){
+                $(this).val(otherVal);
+            }
+        }        
+        $(spanLabel).text($(this).val());
   });
 }
 
@@ -362,7 +389,7 @@ function callOpenCVServerExec() {
     if(refImagePathLeft=='undefined'&&refImagePathRight=='undefined'&&refImagePathMiddle=='undefined') return;
     
     // check to see if any filters are applied:
-    if(!$("#binaryCheck")[0].checked){
+    if(!$("#binaryCheck")[0].checked&&!$("#blobCheck")[0].checked){
         return;
     }
     // generate the command line
@@ -388,6 +415,37 @@ function callOpenCVServerExec() {
             }else{
                 args.push(0);
             }            
+        }
+        if($("#blobCheck")[0].checked){
+            args.push('Filter:Blob');
+            if($("#blobAreaCheck")[0].checked){
+                args.push(1);
+            }else{
+                args.push(0);
+            }            
+            args.push($("#blobAreaMin").val());
+            args.push($("#blobAreaMax").val());
+            if($("#blobCircularityCheck")[0].checked){
+                args.push(1);
+            }else{
+                args.push(0);
+            }            
+            args.push($("#blobCircularityMin").val());
+            args.push($("#blobCircularityMax").val());
+            if($("#blobEccentricityCheck")[0].checked){
+                args.push(1);
+            }else{
+                args.push(0);
+            }            
+            args.push($("#blobEccentricityMin").val());
+            args.push($("#blobEccentricityMax").val());
+            if($("#blobConvexityCheck")[0].checked){
+                args.push(1);
+            }else{
+                args.push(0);
+            }            
+            args.push($("#blobConvexityMin").val());
+            args.push($("#blobConvexityMax").val());
         }
         consoleMsg('calling OpenCVServerExec with args ' + args);    
     
