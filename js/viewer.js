@@ -582,7 +582,7 @@ $("#cineRefIndex").change(function () {
             alert("invalid reference index");
             return;
         }
-    var offsetIndex = Number(refIndex) - cineFirstFrame;
+    var offsetIndex = Number(refIndex);// - cineFirstFrame;
     //alert("offset_index " + offsetIndex);
     if(cinePathLeft!="undefined")
         updateCineDisplayImage(cinePathLeft,offsetIndex,0);
