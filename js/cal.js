@@ -1,10 +1,78 @@
 $(window).load(function(){
-    workingDirectory = localStorage.getItem("workingDirectory");
+    workingDirectory = localStorage.getItem("workingDirectory"); 
     localStorage.setItem("calFileName","");
     $("#calibrateButton").prop("disabled",true);
     $("#acceptButton").prop("disabled",true);
     $("#cancelButton").hide();
+
+    console.log('useTrinoc is ' + localStorage.getItem("useTrinoc"));
+    if(localStorage.getItem("useTrinoc")=='true'){
+        $( '.trinocOption' ).show();
+        $('#leftPreviewToggle').css('width','32%');        
+        $('#rightPreviewToggle').css('width','32%');        
+    }
+    else{
+        $( '.trinocOption' ).hide();
+        $('#leftPreviewToggle').css('width','48.5%');        
+        $('#rightPreviewToggle').css('width','48.5%');        
+    }
+
+    // .load the images if they exist
+    refreshCalDisplayImages();
+
+    // detect a change to any of the image files and update display
+    fs.watchFile(fullPath('','.cal_left.png'), (curr, prev) => {
+        refreshCalDisplayImages();
+    });
 });
+
+$( "#selectable" ).selectable();
+
+$("#calFrameScroller").change(function(){
+    $("#frameCurrentPreviewSpan").text($(this).val());
+});
+
+function refreshCalDisplayImages(){
+    var leftName = fullPath('','.cal_left.png');
+    fs.stat(leftName, function(err, stat) {
+        if(err == null) {
+            getFileObject(leftName, function (fileObject) {
+                // get the current width of the parent viewer
+                var vwidth = $("#viewWindowLeftCal").outerWidth();
+                loadImage(fileObject,"#panzoomLeftCal",vwidth,"auto",1,false,false,"","",false,function(){$("#viewWindowLeftCal").css('height',$("#viewWindowLeftCal img").outerHeight()+'px')});
+            });
+        }
+	else{
+            // no-op if the file isn't there
+        }
+    });
+    var rightName = fullPath('','.cal_right.png');
+    fs.stat(rightName, function(err, stat) {
+        if(err == null) {
+            getFileObject(rightName, function (fileObject) {
+                // get the current width of the parent viewer
+                var vwidth = $("#viewWindowRightCal").outerWidth();
+                loadImage(fileObject,"#panzoomRightCal",vwidth,"auto",1,false,false,"","",false,function(){$("#viewWindowRightCal").css('height',$("#viewWindowRightCal img").outerHeight()+'px')});
+            });
+        }
+	else{
+            // no-op if the file isn't there
+        }
+    });
+    var middleName = fullPath('','.cal_middle.png');
+    fs.stat(middleName, function(err, stat) {
+        if(err == null) {
+            getFileObject(middleName, function (fileObject) {
+                // get the current width of the parent viewer
+                var vwidth = $("#viewWindowMiddleCal").outerWidth();
+                loadImage(fileObject,"#panzoomMiddleCal",vwidth,"auto",1,false,false,"","",false,function(){$("#viewWindowMiddleCal").css('height',$("#viewWindowMiddleCal img").outerHeight()+'px')});
+            });
+        }
+	else{
+            // no-op if the file isn't there
+        }
+    });
+}
                
 function startProgress (){
     $("#runLoaderCal").removeClass('post-loader-success');
@@ -42,25 +110,55 @@ $("#calMode").on('change',function (){
     }
 });
 
+function updateSequenceLabels(stats){
+    $("#imagePrefix").val(stats.prefix);
+    $("#startIndex").val(stats.startIndex);
+    $("#endIndex").val(stats.endIndex);
+    $("#skipIndex").val(stats.frameInterval);
+    $("#numDigits").val(stats.numDigits);
+    $("#stereoLeftSuffix").val(stats.leftSuffix);
+    $("#stereoRightSuffix").val(stats.rightSuffix);
+    $("#imageExtension").val(stats.extension);
+
+    $("#calFrameScroller").val(stats.startIndex);
+    $("#frameStartPreviewSpan").text(stats.startIndex);
+    $("#frameCurrentPreviewSpan").text(stats.startIndex);
+    $("#frameEndPreviewSpan").text(stats.endIndex);
+    $("#calFrameScroller").attr('min',stats.startIndex);
+    $("#calFrameScroller").attr('max',stats.endIndex);
+    $("#calFrameScroller").attr('step',stats.frameInterval);
+    
+    updateImageSequencePreview();
+
+    updateSelectableList();
+   
+}
+
+$("#changeImageFolder").on("click",function () {
+    this.value = null;
+});
+
 $("#changeImageFolder").click(function(){
     var path =  dialog.showOpenDialog({defaultPath: workingDirectory, properties: ['openDirectory']});
     if(path){
-        $('#imageFolder span').text(path[0]);
-        updateImageSequencePreview();
+        autoDetectImageSequence(path[0],updateSequenceLabels);
+        $('#imageFolder span').text(path[0]);    
     }
 });
 
-$("#imagePrefix,#startIndex,#numDigits,#imageExtension,#stereoLeftSuffix,#stereoRightSuffix").on('keyup',function(){
+$("#imagePrefix,#startIndex,#endIndex,#skipIndex,#numDigits,#imageExtension,#stereoLeftSuffix,#stereoRightSuffix").on('keyup',function(){
     updateImageSequencePreview();
+    updateSelectableList();
 });
 
 $("#binaryThresh").on('input',function(){
     $("#binaryLabel").text($(this).val());
 });
 
-function concatImageSequenceName(){
+function concatImageSequenceName(frame){
     var fullImageName = "";
-    $('#imageSequencePreview span').text('');    
+    if(!arguments.length)
+        $('#imageSequencePreview span').text('');    
     fullImageName = $("#imageFolderSpan").text();
     if(os.platform()=='win32'){
         fullImageName += '\\';
@@ -69,7 +167,11 @@ function concatImageSequenceName(){
     }
     fullImageName += $("#imagePrefix").val();
     // get the number of digits in the ref index
-    var tmpNum = Number($("#startIndex").val());
+    var tmpNum = 0;
+    if(arguments.length)
+        tmpNum = Number(frame);
+    else
+        tmpNum = Number($("#startIndex").val());
     var defDig = 0;
     if(tmpNum==0)
         defDig = 1;
@@ -81,12 +183,36 @@ function concatImageSequenceName(){
         for(j=0;j<digits - defDig;++j){
             fullImageName += "0";
         }
-    fullImageName += $("#startIndex").val();
+    if(arguments.length)
+        fullImageName += frame;
+    else
+        fullImageName += $("#startIndex").val();
     fullImageName += $("#stereoLeftSuffix").val();                                                       
     fullImageName += $("#imageExtension").val();
     return fullImageName;
 }
 
+
+function updateSelectableList(){
+    $("#selectable").empty();
+
+    // check the bounds of the range
+    if($("#startIndex").val()=='undefined'||$("#endIndex").val()=='undefined'||$("#skipIndex").val()=='undefined') return;
+
+    var si = Number($("#startIndex").val());
+    var ei = Number($("#endIndex").val());
+    var step = Number($("#skipIndex").val());
+    if(ei<si) return;
+    if(step==0) return;
+    
+    // for each file in the sequence, add an item to the selectable list:
+    for(i=si;i<=ei;i+=step){
+        fileName = concatImageSequenceName(i);
+        // strip off everything before the last slash or backslash
+        fileName = fileName.split(/[\\\/]/).pop();
+        $("#selectable").append('<li class="ui-widget-content">'+fileName+'</li>');
+    }
+}
 
 function updateImageSequencePreview(){
     var fullImageName = concatImageSequenceName();

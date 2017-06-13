@@ -421,7 +421,8 @@ function loadImage(file,viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCla
                         // clear the drawn ROIs
                         clearDrawnROIs();
                     }
-                    drawROIs();
+                    if(typeof drawROIs === "function")
+                        drawROIs();
                     callBack();
                     return true;
                 }
@@ -444,7 +445,8 @@ function loadImage(file,viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCla
                 // clear the drawn ROIs
                 clearDrawnROIs();
             }
-            drawROIs();
+            if(typeof drawROIs === "function")
+                drawROIs();
             callBack();
             //if($("#binaryAutoUpdateCheck")[0].checked)
             //    callOpenCVServerExec();
@@ -818,7 +820,11 @@ $("#initCross").click(function () {
 $("#performCal").click(function () {
     localStorage.setItem("workingDirectory",workingDirectory);
     localStorage.setItem("calFileName","");
-    var win = new BrowserWindow({ width: 600, height: 1000 });
+    if(showStereoPane==2)
+        localStorage.setItem("useTrinoc",true);
+    else
+        localStorage.setItem("useTrinoc",false);
+    var win = new BrowserWindow({ width: 1000, height: 1000 });
     win.on('closed', () => {
         calFileName = localStorage["calFileName"];
         if(calFileName != ""){

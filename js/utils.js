@@ -4,23 +4,6 @@
 //const homeDir = os.homedir();
 //const fs = require('fs');
 
-function fullPath(folder,file){
-    var filePath = workingDirectory;
-    if(folder!=''){
-        if(os.platform()=='win32'){
-            filePath += '\\' + folder;
-        }else{
-            filePath += '/' + folder;
-        }
-    }
-    if(os.platform()=='win32'){
-        filePath += '\\' + file;
-    }else{
-        filePath += '/' + file;
-    }
-    return filePath;
-}
-
 $(window).load(function(){
     initialize_gui(true);
 });
@@ -269,14 +252,14 @@ function updateResultsFilesList(){
 }
 
 // toggle the params menu on or off
-document.getElementById("paramsButton").onclick = function(){
+$("#paramsButton").click(function(){
     if($('#innerFluidRightCol').css('display')=='none'){
         showParams();
     }
     else {
         hideParams();
     }
-};
+});
 function showParams(){
     $('#innerFluidRightCol').css('display','inline-block');
     $('#innerFluidRightCol').css('width','25%');
@@ -294,15 +277,14 @@ function hideParams(){
 }
 
 // clear the console text
-document.getElementById("clearConsoleIcon").onclick = function() {eraseText("consoleWindow")};
+$("clearConsoleIcon").click(function() {eraseText("consoleWindow")});
 function eraseText(object_id) {
     document.getElementById(object_id).innerHTML = "Console output:" + '<br/><br/>';
-}
+};
 
 function consoleMsg(string){
     $("#consoleWindow").append(string + '</br>');
-    var objDiv = document.getElementById('consoleWindow');
-    objDiv.scrollTop = objDiv.scrollHeight;
+    $("#consoleWindow").scrollTop($("#consoleWindow").get(0).scrollHeight);
 }
 
 // resize the full divs on window resize
@@ -323,7 +305,7 @@ $(".pane-opener").click(function(){
     $(this).parent().parent().parent().hide();
     resizeViewerFillDivs();
     resizeAll();
-})
+});
 
 $(".pane-closer").click(function(){
     // gather the outer height and width of all columns

@@ -146,10 +146,45 @@ input[type="file"] {
     border: none;
     padding: 10px 20px;
     margin-right: 10px;
-    margin-top: 40px;
+    margin-bottom: 10px;
+    margin-top: 0px;
 }
 .calib-button:disabled {
     background-color: #666666;
+}
+
+#selectable .ui-selecting {
+    background: #ff0000;
+}
+#selectable .ui-selected {
+    background: #ff9999;
+    color: white;
+}
+.selectable-box {
+    margin-top:5px;
+    margin-bottom:10px;
+    height: calc(100% - 450px);
+    /*position:relative; bottom:10px;*/
+    width:100%;
+    overflow:scroll;
+    overflow-x:hidden;
+    background-color:#FFFFFF;
+    border:1px solid #D0D0D0;
+}
+#selectable {
+    list-style-type: none;
+    padding: 2px;
+    margin: 0;
+    width: 98%;
+}
+#selectable li {
+    margin: 0 0 3px 0;
+    padding: 3px;
+    font-size: 1em;
+    height: 25px;
+    list-style-position:inside;
+    background: #e6e6e6;
+    border-radius: 3px;
 }
 .banner-button {
     position: absolute;
