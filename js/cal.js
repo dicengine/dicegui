@@ -18,11 +18,59 @@ $(window).load(function(){
     }
 
     // .load the images if they exist
-    refreshCalDisplayImages();
+    //refreshCalDisplayImages();
 
     // detect a change to any of the image files and update display
-    fs.watchFile(fullPath('','.cal_left.png'), (curr, prev) => {
-        refreshCalDisplayImages();
+    //fs.watchFile(fullPath('','.cal_left.png'), (curr, prev) => {
+    //    refreshCalDisplayImages();
+    //});
+    // initialize panzooms                                                                                                            
+    $("#panzoomLeftCal").panzoom({
+        which: 2,
+        minScale: 0.05,
+        cursor: "pointer"
+    });
+    $("#panzoomRightCal").panzoom({
+        which: 2,
+        minScale: 0.05,
+        cursor: "pointer" 
+    });
+    $("#panzoomMiddleCal").panzoom({
+        which: 2,
+        minScale: 0.05,
+        cursor: "pointer"
+    });
+});
+
+// zoom on focal point from mousewheel 
+$("#panzoomLeftCal").parent().on('mousewheel.focal', function( e ) {
+    e.preventDefault();
+    var delta = e.delta || e.originalEvent.wheelDelta;
+    var zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
+    $("#panzoomLeftCal").panzoom('zoom', zoomOut, {
+        increment: 0.1,
+        animate: false,
+        focal: e
+    });
+});
+$("#panzoomRightCal").parent().on('mousewheel.focal', function( e ) {
+    e.preventDefault();
+    var delta = e.delta || e.originalEvent.wheelDelta;
+    var zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
+    $("#panzoomRightCal").panzoom('zoom', zoomOut, {
+        increment: 0.1,
+        animate: false,
+        focal: e
+    });
+});
+$("#panzoomMiddleCal").parent().on('mousewheel.focal', function( e ) {
+    e.preventDefault();
+    var delta = e.delta || e.originalEvent.wheelDelta;
+    var zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
+    $("#panzoomMiddleCal").panzoom('zoom', zoomOut, {
+        increment: 0.1,
+        animate: false,
+        focal: e
     });
 });
 
@@ -30,7 +78,13 @@ $( "#selectable" ).selectable();
 
 $("#calFrameScroller").change(function(){
     $("#frameCurrentPreviewSpan").text($(this).val());
+    previewCalImages();
 });
+
+function calConsoleMsg(string){
+    $("#calConsoleWindow").append(string + '</br>');
+    $("#calConsoleWindow").scrollTop($("#calConsoleWindow").get(0).scrollHeight);
+}
 
 function refreshCalDisplayImages(){
     var leftName = fullPath('','.cal_left.png');
@@ -110,6 +164,67 @@ $("#calMode").on('change',function (){
     }
 });
 
+function previewCalImages(){
+    // set up the arguments for the OpenCVServer
+    var args = [];
+    // create the list of files:
+    var leftName = concatImageSequenceName($("#calFrameScroller").val(),0);
+    console.log('leftName ' + leftName);
+    args.push(leftName);
+    args.push('.cal_left.png');
+    
+    var rightName = concatImageSequenceName($("#calFrameScroller").val(),1);
+    console.log('rightName ' + rightName);
+    args.push(rightName);
+    args.push('.cal_right.png');
+    if(localStorage.getItem("useTrinoc")=='true'){
+        var middleName = concatImageSequenceName($("#calFrameScroller").val(),2);
+        console.log('middleName ' + middleName);
+        args.push(middleName);
+        args.push('.cal_middle.png');
+    }
+    args.push('Filter:BinaryThreshold');
+    args.push(1); // 0 is gaussian 1 is mean
+    args.push(75); // block size
+    args.push(10); // threshold constant
+    args.push(0); // invert the colors ? TODO depends on the pattern type
+    args.push('Filter:Blob');
+    args.push(0); // use area filter
+    args.push(50); // min area
+    args.push(200); // max area
+    args.push(0); // use circularity
+    args.push(0.75); // circ min
+    args.push(1.0); // circ max
+    args.push(0); // eccentricity filter
+    args.push(0.0); // ecc min
+    args.push(1.0); // ecc max
+    args.push(0); // convexity
+    args.push(0.0); // convexity min
+    args.push(1.0); // convexity max
+        // call the filter exec                                                                                                    
+    var child_process = require('child_process');
+    var readline      = require('readline');
+    var proc = child_process.execFile(execOpenCVServerPath,args,{cwd:workingDirectory});
+    proc.on('error', function(){
+        alert('DICe OpenCVServer failed: invalid executable: ' + execOpenCVServerPath);
+    });
+    proc.on('close', (code) => {
+        console.log(`OpenCVServer exited with code ${code}`);
+        if(code!=0){
+            alert('OpenCVServer failed');
+        }
+        else{
+            refreshCalDisplayImages();
+        }
+    });
+    readline.createInterface({
+        input     : proc.stdout,
+        terminal  : false
+    }).on('line', function(line) {
+        calConsoleMsg(line);
+    });
+}
+
 function updateSequenceLabels(stats){
     $("#imagePrefix").val(stats.prefix);
     $("#startIndex").val(stats.startIndex);
@@ -131,7 +246,8 @@ function updateSequenceLabels(stats){
     updateImageSequencePreview();
 
     updateSelectableList();
-   
+
+    previewCalImages();
 }
 
 $("#changeImageFolder").on("click",function () {
@@ -147,16 +263,23 @@ $("#changeImageFolder").click(function(){
 });
 
 $("#imagePrefix,#startIndex,#endIndex,#skipIndex,#numDigits,#imageExtension,#stereoLeftSuffix,#stereoRightSuffix").on('keyup',function(){
-    updateImageSequencePreview();
-    updateSelectableList();
+    $("#calFrameScroller").val($("#startIndex").val());
+    $("#calFrameScroller").attr('min',$("#startIndex").val());
+    $("#calFrameScroller").attr('max',$("#endIndex").val());
+    $("#calFrameScroller").attr('step',$("#skipIndex").val());
+    $("#frameStartPreviewSpan").text($("#startIndex").val());
+    $("#frameCurrentPreviewSpan").text($("#startIndex").val());
+    $("#frameEndPreviewSpan").text($("#endIndex").val());
+    updateImageSequencePreview(updateSelectableList);
 });
 
 $("#binaryThresh").on('input',function(){
     $("#binaryLabel").text($(this).val());
 });
 
-function concatImageSequenceName(frame){
+function concatImageSequenceName(frame,mode){
     var fullImageName = "";
+    mode = mode || 0;
     if(!arguments.length)
         $('#imageSequencePreview span').text('');    
     fullImageName = $("#imageFolderSpan").text();
@@ -187,7 +310,12 @@ function concatImageSequenceName(frame){
         fullImageName += frame;
     else
         fullImageName += $("#startIndex").val();
-    fullImageName += $("#stereoLeftSuffix").val();                                                       
+    if(mode==0)
+      fullImageName += $("#stereoLeftSuffix").val();                                                       
+    else if(mode==1)
+      fullImageName += $("#stereoRightSuffix").val();                                                       
+    else if(mode==2)
+      fullImageName += $("#stereoMiddleSuffix").val();                                                       
     fullImageName += $("#imageExtension").val();
     return fullImageName;
 }
@@ -214,16 +342,18 @@ function updateSelectableList(){
     }
 }
 
-function updateImageSequencePreview(){
+function updateImageSequencePreview(cb){
     var fullImageName = concatImageSequenceName();
     $('#imageSequencePreview span').text(fullImageName);
 
+    cb = cb || $.noop;
     // see if the file exists:
     fs.stat(fullImageName, function(err, stat) {
         if(err == null) {
             $("#imageSequencePreview").css({color:"#009933"})
             $("#calibrateButton").prop("disabled",false);
             $("#cancelButton").show();
+            cb();
         }
         else{
             $("#imageSequencePreview").css({color:"#ff0000"})            
@@ -327,8 +457,8 @@ function callCalExec() {
         input     : proc.stdout,
         terminal  : false
     }).on('line', function(line) {
-        //console.log(line);                                                                                          
-        console.log(line);    
+        calConsoleMsg(line);
+        //console.log(line);    
     });
     $("#cancelButton").on('click',function(){
         proc.kill(); 

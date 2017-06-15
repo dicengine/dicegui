@@ -302,19 +302,23 @@ function loadImage(file,viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCla
         var extension = file.name.split('.').pop().toLowerCase();
         var localFileName = '.display_image_';
         var lrm =   0;
+        var copyRequired = false;
         if(viewer=="#panzoomLeft"){
             localFileName += 'left.';
             lrm = 0;
+            copyRequired = true;
         }else if(viewer=="#panzoomMiddle"){
             localFileName += 'middle.';
             lrm = 2;
-        }else{
+            copyRequired = true;
+        }else if(viewer=="#panzoomRight"){
             localFileName += 'right.';
             lrm = 1;
+            copyRequired = true;
         }
         localFileName = fullPath('',localFileName);
         localFileName += extension;
-        if(!file.name.includes('display_image_')){
+        if(!file.name.includes('display_image_')&&copyRequired){
             // copy the image file to the working directory as the display image
             deleteDisplayImageFiles(lrm,function(){copyFile(file.path,localFileName);});
         }

@@ -39,7 +39,7 @@ function autoDetectImageSequence(folderPath,cb){
             var nameLen = dir[i].length;
             // grab the first image file that comes along...                                                          
             var ext = dir[i].split('.').pop();
-            console.log('file in dir: ' + dir[i]);
+            //console.log('file in dir: ' + dir[i]);
             if(ext=='tif'||ext=='TIF'||ext=='TIFF'||ext=='tiff'||ext=='JPG'||ext=='JPEG'||ext=='jpeg'||ext=='jpg'||ext=='png'||ext=='PNG'){
                 // split up the name into components:
                 var trimName = dir[i];

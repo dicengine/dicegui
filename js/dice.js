@@ -399,6 +399,7 @@ function callOpenCVServerExec() {
         for(var i = 0; i < dir.length; i++) {
             if(dir[i].includes('.display_image')&&!dir[i].includes('filter')){
                 args.push(dir[i]);
+                args.push(dir[i].replace('.'+dir[i].split('.').pop(),"_filter.png"));
             }
         }
         if($("#binaryCheck")[0].checked){
