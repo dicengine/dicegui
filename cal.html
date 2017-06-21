@@ -24,7 +24,7 @@
   <body>
     <div class="wrapper" style="padding:10px;">
       <!-- image selection column -->
-      <div style="width:100%; height:65%; display:inline-block; min-height:696px;">
+      <div style="width:100%; height:700px; display:inline-block; min-height:700px;">
         <div calss="toggle-div" style="width:32%; height:100%; float:left;">
           <div class="toggle-div-banner">FILE SELECTION</div>
           <div class="toggle-div-body" style="height:calc(100% - 32px);">
@@ -123,6 +123,12 @@
             </select>
              <div>pattern spacing size</div>
              <input type="text" id="targetSpacingSize" name="targetSpacingSize" value="1.0" style="width:30%;">
+             <p style="margin-top:10px;"><input id="previewThreshCheck" type="checkbox"> preview threshold</p>
+             <p style="margin-top:10px;"><input id="adaptiveThreshCheck" type="checkbox" checked> use adaptive threshold</p>
+             <p id="calAdaptiveThreshP" style="margin-top:10px;">adaptive thresh constant: <label id="calAdaptiveThreshConstantLabel">50</label> (counts)</p>
+             <input id="calAdaptiveThreshConstant" type="range" min="-50" max="50.0" defaultValue="50" value="50" step="1">
+             <p id="calThreshP" style="margin-top:10px;">thresholding constant: <label id="calThreshConstantLabel">100</label> (counts)</p>
+             <input id="calThreshConstant" type="range" min="0" max="255.0" defaultValue="100" value="100" step="1">
              <div style="margin-top:20px; margin-right:10px;" id="patternNote">note: pattern width and height should only include markers inside and including the marker dot rows and columns</div>
              </div>
           </div><!-- end middle col top row-->
@@ -149,10 +155,10 @@
             </div><!-- end right col top row -->
             </div>
       </div> <!-- end second row -->
-     <div style="width:100%; height:auto; float:left;">
+     <div style="width:100%; height:calc(100% - 700px); float:left;">
         <div id="leftPreviewToggle" class="toggle-div" style="float:left;height:100%;width:32%;">
-          <div class="toggle-div-banner">PREVIEW LEFT</div>
-          <div class="toggle-div-body" style="height:calc(100% - 32px);min-height:200px;background-color:darkgray">
+          <div class="toggle-div-banner"><span style="display:block;float:left;text-align:left;width:40%;">PREVIEW LEFT</span><span id="previewLeftSpan" style="display:block;float:left;text-align:right;color:red;width:60%;"></span></div>
+          <div id="leftPreviewBody" class="toggle-div-body" style="padding:0px;height:calc(100% - 32px);min-height:200px;">
             <!--<div>
               <span style="width:33%; float:left; text-align:left;">LEFT</span>
               <span style="width:33%; float:left; text-align:left;" class="trinocOption">MIDDLE</span>
@@ -164,8 +170,8 @@
           </div> <!-- close body -->
           </div> <!-- close toggle div -->
           <div class="toggle-div trinocOption" style="float:left;height:100%;width:32%; margin-left:10px;">
-            <div class="toggle-div-banner">PREVIEW MIDDLE</div>
-            <div class="toggle-div-body" style="height:calc(100% - 32px);min-height:200px;background-color:darkgray">
+            <div class="toggle-div-banner"><span style="display:block;float:left;text-align:left;width:40%;">PREVIEW MIDDLE</span><span id="previewMiddleSpan" style="display:block;float:left;text-align:right;color:red;width:60%;"></span></div>
+            <div id="middlePreviewBody" class="toggle-div-body" style="padding:0px;height:calc(100% - 32px);min-height:200px;">
           
             <div id="viewWindowMiddleCal" class="trinocOption" style="background-color:#ffffff; width:100%; height:100%;">
                 <div id="panzoomMiddleCal" class="panzoom trinocOption"></div>
@@ -173,8 +179,8 @@
             </div> <!-- close body -->
           </div> <!-- close toggle div -->
           <div id="rightPreviewToggle" class="toggle-div" style="float:left;height:100%;width:32%; margin-left:10px;">
-            <div class="toggle-div-banner">PREVIEW RIGHT</div>
-            <div class="toggle-div-body" style="height:calc(100% - 32px);min-height:200px;background-color:darkgray">
+            <div class="toggle-div-banner"><span style="display:block;float:left;text-align:left;width:40%;">PREVIEW RIGHT</span><span id="previewRightSpan" style="display:block;float:left;text-align:right;color:red;width:60%;"></span></div>
+            <div  id="rightPreviewBody" class="toggle-div-body" style="padding:0px;height:calc(100% - 32px);min-height:200px;">
               <div id="viewWindowRightCal" style="background-color:#ffffff; width:100%; height:100%;">
                  <div id="panzoomRightCal" class="panzoom"></div>
               </div>

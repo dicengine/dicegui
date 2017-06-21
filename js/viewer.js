@@ -828,7 +828,7 @@ $("#performCal").click(function () {
         localStorage.setItem("useTrinoc",true);
     else
         localStorage.setItem("useTrinoc",false);
-    var win = new BrowserWindow({ width: 1000, height: 1000 });
+    var win = new BrowserWindow({ width: 1200, height: 1200 });
     win.on('closed', () => {
         calFileName = localStorage["calFileName"];
         if(calFileName != ""){
