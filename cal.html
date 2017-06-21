@@ -69,8 +69,8 @@
                </select>
                <img id="boardImage" src="./images/MarkerCalExample.png" alt="example checkerboard cal target" height="250" width="auto">
           </div>
-            <p style="margin-top:10px;">pattern width</p> 
-            <select id="calWidth" style="width:30%; margin-bottom:10px;">
+            <p class="board-size" style="margin-top:10px;">pattern width</p> 
+            <select class="board-size" id="calWidth" style="width:30%; margin-bottom:10px;">
                <option value="3">3</option>
                <option value="4">4</option>
                <option value="5">5</option>
@@ -95,8 +95,8 @@
                <option value="24">24</option>
                <option value="25">25</option>
             </select>
-            <p>pattern height</p>
-            <select id="calHeight" style="width:30%; margin-bottom:10px;">
+            <p class="board-size">pattern height</p>
+            <select class="board-size" id="calHeight" style="width:30%; margin-bottom:10px;">
                <option value="3">3</option>
                <option value="4">4</option>
                <option value="5">5</option>
@@ -121,15 +121,14 @@
                <option value="24">24</option>
                <option value="25">25</option>
             </select>
-             <div>pattern spacing size</div>
-             <input type="text" id="targetSpacingSize" name="targetSpacingSize" value="1.0" style="width:30%;">
+             <div style="margin-top:10px;">pattern spacing size</div>
+             <input type="text" id="targetSpacingSize" name="targetSpacingSize" value="1.0" style="width:30%;margin-top:5px;">
              <p style="margin-top:10px;"><input id="previewThreshCheck" type="checkbox"> preview threshold</p>
              <p style="margin-top:10px;"><input id="adaptiveThreshCheck" type="checkbox" checked> use adaptive threshold</p>
              <p id="calAdaptiveThreshP" style="margin-top:10px;">adaptive thresh constant: <label id="calAdaptiveThreshConstantLabel">50</label> (counts)</p>
              <input id="calAdaptiveThreshConstant" type="range" min="-50" max="50.0" defaultValue="50" value="50" step="1">
              <p id="calThreshP" style="margin-top:10px;">thresholding constant: <label id="calThreshConstantLabel">100</label> (counts)</p>
              <input id="calThreshConstant" type="range" min="0" max="255.0" defaultValue="100" value="100" step="1">
-             <div style="margin-top:20px; margin-right:10px;" id="patternNote">note: pattern width and height should only include markers inside and including the marker dot rows and columns</div>
              </div>
           </div><!-- end middle col top row-->
           <div class="toggle-div" style="width:32%; height:100%; float:left; margin-left:10px;">

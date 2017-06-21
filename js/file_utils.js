@@ -44,12 +44,19 @@ function autoDetectImageSequence(folderPath,cb){
                 // split up the name into components:
                 var trimName = dir[i];
                 // remove the extension                                                                           
-                trimName = trimName.substr(0,trimName.length - ext.length - 1); // minus 1 to get rid of the dot  
+                trimName = trimName.substr(0,trimName.length - ext.length - 1); // minus 1 to get rid of the dot
+                //console.log('trim name: ' + trimName);
                 var suffix = '_' + trimName.split('_').pop();
+                //console.log('suffix: ' + suffix);
                 trimName = trimName.substr(0,trimName.length - suffix.length);
+                //console.log('trim name: ' + trimName);
                 var digits = trimName.split(/[ \-_]+/).pop();
+                //console.log('digits: ' + digits);
                 var index = Number(digits);
+                //console.log('index: ' + index);
                 var tag = trimName.substr(0,trimName.length - digits.length);
+                if(tag=="") return;
+                //console.log('tag: ' + tag);
                 // always update the endIndex
                 endIndex = Number(digits);
                 if(leftImageIndex==-1){

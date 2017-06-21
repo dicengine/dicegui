@@ -4,6 +4,7 @@ $(window).load(function(){
     $("#calibrateButton").prop("disabled",true);
     $("#acceptButton").prop("disabled",true);
     $("#cancelButton").hide();
+    $('.board-size').hide();
 
     console.log('useTrinoc is ' + localStorage.getItem("useTrinoc"));
     if(localStorage.getItem("useTrinoc")=='true'){
@@ -156,21 +157,21 @@ function endProgress (success){
 $("#calMode").on('change',function (){
     if($(this).val()=="checkerboard"){
         $("#boardImage").attr("src","./images/CheckerboardExample.png");
-        $("#patternNote").hide();
         $("#binaryThresh").val(30);
         $("#binaryLabel").text($("#binaryThresh").val());
+        $('.board-size').show();
     }
     else if($(this).val()=="vic3d"){
         $("#boardImage").attr("src","./images/MarkerCalExample.png");
-        $("#patternNote").show();
         $("#binaryThresh").val(30);
         $("#binaryLabel").text($("#binaryThresh").val());
+        $('.board-size').hide();
     }
     else if($(this).val()=="vic3dDark"){
         $("#boardImage").attr("src","./images/DarkMarkerCalExample.png");
-        $("#patternNote").show();
         $("#binaryThresh").val(100);
         $("#binaryLabel").text($("#binaryThresh").val());
+        $('.board-size').hide();
     }
 });
 
@@ -204,11 +205,22 @@ function previewCalImages(){
         thresh = $("#calThreshConstant").val();
     }
     args.push('Filter:CalPreview');
+    if($("#calMode").val()=="checkerboard"){
+    args.push('Filter:BoardSize');
+        args.push($("#calWidth").val());
+        args.push($("#calHeight").val());
+    }
+    args.push('Filter:PatternSpacing');
+    args.push($("#targetSpacingSize").val());
     args.push('Filter:BinaryThreshold');
     args.push(1); // 0 is gaussian 1 is mean
     args.push(75); // block size
     args.push(thresh); // threshold constant
-    args.push(0); // invert the colors ? TODO depends on the pattern type
+    if($("#calMode").val()=="vic3dDark"){
+        args.push(1.0); // invert the colors for the dark pattern
+    }else{
+        args.push(0); // otherwise, do not invert
+    }
     args.push('Filter:Blob');
     args.push(0); // use area filter
     args.push(50); // min area
@@ -244,7 +256,7 @@ function previewCalImages(){
                 refreshCalDisplayImages();
                 if(code==2||code==4||code==6||code==8){
                     $("#leftPreviewBody").css('border', '3px solid red');
-                    $("#previewLeftSpan").text("not enough marker dots");
+                    $("#previewLeftSpan").text("error finding cal dots");
                 }
                 if(code==3||code==5||code==7){
                     $("#leftPreviewBody").css('border', '3px solid #00cc00');
@@ -252,7 +264,7 @@ function previewCalImages(){
                 }
                 if(code==3||code==4||code==7||code==8){
                     $("#rightPreviewBody").css('border', '3px solid red');
-                    $("#previewRightSpan").text("not enough marker dots");
+                    $("#previewRightSpan").text("error finding cal dots");
                 }
                 if(code==2||code==5||code==6){
                     $("#rightPreviewBody").css('border', '3px solid #00cc00');
@@ -260,15 +272,37 @@ function previewCalImages(){
                 }
                 if(code==5||code==6||code==7||code==8){
                     $("#middlePreviewBody").css('border', '3px solid red');
-                    $("#previewMiddleSpan").text("not enough marker dots");
+                    $("#previewMiddleSpan").text("error finding cal dots");
                 }
                 if(code==2||code==3||code==4){
                     $("#middlePreviewBody").css('border', '3px solid #00cc00');
-                    $("#previewMiddleSpan").text("not enough marker dots");
+                    $("#previewMiddleSpan").text("");
                 }
-            }
-            else{
-                //alert('OpenCVServer failed');
+                //if(code==9||code==11||code==13||code==15){
+                //    $("#leftPreviewBody").css('border', '3px solid red');
+                //    $("#previewLeftSpan").text("invalid num cal dots");
+                //}
+                //if(code==10||code==12||code==14){
+                //    $("#leftPreviewBody").css('border', '3px solid #00cc00');
+                //    $("#previewLeftSpan").text("");
+                //}
+                //if(code==10||code==11||code==14||code==15){
+                //    $("#rightPreviewBody").css('border', '3px solid red');
+                //    $("#previewRightSpan").text("invalid num cal dots");
+                //}
+                //if(code==9||code==12||code==13){
+                //    $("#rightPreviewBody").css('border', '3px solid #00cc00');
+                //    $("#previewRightSpan").text("");
+                //}
+                //if(code==12||code==13||code==14||code==15){
+                //    $("#middlePreviewBody").css('border', '3px solid red');
+                //    $("#previewMiddleSpan").text("invalid num cal dots");
+                //}
+                //if(code==9||code==10||code==11){
+                //    $("#middlePreviewBody").css('border', '3px solid #00cc00');
+                //    $("#previewMiddleSpan").text("");
+                //}
+            }else if(code==9){
                 // remove border on preview windows
                 $("#leftPreviewBody").css('border', '3px solid red');
                 $("#rightPreviewBody").css('border', '3px solid red');
@@ -283,6 +317,22 @@ function previewCalImages(){
                 $("#previewLeftSpan").text("image load failure");
                 $("#previewRightSpan").text("image load failure");
                 $("#previewMiddleSpan").text("image load failure");
+            }else{
+                //alert('OpenCVServer failed');
+                // remove border on preview windows
+                $("#leftPreviewBody").css('border', '3px solid red');
+                $("#rightPreviewBody").css('border', '3px solid red');
+                $("#middlePreviewBody").css('border', '3px solid red');
+                $("#previewLeftSpan").text("");
+                $("#previewRightSpan").text("");
+                $("#previewMiddleSpan").text("");
+                // clear the preview images
+                $("#panzoomLeftCal").html('');
+                $("#panzoomRightCal").html('');
+                $("#panzoomMiddleCal").html('');
+                $("#previewLeftSpan").text("preview failure (try adjusting threshold)");
+                $("#previewRightSpan").text("preview failure (try adjusting threshold)");
+                $("#previewMiddleSpan").text("preview failure (try adjusting threshold)");
             }
         }
     });
