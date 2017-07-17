@@ -237,7 +237,7 @@ function previewCalImages(){
         // call the filter exec                                                                                                    
     var child_process = require('child_process');
     var readline      = require('readline');
-    var proc = child_process.execFile(execOpenCVServerPath,args,{cwd:workingDirectory});
+    var proc = child_process.execFile(execOpenCVServerPath,args,{cwd:workingDirectory,maxBuffer:400*1024});
     proc.on('error', function(){
         alert('DICe OpenCVServer failed: invalid executable: ' + execOpenCVServerPath);
     });
@@ -546,17 +546,38 @@ function writeInputFile() {
     content += '<Parameter name="image_file_prefix" type="string" value="'+$("#imagePrefix").val()+'" />\n';
     content += '<Parameter name="stereo_left_suffix" type="string" value="'+$("#stereoLeftSuffix").val()+'"/>\n';
     content += '<Parameter name="stereo_right_suffix" type="string" value="'+$("#stereoRightSuffix").val()+'"/>\n';
-    content += '<Parameter name="cal_target_width" type="int" value="'+$("#calWidth").val()+'"/>\n';
-    content += '<Parameter name="cal_target_height" type="int" value="'+$("#calHeight").val()+'"/>\n';
-    if($("#calMode").val()=="checkerboard")
+    content += '<Parameter name="cal_target_has_adaptive" type="bool" value="';
+    var thresh = 0;
+    if($("#adaptiveThreshCheck")[0].checked){
+        content += 'true';
+        thresh = $("#calAdaptiveThreshConstant").val();
+    }
+    else{
+        content += 'false';
+        thresh = $("#calThreshConstant").val();
+    }
+    content += '"/>\n';    
+    content += '<Parameter name="cal_target_binary_constant" type="double" value="'+thresh+'"/>\n';
+    content += '<Parameter name="cal_target_block_size" type="double" value="75"/>\n'; // for now this is fixed
+    content += '<Parameter name="cal_target_is_inverted" type="bool" value="';
+    if($("#calMode").val()=="vic3dDark"){
+        content += 'true';
+    }
+    else{
+        content += 'false';
+    }
+    content += '"/>\n';
+    if($("#calMode").val()=="checkerboard"){
         content += '<Parameter name="cal_mode" type="int" value="0"/>\n';
+        content += '<Parameter name="cal_target_width" type="int" value="'+$("#calWidth").val()+'"/>\n';
+        content += '<Parameter name="cal_target_height" type="int" value="'+$("#calHeight").val()+'"/>\n';
+    }
     else if($("#calMode").val()=="vic3d")
         content += '<Parameter name="cal_mode" type="int" value="1"/>\n';
     else if($("#calMode").val()=="vic3dDark"){
         content += '<Parameter name="cal_mode" type="int" value="2"/>\n';
     }
     content += '<Parameter name="cal_target_spacing_size" type="double" value="'+$("#targetSpacingSize").val()+'"/>\n';
-    content += '<Parameter name="cal_binary_threshold" type="int" value="'+$("#binaryThresh").val()+'"/>\n';
     content += '</ParameterList>\n';
     fs.writeFile(fileName, content, function (err) {
         if(err){
@@ -589,7 +610,7 @@ function callCalExec() {
     var child_process = require('child_process');
     var readline      = require('readline');
     var logStream = fs.createWriteStream(logName, {flags: 'w'});
-    var proc = child_process.execFile(execCalPath, [fileName,outName],{cwd:workingDirectory});
+    var proc = child_process.execFile(execCalPath, [fileName,outName],{cwd:workingDirectory,maxBuffer:400*1024});
     proc.stdout.pipe(logStream);
     proc.stderr.pipe(logStream);
     readline.createInterface({
@@ -602,8 +623,11 @@ function callCalExec() {
     $("#cancelButton").on('click',function(){
         proc.kill(); 
     });
-    proc.on('close', (code) => {
-        console.log(`cal process exited with code ${code}`);
+    proc.on('exit', function (code, signal) {
+        console.log('cal process  exited with code = ' +code+'  signal = '+signal);
+    //});
+    //proc.on('close', (code) => {
+    //    console.log(`cal process exited with code ${code}`);
         $("#acceptButton").prop("disabled",false);
         if(code!=0){
             alert('DICe cal execution failed (see cal.log for details)');

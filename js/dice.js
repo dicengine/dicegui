@@ -157,9 +157,9 @@ function callDICeExec(resolution,ss_locs) {
     var readline      = require('readline');
     var proc;
     if(ss_locs)
-        proc = child_process.execFile(execPath, ['-i',inputFile,'-v','-t','--ss_locs'],{cwd:workingDirectory});
+        proc = child_process.execFile(execPath, ['-i',inputFile,'-v','-t','--ss_locs'],{cwd:workingDirectory,maxBuffer:400*1024});
     else
-        proc = child_process.execFile(execPath, ['-i',inputFile,'-v','-t'],{cwd:workingDirectory});
+        proc = child_process.execFile(execPath, ['-i',inputFile,'-v','-t'],{cwd:workingDirectory,maxBuffer:400*1024});
         
     readline.createInterface({
         input     : proc.stdout,
@@ -223,7 +223,7 @@ function updateCineDisplayImage(fileName,index,mode,reset_ref_ROIs){
     else
         tiffImageName += 'middle.tif';
     consoleMsg("converting file " + fileName + " to .tif for display");
-    var procConv = child_process.execFile(execCineToTiffPath, [fileName,index,index,tiffImageName],{cwd:workingDirectory})
+    var procConv = child_process.execFile(execCineToTiffPath, [fileName,index,index,tiffImageName],{cwd:workingDirectory,maxBuffer:400*1024})
         readline.createInterface({
             input     : procConv.stdout,
             terminal  : false
@@ -272,7 +272,7 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
         }
         else{
             console.log("getting frame range of cine file: " + fileName);
-            var proc = child_process.execFile(execCineStatPath, [fileName],{cwd:workingDirectory})
+            var proc = child_process.execFile(execCineStatPath, [fileName],{cwd:workingDirectory,maxBuffer:400*1024})
         }
         readline.createInterface({
             input     : proc.stdout,
@@ -453,7 +453,7 @@ function callOpenCVServerExec() {
         // call the filter exec
         var child_process = require('child_process');
         var readline      = require('readline');
-        var proc = child_process.execFile(execOpenCVServerPath,args,{cwd:workingDirectory});
+        var proc = child_process.execFile(execOpenCVServerPath,args,{cwd:workingDirectory,maxBuffer:400*1024});
 
         proc.on('error', function(){
             alert('DICe OpenCVServer failed: invalid executable: ' + execOpenCVServerPath);
@@ -511,12 +511,12 @@ function callCrossInitExec() {
     fs.stat(fileName, function(err, stat) {
         if(err == null) {
             console.log("found nonlinear seed file: projection_points.dat in the execution directory, enabling nonlinear warp");
-            proc = child_process.execFile(execCrossInitPath, [refImagePathLeft,refImagePathRight,'1'],{cwd:workingDirectory})
+            proc = child_process.execFile(execCrossInitPath, [refImagePathLeft,refImagePathRight,'1'],{cwd:workingDirectory,maxBuffer:400*1024})
             startProgress();
         }
         else{
             console.log("nonlinear seed file projection_points.dat not found");
-            proc = child_process.execFile(execCrossInitPath, [refImagePathLeft,refImagePathRight,'0'],{cwd:workingDirectory})
+            proc = child_process.execFile(execCrossInitPath, [refImagePathLeft,refImagePathRight,'0'],{cwd:workingDirectory,maxBuffer:400*1024})
             startProgress();
         }
         readline.createInterface({
