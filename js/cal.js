@@ -83,7 +83,7 @@ $("#panzoomMiddleCal").parent().on('mousewheel.focal', function( e ) {
     });
 });
 
-$( "#selectable" ).selectable();
+$( "#selectable").selectable();
 
 $("#calFrameScroller").on('input', function () {
         $("#frameCurrentPreviewSpan").text($(this).val());
@@ -234,7 +234,7 @@ function previewCalImages(){
     args.push(0); // convexity
     args.push(0.0); // convexity min
     args.push(1.0); // convexity max
-        // call the filter exec                                                                                                    
+    // call the filter exec
     var child_process = require('child_process');
     var readline      = require('readline');
     var proc = child_process.execFile(execOpenCVServerPath,args,{cwd:workingDirectory,maxBuffer:400*1024});
@@ -441,7 +441,6 @@ function concatImageSequenceName(frame,mode){
     return fullImageName;
 }
 
-
 function updateSelectableList(){
     $("#selectable").empty();
 
@@ -455,11 +454,13 @@ function updateSelectableList(){
     if(step==0) return;
     
     // for each file in the sequence, add an item to the selectable list:
+    var index = 0;
     for(i=si;i<=ei;i+=step){
         fileName = concatImageSequenceName(i);
         // strip off everything before the last slash or backslash
         fileName = fileName.split(/[\\\/]/).pop();
-        $("#selectable").append('<li class="ui-widget-content">'+fileName+'</li>');
+        $("#selectable").append('<li style="display:block;" id="calListItem_'+index+'" class="ui-widget-content"><span style="float:left;">'+fileName+'</span></li>');
+        index++;
     }
 }
 
@@ -473,7 +474,6 @@ function updateImageSequencePreview(cb){
         if(err == null) {
             $("#imageSequencePreview").css({color:"#009933"})
             $("#calibrateButton").prop("disabled",false);
-            $("#cancelButton").show();
             cb();
         }
         else{
@@ -578,6 +578,20 @@ function writeInputFile() {
         content += '<Parameter name="cal_mode" type="int" value="2"/>\n';
     }
     content += '<Parameter name="cal_target_spacing_size" type="double" value="'+$("#targetSpacingSize").val()+'"/>\n';
+    // turn off any images that have been manually turned off
+
+    var hasManualOffs = false;
+    $('#selectable .ui-selected').each(function() {
+        if(!hasManualOffs){
+            content += '<ParameterList name="cal_manual_skip_images">\n';
+        }
+        // convert the list id to an index and add it to the params
+        content += '<Parameter name="skip_'+$(this).attr('id').split('_').pop()+'" type="bool" value="true"/>\n';
+        hasManualOffs = true;
+    })
+    if(hasManualOffs){
+        content += '</ParameterList>\n';
+    }
     content += '</ParameterList>\n';
     fs.writeFile(fileName, content, function (err) {
         if(err){
@@ -591,21 +605,26 @@ function writeInputFile() {
 
 function callCalExec() {
     startProgress();
+    $("#cancelButton").show();
     var fileName = workingDirectory;
     var logName = workingDirectory;
     var outName = workingDirectory;
+    var errorName = workingDirectory;
     if(os.platform()=='win32'){
         fileName += '\\';
         logName += '\\';
         outName += '\\';
+        errorName += '\\';
     }else{
         fileName += '/';
         logName += '/';
         outName += '/';
+        errorName += '/';
     }
     fileName += 'cal_input.xml';
     logName += 'cal.log';
     outName += 'cal.txt';
+    errorName += 'cal_errors.txt';
     console.log('running ' + execCalPath +' with input file: ' + fileName);
     var child_process = require('child_process');
     var readline      = require('readline');
@@ -629,6 +648,7 @@ function callCalExec() {
     //proc.on('close', (code) => {
     //    console.log(`cal process exited with code ${code}`);
         $("#acceptButton").prop("disabled",false);
+        $("#cancelButton").hide();
         if(code!=0){
             alert('DICe cal execution failed (see cal.log for details)');
             endProgress(false);
@@ -660,6 +680,34 @@ function callCalExec() {
                 } // end null err
                 else{
                     console.log("error: could not open the log file " + logName);
+                }
+            }); // end stat
+            fs.stat(errorName, function(err, stat) {
+                if(err == null) {
+                    fs.readFile(errorName, 'utf8', function (err,dataS) {
+                         if (err) {
+                              return console.log(err);
+                         }
+                        var resDataLines = dataS.toString().split(/\r?\n/);
+                        console.log(resDataLines);
+                        var numImages = $('#selectable li').length;
+                        if(numImages==resDataLines.length-1){
+                            // remove all the exiting error notes
+                            $('.error-span').html('');
+                            var lineIndex = 0;
+                            $('#selectable li').each(function() {
+                                // update the string in each list item for the images
+                                $(this).append('<span class="error-span" style="float:right;">'+resDataLines[lineIndex]+'<\span>');
+                                lineIndex++;
+                             })
+                        }
+                        else{
+                            console.log('could not update image errors ' + numImages + ' ' + resDataLines.length);
+                        }
+                    }); // end read cal_error.txt file
+                } // end null err
+                else{
+                    console.log("error: could not open the cal error file " + errorName);
                 }
             }); // end stat
         } // end else
