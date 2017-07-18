@@ -65,7 +65,7 @@
                <select id="calMode" style="width:75%; margin-bottom:10px; margin-top:10px;">
                  <option value="vic3d">symmetric dot grid with special corner dots</option>
                  <option value="vic3dDark">symmetric dot grid with special corner dots (white dots on black)</option>
-                 <option value="checkerboard">checkerboard</option>
+                 <!--<option value="checkerboard">checkerboard</option>--> 
                </select>
                <img id="boardImage" src="./images/MarkerCalExample.png" alt="example checkerboard cal target" height="250" width="auto">
           </div>
@@ -131,7 +131,7 @@
              <input id="calThreshConstant" type="range" min="0" max="255.0" defaultValue="100" value="100" step="1">
              </div>
           </div><!-- end middle col top row-->
-          <div class="toggle-div" style="width:32%; height:100%; float:left; margin-left:10px;">
+          <div class="toggle-div" style="width:32%; height:100%; float:left; margin-left:10px; overflow:auto;">
             <div class="toggle-div-banner">CALIBRATION</div>
             <div class="toggle-div-body" style="height:calc(100% - 32px);;">
             <!-- preview area for the processing cal -->
@@ -142,10 +142,10 @@
              <button class="calib-button float-left" id="calibrateButton" type="button">calibrate</button>
              <button class="calib-button float-left" id="acceptButton" type="button">accept</button>
              <button class="calib-button float-left" id="cancelButton" type="button">abort</button>
-             <div id="calOutputPreview" style="font-weight: bold; word-wrap: break-word; margin-top:20px;">output file: <span id="calOutputPreviewSpan"></span></div>
-             <div id="rmsPreview" style="font-weight: bold; word-wrap: break-word; margin-top:10px;">rms error: <span id="rmsPreviewSpan"></span></div>
-             <div id="epipolarPreview" style="font-weight: bold; word-wrap: break-word; margin-top:10px;">avg epipolar error: <span id="epipolarPreviewSpan"></span></div>
-             <div style="margin-top:20px;">select files to remove from cal (ctrl click to deselect):</div>
+             <div id="calOutputPreview" style="font-weight: bold; word-wrap: break-word; margin-top:5px;">output file: <span style="font-weight:normal;"id="calOutputPreviewSpan"></span></div>
+             <div id="rmsPreview" style="font-weight: bold; word-wrap: break-word; margin-top:5px;">rms error: <span style="font-weight:normal;" id="rmsPreviewSpan"></span></div>
+             <div id="epipolarPreview" style="font-weight: bold; word-wrap: break-word; margin-top:5px;">avg epipolar error: <span style="font-weight:normal;" id="epipolarPreviewSpan"></span></div>
+             <div style="margin-top:20px;">select files to skip (ctrl click to deselect):</div>
              <div class="selectable-box">
                 <ol id="selectable">
                   <!--<li class="ui-widget-content">Item 1</li>-->

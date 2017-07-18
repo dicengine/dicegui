@@ -135,7 +135,7 @@
               <div id="cineMiddlePreview" style="word-wrap: break-word; margin-bottom:20px;" class="nav-item"><span id="cineMiddlePreviewSpan"></span></div>
             </div> <!-- end nav three cam -->
               <p class="nav-item">frames:</p>
-              <div id="cineRangePreview" class="nav-item"><span id="cineStartPreviewSpan" style="display:block; float:left; width:75px;"></span><span id="cineEndPreviewSpan" style="display:block; text-align:right; float:right; width:75px;"></span></div>
+              <div style="display:block" id="cineRangePreview" class="nav-item"><span id="cineStartPreviewSpan" style="display:block; float:left; width:33%;"></span><span id="cineCurrentPreviewSpan" style="display:block; float:left; text-align:center;  width:33%;"></span><span id="cineEndPreviewSpan" style="display:block; text-align:right; float:right; width:33%;"></span></div>
               <input class="nav-item" style="width:95%;" id="frameScroller" type="range" min="0" max="1" defaultValue="0" value="0" step="1">
               <div class="nav-item">ref index</div>
               <input class="nav-item" type="text" id="cineRefIndex" name="cineRefIndex" value="0" style="width:95%;">
@@ -390,7 +390,7 @@
                        <p>analysis mode:</p>
                        <select id="analysisModeSelect">
                            <option value="subset">subset-based full-field</option>
-                           <option value="tracking">tracking</option>
+                           <!--<option value="tracking">tracking</option>-->
                        </select>
                        <div id="subsetParams" class="param-options">
                            <p>initialization method:</p>

@@ -582,6 +582,7 @@ $("#cineRefIndex").change(function () {
     // filename left and right
     var refIndex = $("#cineRefIndex").val();
     $("#frameScroller").val(refIndex);
+    $("#cineCurrentPreviewSpan").text(refIndex);
     // check that the ref index is valid
     if(cinePathLeft!="undefined"||cinePathRight!="undefined"||cinePathMiddle!="undefined")
         if(refIndex < Number($("#cineStartPreviewSpan").text()) || refIndex > Number($("#cineEndPreviewSpan").text())){
@@ -600,11 +601,12 @@ $("#cineRefIndex").change(function () {
         callOpenCVServerExec();
 });
 
-$("#frameScroller").change(function(){
+$("#frameScroller").on('input', function () {
+    $("#cineCurrentPreviewSpan").text($(this).val());
+}).change(function(){
     $("#cineRefIndex").val($(this).val());
     $("#cineRefIndex").trigger("change");
 });
-
 
 $("#rightRefInput").on("click",function () {
     this.value = null;

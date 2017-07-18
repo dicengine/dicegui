@@ -411,9 +411,9 @@ $("#stereoButton").click(function(){
     if(oldText=='run 2d'){
         showStereoViewer();
         checkValidInput();
-    }else if(oldText=='run stereo'){
-        showTrinocViewer();
-        checkValidInput();        
+//    }else if(oldText=='run stereo'){ // turn off trinocular for now
+//        showTrinocViewer();
+//        checkValidInput();        
     }else{
         show2DViewer();
         checkValidInput();

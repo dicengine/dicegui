@@ -222,7 +222,7 @@ function updateCineDisplayImage(fileName,index,mode,reset_ref_ROIs){
         tiffImageName += 'right.tif';
     else
         tiffImageName += 'middle.tif';
-    consoleMsg("converting file " + fileName + " to .tif for display");
+    consoleMsg("converting file " + fileName + " index " + index + " to .tif for display");
     var procConv = child_process.execFile(execCineToTiffPath, [fileName,index,index,tiffImageName],{cwd:workingDirectory,maxBuffer:400*1024})
         readline.createInterface({
             input     : procConv.stdout,
@@ -315,14 +315,15 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
                                  }
                              cineFirstFrame = stats[1];
                              $("#cineStartPreviewSpan").text(stats[1]);
+                             $("#cineCurrentPreviewSpan").text(stats[1]);
                              $("#cineEndPreviewSpan").text(stats[2]);
                              if(mode==0){
                                  $("#cineRefIndex").val(stats[1]);
-                                 $("#frameScroller").val(stats[1]);
                                  $("#cineStartIndex").val(stats[1]);
-                                 $("#frameScroller").attr('min',stats[1]);
                                  $("#cineEndIndex").val(stats[2]);
                                  $("#frameScroller").attr('max',stats[2]);
+                                 $("#frameScroller").attr('min',stats[1]);
+                                 $("#frameScroller").val(stats[1]);
                              }
                              // convert the cine to tiff
                              // always start with the ref index for the initial display
@@ -336,7 +337,7 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
                                  cinePathMiddle = file.path;
                                  $("#cineMiddlePreview span").text(file.name);
                              }
-                             deleteDisplayImageFiles(mode,function(){updateCineDisplayImage(fileName,"0",mode,reset_ref_ROIs);});
+                             deleteDisplayImageFiles(mode,function(){updateCineDisplayImage(fileName,stats[1],mode,reset_ref_ROIs);});
                              callback = callback || $.noop;
                              callback();
                              return true;
