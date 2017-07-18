@@ -34,6 +34,7 @@ function impl_input_xml_file(xml){
             }
         }); // end stat subset file
     }  // end has subset_file
+
     
     
     // set the step size
@@ -49,14 +50,6 @@ function impl_input_xml_file(xml){
     if(subset_size){
         $("#subsetSize").val(subset_size);
         $("#subsetSizeLabel").text(subset_size);
-    }
-    // see if there is a calibration parameters file
-    calPath = xml_get(xml,"calibration_parameters_file");
-    if(calPath && calPath !== 'null' && calPath != 'undefined'){
-        $("#calList").empty();
-        // pull off the file name from the above path
-        substrs = calPath.split(/[\\\/]/);
-        $("#calList").append("<li class='calListLi'>" + substrs[substrs.length-1] + "</li>");
     }
     // no text output files produced
     noText = xml_get(xml,"no_text_output_files");
@@ -167,9 +160,9 @@ function impl_input_xml_file(xml){
             ref_image_index = xml_get(xml,"reference_image_index");
             console.log('ref image index: ' + ref_image_index);
             if(ref_image_index) $("#refIndex").val(ref_image_index);
-            last_image_index = xml_get(xml,"last_image_index");
-            console.log('last image index: ' + last_image_index);
-            if(last_image_index) $("#endIndex").val(last_image_index);
+            end_image_index = xml_get(xml,"end_image_index");
+            console.log('last image index: ' + end_image_index);
+            if(end_image_index) $("#endIndex").val(end_image_index);
             start_image_index = xml_get(xml,"start_image_index");
             console.log('start image inde: ' + start_image_index);
             if(start_image_index) $("#startIndex").val(start_image_index);
@@ -227,6 +220,19 @@ function impl_input_xml_file(xml){
         }
     });
 
+    // see if there is a calibration parameters file
+    calPath = xml_get(xml,"calibration_parameters_file");
+    console.log('has calibration file: ' + calPath);
+    if(calPath && calPath !== 'null' && calPath != 'undefined'){
+        $("#calList").empty();
+        // pull off the file name from the above path
+        //substrs = calPath.split(/[\\\/]/);
+        //console.log(substrs);
+        var calFileName = calPath.split(/[\\\/]/).pop();
+        //console.log('cal file name is ' + calFileName);
+        $("#calList").append("<li class='calListLi'>" + calFileName + "</li>");
+    }
+    
     // see if there is a parameters file
     paramsFile = xml_get(xml,"correlation_parameters_file");
     if(paramsFile){
