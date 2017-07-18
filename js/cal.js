@@ -344,7 +344,7 @@ function previewCalImages(){
     });
 }
 
-function updateSequenceLabels(stats){
+function updateCalSequenceLabels(stats){
     $("#imagePrefix").val(stats.prefix);
     $("#startIndex").val(stats.startIndex);
     $("#endIndex").val(stats.endIndex);
@@ -378,7 +378,7 @@ $("#changeImageFolder").on("click",function () {
 $("#changeImageFolder").click(function(){
     var path =  dialog.showOpenDialog({defaultPath: workingDirectory, properties: ['openDirectory']});
     if(path){
-        autoDetectImageSequence(path[0],updateSequenceLabels);
+        autoDetectImageSequence(path[0],updateCalSequenceLabels);
         $('#imageFolder span').text(path[0]);    
     }
 });

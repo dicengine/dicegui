@@ -146,15 +146,28 @@ $("#changeWorkingDirLi").click(function(){
 $("#changeImageFolder").click(function(){
     var path =  dialog.showOpenDialog({defaultPath: workingDirectory, properties: ['openDirectory']});
     if(path){
+        autoDetectImageSequence(path[0],updateSequenceLabels);
         $('#imageFolder span').text(path[0]);
-        updateImageSequencePreview();
+        //updateImageSequencePreview();
     }
 });
 
-$("#imagePrefix,#refIndex,#numDigits,#imageExtension,#stereoLeftSuffix,#stereoRightSuffix,#stereoMiddleSuffix").on('keyup',function(){
-    updateImageSequencePreview();
-});
+function updateSequenceLabels(stats){
+    $("#imagePrefix").val(stats.prefix);
+    $("#startIndex").val(stats.startIndex);
+    $("#endIndex").val(stats.endIndex);
+    $("#skipIndex").val(stats.frameInterval);
+    $("#numDigits").val(stats.numDigits);
+    $("#stereoLeftSuffix").val(stats.leftSuffix);
+    $("#stereoRightSuffix").val(stats.rightSuffix);
+    $("#imageExtension").val(stats.extension);
 
+    updateImageSequencePreview(true);
+}
+
+$("#imagePrefix,#refIndex,#numDigits,#imageExtension,#stereoLeftSuffix,#stereoRightSuffix,#stereoMiddleSuffix").on('keyup',function(){
+    updateImageSequencePreview(false);
+});
 
 function concatImageSequenceName(stereoImageFlag){
     var fullImageName = "";
@@ -192,7 +205,7 @@ function concatImageSequenceName(stereoImageFlag){
 }
 
 
-function updateImageSequencePreview(){
+function updateImageSequencePreview(loadImage){
     var fullImageName = concatImageSequenceName(0);
     $('#imageSequencePreview span').text(fullImageName);
 
@@ -200,6 +213,8 @@ function updateImageSequencePreview(){
     fs.stat(fullImageName, function(err, stat) {
         if(err == null) {
             $("#imageSequencePreview").css({color:"#009933"})
+            if(loadImage)
+                load_image_sequence(false);
         }
         else{
             $("#imageSequencePreview").css({color:"#ff0000"})
