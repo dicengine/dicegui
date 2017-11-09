@@ -27,6 +27,8 @@ function initialize_gui(load_existing){
     // hide the stereo utilities
     $("#previewCross").hide();
     $("#initCross").hide();
+    // hide the tracking tools
+    $("#trackingParams").hide();
 
     // hide the minimized bars for closed views
     $("#leftMinimized").hide();
