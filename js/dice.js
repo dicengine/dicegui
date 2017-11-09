@@ -760,9 +760,9 @@ function writeParamsFile(only_write,resolution,ss_locs) {
     content += '<Parameter name="DISPLACEMENT_X" type="bool" value="true" />\n';
     content += '<Parameter name="DISPLACEMENT_Y" type="bool" value="true" />\n';
     if((showStereoPane==1||showStereoPane==2)){
-        content += '<Parameter name="MODEL_COORDINATE_X" type="bool" value="true" />\n';
-        content += '<Parameter name="MODEL_COORDINATE_Y" type="bool" value="true" />\n';
-        content += '<Parameter name="MODEL_COORDINATE_Z" type="bool" value="true" />\n';
+        content += '<Parameter name="MODEL_COORDINATES_X" type="bool" value="true" />\n';
+        content += '<Parameter name="MODEL_COORDINATES_Y" type="bool" value="true" />\n';
+        content += '<Parameter name="MODEL_COORDINATES_Z" type="bool" value="true" />\n';
         content += '<Parameter name="MODEL_DISPLACEMENT_X" type="bool" value="true" />\n';
         content += '<Parameter name="MODEL_DISPLACEMENT_Y" type="bool" value="true" />\n';
         content += '<Parameter name="MODEL_DISPLACEMENT_Z" type="bool" value="true" />\n';
