@@ -29,6 +29,7 @@ function initialize_gui(load_existing){
     $("#initCross").hide();
     // hide the tracking tools
     $("#trackingParams").hide();
+    $("#analysisModeSelect").val("subset");
 
     // hide the minimized bars for closed views
     $("#leftMinimized").hide();
