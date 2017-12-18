@@ -4,6 +4,7 @@
 
 // working directory
 var workingDirectory = "undefined";
+var linux_path = "";
 
 var execPath
 if(os.platform()=='win32'){
@@ -13,6 +14,13 @@ if(os.platform()=='win32'){
     execCineToTiffPath = 'C:\\Program Files (x86)\\Digital Image Correlation Engine\\DICe_CineToTiff.exe';
     execCalPath = 'C:\\Program Files (x86)\\Digital Image Correlation Engine\\DICe_Cal.exe';
     execOpenCVServerPath = 'C:\\Program Files (x86)\\Digital Image Correlation Engine\\DICe_OpenCVServer.exe';
+}else if(os.platform()=='linux'){
+    execPath = linux_path+'dice';
+    execCrossInitPath = linux_path+'DICe_CrossInit';
+    execCineStatPath = linux_path+'DICe_CineStat';
+    execCineToTiffPath = linux_path+'DICe_CineToTiff';
+    execCalPath = linux_path+'DICe_Cal';
+    execOpenCVServerPath = linux_path+'DICe_OpenCVServer';    
 }else{
     execPath = '/Applications/DICe.app/Contents/Resources/app/bin/dice';
     execCrossInitPath = '/Applications/DICe.app/Contents/Resources/app/bin/DICe_CrossInit';
