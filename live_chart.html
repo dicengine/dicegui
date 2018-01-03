@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Live Chart</title>
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+    <script>if (window.module) module = window.module;</script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="./js/requires.js" defer></script>
+    <script src="./js/live_chart.js" defer></script>
+    <!-- Local style sheet -->
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <!-- Google fonts and icons -->
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:400,600">
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  </head>
+  <body style="background-color:white;">
+    <div style="background-color:white;">
+      <div id="liveChart" style="display: block; position: absolute; width: 100%; height:100%; min-height: 600px;"></div>
+    </div> <!-- end content-->
+  </body>
+</html>
