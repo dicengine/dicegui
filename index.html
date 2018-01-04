@@ -215,6 +215,12 @@
               </label>
           </div>
           <!-- end nav-two-cam-->
+          <h1 style="margin-top:20px;">LIVE PLOTS</h1>
+          <ul>
+            <li id="liveChartLi" class="action-li"><i class="material-icons md-dark md-br-pad">insert_chart</i>
+              <span>live charts</span>
+            </li>
+          </ul>          
           <h1 style="margin-top:40px;">ANALYSIS</h1>
           <div id="runLoader" class="pre-loader"></div>
           <ul>
@@ -232,9 +238,6 @@
             </li>
             <li id="abortLi" class="action-li"><i class="material-icons md-dark md-br-pad">cancel</i>
               <span>abort analysis</span>
-            </li>
-            <li id="liveChartLi" class="action-li"><i class="material-icons md-dark md-br-pad">insert_chart</i>
-              <span>live charts</span>
             </li>
           </ul>
           <svg class="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
@@ -279,6 +282,9 @@
                     <i id="removeLastROI" class="material-icons md-dark action-li" title="remove last ROI">remove_circle</i>
                     <i id="removeLastExcluded"class="material-icons md-dark action-li" title="remove last exclusion">remove_circle_outline</i>
                     <i id="resetROIs"class="material-icons md-dark action-li" title="reset ROIs">block</i>
+                    <i id="addLivePlotPts"class="material-icons md-dark action-li" title="add live plot pt" style="margin-left:40px;">gps_fixed</i>
+                    <i id="addLivePlotLine"class="material-icons md-dark action-li" title="add live plot line">location_disabled</i>
+                    <i id="resetLivePlotPts"class="material-icons md-dark action-li" title="reset live plot pts">block</i>
                     <label id="ROIProgress"></label>
                   </div> <!-- end toggle div body -->
                 </div> <!-- end toggle div -->

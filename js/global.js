@@ -60,6 +60,8 @@ var bestFitYAxis = 0;
 // regions of interest
 var ROIDefsX = [[]];
 var ROIDefsY = [[]];
+var livePlotPtsX = [];
+var livePlotPtsY = [];
 var excludedDefsX = [[]];
 var excludedDefsY = [[]];
 var firstClick = true;
@@ -68,6 +70,14 @@ var addROIsActive = false;
 var addExcludedActive = false;
 var currentROIIndex = 0;
 var currentExcludedIndex = 0;
+var addLivePlotPtsActive = false;
+var addLivePlotLineActive = false;
+var livePlotLineXOrigin = 0;
+var livePlotLineYOrigin = 0;
+var livePlotLineXAxis = 0;
+var livePlotLineYAxis = 0;
+
+
 
 // state of windows etc. in interface
 var showPrefPane = true;

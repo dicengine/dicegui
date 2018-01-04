@@ -1,5 +1,17 @@
 google.charts.load('current', {'packages':['corechart','line']});
-google.charts.setOnLoadCallback(drawLiveChart);
+google.charts.setOnLoadCallback(liveChartRepeat);
+
+
+var nIntervId;
+ 
+function liveChartRepeat() {
+    drawLiveChart();
+    nIntervId = setInterval(drawLiveChart, 5000);
+}
+  
+//function stopTextColor() {
+//  clearInterval(nIntervId);
+//}
 
 function drawLiveChart () {
 
@@ -108,8 +120,9 @@ function addResultToChart (index,resFile,data,xCol,yCol,cb) {
            });
         } // end null
         else{
-            alert("could not read results file: " + resFile);
-            return;
+            // fail quietly if the file does not exist
+            //alert("could not read results file: " + resFile);
+            //return;
         }   
     }); // end stat    
 } // end function

@@ -698,6 +698,28 @@ function writeBestFitFile() {
             }
 }
 
+function writeLivePlotsFile() {
+    if(livePlotPtsX.length >0 || addLivePlotLineActive){
+        var livePlotFile = fullPath('','live_plot.dat');
+        consoleMsg('writing live plot data file ' + livePlotFile);
+        var LPcontent = '';
+        LPcontent += '# two numbers is a point four numbers is a line\n';
+        for(i=0;i<livePlotPtsX.length;++i){
+            LPcontent += livePlotPtsX[i] + ' ' + livePlotPtsY[i] + '\n'
+        }
+        if(addLivePlotLineActive){
+            LPcontent += livePlotLineXOrigin + ' ' + livePlotLineYOrigin + ' ' + livePlotLineXAxis + ' ' + livePlotLineYAxis + '\n'            
+        }
+        fs.writeFile(livePlotFile, LPcontent, function (err) {
+            if(err){
+                 alert("Error: an error ocurred creating the file "+ err.message)
+            }
+            consoleMsg('live_plot.dat file has been successfully saved');
+        });
+    }
+}
+
+
 function writeParamsFile(only_write,resolution,ss_locs) {
     // delete the best_fit_plane.dat file if it exists
     var fileName = fullPath('','best_fit_plane.dat');
@@ -712,6 +734,20 @@ function writeParamsFile(only_write,resolution,ss_locs) {
             // create a best_fit_plane.dat file if requested
         }else{
             writeBestFitFile();
+        }
+    });
+    // delete the live_plot.dat file if it exists
+    var LPFileName = fullPath('','live_plot.dat');
+    fs.stat(LPFileName, function(err, stat) {
+        if(err == null) {
+            fs.unlink(LPFileName, (err) => {
+                if (err) throw err;
+                console.log('successfully deleted '+LPFileName);
+            });
+            updateResultsFilesList();
+            writeLivePlotsFile();
+        }else{
+            writeLivePlotsFile();
         }
     });
     

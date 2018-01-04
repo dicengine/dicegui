@@ -219,6 +219,41 @@ function impl_input_xml_file(xml){
             $("#bestFitCheck")[0].checked = false;
         }
     });
+    
+    // see if there is a "live_plot.dat" file in the folder
+    var LPFileName = fullPath('','live_plot.dat');
+    fs.stat(LPFileName, function(err, stat) {
+        if(err == null) {
+            fs.readFile(LPFileName,'utf8',function(err,data){
+                if(err){
+                }else{
+                    var lines = data.toString().split('\n');
+                    for(var line = 0; line < lines.length; line++){
+                        if(lines[line].charAt(0)=='#') continue;
+                        var tokens = lines[line].split(/\s+/g).map(Number);
+                        if(isNaN(tokens[0]))continue;
+                        //console.log("tokens: " + tokens);
+                        //console.log("token length " +  tokens.length);
+                        if(tokens.length==2){
+                            livePlotPtsX.push(tokens[0]);
+                            livePlotPtsY.push(tokens[1]);
+                        }else if(tokens.length==4){
+                            livePlotLineXOrigin = tokens[0];
+                            livePlotLineYOrigin = tokens[1];
+                            livePlotLineXAxis = tokens[2];
+                            livePlotLineYAxis = tokens[3];
+                            addLivePlotLineActive = true;
+                            $("#addLivePlotLine").css('color','#33ccff');
+                        }else{
+                            //alert("Error reading live plot data: invalid line in file");
+                        }
+                    }
+                    // set the coordinates
+                    drawROIs();
+                }                
+            }); // end readfile
+        }
+    });
 
     // see if there is a calibration parameters file
     calPath = xml_get(xml,"calibration_parameters_file");

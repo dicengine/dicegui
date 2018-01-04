@@ -81,12 +81,25 @@ $("#panzoomLeft").mousedown(function(){
             var imgX = Math.round(viewX / scale);
             var imgY = Math.round(viewY / scale);
             if(imgX>=0&&imgX<refImageWidthLeft&&imgY>=0&&imgY<refImageHeightLeft){
-                var shapeIndex = 0;
+                //var shapeIndex = 0;
                 excludedDefsX[currentExcludedIndex].push(imgX);
                 excludedDefsY[currentExcludedIndex].push(imgY);
                 //printExcludedDefs();
             }
-         }
+        }
+        if(addLivePlotPtsActive){
+            var scale = $("#panzoomLeft").panzoom("getMatrix")[0];
+            var viewX = event.pageX - $(this).offset().left;
+            var viewY = event.pageY - $(this).offset().top;
+            var imgX = Math.round(viewX / scale);
+            var imgY = Math.round(viewY / scale);
+            if(imgX>=0&&imgX<refImageWidthLeft&&imgY>=0&&imgY<refImageHeightLeft){
+                livePlotPtsX.push(imgX);
+                livePlotPtsY.push(imgY);
+            }
+            drawROIs();
+        }
+        
     }
     // end shape if right click
     else if(event.button == 2 && shapeInProgress){
@@ -118,15 +131,45 @@ function completeShape(){
     firstClick = true;
 }
 
+$("#addLivePlotPts").click(function(){
+    if(addLivePlotPtsActive==false){
+        addLivePlotPtsActive = true;
+        addROIsActive = false;
+        addExcludedActive = false;
+        $("#addLivePlotPts").css('color','#33ccff');
+        $("#addROIs").css('color','rgba(0, 0, 0, 0.5)');
+        $("#addExcludeds").css('color','rgba(0, 0, 0, 0.5)');
+        // TODO abort any excluded shapes in progress
+    }else{
+        //$("#addROIs").css('background-color','transparent');
+        $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
+        addLivePlotPtsActive = false;
+        // TODO abort any ROIS in progress
+    }
+});
+
+$("#addLivePlotLine").click(function(){
+    if(addLivePlotLineActive==false){
+        addLivePlotLineActive = true;
+        $("#addLivePlotLine").css('color','#33ccff');
+    }else{
+        addLivePlotLineActive = false;
+        $("#addLivePlotLine").css('color','rgba(0, 0, 0, 0.5)');
+    }
+    drawROIs();
+});
+
 $("#addROIs").click(function(){
     completeShape();
     if(addROIsActive==false){
         addROIsActive = true;
         addExcludedActive = false;
+        addLivePlotPtsActive = false;
         //$("#addROIs").css('background-color','#33ccff');
         $("#addROIs").css('color','#33ccff');
         //$("#addExcludeds").css('background-color','transparent');
         $("#addExcludeds").css('color','rgba(0, 0, 0, 0.5)');
+        $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
         // TODO abort any excluded shapes in progress
     }else{
         //$("#addROIs").css('background-color','transparent');
@@ -140,11 +183,13 @@ $("#addExcludeds").click(function(){
     completeShape();
     if(addExcludedActive==false){
         addROIsActive = false;
+        addLivePlotPtsActive = false;
         addExcludedActive = true;
         //$("#addExcludeds").css('background-color','#33ccff');
         $("#addExcludeds").css('color','#33ccff');
         //$("#addROIs").css('background-color','transparent');
         $("#addROIs").css('color','rgba(0, 0, 0, 0.5)');
+        $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
         // TODO abort any ROI shapes in progress
     }else{
         //$("#addExcludeds").css('background-color','transparent');
@@ -199,6 +244,26 @@ $("#resetROIs").click(function(){
         // Do nothing!
     }
 });
+
+$("#resetLivePlotPts").click(function(){
+    if (confirm('reset all live plots?')) {
+        clearLivePlotPts();
+        addLivePlotPtsActive = false;
+        addLivePlotLineActive = false;
+        $("#addLivePlotLine").css('color','rgba(0, 0, 0, 0.5)');
+        $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
+        // clear the drawn ROIs
+        clearDrawnROIs();
+        drawROIs();
+    } else {
+        // Do nothing!
+    }
+});
+
+function clearLivePlotPts () {
+    livePlotPtsX = [];
+    livePlotPtsY = [];
+}
 
 function clearROIs () {
     ROIDefsX = [[]];
@@ -278,6 +343,13 @@ function drawROIs(){
         var mask = draw.mask().add(backMask).add(excluded);
         polygon.maskWith(mask);
     }
+    // draw all the live plot points on the image:
+    for(i=0;i<livePlotPtsX.length;i++){
+        var hsize = 7;
+        var pt_cross = draw.polyline([[livePlotPtsX[i],livePlotPtsY[i]-hsize],[livePlotPtsX[i],livePlotPtsY[i]+hsize],[livePlotPtsX[i],livePlotPtsY[i]],[livePlotPtsX[i]-hsize,livePlotPtsY[i]],[livePlotPtsX[i]+hsize,livePlotPtsY[i]]]).attr({ fill : 'none', stroke: '#ff33cc', 'stroke-opacity': '1.0','stroke-width': '3', 'stroke-linecap':'round' });
+        var text = draw.text(i.toString()).attr({x:livePlotPtsX[i],y:livePlotPtsY[i], fill:'#ffffff'});
+    }
+    
     // draw a default subset on the image in the center
     if($("#analysisModeSelect").val()=="subset"){
         var ss_size = $("#subsetSize").val();
@@ -320,6 +392,34 @@ function drawROIs(){
             cross_line.plot([[bestFitXOrigin,bestFitYOrigin],[bestFitXAxis,bestFitYAxis]]);
         });    
     }
+
+    // draw the axis for live plot line if enabled
+    if(addLivePlotLineActive){
+        var hsize = 7;
+         live_plot_line = draw.polyline([[livePlotLineXOrigin,livePlotLineYOrigin],[livePlotLineXAxis,livePlotLineYAxis]]).attr({ stroke: '#ff33cc', 'stroke-opacity': '0.8','stroke-width': '3', 'stroke-linecap':'round' });
+        live_plot_line_origin = draw.polyline([[livePlotLineXOrigin,livePlotLineYOrigin-hsize],[livePlotLineXOrigin,livePlotLineYOrigin+hsize],[livePlotLineXOrigin,livePlotLineYOrigin],[livePlotLineXOrigin-hsize,livePlotLineYOrigin],[livePlotLineXOrigin+hsize,livePlotLineYOrigin]]).attr({ fill : 'none', stroke: '#00ff00', 'stroke-opacity': '1.0','stroke-width': '3', 'stroke-linecap':'round' });
+        live_plot_line_origin.draggable().on('dragmove',function(e){
+            e.preventDefault();
+            var scale = $("#panzoomLeft").panzoom("getMatrix")[0];
+            var imgX = Math.round(e.detail.p.x / scale);
+            var imgY = Math.round(e.detail.p.y / scale);
+            this.move(imgX-hsize,imgY-hsize);
+            livePlotLineXOrigin = imgX;
+            livePlotLineYOrigin = imgY;
+            live_plot_line.plot([[livePlotLineXOrigin,livePlotLineYOrigin],[livePlotLineXAxis,livePlotLineYAxis]]);
+        });    
+        live_plot_line_axis = draw.polyline([[livePlotLineXAxis,livePlotLineYAxis-hsize],[livePlotLineXAxis,livePlotLineYAxis+hsize],[livePlotLineXAxis,livePlotLineYAxis],[livePlotLineXAxis-hsize,livePlotLineYAxis],[livePlotLineXAxis+hsize,livePlotLineYAxis]]).attr({ fill : 'none', stroke: '#ff0000', 'stroke-opacity': '1.0','stroke-width': '3', 'stroke-linecap':'round' });
+        live_plot_line_axis.draggable().on('dragmove',function(e){
+            e.preventDefault();
+            var scale = $("#panzoomLeft").panzoom("getMatrix")[0];
+            var imgX = Math.round(e.detail.p.x / scale);
+            var imgY = Math.round(e.detail.p.y / scale);
+            this.move(imgX-hsize,imgY-hsize);
+            livePlotLineXAxis = imgX;
+            livePlotLineYAxis = imgY;
+            live_plot_line.plot([[livePlotLineXOrigin,livePlotLineYOrigin],[livePlotLineXAxis,livePlotLineYAxis]]);
+        });    
+    } // end live plot line
 }
 
 $("#bestFitCheck").change(function(){

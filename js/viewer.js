@@ -361,6 +361,10 @@ function loadImage(file,viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCla
                     if(bestFitYOrigin==0) bestFitYOrigin = refImageHeightLeft / 2;
                     if(bestFitXAxis==0) bestFitXAxis = 1.25*refImageWidthLeft / 2;
                     if(bestFitYAxis==0) bestFitYAxis = refImageHeightLeft / 2;
+                    if(livePlotLineXOrigin==0) livePlotLineXOrigin = refImageWidthLeft / 2;
+                    if(livePlotLineYOrigin==0) livePlotLineYOrigin = 0.75*refImageHeightLeft / 2;
+                    if(livePlotLineXAxis==0) livePlotLineXAxis = 1.5*refImageWidthLeft / 2;
+                    if(livePlotLineYAxis==0) livePlotLineYAxis = 0.75*refImageHeightLeft / 2;
                     if(recordPath) refImagePathLeft = file.path;
                     updateDimsLabels();
                     checkValidInput();
@@ -402,6 +406,10 @@ function loadImage(file,viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCla
                         if(bestFitXAxis==0) bestFitXAxis = 1.25*refImageWidthLeft / 2;
                         if(bestFitYAxis==0) bestFitYAxis = refImageHeightLeft / 2;
                         if(recordPath) refImagePathLeft = file.path;
+                        if(livePlotLineXOrigin==0) livePlotLineXOrigin = refImageWidthLeft / 2;
+                        if(livePlotLineYOrigin==0) livePlotLineYOrigin = 1.5*refImageHeightLeft / 2;
+                        if(livePlotLineXAxis==0) livePlotLineXAxis = 1.5*refImageWidthLeft / 2;
+                        if(livePlotLineYAxis==0) livePlotLiveYAxis = 1.5*refImageHeightLeft / 2 + 50;
                         updateDimsLabels();
                         checkValidInput();
                     }else if(viewer=="#panzoomRight"){
