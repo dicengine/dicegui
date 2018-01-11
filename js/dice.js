@@ -63,20 +63,20 @@ document.getElementById("writeLi").onclick = function() {
     writeInputFile(true);
 };
 
-document.getElementById("liveChartLi").onclick = function() {
+document.getElementById("livePlotLi").onclick = function() {
     localStorage.clear();
     localStorage.setItem("workingDirectory",workingDirectory);
-    var liveChartFiles = ""
-    liveChartFiles = "DICe_solution_0.txt DICe_solution_1.txt DICe_solution_2.txt DICe_solution_3.txt DICe_solution_4.txt DICe_solution_5.txt DICe_solution_6.txt";
-    localStorage.setItem("liveChartFiles", liveChartFiles);
-    localStorage.setItem("liveChartColumns", "-1 2");
-    localStorage.setItem("liveChartXTitle", "Time Step");
-    localStorage.setItem("liveChartYTitle", "Disp_x");
-    var win = new BrowserWindow({ width: 850, height: 600 });
+    var livePlotFiles = ""
+    livePlotFiles = "DICe_solution_0.txt DICe_solution_1.txt DICe_solution_2.txt DICe_solution_3.txt DICe_solution_4.txt DICe_solution_5.txt DICe_solution_6.txt";
+    localStorage.setItem("livePlotFiles", livePlotFiles);
+    localStorage.setItem("livePlotColumns", "-1 2");
+    localStorage.setItem("livePlotXTitle", "Time Step");
+    localStorage.setItem("livePlotYTitle", "Disp_x");
+    var win = new BrowserWindow({ width: 1155, height: 800 });
     win.on('closed', () => {
         win = null
     })
-    win.loadURL('file://' + __dirname + '/live_chart.html');
+    win.loadURL('file://' + __dirname + '/live_plot.html');
 };
 
 
