@@ -3,10 +3,30 @@ google.charts.setOnLoadCallback(livePlotRepeat);
 
 var nIntervId;
 var firstPlot = true;
+var dataTables = [];
+var dataObjs = [];
+var currentTable = 0;
+var chartOptions = {
+    hAxis: {title:'Step'},
+    vAxis: {title:'Value'},
+    legend: 'right',
+    explorer: {},
+};    
 
 function livePlotRepeat() {
-    livePlot();
-    nIntervId = setInterval(livePlot, 5000);
+
+    var workingDir = localStorage.getItem("workingDirectory");
+    var fileNameStr = localStorage.getItem("livePlotFiles"); 
+    var fileNames = fileNameStr.split(/[ ,]+/);
+    for(i=0;i<fileNames.length;++i)
+        if(os.platform()=='win32'){
+            fileNames[i] = workingDir + '\\' +fileNames[i]; 
+        }else{
+            fileNames[i] = workingDir + '/' +fileNames[i]; 
+        }
+    console.log(fileNames);
+    livePlot(fileNames);
+    nIntervId = setInterval(function(){livePlot(fileNames);}, 5000);
 }
 
 function stopLivePlot() {
@@ -14,70 +34,80 @@ function stopLivePlot() {
 }
 
 $("#livePlotUL").on('click', 'li', function() {
-    var n = $(this).attr('id').indexOf("_");
-    var divID = '#div_' + $(this).attr('id').substring(n+1);
-    // hide all the divs in the list
-    $(".plot_div").each(function(){
-        $(this).hide();
-    });
-    // show the div associated with this list item
-    $(divID).show();
+    currentTable = Number($(this).attr('id').split("_").pop());
+    plotDataTable();
 });
 
-function livePlot(){
-
-    var chartOptions = {
-        hAxis: {title:'Step'},
-        vAxis: {title:'Value'},
-        legend: 'right',
-        explorer: {},
-    };    
-    var dataObjs = [];
-    var dataTables = [];
-    var fileName = '/Users/dzturne/dice_working_dir/test_charts/DICe_solution_0_test.txt';
-    fileToDataObj(fileName,dataObjs).then(function(response) {
+function livePlot(fileNames){
+    dataObjs = [];
+    var promises = [];
+    for(fileIt=0;fileIt<fileNames.length;++fileIt){
+        var promise = fileToDataObj(fileNames[fileIt],dataObjs);
+        promises.push(promise);
+    }
+    Promise.all(promises).then(function(response) {
         console.log("fileToDataObj succeeded!", response);
         dataObjsToDataTables(dataObjs,dataTables);
-        // plot the tables in the html page
-        
-        // for each entry in the data tables, create a plot
-        for(i=0;i<dataTables.length;++i){
-            // create a div on the page:
-            var divID = "div_livePlot_" + i;
-            if(firstPlot)
-                $("#livePlots").append('<div id="' + divID + '" class="plot_div" style="height:100%; width:100%; float:left;" ></div>');
-            var liID = "li_livePlot_" + i;
-            var liTitle = dataObjs[0].headings[i];
-            if(firstPlot)
-                $("#livePlotUL").append('<li id="' + liID + '" class="action-li plot_li"><span>' + liTitle + '</span></li>');            
-            var chart = new google.visualization.LineChart(document.getElementById(divID));
-            chartOptions.hAxis.title = 'Step';
-            chartOptions.vAxis.title = liTitle;
-            // if the chart is hidden, show it, then draw and hide it again
-            var decDivID = '#' + divID;
-            if($(decDivID).is(":visible"))
-                chart.draw(dataTables[i],chartOptions);
-            else{
-               $(decDivID).show();
-               chart.draw(dataTables[i],chartOptions);
-               $(decDivID).hide();
+        var firstValidIndex = getFirstValidIndex();
+        if(firstPlot){
+            for(i=0;i<dataTables.length;++i){
+                var liID = "li_livePlot_" + i;
+                var liTitle = dataObjs[firstValidIndex].headings[i];
+                $("#livePlotUL").append('<li id="' + liID + '" class="action-li plot_li"><span>' + liTitle + '</span></li>');
             }
-            // hide all but the first div
-            if(i>0 && firstPlot)
-               $(decDivID).hide();
+            firstPlot = false;
         }
-        firstPlot = false;
+        plotDataTable();
     },function(error) {
         console.error("fileToDataObj failed!", error);
+        buildDataTables();
     });
+}
+
+function getFirstValidIndex(){
+    var firstValidIndex = 0;
+    for(i=0;i<dataObjs.length;++i){
+        if(!dataObjs[i].initialized)
+            firstValidIndex++;
+        else
+            break;
+    }
+    return firstValidIndex;
+}
+
+function plotDataTable(){
+    // clear the divs and clear the plots
+    $('#livePlots').empty();    
+    // create a div on the page:
+    var divID = "div_livePlot_" + currentTable;
+    $("#livePlots").append('<div id="' + divID + '" class="plot_div" style="height:100%; width:100%; float:left;" ></div>');
+    var liID = "li_livePlot_" + currentTable;
+    var firstValidIndex = getFirstValidIndex();
+    var liTitle = dataObjs[firstValidIndex].headings[currentTable];
+    var chart = new google.visualization.LineChart(document.getElementById(divID));
+    chartOptions.hAxis.title = 'Step';
+    chartOptions.vAxis.title = liTitle;
+    // turn off the empty columns
+    var view = new google.visualization.DataView(dataTables[currentTable]);
+    var hideCols = [];
+    for(i=0;i<dataObjs.length;++i){
+        if(dataObjs[i].initialized) continue;
+        var suffixAndExt = dataObjs[i].fileName.split("_").pop();
+        var suffix = suffixAndExt.substr(0, suffixAndExt.indexOf('.'));
+        var col = Number(suffix) + 1;
+        hideCols.push(col);
+    }
+    view.hideColumns(hideCols); //here you set the columns you want to display
+    chart.draw(view, chartOptions);
+    //chart.draw(dataTables[currentTable],chartOptions);
 }
 
 function fileToDataObj(file,dataObjs) {
     // Return a new promise.
     return new Promise(function(resolve, reject) {
-        // Do stuff
-        var obj = {fileName:file,headings:[],data:[]}
-        fs.stat(file, function(err, stat) {                                
+        console.log("reading file " + file);
+        var obj = {fileName:file,headings:[],data:[],initialized:false}
+        fs.stat(file, function(err, stat) {
             if(err == null) {                                     
                 fs.readFile(file, 'utf8', function (err,dataS) {                                       
                     if (err) {                                                                                    
@@ -92,7 +122,7 @@ function fileToDataObj(file,dataObjs) {
                         if(isNaN(thisLineSplit[0]))
                             continue;
                         else if(foundHeaders) // if the header row has already been found read a line of data
-                            obj.data.push(resDataLines[i].split(/[ ,]+/).map(Number));
+                            obj.data.push(resDataLines[i].split(/[ ,]+/).map(Number)); 
                         else{ // read the previous line as the header and decrement i
                             foundHeaders = true;
                             if(i>=1)
@@ -100,13 +130,17 @@ function fileToDataObj(file,dataObjs) {
                             i--;
                         }
                     }
+                    obj.initialized = true;
+                    console.log('file read is successful ' + file);
                     dataObjs.push(obj);
-                    // make part of a file name list and call resolve when the list is complete
                     resolve('file read success!');
                 });
             }// end null
-            else{
-                reject('file read failure!');
+            else{ // always resolve ...
+                dataObjs.push(obj);
+                console.log('file read failed ' + file);
+                resolve('file read success!');
+                //reject('file read failure!');        
             }
         }); // end stat
     });
@@ -119,22 +153,24 @@ function dataObjsToDataTables(dataObjs,dataTables){
         console.log('dataObjsToDataTables: error, dataObjs.length < 1');
         return;
     }
-    if(dataObjs[0].data.length<=0){
+    // get the first valid dataObj
+    var firstValidIndex = getFirstValidIndex();
+    if(dataObjs[firstValidIndex].data.length<=0){
         console.log('dataObjsToDataTables: error, data.length < 1')
         return;
     }
-    if(dataObjs[0].headings.length<=0){
+    if(dataObjs[firstValidIndex].headings.length<=0){
         console.log('dataObjsToDataTables: error, headings.length < 1')
         return;
     }
-    if(dataObjs[0].data[0].length<=0){
+    if(dataObjs[firstValidIndex].data[0].length<=0){
         console.log('dataObjsToDataTables: error, data[0].length < 1')
         return;
     }    
-    var numHeadings = dataObjs[0].headings.length;
-    var numCols = dataObjs[0].data[0].length;
-    var numRows = dataObjs[0].data.length;
-    var headings = dataObjs[0].headings;
+    var numHeadings = dataObjs[firstValidIndex].headings.length;
+    var numCols = dataObjs[firstValidIndex].data[0].length;
+    var numRows = dataObjs[firstValidIndex].data.length;
+    var headings = dataObjs[firstValidIndex].headings;
     var numDataTables = numHeadings;
     var numObjs = dataObjs.length;
     console.log('numHeadings ' + numHeadings + ' nuCols ' + numCols + ' numRows ' + numRows + ' headings ' + headings);
@@ -142,34 +178,49 @@ function dataObjsToDataTables(dataObjs,dataTables){
         console.log('dataObjsToDataTables: error, numCols!=numHeadings');
         return;
     }
-    // first check that the dataObjs are compatible    
+    // set up the mapping from a dataObj's index in the vector to the dataTable column index
+    var dataObjColIndex = [];
+    for(obj=0;obj<numObjs;++obj){
+        var suffixAndExt = dataObjs[obj].fileName.split("_").pop();
+        var suffix = suffixAndExt.substr(0, suffixAndExt.indexOf('.'));
+        dataObjColIndex.push(Number(suffix));
+    }
+    // first check that the dataObjs are compatible
     for(i=0;i<dataObjs.length;++i){
+        if(!dataObjs[i].initialized) continue;
+        var fileName = dataObjs[i].filename
         if(dataObjs[i].headings.length!=numHeadings){
-            console.log('dataObjsToDataTables: error, ' + dataObjs[i].fileName + ' has an invalid number of headings');
+            console.log('dataObjsToDataTables: error, ' + fileName + ' has an invalid number of headings');
             return;
         }
         if(dataObjs[i].data[0].length!=numCols){
-            console.log('dataObjsToDataTables: error, ' + dataObjs[i].fileName + ' has an invalid number of columns');
+            console.log('dataObjsToDataTables: error, ' + fileName + ' has an invalid number of columns');
             return;
         }
+        // get the column number from the filename        
         for(j=0;j<numHeadings;++j){
             if(dataObjs[i].headings[j]!=headings[j]){
-                console.log('dataObjsToDataTables: error, ' + dataObjs[i].fileName + ' headings do not match');
+                console.log('dataObjsToDataTables: error, ' + fileName + ' headings do not match');
                 return;
             }
         }
     }
     // collate the data objects data into a data table for each column
     // one dataTable for every heading with a column for every dataObj
+
     for(dt=0;dt<numDataTables;++dt){
-        var dataTable = new google.visualization.DataTable();
-        dataTable.addColumn('number', 'step');
-        for(obj=0;obj<numObjs;++obj){
-            // strip the filename to everything between the last underscore and the file extension
-            var suffixAndExt = dataObjs[obj].fileName.split("_").pop();
-            var suffix = suffixAndExt.substr(0, suffixAndExt.indexOf('.')); 
-            dataTable.addColumn('number', "pt_" + suffix);
+        if(dataTables.length<dt+1){
+            dataTables.push(new google.visualization.DataTable());
+            dataTables[dt].addColumn('number', 'step');
+            for(obj=0;obj<numObjs;++obj){
+                // strip the filename to everything between the last underscore and the file extension
+                //var suffixAndExt = dataObjs[obj].fileName.split("_").pop();
+                //var suffix = suffixAndExt.substr(0, suffixAndExt.indexOf('.')); 
+                dataTables[dt].addColumn('number', "pt_" + obj);//dataObjColIndex[obj]);
+            }
         }
+        var dataTable = dataTables[dt];
+        dataTable.removeRows(0,dataTable.getNumberOfRows());
         dataTable.addRows(numRows);
         // set the x labels
         for(row=0;row<numRows;++row){
@@ -178,11 +229,15 @@ function dataObjsToDataTables(dataObjs,dataTables){
         // copy all the dataObjs data into this dataTable
         for(row=0;row<numRows;++row){
             for(obj=0;obj<numObjs;++obj){
-                dataTable.setCell(row,obj+1,dataObjs[obj].data[row][dt]);
+                if(dataObjs[obj].initialized)
+                    dataTable.setCell(row,dataObjColIndex[obj]+1,dataObjs[obj].data[row][dt]);
+                    //dataTable.setCell(row,obj+1,dataObjs[obj].data[row][dt]);
             }
         }
-        dataTables.push(dataTable);
+        // remove the columns for points that failed:
+        //for(obj=0;obj<numObjs;++obj){
+        //    if(!dataObjs[obj].initialized)
+        //       dataTable.hideColumns(dataObjColIndex[obj]+1);
+        //}
     }
-    //console.log(dataObjs);
-    //console.log(dataTables);
 }

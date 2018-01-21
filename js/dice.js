@@ -69,9 +69,6 @@ document.getElementById("livePlotLi").onclick = function() {
     var livePlotFiles = ""
     livePlotFiles = "DICe_solution_0.txt DICe_solution_1.txt DICe_solution_2.txt DICe_solution_3.txt DICe_solution_4.txt DICe_solution_5.txt DICe_solution_6.txt";
     localStorage.setItem("livePlotFiles", livePlotFiles);
-    localStorage.setItem("livePlotColumns", "-1 2");
-    localStorage.setItem("livePlotXTitle", "Time Step");
-    localStorage.setItem("livePlotYTitle", "Disp_x");
     var win = new BrowserWindow({ width: 1155, height: 800 });
     win.on('closed', () => {
         win = null
