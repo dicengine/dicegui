@@ -30,6 +30,9 @@ if(os.platform()=='win32'){
     execOpenCVServerPath = '/Applications/DICe.app/Contents/Resources/app/bin/DICe_OpenCVServer';
 }
 
+// true if debugging messages are turned on for the dice executable
+var diceDebugMsgOn = false;
+
 // image sets
 var refImagePathLeft = "undefined";
 var refImagePathRight = "undefined";
@@ -76,8 +79,6 @@ var livePlotLineXOrigin = 0;
 var livePlotLineYOrigin = 0;
 var livePlotLineXAxis = 0;
 var livePlotLineYAxis = 0;
-
-
 
 // state of windows etc. in interface
 var showPrefPane = true;

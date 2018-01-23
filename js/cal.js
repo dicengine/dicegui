@@ -237,7 +237,7 @@ function previewCalImages(){
     // call the filter exec
     var child_process = require('child_process');
     var readline      = require('readline');
-    var proc = child_process.execFile(execOpenCVServerPath,args,{cwd:workingDirectory,maxBuffer:400*1024});
+    var proc = child_process.spawn(execOpenCVServerPath,args,{cwd:workingDirectory});//,maxBuffer:1024*1024});
     proc.on('error', function(){
         alert('DICe OpenCVServer failed: invalid executable: ' + execOpenCVServerPath);
     });
@@ -629,7 +629,7 @@ function callCalExec() {
     var child_process = require('child_process');
     var readline      = require('readline');
     var logStream = fs.createWriteStream(logName, {flags: 'w'});
-    var proc = child_process.execFile(execCalPath, [fileName,outName],{cwd:workingDirectory,maxBuffer:400*1024});
+    var proc = child_process.spawn(execCalPath, [fileName,outName],{cwd:workingDirectory});//,maxBuffer:1024*1024});
     proc.stdout.pipe(logStream);
     proc.stderr.pipe(logStream);
     readline.createInterface({

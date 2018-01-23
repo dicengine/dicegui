@@ -63,21 +63,18 @@ document.getElementById("writeLi").onclick = function() {
     writeInputFile(true);
 };
 
-document.getElementById("livePlotLi").onclick = function() {
-    localStorage.clear();
-    localStorage.setItem("workingDirectory",workingDirectory);
-    var livePlotFiles = ""
-    livePlotFiles = "DICe_solution_0.txt DICe_solution_1.txt DICe_solution_2.txt DICe_solution_3.txt DICe_solution_4.txt DICe_solution_5.txt DICe_solution_6.txt";
-    localStorage.setItem("livePlotFiles", livePlotFiles);
-    var win = new BrowserWindow({ width: 1155, height: 800 });
-    win.on('closed', () => {
-        win = null
-    })
-    win.loadURL('file://' + __dirname + '/live_plot.html');
-};
-
-
-
+//document.getElementById("livePlotLi").onclick = function() {
+//    localStorage.clear();
+//    localStorage.setItem("workingDirectory",workingDirectory);
+//    var livePlotFiles = ""
+//    livePlotFiles = "DICe_solution_0.txt DICe_solution_1.txt DICe_solution_2.txt DICe_solution_3.txt DICe_solution_4.txt DICe_solution_5.txt DICe_solution_6.txt";
+//    localStorage.setItem("livePlotFiles", livePlotFiles);
+//    var win = new BrowserWindow({ width: 1155, height: 800 });
+//    win.on('closed', () => {
+//        win = null
+//    })
+//    win.loadURL('file://' + __dirname + '/live_plot.html');
+//};
 
 function resetWorkingDirectory(){
         $("#refImageText span").text('');
@@ -169,38 +166,48 @@ function callDICeExec(resolution,ss_locs) {
 
     var inputFile = fullPath('','input.xml');
     var child_process = require('child_process');
-    var readline      = require('readline');
-    var proc;
-    if(ss_locs)
-        proc = child_process.execFile(execPath, ['-i',inputFile,'-v','-t','--ss_locs'],{cwd:workingDirectory,maxBuffer:400*1024});
-    else
-        proc = child_process.execFile(execPath, ['-i',inputFile,'-v','-t'],{cwd:workingDirectory,maxBuffer:400*1024});
-        
-    readline.createInterface({
-        input     : proc.stdout,
-        terminal  : false
-    }).on('line', function(line) {                
-        //console.log(line);
-        consoleMsg(line);
-    });
-    
-//    proc.stderr.on('data', (data) => {
-//        console.log(`stderr: ${data}`);
-//        alert('DICe execution failed (see console for details)');
-//    });
+    var readline = require('readline');
 
-    proc.on('error', function(){
+    var child;// = child_process.spawn('<process>', [<arg1>, <arg2>]);
+    if(ss_locs)
+        child = child_process.spawn(execPath, ['-i',inputFile,'-v','-t','--ss_locs'],{cwd:workingDirectory});
+    else
+        child = child_process.spawn(execPath, ['-i',inputFile,'-v','-t'],{cwd:workingDirectory});
+
+    child.stdout.on('data', function (data) {
+        if(diceDebugMsgOn){
+            consoleMsg(data.toString());
+        }
+    });
+
+    if(!diceDebugMsgOn){
+        readline.createInterface({
+            input     : child.stdout,
+            terminal  : false
+        }).on('line', function(line) {                
+            consoleMsg(line);
+        });
+    }
+
+    child.on('error', function(){
         alert('DICe execution failed: invalid executable: ' + execPath);
         endProgress(false);
         $("#abortLi").hide();
     });
 
     $("#abortLi").on('click',function(){
-        proc.kill();
+        child.kill();
         $("#abortLi").hide();
     });
-    
-    proc.on('close', (code) => {
+
+    child.stderr.on('data', function (data) {
+        consoleMsg(data);
+        alert('DICe execution failed: invalid executable: ' + execPath);
+        endProgress(false);
+        $("#abortLi").hide();
+    });
+
+    child.on('close', function (code) {
         console.log(`child process exited with code ${code}`);
         updateResultsFilesList();
         $("#abortLi").hide();
@@ -224,7 +231,15 @@ function callDICeExec(resolution,ss_locs) {
                 showParaviewMsg();
             }
         }
-    });    
+    });
+    
+//    var readline      = require('readline');
+//    var proc;
+//    if(ss_locs)
+//        proc = child_process.execFile(execPath, ['-i',inputFile,'-v','-t','--ss_locs'],{cwd:workingDirectory,maxBuffer:1024*1024});
+//    else
+//        proc = child_process.execFile(execPath, ['-i',inputFile,'-v','-t'],{cwd:workingDirectory,maxBuffer:1024*1024});
+//        
 }
 
 function updateCineDisplayImage(fileName,index,mode,reset_ref_ROIs){
@@ -238,7 +253,7 @@ function updateCineDisplayImage(fileName,index,mode,reset_ref_ROIs){
     else
         tiffImageName += 'middle.tif';
     consoleMsg("converting file " + fileName + " index " + index + " to .tif for display");
-    var procConv = child_process.execFile(execCineToTiffPath, [fileName,index,index,tiffImageName],{cwd:workingDirectory,maxBuffer:400*1024})
+    var procConv = child_process.spawn(execCineToTiffPath, [fileName,index,index,tiffImageName],{cwd:workingDirectory});//,maxBuffer:1024*1024})
         readline.createInterface({
             input     : procConv.stdout,
             terminal  : false
@@ -287,7 +302,7 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
         }
         else{
             console.log("getting frame range of cine file: " + fileName);
-            var proc = child_process.execFile(execCineStatPath, [fileName],{cwd:workingDirectory,maxBuffer:400*1024})
+            var proc = child_process.spawn(execCineStatPath, [fileName],{cwd:workingDirectory});//,maxBuffer:1024*1024})
         }
         readline.createInterface({
             input     : proc.stdout,
@@ -469,7 +484,7 @@ function callOpenCVServerExec() {
         // call the filter exec
         var child_process = require('child_process');
         var readline      = require('readline');
-        var proc = child_process.execFile(execOpenCVServerPath,args,{cwd:workingDirectory,maxBuffer:400*1024});
+        var proc = child_process.spawn(execOpenCVServerPath,args,{cwd:workingDirectory});//,maxBuffer:1024*1024});
 
         proc.on('error', function(){
             alert('DICe OpenCVServer failed: invalid executable: ' + execOpenCVServerPath);
@@ -527,20 +542,33 @@ function callCrossInitExec() {
     fs.stat(fileName, function(err, stat) {
         if(err == null) {
             console.log("found nonlinear seed file: projection_points.dat in the execution directory, enabling nonlinear warp");
-            proc = child_process.execFile(execCrossInitPath, [refImagePathLeft,refImagePathRight,'1'],{cwd:workingDirectory,maxBuffer:400*1024})
+            proc = child_process.spawn(execCrossInitPath, [refImagePathLeft,refImagePathRight,'1'],{cwd:workingDirectory});//,maxBuffer:1024*1024})
             startProgress();
         }
         else{
             console.log("nonlinear seed file projection_points.dat not found");
-            proc = child_process.execFile(execCrossInitPath, [refImagePathLeft,refImagePathRight,'0'],{cwd:workingDirectory,maxBuffer:400*1024})
+            proc = child_process.spawn(execCrossInitPath, [refImagePathLeft,refImagePathRight,'0'],{cwd:workingDirectory});//,maxBuffer:1024*1024})
             startProgress();
         }
-        readline.createInterface({
-            input     : proc.stdout,
-            terminal  : false
-        }).on('line', function(line) {                
-            consoleMsg(line);
+        proc.stdout.on('data', function (data) {
+            if(diceDebugMsgOn){
+                consoleMsg(data.toString());
+            }
         });
+        if(!diceDebugMsgOn){
+            readline.createInterface({
+                input     : proc.stdout,
+                terminal  : false
+            }).on('line', function(line) {
+                consoleMsg(line);
+            });
+        }
+        //readline.createInterface({
+        //    input     : proc.stdout,
+        //    terminal  : false
+        //}).on('line', function(line) {                
+        //    consoleMsg(line);
+        //});
         proc.on('error', function(){
             alert('DICe cross correlation initialization failed: invalid executable: ' + execCrossInitPath);
             endProgress(false);

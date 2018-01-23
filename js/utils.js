@@ -84,6 +84,8 @@ function initialize_gui(load_existing){
                     console.log('loading existing input file if it exists: ' + existing_input);
                     parse_input_xml_file(existing_input);
                 }
+                // test if debugging messages are turned on or off
+                testForDebugMsg();
             });
         } else if(err.code == 'ENOENT') {
             // file does not exist
@@ -109,11 +111,28 @@ function initialize_gui(load_existing){
             deleteDisplayImageFiles(0);
             deleteDisplayImageFiles(1);
             deleteDisplayImageFiles(2);
+            // test if debugging messages are turned on or off
+            testForDebugMsg();
         } else {
             consoleMsg('error occurred trying to load previous state');
         }
     });
 };
+
+function testForDebugMsg(){
+    // test if debugging messages are turned on or off
+    var child_process = require('child_process');
+    var proc = child_process.execFile(execPath,['-d'],{cwd:workingDirectory});
+    proc.on('error', function(){
+        alert('Error! invalid DICe executable: ' + execPath);
+    });
+    proc.on('close', (code) => {
+        console.log(`DICe test for debug messages exited with code ${code}`);
+        if(code==1){
+            diceDebugMsgOn = true;
+        }
+    });
+}
 
 // last items before closing browser
 $(window).bind("beforeunload", function() {
@@ -301,6 +320,8 @@ function eraseText(object_id) {
 };
 
 function consoleMsg(string){
+    //document.getElementById("consoleWindow").append(string + '</br>');
+    //document.getElementById("consoleWindow").scrollTop = document.getElementById("consoleWindow").scrollHeight
     $("#consoleWindow").append(string + '</br>');
     $("#consoleWindow").scrollTop($("#consoleWindow").get(0).scrollHeight);
 }
