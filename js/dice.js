@@ -63,18 +63,33 @@ document.getElementById("writeLi").onclick = function() {
     writeInputFile(true);
 };
 
-//document.getElementById("livePlotLi").onclick = function() {
-//    localStorage.clear();
-//    localStorage.setItem("workingDirectory",workingDirectory);
-//    var livePlotFiles = ""
-//    livePlotFiles = "DICe_solution_0.txt DICe_solution_1.txt DICe_solution_2.txt DICe_solution_3.txt DICe_solution_4.txt DICe_solution_5.txt DICe_solution_6.txt";
-//    localStorage.setItem("livePlotFiles", livePlotFiles);
-//    var win = new BrowserWindow({ width: 1155, height: 800 });
-//    win.on('closed', () => {
-//        win = null
-//    })
-//    win.loadURL('file://' + __dirname + '/live_plot.html');
-//};
+// global variable to see if there is already a live plot visible
+var livePlotWin = null;
+
+function showLivePlots(){
+    if(livePlotPtsX.length <=0) return; // TODO add line test  && !addLivePlotLineActive) return;
+    localStorage.clear();
+    localStorage.setItem("workingDirectory",workingDirectory);
+    var livePlotFiles = ""
+    // TODO set up the files to read
+    //livePlotFiles = "DICe_solution_0.txt DICe_solution_1.txt DICe_solution_2.txt DICe_solution_3.txt DICe_solution_4.txt DICe_solution_5.txt DICe_solution_6.txt";
+    for(i=0;i<livePlotPtsX.length;++i){
+        livePlotFiles += 'live_plot_pt_' + i + '.txt';
+        if(i<livePlotPtsX.length-1)
+            livePlotFiles += ' ';
+    }
+    localStorage.setItem("livePlotFiles", livePlotFiles);
+    //alert('live plot win is ' + livePlotWin);
+    if(livePlotWin !== null && typeof livePlotWin === 'object'){
+        //livePlotWin.close();
+    }else{
+        livePlotWin = new BrowserWindow({ width: 1155, height: 800 });
+    }
+    livePlotWin.on('closed', () => {
+        livePlotWin = null;
+    })
+    livePlotWin.loadURL('file://' + __dirname + '/live_plot.html');
+}
 
 function resetWorkingDirectory(){
         $("#refImageText span").text('');
@@ -164,6 +179,9 @@ document.getElementById("clearCross").onclick = function() {
 }
 function callDICeExec(resolution,ss_locs) {
 
+    // load the live plot viewer if there are any live plots:
+    showLivePlots();
+    
     var inputFile = fullPath('','input.xml');
     var child_process = require('child_process');
     var readline = require('readline');

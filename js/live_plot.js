@@ -115,20 +115,30 @@ function fileToDataObj(file,dataObjs) {
                     }
                     var resDataLines = dataS.toString().split(/\r?\n/);
                     var foundHeaders = false;
+                    var prevLine;
                     for(i=0;i<resDataLines.length;++i){
                         var thisLineSplit = resDataLines[i].split(/[ ,]+/);
+                        if(thisLineSplit[thisLineSplit.length-1]=='') // remove effects of trailing commas if they exist
+                            thisLineSplit.splice(thisLineSplit.length-1,1);
                         // if(thisLineSplit[0]=='#')continue;
                         // if this is the column headings then append them
-                        if(isNaN(thisLineSplit[0]))
+                        if(isNaN(thisLineSplit[0])){
+                            prevLine = thisLineSplit;
                             continue;
+                        }
                         else if(foundHeaders) // if the header row has already been found read a line of data
-                            obj.data.push(resDataLines[i].split(/[ ,]+/).map(Number)); 
+                            obj.data.push(thisLineSplit.map(Number));
+                            //obj.data.push(resDataLines[i].split(/[ ,]+/).map(Number)); 
                         else{ // read the previous line as the header and decrement i
                             foundHeaders = true;
-                            if(i>=1)
-                                obj.headings = resDataLines[i-1].split(/[ ,]+/);
+                            if(i>=1){
+                                //console.log('prevLine ' + prevLine);
+                                obj.headings = prevLine;
+                                //obj.headings = resDataLines[i-1].split(/[ ,]+/);
+                            }
                             i--;
                         }
+                        prevLine = thisLineSplit;
                     }
                     obj.initialized = true;
                     console.log('file read is successful ' + file);
@@ -222,6 +232,7 @@ function dataObjsToDataTables(dataObjs,dataTables){
         var dataTable = dataTables[dt];
         dataTable.removeRows(0,dataTable.getNumberOfRows());
         dataTable.addRows(numRows);
+        //console.log('DATA TABLE SIZE ' + numRows + ' x ' + dataTables[dt].getNumberOfColumns());
         // set the x labels
         for(row=0;row<numRows;++row){
             dataTable.setCell(row,0,row);
