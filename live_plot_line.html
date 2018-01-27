@@ -2,14 +2,14 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Live Plot</title>
+    <title>Live Plot Line</title>
     <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
     <script>if (window.module) module = window.module;</script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="./js/requires.js" defer></script>
-    <script src="./js/live_plot.js" defer></script>
+    <script src="./js/live_plot_line.js" defer></script>
     <!-- Local style sheet -->
     <link rel="stylesheet" type="text/css" href="style.css">
     <!-- Google fonts and icons -->
@@ -21,10 +21,19 @@
     <div style="background-color:#cccccc; width:100%; min-width:1120px; height:100%; display:block; position: absolute; padding: 10px;">
       <div id="livePlotLinks" style="background-color:#e6e6e6; width:225px; height:auto; float:left; border-radius:5px;">
         <h1 style="padding-left: 10px;">FIELDS</h1>
-        <ul id="livePlotUL" style="padding-left:22px; padding-bottom:20px;">
-        </ul>              
+        <ul id="livePlotLineUL" style="padding-left:22px; padding-bottom:20px;">
+        </ul>
+        <h1 style="padding-left: 10px;">STEP</h1>
+        <div style="padding-left: 22px;">
+          <select id="stepSelect"></select>
+          <input id="fixAxisCheck" type="checkbox" style="margin-left:10px;"><span> fix v-axis</span>
+          <ul id="stepUL" style="padding-top:10px;">
+            <li id="stepForward" class="action-li"><span>next</span></li>            
+            <li id="stepBackward" class="action-li"><span>previous</span></li>            
+          </ul>
+        </div>
       </div>
-      <div id="livePlots" style="position:absolute; left:245px; width:calc(100% - 255px); min-width:875px; height:97%; float:left; overflow:hidden; border-radius:5px;">
+      <div id="livePlotLine" style="position:absolute; left:245px; width:calc(100% - 255px); min-width:875px; height:97%; float:left; overflow:hidden; border-radius:5px;">
       </div>
     </div> <!-- end content-->    
   </body>

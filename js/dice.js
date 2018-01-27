@@ -65,30 +65,42 @@ document.getElementById("writeLi").onclick = function() {
 
 // global variable to see if there is already a live plot visible
 var livePlotWin = null;
-
+var livePlotLineWin = null;
 function showLivePlots(){
-    if(livePlotPtsX.length <=0) return; // TODO add line test  && !addLivePlotLineActive) return;
+    if(livePlotPtsX.length <=0 && !addLivePlotLineActive) return;
     localStorage.clear();
     localStorage.setItem("workingDirectory",workingDirectory);
-    var livePlotFiles = ""
-    // TODO set up the files to read
-    //livePlotFiles = "DICe_solution_0.txt DICe_solution_1.txt DICe_solution_2.txt DICe_solution_3.txt DICe_solution_4.txt DICe_solution_5.txt DICe_solution_6.txt";
-    for(i=0;i<livePlotPtsX.length;++i){
-        livePlotFiles += 'live_plot_pt_' + i + '.txt';
-        if(i<livePlotPtsX.length-1)
-            livePlotFiles += ' ';
+    if(livePlotPtsX.length >0){
+        var livePlotFiles = ""
+        // TODO set up the files to read
+        //livePlotFiles = "DICe_solution_0.txt DICe_solution_1.txt DICe_solution_2.txt DICe_solution_3.txt DICe_solution_4.txt DICe_solution_5.txt DICe_solution_6.txt";
+        for(i=0;i<livePlotPtsX.length;++i){
+            livePlotFiles += 'live_plot_pt_' + i + '.txt';
+            if(i<livePlotPtsX.length-1)
+                livePlotFiles += ' ';
+        }
+        localStorage.setItem("livePlotFiles", livePlotFiles);
+        //alert('live plot win is ' + livePlotWin);
+        if(livePlotWin !== null && typeof livePlotWin === 'object'){
+            //livePlotWin.close();
+        }else{
+            livePlotWin = new BrowserWindow({ width: 1155, height: 800 });
+        }
+        livePlotWin.on('closed', () => {
+            livePlotWin = null;
+        })
+        livePlotWin.loadURL('file://' + __dirname + '/live_plot.html');
     }
-    localStorage.setItem("livePlotFiles", livePlotFiles);
-    //alert('live plot win is ' + livePlotWin);
-    if(livePlotWin !== null && typeof livePlotWin === 'object'){
-        //livePlotWin.close();
-    }else{
-        livePlotWin = new BrowserWindow({ width: 1155, height: 800 });
+    if(addLivePlotLineActive){
+        if(livePlotLineWin !== null && typeof livePlotLineWin === 'object'){
+        }else{
+            livePlotLineWin = new BrowserWindow({ width: 1155, height: 800 });
+        }
+        livePlotLineWin.on('closed', () => {
+            livePlotLineWin = null;
+        })
+        livePlotLineWin.loadURL('file://' + __dirname + '/live_plot_line.html');
     }
-    livePlotWin.on('closed', () => {
-        livePlotWin = null;
-    })
-    livePlotWin.loadURL('file://' + __dirname + '/live_plot.html');
 }
 
 function resetWorkingDirectory(){
@@ -182,6 +194,17 @@ function callDICeExec(resolution,ss_locs) {
     // load the live plot viewer if there are any live plots:
     showLivePlots();
     
+    // nuke the old line plot and point live plot files
+    fs.readdirSync(workingDirectory).forEach(file => {
+        // check if the file matches the syntax                                                                       
+        if(file.indexOf('live_plot_line_step_') !== -1 || file.indexOf('live_plot_pt_') !== -1){
+            fs.unlink(fullPath('',file), (err) => {
+                if (err) throw err;
+                console.log('successfully deleted old line plot file'+file);
+            });
+        }
+    });
+
     var inputFile = fullPath('','input.xml');
     var child_process = require('child_process');
     var readline = require('readline');
@@ -742,7 +765,7 @@ function writeBestFitFile() {
 }
 
 function writeLivePlotsFile() {
-    if(livePlotPtsX.length >0 || addLivePlotLineActive){
+    if(livePlotPtsX.length >0 || addLivePlotLineActive){        
         var livePlotFile = fullPath('','live_plot.dat');
         consoleMsg('writing live plot data file ' + livePlotFile);
         var LPcontent = '';

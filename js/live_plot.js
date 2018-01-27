@@ -24,7 +24,14 @@ function livePlotRepeat() {
         }else{
             fileNames[i] = workingDir + '/' +fileNames[i]; 
         }
-    console.log(fileNames);
+    var lineFile = localStorage.getItem("livePlotLineFile");
+    if(os.platform()=='win32'){
+        lineFile = workingDir + '\\' + lineFile; 
+    }else{
+        lineFile = workingDir + '/' + lineFile; 
+    }
+    console.log('livePlot point filenames' + fileNames);
+    console.log('livePlot line filename' + lineFile);
     livePlot(fileNames);
     nIntervId = setInterval(function(){livePlot(fileNames);}, 5000);
 }
@@ -60,7 +67,6 @@ function livePlot(fileNames){
         plotDataTable();
     },function(error) {
         console.error("fileToDataObj failed!", error);
-        buildDataTables();
     });
 }
 
