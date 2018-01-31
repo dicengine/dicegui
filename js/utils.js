@@ -314,7 +314,9 @@ function hideParams(){
 }
 
 // clear the console text
-$("clearConsoleIcon").click(function() {eraseText("consoleWindow")});
+$("#clearConsoleIcon").click(function() {
+    eraseText("consoleWindow")
+});
 function eraseText(object_id) {
     document.getElementById(object_id).innerHTML = "Console output:" + '<br/><br/>';
 };
