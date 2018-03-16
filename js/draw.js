@@ -1,7 +1,7 @@
 $("#panzoomLeft").mousemove(function(){
     if(shapeInProgress){
         // get the position of the last point
-        if(addROIsActive || addExcludedActive){
+        if(addROIsActive || addExcludedActive || addObstructedActive){
             var scale = $("#panzoomLeft").panzoom("getMatrix")[0];
             var viewX = event.pageX - $(this).offset().left;
             var viewY = event.pageY - $(this).offset().top;
@@ -21,9 +21,13 @@ $("#panzoomLeft").mousemove(function(){
                 if(addROIsActive){
                     ROIX = ROIDefsX[ROIDefsX.length - 1];
                     ROIY = ROIDefsY[ROIDefsY.length - 1];
-                }else{
+                }else if(addExcludedActive){
                     ROIX = excludedDefsX[excludedDefsX.length - 1];
                     ROIY = excludedDefsY[excludedDefsY.length - 1];
+                }
+                else{
+                    ROIX = obstructedDefsX[obstructedDefsX.length - 1];
+                    ROIY = obstructedDefsY[obstructedDefsY.length - 1];
                 }
                 coordsString += ' M ';
                 for(var j = 0, jl = ROIX.length; j < jl; j++) {
@@ -37,8 +41,10 @@ $("#panzoomLeft").mousemove(function(){
                 coordsString += ' L ' + imgX + ' ' + imgY + ' Z';
                 if(addROIsActive){
                     var polygon = draw.path(coordsString).attr({ fill: '#00ff00', 'fill-opacity': '0.4', stroke: '#00ff00', 'stroke-opacity': '1','stroke-width': '2', 'stroke-linecap':'round' });
-                }else{
+                }else if(addExcludedActive){
                     var outline = draw.path(coordsString).attr({ 'fill-opacity':'0', stroke: '#f06', 'stroke-opacity': '1','stroke-width': '2', 'stroke-linecap':'round' });
+                }else{
+                    var polygon = draw.path(coordsString).attr({ fill: '#00ffff', 'fill-opacity': '0.4', stroke: '#00ffff', 'stroke-opacity': '1','stroke-width': '2', 'stroke-linecap':'round' });
                 }
                 draw.style('z-index',2);
                 draw.style('position','absolute');
@@ -87,6 +93,25 @@ $("#panzoomLeft").mousedown(function(){
                 //printExcludedDefs();
             }
         }
+        if(addObstructedActive){
+            if(shapeInProgress==false && currentObstructedIndex > 0){
+                obstructedDefsX.push([]);
+                obstructedDefsY.push([]);
+            }
+            shapeInProgress = true;
+            $("#ROIProgress").text("obstruction in progress");
+            var scale = $("#panzoomLeft").panzoom("getMatrix")[0];
+            var viewX = event.pageX - $(this).offset().left;
+            var viewY = event.pageY - $(this).offset().top;
+            var imgX = Math.round(viewX / scale);
+            var imgY = Math.round(viewY / scale);
+            if(imgX>=0&&imgX<refImageWidthLeft&&imgY>=0&&imgY<refImageHeightLeft){
+                //var shapeIndex = 0;
+                obstructedDefsX[currentObstructedIndex].push(imgX);
+                obstructedDefsY[currentObstructedIndex].push(imgY);
+                //printExcludedDefs();
+            }
+        }
         if(addLivePlotPtsActive){
             var scale = $("#panzoomLeft").panzoom("getMatrix")[0];
             var viewX = event.pageX - $(this).offset().left;
@@ -115,15 +140,19 @@ function completeShape(){
     if(validPolygon){
         if(addROIsActive){
             currentROIIndex += 1;
-        }else{
+        }else if(addExcludedActive){
             currentExcludedIndex += 1;
+        }else{
+            currentObstructedIndex += 1;
         }
     }
     else{ // delete the last shape
         if(addROIsActive){
             removeLastROI();
-        }else{
+        }else if(addExcludedActive){
             removeLastExcluded();
+        }else{
+            removeLastObstructed();
         }
     }
     $("#ROIProgress").text("");
@@ -135,10 +164,12 @@ $("#addLivePlotPts").click(function(){
     if(addLivePlotPtsActive==false){
         addLivePlotPtsActive = true;
         addROIsActive = false;
+        addObstructedActive = false;
         addExcludedActive = false;
         $("#addLivePlotPts").css('color','#33ccff');
         $("#addROIs").css('color','rgba(0, 0, 0, 0.5)');
         $("#addExcludeds").css('color','rgba(0, 0, 0, 0.5)');
+        $("#addObstructed").css('color','rgba(0, 0, 0, 0.5)');
         // TODO abort any excluded shapes in progress
     }else{
         //$("#addROIs").css('background-color','transparent');
@@ -164,11 +195,13 @@ $("#addROIs").click(function(){
     if(addROIsActive==false){
         addROIsActive = true;
         addExcludedActive = false;
+        addObstructedActive = false;
         addLivePlotPtsActive = false;
         //$("#addROIs").css('background-color','#33ccff');
         $("#addROIs").css('color','#33ccff');
         //$("#addExcludeds").css('background-color','transparent');
         $("#addExcludeds").css('color','rgba(0, 0, 0, 0.5)');
+        $("#addObstructed").css('color','rgba(0, 0, 0, 0.5)');
         $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
         // TODO abort any excluded shapes in progress
     }else{
@@ -179,16 +212,36 @@ $("#addROIs").click(function(){
     }
 });
 
+$("#addObstructed").click(function(){
+    completeShape();
+    if(addObstructedActive==false){
+        addROIsActive = false;
+        addLivePlotPtsActive = false;
+        addObstructedActive = true;
+        addExcludedActive = false;
+        $("#addObstructed").css('color','#33ccff');
+        $("#addROIs").css('color','rgba(0, 0, 0, 0.5)');
+        $("#addExcludeds").css('color','rgba(0, 0, 0, 0.5)');
+        $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
+        // TODO abort any ROI shapes in progress
+    }else{
+        $("#addObstructed").css('color','rgba(0, 0, 0, 0.5)');
+        addObstructedActive = false;
+    }
+});
+
 $("#addExcludeds").click(function(){
     completeShape();
     if(addExcludedActive==false){
         addROIsActive = false;
         addLivePlotPtsActive = false;
         addExcludedActive = true;
+        addObstructedActive = false;
         //$("#addExcludeds").css('background-color','#33ccff');
         $("#addExcludeds").css('color','#33ccff');
         //$("#addROIs").css('background-color','transparent');
         $("#addROIs").css('color','rgba(0, 0, 0, 0.5)');
+        $("#addObstructed").css('color','rgba(0, 0, 0, 0.5)');
         $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
         // TODO abort any ROI shapes in progress
     }else{
@@ -236,6 +289,7 @@ $("#resetROIs").click(function(){
     if (confirm('reset all included and excluded regions?')) {
         clearROIs();
         clearExcluded();
+        clearObstructed();
         // clear the drawn ROIs
         clearDrawnROIs();
         drawROIs();
@@ -247,11 +301,7 @@ $("#resetROIs").click(function(){
 
 $("#resetLivePlotPts").click(function(){
     if (confirm('reset all live plots?')) {
-        clearLivePlotPts();
-        addLivePlotPtsActive = false;
-        addLivePlotLineActive = false;
-        $("#addLivePlotLine").css('color','rgba(0, 0, 0, 0.5)');
-        $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
+        resetLivePlots();
         // clear the drawn ROIs
         clearDrawnROIs();
         drawROIs();
@@ -259,10 +309,21 @@ $("#resetLivePlotPts").click(function(){
         // Do nothing!
     }
 });
+function resetLivePlots(){
+    clearLivePlotPts();
+    addLivePlotPtsActive = false;
+    addLivePlotLineActive = false;
+    $("#addLivePlotLine").css('color','rgba(0, 0, 0, 0.5)');
+    $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
+}
 
 function clearLivePlotPts () {
     livePlotPtsX = [];
     livePlotPtsY = [];
+    livePlotLineXOrigin = refImageWidthLeft / 2;
+    livePlotLineYOrigin = 0.75*refImageHeightLeft / 2;
+    livePlotLineXAxis = 1.5*refImageWidthLeft / 2;
+    livePlotLineYAxis = 0.75*refImageHeightLeft / 2;
 }
 
 function clearROIs () {
@@ -277,13 +338,22 @@ function clearExcluded () {
     currentExcludedIndex = 0;
 }
 
+function clearObstructed () {
+    obstructedDefsX = [[]];
+    obstructedDefsY = [[]];
+    currentObstructedIndex = 0;
+}
+
 function drawROIs(){
     // clear the old ROIs
     clearDrawnROIs();
     var hasExcluded = false;
     var hasROI = false;
     var draw = SVG('panzoomLeft').size(refImageWidthLeft, refImageHeightLeft);
+    draw.style('z-index',2);
+    draw.style('position','absolute');
     var polygon;
+    var obstructed;
     var excluded;
     // draw existing ROIs using the svg element:
     if(ROIDefsX && ROIDefsY){
@@ -307,6 +377,29 @@ function drawROIs(){
         if(coordsString!=' M '){
             hasROI = true;
             polygon = draw.path(coordsString).attr({ fill: '#00ff00', 'fill-opacity': '0.4', stroke: '#00ff00', 'stroke-opacity': '1','stroke-width': '2', 'stroke-linecap':'round' });
+        }
+    }
+    // draw existing Obstructions using the svg element:
+    if(obstructedDefsX && obstructedDefsY && $("#analysisModeSelect").val()=="tracking"){
+        var coordsString = '';        
+        for(var i = 0, l = 1; i < obstructedDefsX.length; i++) {
+            var ROIX = obstructedDefsX[i];
+            var ROIY = obstructedDefsY[i];
+            coordsString += ' M ';
+            for(var j = 0, jl = ROIX.length; j < jl; j++) {
+                if(j==0){
+                    coordsString += ROIX[j] + ' ' + ROIY[j];
+                }else if(j!=ROIX.length-1){
+                    coordsString += ' L ' + ROIX[j] + ' ' + ROIY[j];
+                }
+                else{
+                    coordsString += ' L ' + ROIX[j] + ' ' + ROIY[j] + ' Z';
+                }
+            }
+        }
+        //console.log(coordsString);
+        if(coordsString!=' M '){
+            obstructed = draw.path(coordsString).attr({ fill: '#00ffff', 'fill-opacity': '0.4', stroke: '#00ffff', 'stroke-opacity': '1','stroke-width': '2', 'stroke-linecap':'round' });
         }
     }
     // draw existing exclusions using the svg element:
@@ -354,8 +447,6 @@ function drawROIs(){
     if($("#analysisModeSelect").val()=="subset"){
         var ss_size = $("#subsetSize").val();
         polygon = draw.rect(ss_size,ss_size).move(refImageWidthLeft/2 - ss_size/2,refImageHeightLeft/2 - ss_size/2).attr({ fill: 'none', stroke: '#ffff00', 'stroke-opacity': '0.8','stroke-width': '3', 'stroke-linecap':'round' }).id('subsetBox');    
-        draw.style('z-index',2);
-        draw.style('position','absolute');
         polygon.draggable().on('dragmove',function(e){
             e.preventDefault();
             var scale = $("#panzoomLeft").panzoom("getMatrix")[0];
@@ -443,6 +534,16 @@ function clearLastDrawnROI(){
     });
 }
 
+$("#removeLastROI").click(function(){
+    if(ROIDefsX[0].length<3) return;
+    if (confirm('remove last drawn ROI?')) {
+        removeLastROI();
+        if(currentROIIndex > 0){
+            currentROIIndex -= 1;
+        }
+        drawROIs();
+    }
+});
 function removeLastROI(){
     if(ROIDefsX && ROIDefsY){
         if(ROIDefsX.length > 1){
@@ -454,7 +555,16 @@ function removeLastROI(){
         }
     }
 }
-
+$("#removeLastExcluded").click(function(){
+    if(excludedDefsX[0].length<3) return;
+    if (confirm('remove last excluded region?')) {
+        removeLastExcluded();
+        if(currentExcludedIndex > 0){
+            currentExcludedIndex -= 1;
+        }
+        drawROIs();
+    }
+});
 function removeLastExcluded(){
     if(excludedDefsX && excludedDefsY){
         if(excludedDefsX.length > 1){
@@ -466,26 +576,27 @@ function removeLastExcluded(){
         }
     }
 }
-$("#removeLastROI").click(function(){
-    if(ROIDefsX[0].length<3) return;
-    if (confirm('remove last drawn ROI?')) {
-        removeLastROI();
-        if(currentROIIndex > 0){
-            currentROIIndex -= 1;
+$("#removeLastObstructed").click(function(){
+    if(obstructedDefsX[0].length<3) return;
+    if (confirm('remove last obstructed region?')) {
+        removeLastObstructed();
+        if(currentObstructedIndex > 0){
+            currentObstructedIndex -= 1;
         }
         drawROIs();
     }
 });
-$("#removeLastExcluded").click(function(){
-    if(excludedDefsX[0].length<3) return;
-    if (confirm('remove last excluded region?')) {
-        removeLastExcluded();
-        if(currentExcludedIndex > 0){
-            currentExcludedIndex -= 1;
+function removeLastObstructed(){
+    if(obstructedDefsX && obstructedDefsY){
+        if(obstructedDefsX.length > 1){
+            obstructedDefsX.pop();
+            obstructedDefsY.pop();
+        }else{
+            obstructedDefsX=[[]];
+            obstructedDefsY=[[]];
         }
-        drawROIs();
     }
-});
+}
 
 
 function validatePolygon(){
@@ -495,9 +606,12 @@ function validatePolygon(){
     if(addROIsActive){
         polysX = ROIDefsX;
         polysY = ROIDefsY;
-    }else{
+    }else if(addExcludedActive){
         polysX = excludedDefsX;
         polysY = excludedDefsY;            
+    }else{
+        polysX = obstructedDefsX;
+        polysY = obstructedDefsY;            
     }
     if(polysX && polysY){
         var numPolys = polysX.length;

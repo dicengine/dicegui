@@ -296,7 +296,7 @@ function loadImage(file,viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCla
     //var tgt = evt.target || window.event.srcElement,
     //    files = tgt.files;
     console.log('loading image: ' + file.name + ' path: ' + file.path);
-    
+
     if (FileReader && file){   
         var fr = new FileReader();
         var extension = file.name.split('.').pop().toLowerCase();

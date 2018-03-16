@@ -138,6 +138,7 @@ function resetWorkingDirectory(){
         clearDrawnROIs();
         clearROIs();
         clearExcluded();
+        clearObstructed();
         $("#runLoader").removeClass('post-loader-success');
         $("#runLoader").removeClass('post-loader-fail');
         $("#runLoader").removeClass('loader');    
@@ -540,7 +541,7 @@ function callOpenCVServerExec() {
                 fs.stat(fullPath('','.display_image_left_filter.png'), function(err, stat) {
                     if(err == null) {
                         getFileObject(fullPath('','.display_image_left_filter.png'), function (fileObject) {
-                            loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,true,"","",false);
+                            loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
                         });                 
                     }else{
                     }
@@ -666,14 +667,18 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
     if(ROIDefsX[0].length>=3){
         content += '<Parameter name="subset_file" type="string" value="' + subsetFile + '" />\n';
     }
-    content += '<Parameter name="subset_size" type="int" value="'+$("#subsetSize").val()+'" />\n';
-    content += '<Parameter name="step_size" type="int" value="'+$("#stepSize").val()+'" />\n';
-    content += '<Parameter name="separate_output_file_for_each_subset" type="bool" value="false" />\n';
+    if($("#analysisModeSelect").val()=="subset"){
+        content += '<Parameter name="subset_size" type="int" value="'+$("#subsetSize").val()+'" />\n';
+        content += '<Parameter name="step_size" type="int" value="'+$("#stepSize").val()+'" />\n';
+        content += '<Parameter name="separate_output_file_for_each_subset" type="bool" value="false" />\n';
+    }else{
+        content += '<Parameter name="separate_output_file_for_each_subset" type="bool" value="true" />\n';
+    }
     content += '<Parameter name="create_separate_run_info_file" type="bool" value="true" />\n';
-    if($("#omitTextCheck")[0].checked){
+    if($("#omitTextCheck")[0].checked&&$("#analysisModeSelect").val()=="subset"){
         content += '<Parameter name="no_text_output_files" type="bool" value="true" />\n';
     }
-    if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs){
+    if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs&&$("#analysisModeSelect").val()=="subset"){
         content += '<Parameter name="calibration_parameters_file" type="string" value="' + calPath + '" />\n';
     }
     var fileSelectMode = $("#fileSelectMode").val();
@@ -691,7 +696,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
             }
         }
       content += '</ParameterList>\n';
-      if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs){
+      if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs&&$("#analysisModeSelect").val()=="subset"){
           content += '<Parameter name="stereo_reference_image" type="string" value="' + refImagePathRight + '" />\n';
           content += '<ParameterList name="stereo_deformed_images">\n';
           // add the deformed images
@@ -716,7 +721,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
         content += '<Parameter name="num_file_suffix_digits" type="int" value="'+$("#numDigits").val()+'" />\n';
         content += '<Parameter name="image_file_extension" type="string" value="'+$("#imageExtension").val()+'" />\n';
         content += '<Parameter name="image_file_prefix" type="string" value="'+$("#imagePrefix").val()+'" />\n';
-        if((showStereoPane==1||showStereoPane==2)){
+        if((showStereoPane==1||showStereoPane==2)&&$("#analysisModeSelect").val()=="subset"){
             content += '<Parameter name="stereo_left_suffix" type="string" value="'+$("#stereoLeftSuffix").val()+'"/>\n';
             content += '<Parameter name="stereo_right_suffix" type="string" value="'+$("#stereoRightSuffix").val()+'" />\n';
         }
@@ -728,7 +733,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
         content += '<Parameter name="cine_start_index" type="int" value="'+$("#cineStartIndex").val()+'" />\n';
         content += '<Parameter name="cine_skip_index" type="int" value="'+$("#cineSkipIndex").val()+'" />\n';
         content += '<Parameter name="cine_end_index" type="int" value="'+$("#cineEndIndex").val()+'" />\n';
-        if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs){
+        if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs&&$("#analysisModeSelect").val()=="subset"){
             content += '<Parameter name="stereo_cine_file" type="string" value="'+cinePathRight+'" />\n';
         }
     }
@@ -743,7 +748,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
 }
 
 function writeBestFitFile() {
-            if($("#bestFitCheck")[0].checked){
+            if($("#bestFitCheck")[0].checked&&$("#analysisModeSelect").val()=="subset"){
                 var bestFitFile = fullPath('','best_fit_plane.dat');
                 consoleMsg('writing best fit plane file ' + bestFitFile);
                 var BFcontent = '';
@@ -765,7 +770,7 @@ function writeBestFitFile() {
 }
 
 function writeLivePlotsFile() {
-    if(livePlotPtsX.length >0 || addLivePlotLineActive){        
+    if((livePlotPtsX.length >0 || addLivePlotLineActive)&&$("#analysisModeSelect").val()=="subset"){        
         var livePlotFile = fullPath('','live_plot.dat');
         consoleMsg('writing live plot data file ' + livePlotFile);
         var LPcontent = '';
@@ -831,47 +836,62 @@ function writeParamsFile(only_write,resolution,ss_locs) {
         content += '<Parameter name="estimate_resolution_error_max_amplitude" type="double" value="1.0" />\n';
         content += '<Parameter name="estimate_resolution_error_amplitude_step" type="double" value="1.0" />\n';
     }
-    content += '<Parameter name="sssig_threshold" type="double" value="'+$("#sssigThresh").val()+'" />\n';
     content += '<Parameter name="interpolation_method" type="string" value="KEYS_FOURTH" />\n';
-    content += '<Parameter name="optimization_method" type="string" value="GRADIENT_BASED" />\n';
-    var initMode = $("#initSelect").val();
-    if(initMode=="featureMatching"){
-        content += '<Parameter name="initialization_method" type="string" value="USE_FEATURE_MATCHING" />\n';
-    }
-    else if(initMode=="fieldValues"){
-        content += '<Parameter name="initialization_method" type="string" value="USE_FIELD_VALUES" />\n';
-    }
-    else if(initMode=="neighborValues"){
-        content += '<Parameter name="initialization_method" type="string" value="USE_NEIGHBOR_VALUES" />\n';
-    }
-    if($("#translationCheck")[0].checked){
-        content += '<Parameter name="enable_translation" type="bool" value="true" />\n';
+    if($("#analysisModeSelect").val()=="subset"){
+        content += '<Parameter name="sssig_threshold" type="double" value="'+$("#sssigThresh").val()+'" />\n';
+        content += '<Parameter name="optimization_method" type="string" value="GRADIENT_BASED" />\n';
+        var initMode = $("#initSelect").val();
+        if(initMode=="featureMatching"){
+            content += '<Parameter name="initialization_method" type="string" value="USE_FEATURE_MATCHING" />\n';
+        }
+        else if(initMode=="fieldValues"){
+            content += '<Parameter name="initialization_method" type="string" value="USE_FIELD_VALUES" />\n';
+        }
+        else if(initMode=="neighborValues"){
+            content += '<Parameter name="initialization_method" type="string" value="USE_NEIGHBOR_VALUES" />\n';
+        }
+        if($("#translationCheck")[0].checked){
+            content += '<Parameter name="enable_translation" type="bool" value="true" />\n';
+        }else{
+            content += '<Parameter name="enable_translation" type="bool" value="false" />\n';
+        }
+        if($("#rotationCheck")[0].checked){
+            content += '<Parameter name="enable_rotation" type="bool" value="true" />\n';
+        }else{
+            content += '<Parameter name="enable_rotation" type="bool" value="false" />\n';
+        }
+        if($("#normalStrainCheck")[0].checked){
+            content += '<Parameter name="enable_normal_strain" type="bool" value="true" />\n';
+        }else{
+            content += '<Parameter name="enable_normal_strain" type="bool" value="false" />\n';
+        }  
+        if($("#shearStrainCheck")[0].checked){
+            content += '<Parameter name="enable_shear_strain" type="bool" value="true" />\n';
+        }else{
+            content += '<Parameter name="enable_shear_strain" type="bool" value="false" />\n';
+        }
+        if($("#strainCheck")[0].checked){
+            content += '<ParameterList name="post_process_vsg_strain">\n';
+            content += '<Parameter name="strain_window_size_in_pixels" type="int" value="'+$("#strainGaugeSize").val()+'" />\n';
+            content += '</ParameterList>\n';
+        }
     }else{
-        content += '<Parameter name="enable_translation" type="bool" value="false" />\n';
-    }
-    if($("#rotationCheck")[0].checked){
-        content += '<Parameter name="enable_rotation" type="bool" value="true" />\n';
-    }else{
-        content += '<Parameter name="enable_rotation" type="bool" value="false" />\n';
-    }
-    if($("#normalStrainCheck")[0].checked){
-        content += '<Parameter name="enable_normal_strain" type="bool" value="true" />\n';
-    }else{
-        content += '<Parameter name="enable_normal_strain" type="bool" value="false" />\n';
-    }
-    if($("#shearStrainCheck")[0].checked){
-        content += '<Parameter name="enable_shear_strain" type="bool" value="true" />\n';
-    }else{
-        content += '<Parameter name="enable_shear_strain" type="bool" value="false" />\n';
+        content += '<Parameter name="use_tracking_default_params" type="bool" value="true" />\n';
+        content += '<Parameter name="normalize_gamma_with_active_pixels" type="bool" value="true" />\n';
+        content += '<Parameter name="filter_failed_cine_pixels" type="bool" value="true" />\n';
+        content += '<Parameter name="use_search_initialization_for_failed_steps" type="bool" value="true" />\n';
+        content += '<Parameter name="obstruction_skin_factor" type="double" value="1.0" />\n';
+        if($("#optModeSelect").val()=="simplex"){
+            content += '<Parameter name="optimization_method" type="string" value="SIMPLEX" />\n';
+            content += '<Parameter name="compute_image_gradients" type="bool" value="false" />\n';
+        }else{
+            content += '<Parameter name="compute_image_gradients" type="bool" value="true" />\n';
+            content += '<Parameter name="optimization_method" type="string" value="GRADIENT_BASED_THEN_SIMPLEX" />\n';
+        }
     }
     if($("#filterCheck")[0].checked){
         content += '<Parameter name="gauss_filter_images" type="bool" value="true" />\n';
         content += '<Parameter name="gauss_filter_mask_size" type="int" value="'+$("#filterSize").val()+'" />\n';
-    }
-    if($("#strainCheck")[0].checked){
-        content += '<ParameterList name="post_process_vsg_strain">\n';
-        content += '<Parameter name="strain_window_size_in_pixels" type="int" value="'+$("#strainGaugeSize").val()+'" />\n';
-        content += '</ParameterList>\n';
     }
     content += '<Parameter name="output_delimiter" type="string" value="," />\n'
     content += '<ParameterList name="output_spec"> \n';
@@ -879,23 +899,31 @@ function writeParamsFile(only_write,resolution,ss_locs) {
     content += '<Parameter name="COORDINATE_Y" type="bool" value="true" />\n';
     content += '<Parameter name="DISPLACEMENT_X" type="bool" value="true" />\n';
     content += '<Parameter name="DISPLACEMENT_Y" type="bool" value="true" />\n';
-    if((showStereoPane==1||showStereoPane==2)){
-        content += '<Parameter name="MODEL_COORDINATES_X" type="bool" value="true" />\n';
-        content += '<Parameter name="MODEL_COORDINATES_Y" type="bool" value="true" />\n';
-        content += '<Parameter name="MODEL_COORDINATES_Z" type="bool" value="true" />\n';
-        content += '<Parameter name="MODEL_DISPLACEMENT_X" type="bool" value="true" />\n';
-        content += '<Parameter name="MODEL_DISPLACEMENT_Y" type="bool" value="true" />\n';
-        content += '<Parameter name="MODEL_DISPLACEMENT_Z" type="bool" value="true" />\n';
-    }
-    content += '<Parameter name="SIGMA" type="bool" value="true" />\n';
-    content += '<Parameter name="GAMMA" type="bool" value="true" />\n';
-    content += '<Parameter name="BETA" type="bool" value="true" />\n';
-    content += '<Parameter name="STATUS_FLAG" type="bool" value="true" />\n';
-    content += '<Parameter name="UNCERTAINTY" type="bool" value="true" />\n';
-    if($("#strainCheck")[0].checked){
-        content += '<Parameter name="VSG_STRAIN_XX" type="bool" value="true" />\n';
-        content += '<Parameter name="VSG_STRAIN_YY" type="bool" value="true" />\n';
-        content += '<Parameter name="VSG_STRAIN_XY" type="bool" value="true" />\n';
+    
+    if($("#analysisModeSelect").val()=="subset"){
+        if((showStereoPane==1||showStereoPane==2)){
+            content += '<Parameter name="MODEL_COORDINATES_X" type="bool" value="true" />\n';
+            content += '<Parameter name="MODEL_COORDINATES_Y" type="bool" value="true" />\n';
+            content += '<Parameter name="MODEL_COORDINATES_Z" type="bool" value="true" />\n';
+            content += '<Parameter name="MODEL_DISPLACEMENT_X" type="bool" value="true" />\n';
+            content += '<Parameter name="MODEL_DISPLACEMENT_Y" type="bool" value="true" />\n';
+            content += '<Parameter name="MODEL_DISPLACEMENT_Z" type="bool" value="true" />\n';
+        }
+        content += '<Parameter name="SIGMA" type="bool" value="true" />\n';
+        content += '<Parameter name="GAMMA" type="bool" value="true" />\n';
+        content += '<Parameter name="BETA" type="bool" value="true" />\n';
+        content += '<Parameter name="STATUS_FLAG" type="bool" value="true" />\n';
+        content += '<Parameter name="UNCERTAINTY" type="bool" value="true" />\n';
+        if($("#strainCheck")[0].checked){
+            content += '<Parameter name="VSG_STRAIN_XX" type="bool" value="true" />\n';
+            content += '<Parameter name="VSG_STRAIN_YY" type="bool" value="true" />\n';
+            content += '<Parameter name="VSG_STRAIN_XY" type="bool" value="true" />\n';
+        }
+    }else{
+        content += '<Parameter name="ROTATION_Z" type="bool" value="true" />\n';
+        content += '<Parameter name="SIGMA" type="bool" value="true" />\n';
+        content += '<Parameter name="GAMMA" type="bool" value="true" />\n';
+        content += '<Parameter name="BETA" type="bool" value="true" />\n';    
     }
     content += '</ParameterList>\n';
     content += '</ParameterList>\n';
@@ -909,60 +937,88 @@ function writeParamsFile(only_write,resolution,ss_locs) {
 }
 
 function writeSubsetFile(only_write,resolution,ss_locs){
-  if(ROIDefsX[0].length>=3){
-      var subsetFile = fullPath('','subset_defs.txt');
+
+    var subsetFile = fullPath('','subset_defs.txt');
     consoleMsg('writing subset file ' + subsetFile);
     var content = '';
     content += '# Auto generated subset file from DICe GUI\n';
-    if(ROIDefsX[0].length < 3 || ROIDefsY[0].length < 3){
-        alert('Error: subset file creation failed, invalid vertices for region of interest');
-        return false;
-    }
-    content += 'begin region_of_interest\n';
-    content += '  begin boundary\n';
-    // write all the boundary shapes
-    for(var i = 0, l = ROIDefsX.length; i < l; i++) {
-        var ROIx = ROIDefsX[i];
-        var ROIy = ROIDefsY[i];
-        content += '    begin polygon\n';
-        content += '      begin vertices\n';
-        for(var j = 0, jl = ROIx.length; j < jl; j++) {
-            content += '        ' +  ROIx[j] + ' ' + ROIy[j] + '\n';
+    if($("#analysisModeSelect").val()=="subset"&&ROIDefsX[0].length>=3){
+        if(ROIDefsX[0].length != ROIDefsY[0].length){
+            alert('Error: subset file creation failed, invalid vertices for region of interest');
+            return false;
         }
-        content += '      end vertices\n';
-        content += '    end polygon\n';
-    }
-    content += '  end boundary\n';
-    if(excludedDefsX.length>0){
-        if(excludedDefsX[0].length > 2){
-            content += '  begin excluded\n';
-            for(var i = 0, l = excludedDefsX.length; i < l; i++) {
-                var ROIx = excludedDefsX[i];
-                var ROIy = excludedDefsY[i];
-                content += '    begin polygon\n';
-                content += '      begin vertices\n';
-                for(var j = 0, jl = ROIx.length; j < jl; j++) {
-                    content += '        ' + ROIx[j] + ' ' + ROIy[j] + '\n';
-                }
-                content += '      end vertices\n';
-                content += '    end polygon\n';
+        content += 'begin region_of_interest\n';
+        content += '  begin boundary\n';
+        // write all the boundary shapes
+        for(var i = 0, l = ROIDefsX.length; i < l; i++) {
+            var ROIx = ROIDefsX[i];
+            var ROIy = ROIDefsY[i];
+            content += '    begin polygon\n';
+            content += '      begin vertices\n';
+            for(var j = 0, jl = ROIx.length; j < jl; j++) {
+                content += '        ' +  ROIx[j] + ' ' + ROIy[j] + '\n';
             }
-            content += '  end excluded\n';
-        } // excluded[0].length > 2
-    } // excluded defs > 0
-    content += 'end region_of_interest\n';
-    fs.writeFile(subsetFile, content, function (err) {
-        if(err){
-            alert("Error: an error ocurred creating the file "+ err.message)
-         }
-        consoleMsg('subset_defs.txt file has been successfully saved');
+            content += '      end vertices\n';
+            content += '    end polygon\n';
+        }
+        content += '  end boundary\n';
+        if(excludedDefsX.length>0){
+            if(excludedDefsX[0].length > 2){
+                content += '  begin excluded\n';
+                for(var i = 0, l = excludedDefsX.length; i < l; i++) {
+                    var ROIx = excludedDefsX[i];
+                    var ROIy = excludedDefsY[i];
+                    content += '    begin polygon\n';
+                    content += '      begin vertices\n';
+                    for(var j = 0, jl = ROIx.length; j < jl; j++) {
+                        content += '        ' + ROIx[j] + ' ' + ROIy[j] + '\n';
+                    }
+                    content += '      end vertices\n';
+                    content += '    end polygon\n';
+                }
+                content += '  end excluded\n';
+            } // excluded[0].length > 2
+        } // excluded defs > 0
+        content += 'end region_of_interest\n';
+    }else if($("#analysisModeSelect").val()=="tracking"&&ROIDefsX[0].length>=3){ // tracking mode
+        if(ROIDefsX[0].length != ROIDefsY[0].length){
+            alert('Error: subset file creation failed, invalid vertices for region of interest');
+            return false;
+        }
+        content += 'begin subset_coordinates\n';
+        // use the centroid of each shape as the frame of reference origin
+        for(var i = 0, l = ROIDefsX.length; i < l; i++) {
+            var ROIx = ROIDefsX[i];
+            var ROIy = ROIDefsY[i];
+            var cx = 0.0;
+            var cy = 0.0;
+            for(var j = 0, jl = ROIx.length; j < jl; j++) {
+                cx += ROIx[j];
+                cy += ROIy[j];
+            }
+            cx /= ROIx.length;
+            cy /= ROIx.length;
+            cx = Math.round(cx);
+            cy = Math.round(cy);   
+            content += cx + ' ' + cy + '\n';
+        }
+        content += 'end subset_coordinates\n';
+
+        // TODO add EXCLUDED OBSTRUCTED
+    }
+    if(ROIDefsX[0].length>=3){    
+        fs.writeFile(subsetFile, content, function (err) {
+            if(err){
+                alert("Error: an error ocurred creating the file "+ err.message)
+             }
+            consoleMsg('subset_defs.txt file has been successfully saved');
+            if(!only_write)
+                callDICeExec(resolution,ss_locs);
+        });
+    }else{
         if(!only_write)
             callDICeExec(resolution,ss_locs);
-    });
-  }else{
-      if(!only_write)
-          callDICeExec(resolution,ss_locs);
-  }
+    }
 }
 
 function checkValidInput() {

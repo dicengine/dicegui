@@ -255,7 +255,7 @@
                     <span class="toggle-icon action-li" id="leftPaneToggle" title="hide this view"><i class="material-icons md-dark pane-closer" style="transform:rotate(270deg)">open_in_browser</i></span>
                   </div> <!-- end toggle div banner -->
                   <div class="toggle-div-body">
-                    <i id="sssigPreview" class="material-icons md-dark action-li" title="preview sssig mask">check_circle</i>
+                    <i id="sssigPreview" class="material-icons md-dark action-li full-field" title="preview sssig mask">check_circle</i>
                     <i class="material-icons md-dark action-li zoom-in-left" title="zoom in">zoom_in</i>
                     <i class="material-icons md-dark action-li zoom-out-left" title="zoom out">zoom_out</i>
                     <input type="range" class="zoom-range-left">                   
@@ -271,14 +271,16 @@
                     <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
                   </div> <!-- end toggle div banner -->
                   <div class="toggle-div-body">
-                    <i id="addROIs" class="material-icons md-dark action-li" title="add ROIs">add_circle</i>
-                    <i id="addExcludeds" class="material-icons md-dark action-li" title="add exclusions">add_circle_outline</i>
+                    <i id="addROIs" class="material-icons md-dark action-li" title="add ROI">add_circle</i>
                     <i id="removeLastROI" class="material-icons md-dark action-li" title="remove last ROI">remove_circle</i>
+                    <i id="addExcludeds" class="material-icons md-dark action-li" title="add exclusion">add_circle_outline</i>
                     <i id="removeLastExcluded"class="material-icons md-dark action-li" title="remove last exclusion">remove_circle_outline</i>
+                    <i id="addObstructed" class="material-icons md-dark action-li tracking" title="add obstruction">add_box</i>
+                    <i id="removeLastObstructed" class="material-icons md-dark action-li tracking" title="remove last obstruction">indeterminate_check_box</i>
                     <i id="resetROIs"class="material-icons md-dark action-li" title="reset ROIs">block</i>
-                    <i id="addLivePlotPts"class="material-icons md-dark action-li" title="add live plot pt" style="margin-left:40px;">gps_fixed</i>
-                    <i id="addLivePlotLine"class="material-icons md-dark action-li" title="add live plot line">location_disabled</i>
-                    <i id="resetLivePlotPts"class="material-icons md-dark action-li" title="reset live plot pts">block</i>
+                    <i id="addLivePlotPts"class="material-icons md-dark action-li full-field" title="add live plot pt" style="margin-left:40px;">gps_fixed</i>
+                    <i id="addLivePlotLine"class="material-icons md-dark action-li full-field" title="add live plot line">location_disabled</i>
+                    <i id="resetLivePlotPts"class="material-icons md-dark action-li full-field" title="reset live plot pts">block</i>
                     <label id="ROIProgress"></label>
                   </div> <!-- end toggle div body -->
                 </div> <!-- end toggle div -->
@@ -393,9 +395,9 @@
                        <p>analysis mode:</p>
                        <select id="analysisModeSelect">
                            <option value="subset">subset-based full-field</option>
-                           <!--<option value="tracking">tracking</option>-->
+                           <option value="tracking">tracking</option>
                        </select>
-                       <div id="subsetParams" class="param-options">
+                       <div id="subsetParams" class="param-options full-field">
                            <p>initialization method:</p>
                            <select id="initSelect">
                                <option value="featureMatching">feature matching</option>
@@ -413,10 +415,6 @@
                            <p><input id="rotationCheck" type="checkbox" > rotation</p>
                            <p><input id="normalStrainCheck" type="checkbox" > normal stretch</p>
                            <p><input id="shearStrainCheck" type="checkbox" > shear stretch</p>
-                           <p>filtering:</p>
-                           <p><input id="filterCheck" type="checkbox"> gauss filter images</p>
-                           <p>filter window: <label id="filterSizeLabel">5</label> (pixels)</p>
-                           <input id="filterSize" type="range" min="5" max="13" defaultValue="5" value="5" step="2">
                            <p>strain:</p>
                            <p><input id="strainCheck" type="checkbox" checked> compute strain</p>
                            <p>gauge size: <label id="strainGaugeSizeLabel">45</label> (pixels)</p>
@@ -427,7 +425,20 @@
                                <p><input id="bestFitYAxisCheck" type="checkbox"> treat axis as y-axis</p>
                            </div>
                        </div> <!-- end subset params -->
-                       <div id="trackingParams" class="param-options">
+                       <div id="trackingParams" class="param-options tracking">
+                         <p>optimization method:</p>
+                         <select id="optModeSelect" style="margin-bottom:20px;">
+                           <option value="gradient-based">gradient-based</option>
+                           <option value="simplex">simplex</option>
+                         </select>
+                       </div>
+                       <div id="generalParams" class="param-options">
+                           <p>filtering:</p>
+                           <p><input id="filterCheck" type="checkbox"> gauss filter images</p>
+                           <p>filter window: <label id="filterSizeLabel">5</label> (pixels)</p>
+                           <input id="filterSize" style="margin-bottom:20px;" type="range" min="5" max="13" defaultValue="5" value="5" step="2">                         
+                       </div>                       
+                       <div class="tracking">
                          <p><input id="binaryCheck" class="filterOption" type="checkbox"> binary threshold</p>
                          <p class="suboption">thresholding method:</p>
                          <p class="suboption filterOption"><select id="binarySelect">
@@ -439,6 +450,7 @@
                            <input class="suboption filterOption" id="binaryThreshBlockSize" type="range" min="3" max="101.0" defaultValue="75" value="75" step="2">
                            <p class="suboption">thresholding constant: <label id="binaryThreshConstantLabel">10</label> (counts)</p>
                            <input class="suboption filterOption" id="binaryThreshConstant" type="range" min="-50" max="50.0" defaultValue="10" value="10" step="1">
+                           <div style="display: none;">
                            <p><input id="blobCheck" class="filterOption" type="checkbox" style="margin-top:20px;"> blob detection</p>
                            <div class="suboption-wrapper">
                            <div class="suboption-col">
@@ -464,6 +476,7 @@
                            <input class="subsuboption filterOption blobOption" id="blobConvexityMin" type="range" min="0" max="1" defaultValue="0" value="0" step="0.01">
                            <p class="subsuboption">max: <label id="blobConvexityMaxLabel">1</label></p>
                            <input class="subsuboption filterOption blobOption" id="blobConvexityMax" type="range" min="0" max="1" defaultValue="1" value="1" step="0.01">
+                           </div>
                            </div>
                            </div>
                            <hr style="margin-top: 20px;">

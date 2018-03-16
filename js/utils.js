@@ -28,7 +28,8 @@ function initialize_gui(load_existing){
     $("#previewCross").hide();
     $("#initCross").hide();
     // hide the tracking tools
-    $("#trackingParams").hide();
+    $(".tracking").hide();
+    //$("#trackingParams").hide();
     $("#analysisModeSelect").val("subset");
 
     // hide the minimized bars for closed views
@@ -47,6 +48,8 @@ function initialize_gui(load_existing){
                 }
                 $("#fileSelectMode").val(fileSelectMode).change();
                 $("#analysisModeSelect").val(analysisModeSelect).change();
+                if($("#analysisModeSelect").val()=='tracking')
+                    showStereoPaneState=0;
                 if(showStereoPaneState==1){
                     showStereoViewer();
                 }else if(showStereoPaneState==0){
@@ -447,6 +450,9 @@ function resizeFullDivs(targetDiv){
 
 // toggle boxes up and down
 $("#stereoButton").click(function(){
+    // if tracking mode is selected button is disabled:
+    if($("#analysisModeSelect").val()=='tracking') return;
+    
     // get the current state of stereo on or off:
     var oldText = $('#runLi span').text();
     if(oldText=='run 2d'){
@@ -612,17 +618,25 @@ function showStereoViewer(){
 
 $("#analysisModeSelect").on('change',function() {
     if($(this).val()=="subset"){
-        $("#subsetParams").show();
-        $("#trackingParams").hide();
-        $("#sssigPreview").show();
-        drawROIs();
+        $(".full-field").show();
+        $(".tracking").hide();
+        //$("#subsetParams").show();
+        //$("#trackingParams").hide();
+        //$("#sssigPreview").show();
     }
     else if($(this).val()=="tracking"){
-        $("#subsetParams").hide();
-        $("#trackingParams").show();
-        $("#sssigPreview").hide();
-        clearDrawnROIs();
+        $(".full-field").hide();
+        $(".tracking").show();
+        // force 2D
+        resetLivePlots();
+        show2DViewer();
+        //$("#subsetParams").hide();
+        //$("#trackingParams").show();
+        //$("#sssigPreview").hide();
+        //clearDrawnROIs();
     }
+    drawROIs();
+    resizeAll();
 });
 
 $("#fileSelectMode").on('change',function (){

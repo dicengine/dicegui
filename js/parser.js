@@ -51,6 +51,11 @@ function impl_input_xml_file(xml){
         $("#subsetSize").val(subset_size);
         $("#subsetSizeLabel").text(subset_size);
     }
+    if(step_size || subset_size){
+        // override the method if there is a step size or subset size
+        $("#analysisModeSelect").val("subset").change;
+    }
+    
     // no text output files produced
     noText = xml_get(xml,"no_text_output_files");
     if(noText == "true"){
