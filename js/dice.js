@@ -5,7 +5,17 @@ document.getElementById("runLi").onclick = function() {
     fs.stat(fileName, function(err, stat) {
         if(err == null) {
             if (confirm('existing results files found in the working directory, overwrite?')) {
-                // all the inpu file writes are chained via callbacks with the
+                // delete any existing results files
+                fs.readdirSync(fullPath('results','')).forEach(file => {
+                    // check if the file matches the syntax         
+                    if(file.indexOf('DICe_solution_') !== -1){
+                        fs.unlink(fullPath('results',file), (err) => {
+                            if (err) throw err;
+                            console.log('successfully deleted existing results file'+file);
+                        });
+                    }
+                });
+                // all the input file writes are chained via callbacks with the
                 // last callback executing DICe
                 startProgress();
                 writeInputFile(false);
@@ -63,13 +73,49 @@ document.getElementById("writeLi").onclick = function() {
     writeInputFile(true);
 };
 
+function integerLength(integer) {
+    return integer.toString().length;
+}
+
 // global variable to see if there is already a live plot visible
 var livePlotWin = null;
 var livePlotLineWin = null;
 function showLivePlots(){
-    if(livePlotPtsX.length <=0 && !addLivePlotLineActive) return;
     localStorage.clear();
     localStorage.setItem("workingDirectory",workingDirectory);
+    if($("#analysisModeSelect").val()=="tracking"){
+        var livePlotFiles = '';
+        var numDigitsTotal = integerLength(ROIDefsX.length);        
+        // set up the files to read
+        for(i=0;i<ROIDefsX.length;++i){
+            if(os.platform()=='win32'){
+                livePlotFiles += 'results\\';
+            }else{
+                livePlotFiles += 'results/';
+            }
+            var currentDigits = integerLength(i);
+            var numZeros = Number(numDigitsTotal) - Number(currentDigits);
+            livePlotFiles += 'DICe_solution_';
+            for(j=0;j<numZeros;++j)
+                livePlotFiles += '0';
+            livePlotFiles += i + '.txt';
+            if(i<ROIDefsX.length-1)
+                livePlotFiles += ' ';
+        }
+        localStorage.setItem("livePlotFiles", livePlotFiles);
+        //alert('live plot win is ' + livePlotWin);
+        if(livePlotWin !== null && typeof livePlotWin === 'object'){
+            //livePlotWin.close();
+        }else{
+            livePlotWin = new BrowserWindow({ width: 1155, height: 800 });
+        }
+        livePlotWin.on('closed', () => {
+            livePlotWin = null;
+        })
+        livePlotWin.loadURL('file://' + __dirname + '/live_plot.html');
+        return;
+    }
+    if(livePlotPtsX.length <=0 && !addLivePlotLineActive) return;
     if(livePlotPtsX.length >0){
         var livePlotFiles = ""
         // TODO set up the files to read
@@ -988,23 +1034,73 @@ function writeSubsetFile(only_write,resolution,ss_locs){
         content += 'begin subset_coordinates\n';
         // use the centroid of each shape as the frame of reference origin
         for(var i = 0, l = ROIDefsX.length; i < l; i++) {
-            var ROIx = ROIDefsX[i];
-            var ROIy = ROIDefsY[i];
-            var cx = 0.0;
-            var cy = 0.0;
-            for(var j = 0, jl = ROIx.length; j < jl; j++) {
-                cx += ROIx[j];
-                cy += ROIy[j];
-            }
-            cx /= ROIx.length;
-            cy /= ROIx.length;
-            cx = Math.round(cx);
-            cy = Math.round(cy);   
-            content += cx + ' ' + cy + '\n';
+            var centroid = centroidOfPolygon(ROIDefsX[i],ROIDefsY[i]);
+            content += centroid.x + ' ' + centroid.y + '\n';
         }
         content += 'end subset_coordinates\n';
 
-        // TODO add EXCLUDED OBSTRUCTED
+        // add a polygon for each ROI
+        for(var i = 0, l = ROIDefsX.length; i < l; i++) {
+            content += 'begin conformal_subset\n';
+            content += '  subset_id ' + i + '\n';
+            content += '  begin boundary\n';
+            content += '    begin polygon\n'; 
+            content += '      begin vertices\n';
+            var ROIx = ROIDefsX[i];
+            var ROIy = ROIDefsY[i];
+            for(var j = 0, jl = ROIx.length; j < jl; j++) {
+                content += '        ' +  ROIx[j] + ' ' + ROIy[j] + '\n';
+            }
+            content += '      end vertices\n';           
+            content += '    end polygon\n';
+            content += '  end boundary\n';
+            // excluded
+            var has_excluded = false;
+            for(var j = 0, jl = excludedAssignments.length; j < jl; j++) {
+                if(excludedAssignments[j]==i)
+                    has_excluded = true;
+            }
+            if(has_excluded){
+                content += '  begin excluded\n';
+            }
+            for(var j = 0, jl = excludedAssignments.length; j < jl; j++) {
+                if(excludedAssignments[j]==i){
+                    content += '    begin polygon\n'; 
+                    content += '      begin vertices\n';
+                    var ROIx = excludedDefsX[j];
+                    var ROIy = excludedDefsY[j];
+                    for(var k = 0, kl = ROIx.length; k < kl; k++) {
+                        content += '        ' +  ROIx[k] + ' ' + ROIy[k] + '\n';
+                    }
+                    content += '      end vertices\n';           
+                    content += '    end polygon\n';
+                }
+            }
+            if(has_excluded){
+                content += '  end excluded\n';
+            }
+            // obstructed
+            if(obstructedDefsX.length > 0){
+                if(obstructedDefsX[0].length >= 3){
+                    content += '  begin obstructed\n';
+                    for(var j = 0, jl = obstructedDefsX.length; j < jl; j++) {
+                        content += '    begin polygon\n'; 
+                        content += '      begin vertices\n';
+                        var ROIx = obstructedDefsX[j];
+                        var ROIy = obstructedDefsY[j];
+                        for(var k = 0, kl = ROIx.length; k < kl; k++) {
+                            content += '        ' +  ROIx[k] + ' ' + ROIy[k] + '\n';
+                        }
+                        content += '      end vertices\n';           
+                        content += '    end polygon\n';
+                    }
+                    content += '  end obstructed\n';
+                }
+                content += 'end conformal_subset\n';
+            }
+        }
+        // for each ROI add the excluded regions with the excludedAssignment = to the ROI id
+        // add all obstructions to all ROIs
     }
     if(ROIDefsX[0].length>=3){    
         fs.writeFile(subsetFile, content, function (err) {

@@ -67,6 +67,7 @@ var livePlotPtsX = [];
 var livePlotPtsY = [];
 var excludedDefsX = [[]];
 var excludedDefsY = [[]];
+var excludedAssignments = [];
 var obstructedDefsX = [[]];
 var obstructedDefsY = [[]];
 var firstClick = true;

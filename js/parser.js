@@ -76,14 +76,14 @@ function impl_input_xml_file(xml){
         full_name = image_folder + cine_file;
         getFileObject(full_name, function (fileObject) {
             $("#panzoomLeft").html('');
-            callCineStatExec(fileObject,true,false,function(){update_cine_indices(xml)});
+            callCineStatExec(fileObject,0,false,false,function(){update_cine_indices(xml)});
         });
         if(stereo_cine_file){
             console.log('reading stereo cine file: ' + image_folder + stereo_cine_file);
             stereo_full_name = image_folder + stereo_cine_file;
             getFileObject(stereo_full_name, function (fileObject) {
                 $("#panzoomRight").html('');
-                callCineStatExec(fileObject,false);
+                callCineStatExec(fileObject,1,false);
             });
         }
     }else{
@@ -281,10 +281,17 @@ function impl_input_xml_file(xml){
     checkValidInput();
 }
 
+
+// note: the read_susbset_file does not read the
+// subset_id for a conformal subset, instead it assumes that the
+// subsets are always saved in order from 0 to n.
+// note: obstructed regions are copied in all subsets, as such only the
+// obstructed regions from the firs subeset are loaded
 function read_subset_file(data){
     hierarchy = [];
     clearROIs();
     clearExcluded();
+    clearObstructed();
     var max_vertices = 500;
     var lines = data.toString().split('\n');
     for(line = 0;line < lines.length; line++){
@@ -311,6 +318,8 @@ function read_subset_file(data){
                     console.log('vertex x: ' + vertex_x);
                     console.log('vertex y: ' + vertex_y);
                     if(hierarchy[hierarchy.length-3]=='boundary'){
+                        //console.log('ciurrent ROI index is ' + currentROIIndex);
+                        //console.log(ROIDefsX);
                         if(currentROIIndex!=0){
                             ROIDefsX.push([]);
                             ROIDefsY.push([]);
@@ -330,18 +339,41 @@ function read_subset_file(data){
                             excludedDefsX[excludedDefsX.length-1].push(vertex_x[i]);
                             excludedDefsY[excludedDefsY.length-1].push(vertex_y[i]);
                         }
+                        excludedAssignments.push(currentROIIndex-1);
                         currentExcludedIndex += 1;
+                    }
+                    else if(hierarchy[hierarchy.length-3]=='obstructed'&&currentROIIndex==1){
+                        if(currentObstructedIndex!=0){
+                            obstructedDefsX.push([]);
+                            obstructedDefsY.push([]);
+                        }
+                        for(i=0;i<vertex_x.length;i++){
+                            obstructedDefsX[obstructedDefsX.length-1].push(vertex_x[i]);
+                            obstructedDefsY[obstructedDefsY.length-1].push(vertex_y[i]);
+                        }
+                        currentObstructedIndex += 1;
                     }
                 }
             }
             else if(split_line[0]=='end' && hierarchy.length > 0){
                 hierarchy.pop();
             }
-        }
+        } // end split_line
     } // end lines
-    console.log('ROIDefsX: ' + ROIDefsX);
-    console.log('ROIDefsY: ' + ROIDefsY);
-    //drawROIs();
+    console.log('ROIDefsX:');
+    console.log(ROIDefsX);
+    console.log('ROIDefsY:');
+    console.log(ROIDefsY);
+    console.log('ExcludedDefsX:');
+    console.log(excludedDefsX);
+    console.log('ExcludedDefsY:');
+    console.log(excludedDefsY);
+    console.log('excludedAssignments');
+    console.log(excludedAssignments);
+    console.log('obstructedDefsX:');
+    console.log(obstructedDefsX);
+    console.log('obstructedDefsY:');
+    console.log(obstructedDefsY);
 }
 
 function update_cine_indices(xml){

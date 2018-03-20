@@ -78,6 +78,7 @@ $("#panzoomLeft").mousedown(function(){
             if(shapeInProgress==false && currentExcludedIndex > 0){
                 excludedDefsX.push([]);
                 excludedDefsY.push([]);
+                excludedAssignments.push(-1);
             }
             shapeInProgress = true;
             $("#ROIProgress").text("exclusion in progress");
@@ -335,6 +336,7 @@ function clearROIs () {
 function clearExcluded () {
     excludedDefsX = [[]];
     excludedDefsY = [[]];
+    excludedAssignments = [];
     currentExcludedIndex = 0;
 }
 
@@ -574,6 +576,11 @@ function removeLastExcluded(){
             excludedDefsX=[[]];
             excludedDefsY=[[]];
         }
+        if(excludedAssignments.length > 1){
+            excludedAssignments.pop();
+        }else{
+            excludedAssignments = [];
+        }
     }
 }
 $("#removeLastObstructed").click(function(){
@@ -598,6 +605,66 @@ function removeLastObstructed(){
     }
 }
 
+function centroidOfPolygon(ROIx,ROIy){
+    var centroid = {x:0,y:0}; 
+    if(ROIx.length!=ROIy.length||ROIx.length<3){
+        return centroid;
+    }
+    var cx = 0.0;
+    var cy = 0.0;
+    for(var j = 0, jl = ROIx.length; j < jl; j++) {
+        cx += ROIx[j];
+        cy += ROIy[j];
+    }
+    cx /= ROIx.length;
+    cy /= ROIx.length;
+    centroid.x = Math.round(cx);
+    centroid.y = Math.round(cy);
+    return centroid;
+}
+
+function isInPolygon(x,y,vertices_x,vertices_y){
+    if(vertices_x.length<3||vertices_y.length!=vertices_x.length)
+        return false;
+
+    var num_vertices = vertices_x.length;
+    // repeat the first vertex as the last vertex
+    var verts_x = vertices_x.slice();    
+    verts_x.push(vertices_x[0]);
+    var verts_y = vertices_y.slice();
+    verts_y.push(vertices_y[0]);
+    
+    var angle=0.0;
+    for (i=0;i<num_vertices;i++) {
+      // get the two end points of the polygon side and construct
+      // a vector from the point to each one:
+      dx1 = verts_x[i] - x;
+      dy1 = verts_y[i] - y;
+      dx2 = verts_x[i+1] - x;
+      dy2 = verts_y[i+1] - y;
+      angle += angle_2d(dx1,dy1,dx2,dy2);
+    }
+    // if the angle is greater than 2PI, the point is in the polygon
+    if(Math.abs(angle) >= 2.0*Math.PI){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+function angle_2d(x1,y1,x2,y2){
+    var dtheta=0.0;
+    var theta1=0.0;
+    var theta2=0.0;
+    theta1 = Math.atan2(y1,x1);
+    theta2 = Math.atan2(y2,x2);
+    dtheta = theta2 - theta1;
+    while (dtheta > Math.PI)
+        dtheta -= 2.0*Math.PI;
+    while (dtheta < -1.0*Math.PI)
+        dtheta += 2.0*Math.PI;
+    return(dtheta);
+}
 
 function validatePolygon(){
     var tol = 1.0E-3;
@@ -623,7 +690,7 @@ function validatePolygon(){
             alert('Invalid polygon: not enough vertices');
             return false;
         }
-        // TODO check for degenerate points
+        // check for degenerate points
         if(Math.abs(pointsX[0]-pointsX[numPoints-1]) + Math.abs(pointsY[0]-pointsY[numPoints-1]) < tol){
             alert('Invalid polygon: first and last point of the polygon are too close');
             return false;
@@ -634,7 +701,7 @@ function validatePolygon(){
                 return false;
             }
         }
-        // TODO check for intersections
+        // check for intersections
         for(var i = 0, l = numPoints; i < l; i++) {
             var ipt  = [pointsX[i],pointsY[i]]
             var iqpt = i == numPoints-1 ? [pointsX[0],pointsY[0]] : [pointsX[i+1],pointsY[i+1]];
@@ -651,8 +718,30 @@ function validatePolygon(){
                     }
                 }
             }
-        }            
-    } // end array not undefined   
+        }
+        // if excluded region and tracking method is on, the excluded region has to have
+        // a centroid inside an existing ROI, that is the ROI this excluded region is associated with 
+        if(addExcludedActive&&$("#analysisModeSelect").val()=="tracking"){
+            // compute the centroid of the excluded region
+            var centroid = centroidOfPolygon(pointsX,pointsY);
+            //alert('centroid of excluded polygon ' + centroid.x + ' ' + centroid.y);
+            
+            // test if this centroid is inside one of the ROIs
+            var roi_id = -1;
+            for(i=0;i<ROIDefsX.length;++i){
+                //console.log('checking ROI ' + i);
+                if(isInPolygon(centroid.x,centroid.y,ROIDefsX[i],ROIDefsY[i]))
+                    roi_id = i;
+            }
+            if(roi_id<0){
+                alert('centroid of excluded polygon is not inside a valid ROI');
+                return false;
+            }
+            //alert('centroid of excluded is in ROI ' + roi_id);
+            // assign the excluded region to an ROI
+            excludedAssignments[currentExcludedIndex] = roi_id;
+        } // end validate excluded regions
+    } // end array not undefined
     return true;
 }
 
