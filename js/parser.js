@@ -35,8 +35,6 @@ function impl_input_xml_file(xml){
         }); // end stat subset file
     }  // end has subset_file
 
-    
-    
     // set the step size
     step_size = xml_get(xml,"step_size");
     console.log('step_size: ' + step_size);
@@ -53,7 +51,19 @@ function impl_input_xml_file(xml){
     }
     if(step_size || subset_size){
         // override the method if there is a step size or subset size
-        $("#analysisModeSelect").val("subset").change;
+        $("#analysisModeSelect").val("subset").change();
+    }
+
+    // set the mesh size
+    mesh_size = xml_get(xml,"mesh_size");
+    console.log('mesh_size: ' + mesh_size);
+    if(mesh_size){
+        $("#meshSize").val(mesh_size);
+        $("#meshSizeLabel").text(mesh_size);
+    }
+    if(mesh_size){
+        // override the method if there is a step size or subset size
+        $("#analysisModeSelect").val("global").change();
     }
     
     // no text output files produced
@@ -374,6 +384,7 @@ function read_subset_file(data){
     console.log(obstructedDefsX);
     console.log('obstructedDefsY:');
     console.log(obstructedDefsY);
+    drawROIs();
 }
 
 function update_cine_indices(xml){
@@ -467,6 +478,13 @@ function impl_params_xml_file(xml){
         $("#strainCheck")[0].checked = true;
         $("#strainGaugeSize").val(vsg_strain);
         $("#strainGaugeSizeLabel").text(vsg_strain);
+    }
+    // global parameters
+    reg_constant = xml_get(xml,"global_regularization_alpha");
+    console.log('global regularization alpha ' + reg_constant);
+    if(reg_constant){
+        $("#regularizationConstant").val(reg_constant);
+        $("#regularizationConstantLabel").text(reg_constant);
     }
 
     checkValidInput();

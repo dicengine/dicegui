@@ -29,6 +29,8 @@ function initialize_gui(load_existing){
     $("#initCross").hide();
     // hide the tracking tools
     $(".tracking").hide();
+    // hide the global tools
+    $(".global").hide();
     //$("#trackingParams").hide();
     $("#analysisModeSelect").val("subset");
 
@@ -49,6 +51,8 @@ function initialize_gui(load_existing){
                 $("#fileSelectMode").val(fileSelectMode).change();
                 $("#analysisModeSelect").val(analysisModeSelect).change();
                 if($("#analysisModeSelect").val()=='tracking')
+                    showStereoPaneState=0;
+                if($("#analysisModeSelect").val()=='global')
                     showStereoPaneState=0;
                 if(showStereoPaneState==1){
                     showStereoViewer();
@@ -452,6 +456,7 @@ function resizeFullDivs(targetDiv){
 $("#stereoButton").click(function(){
     // if tracking mode is selected button is disabled:
     if($("#analysisModeSelect").val()=='tracking') return;
+    if($("#analysisModeSelect").val()=='global') return;
     
     // get the current state of stereo on or off:
     var oldText = $('#runLi span').text();
@@ -619,13 +624,17 @@ function showStereoViewer(){
 $("#analysisModeSelect").on('change',function() {
     if($(this).val()=="subset"){
         $(".full-field").show();
+        $(".full-field-global").show();
         $(".tracking").hide();
+        $(".global").hide();
         //$("#subsetParams").show();
         //$("#trackingParams").hide();
         //$("#sssigPreview").show();
     }
     else if($(this).val()=="tracking"){
         $(".full-field").hide();
+        $(".full-field-global").hide();
+        $(".global").hide();
         $(".tracking").show();
         // force 2D
         resetLivePlots();
@@ -634,6 +643,15 @@ $("#analysisModeSelect").on('change',function() {
         //$("#trackingParams").show();
         //$("#sssigPreview").hide();
         //clearDrawnROIs();
+    }
+    else if($(this).val()=="global"){
+        $(".full-field").hide();
+        $(".full-field-global").show();
+        $(".tracking").hide();
+        $(".global").show();
+        // force 2D
+        //resetLivePlots();
+        show2DViewer();
     }
     drawROIs();
     resizeAll();
@@ -668,6 +686,14 @@ $("#subsetSize").on('input',function(){
 
 $("#sssigThresh").on('input',function(){
     $("#sssigLabel").text($(this).val());
+});
+
+$("#meshSize").on('input',function(){
+    $("#meshSizeLabel").text($(this).val());
+});
+
+$("#regularizationConstant").on('input',function(){
+    $("#regularizationConstantLabel").text($(this).val());
 });
 
 $("#stepSize").on('input',function(){

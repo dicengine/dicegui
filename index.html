@@ -278,9 +278,9 @@
                     <i id="addObstructed" class="material-icons md-dark action-li tracking" title="add obstruction">add_box</i>
                     <i id="removeLastObstructed" class="material-icons md-dark action-li tracking" title="remove last obstruction">indeterminate_check_box</i>
                     <i id="resetROIs"class="material-icons md-dark action-li" title="reset ROIs">block</i>
-                    <i id="addLivePlotPts"class="material-icons md-dark action-li full-field" title="add live plot pt" style="margin-left:40px;">gps_fixed</i>
-                    <i id="addLivePlotLine"class="material-icons md-dark action-li full-field" title="add live plot line">location_disabled</i>
-                    <i id="resetLivePlotPts"class="material-icons md-dark action-li full-field" title="reset live plot pts">block</i>
+                    <i id="addLivePlotPts"class="material-icons md-dark action-li full-field-global" title="add live plot pt" style="margin-left:40px;">gps_fixed</i>
+                    <i id="addLivePlotLine"class="material-icons md-dark action-li full-field-global" title="add live plot line">location_disabled</i>
+                    <i id="resetLivePlotPts"class="material-icons md-dark action-li full-field-global" title="reset live plot pts">block</i>
                     <label id="ROIProgress"></label>
                   </div> <!-- end toggle div body -->
                 </div> <!-- end toggle div -->
@@ -396,6 +396,7 @@
                        <select id="analysisModeSelect">
                            <option value="subset">subset-based full-field</option>
                            <option value="tracking">tracking</option>
+                           <option value="global">global</option>
                        </select>
                        <div id="subsetParams" class="param-options full-field">
                            <p>initialization method:</p>
@@ -431,6 +432,12 @@
                            <option value="gradient-based">gradient-based</option>
                            <option value="simplex">simplex</option>
                          </select>
+                       </div>
+                       <div id="globalParams" class="param-options global">
+                         <p>mesh size: <label id="meshSizeLabel">50</label> (pixels^2)</p>
+                         <input id="meshSize" type="range" min="3" max="500" defaultValue="50" value="50" step="1">
+                         <p>regularization constant: <label id="regularizationConstantLabel">25</label></p>
+                         <input id="regularizationConstant" type="range" min="0" max="200" defaultValue="25" value="25" step="1">
                        </div>
                        <div id="generalParams" class="param-options">
                            <p>filtering:</p>
@@ -505,6 +512,8 @@
                      <h3>Regions of Interest</h3>
                      <p>In full-field mode, regions of interest can be selected using the <i class="material-icons md-dark">add_circle</i> button.</p>
                      <p>To preview the areas of the image that will be analyzed click the <i class="material-icons md-dark">check_circle</i> button. Automatic detection of speckled potions of the image is based on the SSSIG contrast criteria. Change the SSSIG threshold in the OPTIONS pane to increase or decrease the necessary contrast</p>
+                     <h3>Global mode</h3>
+                     <p>To use the global DIC formulation (currently, only in 2D) set the analysis mode to 'global'. In this mode, the user has two parameters to set, the mesh size (the average area of a mesh element in pixels^2) and the regularization constant. The regularization constant will introduce smoothing to the results for high values.</p>
                      <h3>Tracking mode</h3>
                      <p>To track objects in the field of view, rather than compute full-field displacements and strains, select the 'tracking' analysis mode. If the tracking mode is enabled, ROIs must be drawn on the image using the  <i class="material-icons md-dark">add_circle</i> button. Portions of a particular ROI can be omitted using the <i class="material-icons md-dark">add_circle_outline</i> button. To mark regions of the image that will obstruct the view of any ROI, use the <i class="material-icons md-dark">add_box</i> button to add an obstructed region.</p>
                      <h3>Visualizing Results</h3>

@@ -713,12 +713,26 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
     if(ROIDefsX[0].length>=3){
         content += '<Parameter name="subset_file" type="string" value="' + subsetFile + '" />\n';
     }
+    if(ROIDefsX[0].length==0&&$("#analysisModeSelect").val()=="global"){
+        content += '<Parameter name="subset_file" type="string" value="' + subsetFile + '" />\n';
+        // if no ROIs are defined for global, define one large ROI
+        ROIDefsX[0].push(20);
+        ROIDefsY[0].push(20);
+        ROIDefsX[0].push(refImageWidthLeft-20);
+        ROIDefsY[0].push(20);
+        ROIDefsX[0].push(refImageWidthLeft-20);
+        ROIDefsY[0].push(refImageHeightLeft-20);
+        ROIDefsX[0].push(20);
+        ROIDefsY[0].push(refImageHeightLeft-20);
+    }
     if($("#analysisModeSelect").val()=="subset"){
         content += '<Parameter name="subset_size" type="int" value="'+$("#subsetSize").val()+'" />\n';
         content += '<Parameter name="step_size" type="int" value="'+$("#stepSize").val()+'" />\n';
         content += '<Parameter name="separate_output_file_for_each_subset" type="bool" value="false" />\n';
-    }else{
+    }else if($("#analysisModeSelect").val()=="tracking"){
         content += '<Parameter name="separate_output_file_for_each_subset" type="bool" value="true" />\n';
+    }else{
+        content += '<Parameter name="mesh_size" type="double" value="'+$("#meshSize").val()+'" />\n';
     }
     content += '<Parameter name="create_separate_run_info_file" type="bool" value="true" />\n';
     if($("#omitTextCheck")[0].checked&&$("#analysisModeSelect").val()=="subset"){
@@ -816,7 +830,7 @@ function writeBestFitFile() {
 }
 
 function writeLivePlotsFile() {
-    if((livePlotPtsX.length >0 || addLivePlotLineActive)&&$("#analysisModeSelect").val()=="subset"){        
+    if((livePlotPtsX.length >0 || addLivePlotLineActive)&&($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global")){        
         var livePlotFile = fullPath('','live_plot.dat');
         consoleMsg('writing live plot data file ' + livePlotFile);
         var LPcontent = '';
@@ -921,7 +935,12 @@ function writeParamsFile(only_write,resolution,ss_locs) {
             content += '<Parameter name="strain_window_size_in_pixels" type="int" value="'+$("#strainGaugeSize").val()+'" />\n';
             content += '</ParameterList>\n';
         }
-    }else{
+    }else if($("#analysisModeSelect").val()=="global"){
+        content += '<Parameter name="max_solver_iterations_fast" type="int" value="500" />\n';
+        content += '<Parameter name="global_solver" type="string" value="gmres_solver" />\n';
+        content += '<Parameter name="global_formulation" type="string" value="horn_schunck" />\n';
+        content += '<Parameter name="global_regularization_alpha" type="double" value="'+$("#regularizationConstant").val()+'" />\n';
+    }else{ // assume tracking at this point
         content += '<Parameter name="use_tracking_default_params" type="bool" value="true" />\n';
         content += '<Parameter name="normalize_gamma_with_active_pixels" type="bool" value="true" />\n';
         content += '<Parameter name="filter_failed_cine_pixels" type="bool" value="true" />\n';
@@ -988,7 +1007,7 @@ function writeSubsetFile(only_write,resolution,ss_locs){
     consoleMsg('writing subset file ' + subsetFile);
     var content = '';
     content += '# Auto generated subset file from DICe GUI\n';
-    if($("#analysisModeSelect").val()=="subset"&&ROIDefsX[0].length>=3){
+    if(($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global")&&ROIDefsX[0].length>=3){
         if(ROIDefsX[0].length != ROIDefsY[0].length){
             alert('Error: subset file creation failed, invalid vertices for region of interest');
             return false;
