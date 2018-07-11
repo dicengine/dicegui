@@ -940,6 +940,11 @@ function writeParamsFile(only_write,resolution,ss_locs) {
         content += '<Parameter name="global_solver" type="string" value="gmres_solver" />\n';
         content += '<Parameter name="global_formulation" type="string" value="horn_schunck" />\n';
         content += '<Parameter name="global_regularization_alpha" type="double" value="'+$("#regularizationConstant").val()+'" />\n';
+        if($("#elementTypeSelect").val()=="TRI3"){
+            content += '<Parameter name="global_element_type" type="string" value="TRI3" />\n';
+        }else{
+            content += '<Parameter name="global_element_type" type="string" value="TRI6" />\n';
+        }
     }else{ // assume tracking at this point
         content += '<Parameter name="use_tracking_default_params" type="bool" value="true" />\n';
         content += '<Parameter name="normalize_gamma_with_active_pixels" type="bool" value="true" />\n';

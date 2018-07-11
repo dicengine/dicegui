@@ -438,6 +438,11 @@
                          <input id="meshSize" type="range" min="3" max="500" defaultValue="50" value="50" step="1">
                          <p>regularization constant: <label id="regularizationConstantLabel">25</label></p>
                          <input id="regularizationConstant" type="range" min="0" max="200" defaultValue="25" value="25" step="1">
+                         <p>element type:</p>
+                         <select id="elementTypeSelect">
+                           <option value="TRI6">quadratic triangle (TRI6)</option>
+                           <option value="TRI3">linear triangle (TRI3)</option>
+                         </select>
                        </div>
                        <div id="generalParams" class="param-options">
                            <p>filtering:</p>
