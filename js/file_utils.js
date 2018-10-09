@@ -42,7 +42,7 @@ function autoDetectImageSequence(folderPath,cb){
             // grab the first image file that comes along...                                                          
             var ext = dir[i].split('.').pop();
             //console.log('file in dir: ' + dir[i]);
-            if(ext=='tif'||ext=='TIF'||ext=='TIFF'||ext=='tiff'||ext=='JPG'||ext=='JPEG'||ext=='jpeg'||ext=='jpg'||ext=='png'||ext=='PNG'){
+            if(ext=='tif'||ext=='TIF'||ext=='TIFF'||ext=='tiff'||ext=='JPG'||ext=='JPEG'||ext=='jpeg'||ext=='jpg'||ext=='png'||ext=='PNG'||ext=='bmp'||ext=='BMP'){
                 // split up the name into components:
                 var trimName = dir[i];
                 // remove the extension                                                                           

@@ -292,6 +292,7 @@ function copyFile(source, target, cb) {
 function loadImage(file,viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addClass,addID,recordPath,callBack) {
     callBack = callBack || $.noop;
     var fileTypesOther = ['jpg', 'jpeg', 'png','JPG','PNG'];  //acceptable file types
+    var fileTypesBMP = ['bmp','BMP'];  //acceptable file types
     var fileTypesTiff = ['tiff','tif','TIFF','TIF'];  //acceptable file types
     //var tgt = evt.target || window.event.srcElement,
     //    files = tgt.files;
@@ -385,7 +386,7 @@ function loadImage(file,viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCla
                     $(tiffCanvas).css({border: '5px solid #666666'});
                 }
             }
-            else if(fileTypesOther.indexOf(extension) > -1){
+            else if(fileTypesOther.indexOf(extension) > -1||fileTypesBMP.indexOf(extension) > -1){
                 console.log('parsing jpg or png image ' + file.path + ' ...');
                 if(addBorder){
                     $(viewer).html('<img src="' + file.path + '" width='+vwidth+' height='+vheight+' style="z-index:'+zIndex+'; position: absolute; border: 5px solid #666666"/>');
@@ -438,7 +439,7 @@ function loadImage(file,viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCla
                     callBack();
                     return true;
                 }
-                var myImage = new Image();
+                var myImage  = new Image();
                 myImage.name = file.path;
                 myImage.onload = findHHandWW;
                 myImage.src = file.path;
