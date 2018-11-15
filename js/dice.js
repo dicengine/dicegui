@@ -81,6 +81,13 @@ function integerLength(integer) {
 var livePlotWin = null;
 var livePlotLineWin = null;
 function showLivePlots(){
+    var online = navigator.onLine;
+    // disable live plots when working offline
+    if(!online){
+	alert('Live plots are disabled when working offline');
+        return;
+    }
+
     localStorage.clear();
     localStorage.setItem("workingDirectory",workingDirectory);
     if($("#analysisModeSelect").val()=="tracking"){
