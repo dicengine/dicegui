@@ -155,7 +155,8 @@ function fileToDataObj(file,dataObjs) {
             else{ // always resolve ...
                 dataObjs.push(obj);
                 console.log('file read failed ' + file);
-                resolve('file read success!');
+                console.log(err);
+                resolve('file read failed!');
                 //reject('file read failure!');        
             }
         }); // end stat

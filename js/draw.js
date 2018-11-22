@@ -136,6 +136,8 @@ $("#panzoomLeft").mousedown(function(){
 function completeShape(){
     if(shapeInProgress==false) return;
     shapeInProgress = false;
+    ROIsChanged = true;
+    $("#showDeformedCheck").prop("checked", false);
     // validate the polygon
     var validPolygon = validatePolygon();
     if(validPolygon){

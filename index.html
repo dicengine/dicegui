@@ -18,6 +18,8 @@
     <script src="./js/file_utils.js" defer></script>
     <script src="./js/draw.js" defer></script>
     <script src="./js/parser.js" defer></script>
+    <script src="./js/live_plot.js" defer></script>
+    <script src="./js/show_tracking.js" defer></script>
     <!-- SVG -->
     <script src="./js/svg.js" defer></script>
     <script src="./js/svg.draggable.min.js" defer></script>
@@ -448,8 +450,11 @@
                            <p>filtering:</p>
                            <p><input id="filterCheck" type="checkbox"> gauss filter images</p>
                            <p>filter window: <label id="filterSizeLabel">5</label> (pixels)</p>
-                           <input id="filterSize" style="margin-bottom:20px;" type="range" min="5" max="13" defaultValue="5" value="5" step="2">                         
+                           <input id="filterSize" style="margin-bottom:10px;" type="range" min="5" max="13" defaultValue="5" value="5" step="2">
                        </div>                       
+                       <div id="generalParams" class="param-options tracking">
+                         <p><input id="showDeformedCheck" type="checkbox" style="margin-bottom:10px;"> show tracked ROIs</p>
+                       </div>
                        <div class="tracking">
                          <p><input id="binaryCheck" class="filterOption" type="checkbox"> binary threshold</p>
                          <p class="suboption">thresholding method:</p>

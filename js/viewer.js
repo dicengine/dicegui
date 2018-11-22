@@ -434,8 +434,12 @@ function loadImage(file,viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCla
                         // clear the drawn ROIs
                         clearDrawnROIs();
                     }
-                    if(typeof drawROIs === "function")
-                        drawROIs();
+                    if($("#showDeformedCheck")[0].checked){
+                        updateDeformedCoords();
+		    }else{
+                        if(typeof drawROIs === "function")
+                            drawROIs();
+		    }
                     callBack();
                     return true;
                 }
@@ -458,8 +462,12 @@ function loadImage(file,viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCla
                 // clear the drawn ROIs
                 clearDrawnROIs();
             }
-            if(typeof drawROIs === "function")
-                drawROIs();
+            if($("#showDeformedCheck")[0].checked){
+                updateDeformedCoords();
+	    }else{
+                if(typeof drawROIs === "function")
+                    drawROIs();
+	    }
             callBack();
             //if($("#binaryAutoUpdateCheck")[0].checked)
             //    callOpenCVServerExec();

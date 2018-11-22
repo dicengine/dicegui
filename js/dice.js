@@ -312,6 +312,8 @@ function callDICeExec(resolution,ss_locs) {
         }
         else{
             endProgress(true);
+            resultsFresh = true;
+            ROIsChanged = false;
             if(resolution){
                 localStorage.setItem("workingDirectory",workingDirectory);
                 var win = new BrowserWindow({ width: 850, height: 1000 });
