@@ -86,7 +86,7 @@ function impl_input_xml_file(xml){
         full_name = image_folder + cine_file;
         getFileObject(full_name, function (fileObject) {
             $("#panzoomLeft").html('');
-            callCineStatExec(fileObject,0,false,false,function(){update_cine_indices(xml)});
+            callCineStatExec(fileObject,0,false,function(){update_cine_indices(xml)});
         });
         if(stereo_cine_file){
             console.log('reading stereo cine file: ' + image_folder + stereo_cine_file);
@@ -396,6 +396,7 @@ function update_cine_indices(xml){
     if(cine_skip_index!='undefined') $("#cineSkipIndex").val(cine_skip_index);
     cine_ref_index = xml_get(xml,"cine_ref_index");
     if(cine_ref_index!='undefined') $("#cineRefIndex").val(cine_ref_index);
+    $("#frameScroller").val(cine_ref_index);
 }
 
 function parse_params_xml_file(filename){
