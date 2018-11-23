@@ -96,8 +96,12 @@ function plotLine(lineFile){
     dataObjs = [];
     var promise = fileToDataObj(lineFile,dataObjs);
     promise.then(function(response) {
+	if(response[0]=="file read failed!"||response=="file read failed!"){
+	    console.log('failed to load live_plot_line files');
+	    return;
+	}
         console.log("fileToDataObj succeeded!", response);
-        dataObjsToDataTables(dataObjs,dataTables);
+        dataObjsToLineDataTables(dataObjs,dataTables);
         if(firstPlot){
             for(i=0;i<dataTables.length;++i){
                 var liID = "li_livePlotLine_" + i;
@@ -164,118 +168,4 @@ function plotLineDataTable(){
     }); 
     chart.draw(view, chartOptions);
     //chart.draw(dataTables[currentTable],chartOptions);
-}
-
-function fileToDataObj(file,dataObjs) {
-    // Return a new promise.
-    return new Promise(function(resolve, reject) {
-        console.log("reading file " + file);
-        var obj = {fileName:file,headings:[],data:[],initialized:false}
-        fs.stat(file, function(err, stat) {
-            if(err == null) {                                     
-                fs.readFile(file, 'utf8', function (err,dataS) {                                       
-                    if (err) {                                                                                    
-                        return console.log(err);                                                                  
-                    }
-                    var resDataLines = dataS.toString().split(/\r?\n/);
-                    var foundHeaders = false;
-                    var prevLine;
-                    for(i=0;i<resDataLines.length;++i){
-                        var thisLineSplit = resDataLines[i].split(/[ ,]+/);
-                        if(thisLineSplit[thisLineSplit.length-1]=='') // remove effects of trailing commas if they exist
-                            thisLineSplit.splice(thisLineSplit.length-1,1);
-                        // if(thisLineSplit[0]=='#')continue;
-                        // if this is the column headings then append them
-                        if(isNaN(thisLineSplit[0])){
-                            prevLine = thisLineSplit;
-                            continue;
-                        }
-                        else if(foundHeaders) // if the header row has already been found read a line of data
-                            obj.data.push(thisLineSplit.map(Number));
-                            //obj.data.push(resDataLines[i].split(/[ ,]+/).map(Number)); 
-                        else{ // read the previous line as the header and decrement i
-                            foundHeaders = true;
-                            if(i>=1){
-                                //console.log('prevLine ' + prevLine);
-                                obj.headings = prevLine;
-                                //obj.headings = resDataLines[i-1].split(/[ ,]+/);
-                            }
-                            i--;
-                        }
-                        prevLine = thisLineSplit;
-                    }
-                    obj.initialized = true;
-                    console.log('file read is successful ' + file);
-                    dataObjs.push(obj);
-                    resolve('file read success!');
-                });
-            }// end null
-            else{ // always resolve ...
-                dataObjs.push(obj);
-                console.log('file read failed ' + file);
-                //resolve('file read success!');
-                reject('file read failure!');        
-            }
-        }); // end stat
-    });
-}
-
-// take an array of DataObjs and turn them into an array of data tables
-function dataObjsToDataTables(dataObjs,dataTables){
-    // sanity check the data
-    if(dataObjs.length!=1){
-        console.log('dataObjsToDataTables: error, dataObjs.length != 1');
-        return;
-    }
-    // get the first valid dataObj
-    if(dataObjs[0].data.length<=0){
-        console.log('dataObjsToDataTables: error, data.length < 1')
-        return;
-    }
-    if(dataObjs[0].headings.length<=0){
-        console.log('dataObjsToDataTables: error, headings.length < 1')
-        return;
-    }
-    if(dataObjs[0].data[0].length<=0){
-        console.log('dataObjsToDataTables: error, data[0].length < 1')
-        return;
-    }    
-    var numHeadings = dataObjs[0].headings.length;
-    var numCols = dataObjs[0].data[0].length;
-    var numRows = dataObjs[0].data.length;
-    var headings = dataObjs[0].headings;
-    var numDataTables = numHeadings;
-    console.log('numHeadings ' + numHeadings + ' numCols ' + numCols + ' numRows ' + numRows + ' headings ' + headings);
-    if(numCols!=numHeadings){
-        console.log('dataObjsToDataTables: error, numCols!=numHeadings');
-        return;
-    }
-    // figure out the source of the line plot
-    var xSource = dataObjs[0].data[0][0];
-    var ySource = dataObjs[0].data[0][1];
-    for(dt=0;dt<numDataTables;++dt){
-        if(dataTables.length<dt+1){
-            dataTables.push(new google.visualization.DataTable());
-            dataTables[dt].addColumn('number', 'Arc-length');
-            dataTables[dt].addColumn('number', headings[dt]);//dataObjColIndex[obj]);
-        }
-        var dataTable = dataTables[dt];
-        dataTable.removeRows(0,dataTable.getNumberOfRows());
-        dataTable.addRows(numRows);
-        //console.log('DATA TABLE SIZE ' + numRows + ' x ' + dataTables[dt].getNumberOfColumns());
-        // set the x labels
-        for(row=0;row<numRows;++row){
-            dataTable.setCell(row,0,row);
-        }
-        // copy all the dataObjs data into this dataTable
-        for(row=0;row<numRows;++row){
-            if(dataObjs[0].initialized){
-                var dx = dataObjs[0].data[row][0] - xSource;
-                var dy = dataObjs[0].data[row][1] - ySource;
-                var arcLength = Math.sqrt(dx*dx + dy*dy);
-                dataTable.setCell(row,0,arcLength);                
-                dataTable.setCell(row,1,dataObjs[0].data[row][dt]);
-            }
-        }
-    }
 }
