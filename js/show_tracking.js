@@ -159,15 +159,18 @@ function updateDeformedCoords(){
 	    deformedROIDefsY[roi][pt] = sint*dx + cost*dy + v + cy; 
             //console.log('after x ' + deformedROIDefsX[roi][pt] + ' y ' + deformedROIDefsY[roi][pt]); 
 	}
-        for(pt=0;pt<deformedExcludedDefsX[roi].length;++pt){
-	    var ptx = deformedExcludedDefsX[roi][pt];
-	    var pty = deformedExcludedDefsY[roi][pt];
-            var dx = ptx - cx;
-            var dy = pty - cy;
-            //console.log('before x ' + ptx + ' y ' + pty); 
-	    deformedExcludedDefsX[roi][pt] = cost*dx - sint*dy + u + cx;
-	    deformedExcludedDefsY[roi][pt] = sint*dx + cost*dy + v + cy; 
-            //console.log('after x ' + deformedExcludedDefsX[roi][pt] + ' y ' + deformedExcludedDefsY[roi][pt]); 
+	for(var j = 0, jl = excludedAssignments.length; j < jl; j++) {
+	    if(excludedAssignments[j]==roi){
+              for(pt=0;pt<deformedExcludedDefsX[j].length;++pt){
+  	        var ptx = deformedExcludedDefsX[j][pt];
+	        var pty = deformedExcludedDefsY[j][pt];
+                var dx = ptx - cx;
+                var dy = pty - cy;
+                //console.log('before x ' + ptx + ' y ' + pty); 
+	        deformedExcludedDefsX[j][pt] = cost*dx - sint*dy + u + cx;
+	        deformedExcludedDefsY[j][pt] = sint*dx + cost*dy + v + cy;
+	      } 
+	    }
 	}
     }
     //console.log(deformedROIDefsX);
