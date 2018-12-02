@@ -1,41 +1,56 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Live Plot Line</title>
-    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
-    <script src="./js/jquery.min.js"></script>
-    <script src="./js/jquery-ui.js"></script>
-    <script>if (window.module) module = window.module;</script>
-    <script type="text/javascript" src="./js/loader.js"></script>
-    <script src="./js/requires.js" defer></script>
-    <script src="./js/live_plot_utils.js" defer></script>
-    <script src="./js/live_plot_line.js" defer></script>
-    <!-- Local style sheet -->
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <!-- Google fonts and icons -->
-    <link rel="stylesheet" type="text/css" href="open_sans.css">
-    <link rel="stylesheet" type="text/css" href="material_icons.css">
-  </head>
-  <body style="background-color:white;">
-    <!-- 850x600-->    
-    <div style="background-color:#cccccc; width:100%; min-width:1120px; height:100%; display:block; position: absolute; padding: 10px;">
-      <div id="livePlotLinks" style="background-color:#e6e6e6; width:225px; height:auto; float:left; border-radius:5px;">
-        <h1 style="padding-left: 10px;">FIELDS</h1>
-        <ul id="livePlotLineUL" style="padding-left:22px; padding-bottom:20px;">
+<head>
+<meta charset="UTF-8">
+<title>Live Plot Line</title>
+<script>
+    if (typeof module === 'object') {
+        window.module = module;
+        module = undefined;
+    }
+</script>
+<script src="./js/jquery.min.js"></script>
+<script src="./js/jquery-ui.js"></script>
+<script>
+    if (window.module)
+        module = window.module;
+</script>
+<script type="text/javascript" src="./js/loader.js"></script>
+<script src="./js/requires.js" defer></script>
+<script src="./js/live_plot_utils.js" defer></script>
+<script src="./js/live_plot_line.js" defer></script>
+<!-- Local style sheet -->
+<link rel="stylesheet" type="text/css" href="style.css">
+<!-- Google fonts and icons -->
+<link rel="stylesheet" type="text/css" href="open_sans.css">
+<link rel="stylesheet" type="text/css" href="material_icons.css">
+</head>
+<body style="background-color: white;">
+  <!-- 850x600-->
+  <div
+    style="background-color: #cccccc; width: 100%; min-width: 1120px; height: 100%; display: block; position: absolute; padding: 10px;"
+  >
+    <div id="livePlotLinks"
+      style="background-color: #e6e6e6; width: 225px; height: auto; float: left; border-radius: 5px;"
+    >
+      <h1 style="padding-left: 10px;">FIELDS</h1>
+      <ul id="livePlotLineUL" style="padding-left: 22px; padding-bottom: 20px;">
+      </ul>
+      <h1 style="padding-left: 10px;">STEP</h1>
+      <div style="padding-left: 22px;">
+        <select id="stepSelect"></select> <input id="fixAxisCheck" type="checkbox"
+          style="margin-left: 10px;"
+        ><span> fix v-axis</span>
+        <ul id="stepUL" style="padding-top: 10px;">
+          <li id="stepForward" class="action-li"><span>next</span></li>
+          <li id="stepBackward" class="action-li"><span>previous</span></li>
         </ul>
-        <h1 style="padding-left: 10px;">STEP</h1>
-        <div style="padding-left: 22px;">
-          <select id="stepSelect"></select>
-          <input id="fixAxisCheck" type="checkbox" style="margin-left:10px;"><span> fix v-axis</span>
-          <ul id="stepUL" style="padding-top:10px;">
-            <li id="stepForward" class="action-li"><span>next</span></li>            
-            <li id="stepBackward" class="action-li"><span>previous</span></li>            
-          </ul>
-        </div>
       </div>
-      <div id="livePlotLine" style="position:absolute; left:245px; width:calc(100% - 255px); min-width:875px; height:97%; float:left; overflow:hidden; border-radius:5px;">
-      </div>
-    </div> <!-- end content-->    
-  </body>
+    </div>
+    <div id="livePlotLine"
+      style="position: absolute; left: 245px; width: calc(100% - 255px); min-width: 875px; height: 97%; float: left; overflow: hidden; border-radius: 5px;"
+    ></div>
+  </div>
+  <!-- end content-->
+</body>
 </html>

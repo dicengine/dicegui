@@ -1,79 +1,88 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Seed Cross Correlation Initialization</title>
-    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
-    <script src="./js/jquery.min.js"></script>
-    <script src="./js/jquery-ui.js"></script>
-    <script>if (window.module) module = window.module;</script>
-    <!-- Panzoom -->
-    <script src="./js/jquery.panzoom.min.js" defer></script>
-    <!-- Custom JS -->
-    <!-- SVG -->
-    <script src="./js/svg.js" defer></script>
-    <script src="./js/requires.js" defer></script>
-    <script src="./js/viewer.js" defer></script>
-    <script src="./js/file_utils.js" defer></script>
-    <script src="./js/cross.js" defer></script>
-    <script src="./js/tiff.js" defer></script>
-    <!--<script src="./js/global.js" defer></script>-->
-    <link rel="stylesheet" type="text/css" href="cross_style.css">
-    <!-- Google fonts and icons -->
-    <link rel="stylesheet" type="text/css" href="open_sans.css">
-    <link rel="stylesheet" type="text/css" href="material_icons.css">
-  </head>
-  <body>
-    <div class="content">
+<head>
+<meta charset="UTF-8">
+<title>Seed Cross Correlation Initialization</title>
+<script>
+    if (typeof module === 'object') {
+        window.module = module;
+        module = undefined;
+    }
+</script>
+<script src="./js/jquery.min.js"></script>
+<script src="./js/jquery-ui.js"></script>
+<script>
+    if (window.module)
+        module = window.module;
+</script>
+<!-- Panzoom -->
+<script src="./js/jquery.panzoom.min.js" defer></script>
+<!-- Custom JS -->
+<!-- SVG -->
+<script src="./js/svg.js" defer></script>
+<script src="./js/requires.js" defer></script>
+<script src="./js/viewer.js" defer></script>
+<script src="./js/file_utils.js" defer></script>
+<script src="./js/cross.js" defer></script>
+<script src="./js/tiff.js" defer></script>
+<!--<script src="./js/global.js" defer></script>-->
+<link rel="stylesheet" type="text/css" href="cross_style.css">
+<!-- Google fonts and icons -->
+<link rel="stylesheet" type="text/css" href="open_sans.css">
+<link rel="stylesheet" type="text/css" href="material_icons.css">
+</head>
+<body>
+  <div class="content">
     <div class="cross-viewer-fluid">
-    <div id="crossLeftRow" class="cross-viewer-wrapper">
-      <div id="panzoomViewLeft1" class="cross-viewer">
-        <div id="panzoomCrossLeft1" class="panzoom"></div>
-        <div id="svgContainerLeft1" class="svg-container"></div>
+      <div id="crossLeftRow" class="cross-viewer-wrapper">
+        <div id="panzoomViewLeft1" class="cross-viewer">
+          <div id="panzoomCrossLeft1" class="panzoom"></div>
+          <div id="svgContainerLeft1" class="svg-container"></div>
+        </div>
+        <div id="panzoomViewLeft2" class="cross-viewer">
+          <div id="panzoomCrossLeft2" class="panzoom"></div>
+          <div id="svgContainerLeft2" class="svg-container"></div>
+        </div>
+        <div id="panzoomViewLeft3" class="cross-viewer">
+          <div id="panzoomCrossLeft3" class="panzoom"></div>
+          <div id="svgContainerLeft3" class="svg-container"></div>
+        </div>
+        <div id="panzoomViewLeft4" class="cross-viewer">
+          <div id="panzoomCrossLeft4" class="panzoom"></div>
+          <div id="svgContainerLeft4" class="svg-container"></div>
+        </div>
       </div>
-      <div id="panzoomViewLeft2" class="cross-viewer">
-        <div id="panzoomCrossLeft2" class="panzoom"></div>
-        <div id="svgContainerLeft2" class="svg-container"></div>
-      </div>
-      <div id="panzoomViewLeft3" class="cross-viewer">
-        <div id="panzoomCrossLeft3" class="panzoom"></div>
-        <div id="svgContainerLeft3" class="svg-container"></div>
-      </div>
-      <div id="panzoomViewLeft4" class="cross-viewer">
-        <div id="panzoomCrossLeft4" class="panzoom"></div>
-        <div id="svgContainerLeft4" class="svg-container"></div>
+      <div id="crossRightRow" class="cross-viewer-wrapper">
+        <div id="panzoomViewLeft1" class="cross-viewer">
+          <div id="panzoomCrossRight1" class="panzoom"></div>
+          <div id="svgContainerRight1" class="svg-container"></div>
+        </div>
+        <div id="panzoomViewLeft2" class="cross-viewer">
+          <div id="panzoomCrossRight2" class="panzoom"></div>
+          <div id="svgContainerRight2" class="svg-container"></div>
+        </div>
+        <div id="panzoomViewLeft3" class="cross-viewer">
+          <div id="panzoomCrossRight3" class="panzoom"></div>
+          <div id="svgContainerRight3" class="svg-container"></div>
+        </div>
+        <div id="panzoomViewLeft4" class="cross-viewer">
+          <div id="panzoomCrossRight4" class="panzoom"></div>
+          <div id="svgContainerRight4" class="svg-container"></div>
+        </div>
       </div>
     </div>
-    <div id="crossRightRow" class="cross-viewer-wrapper">
-      <div id="panzoomViewLeft1" class="cross-viewer">
-        <div id="panzoomCrossRight1" class="panzoom"></div>
-        <div id="svgContainerRight1" class="svg-container"></div>
-      </div>
-      <div id="panzoomViewLeft2" class="cross-viewer">
-        <div id="panzoomCrossRight2" class="panzoom"></div>
-        <div id="svgContainerRight2" class="svg-container"></div>
-      </div>
-      <div id="panzoomViewLeft3" class="cross-viewer">
-        <div id="panzoomCrossRight3" class="panzoom"></div>
-        <div id="svgContainerRight3" class="svg-container"></div>
-      </div>
-      <div id="panzoomViewLeft4" class="cross-viewer">
-        <div id="panzoomCrossRight4" class="panzoom"></div>
-        <div id="svgContainerRight4" class="svg-container"></div>
-      </div>
-    </div>
-    </div>
-   <!-- <div id="crossViewWindow" class="cross-view-window"> -->
-   <!--   <div id="panzoomCrossBottom" class="overlap-images"></div> -->
-   <!--   <div id="panzoomCrossTop" class="overlap-images"></div> -->
-          <!--<div id="panzoomCross" class="panzoom"></div>-->
-   <!-- </div> -->
+    <!-- <div id="crossViewWindow" class="cross-view-window"> -->
+    <!--   <div id="panzoomCrossBottom" class="overlap-images"></div> -->
+    <!--   <div id="panzoomCrossTop" class="overlap-images"></div> -->
+    <!--<div id="panzoomCross" class="panzoom"></div>-->
+    <!-- </div> -->
     <div id="crossControls" class="cross-controls">
-      <button class="cross-button float-left" id="crossCalculateButton" typ="button">save seed</button>
+      <button class="cross-button float-left" id="crossCalculateButton" typ="button">save
+        seed</button>
       <button class="cross-button force-right" id="crossCancelButton" typ="button">cancel</button>
       <!--<input class="float-left" id="transparencyInput" type="range" min="0.0" max="1.0" defaultValue="0.5" value="0.5" step="0.05">
       <p class="float-left">left opacity: <label id="transparencyLabel">0.5</label></p>-->
     </div>
-    </div>
-  </body>
+  </div>
+</body>
 </html>

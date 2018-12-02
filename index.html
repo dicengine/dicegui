@@ -1,566 +1,867 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Digital Image Correlation Engine (DICe)</title>
-    <!-- jQuery library -->
-    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
-    <script src="./js/jquery.min.js"></script>
-    <script src="./js/jquery-ui.js"></script>
-    <script>if (window.module) module = window.module;</script>
-    <!-- Tiff -->
-    <script src="./js/tiff.js" defer></script>
-    <!-- Custom JS -->
-    <script src="./js/requires.js" defer></script>
-    <script src="./js/global.js" defer></script>
-    <script src="./js/dice.js" defer></script>  
-    <script src="./js/utils.js" defer></script>
-    <script src="./js/file_utils.js" defer></script>
-    <script src="./js/draw.js" defer></script>
-    <script src="./js/parser.js" defer></script>
-    <script src="./js/live_plot_utils.js" defer></script>
-    <script src="./js/show_tracking.js" defer></script>
-    <!-- SVG -->
-    <script src="./js/svg.js" defer></script>
-    <script src="./js/svg.draggable.min.js" defer></script>
-    <!-- Panzoom -->
-    <script src="./js/jquery.panzoom.min.js" defer></script>
-    <script src="./js/viewer.js" defer></script>
-    <!-- Local style sheet -->
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <!-- Google fonts and icons -->
-    <link rel="stylesheet" type="text/css" href="open_sans.css">
-    <link rel="stylesheet" type="text/css" href="material_icons.css">
-  </head>
-  <body>
-    <div class="wrapper">
-      <div class="header">
-        <img src="./images/DICe_logo_white-01.png" alt="DICe logo" height="42" width="auto">
-        <div id="stackButton" title="toggle stack and column view" class="banner-button stack-button">
-          <div style="float:left; width:auto;"><i id="stackIcon" class="material-icons md-light md-28">view_agenda</i></div>
-        </div>
-        <div id="stereoButton" title="toggle stereo on/off" class="banner-button stereo-button">
-          <div style="float:left; width:auto;"><i class="material-icons md-light md-28">camera_alt</i></div>
-          <div id="x1x2" style="float:left; width:auto; padding-left:5px;">x 1</div>
-        </div>
-        <div id="paramsButton" title="toggle opions pane shown/hidden" class="banner-button params-button">
-          <i class="material-icons md-light md-36">menu</i>
+<head>
+<meta charset="UTF-8">
+<title>Digital Image Correlation Engine (DICe)</title>
+<!-- jQuery library -->
+<script>
+    if (typeof module === 'object') {
+        window.module = module;
+        module = undefined;
+    }
+</script>
+<script src="./js/jquery.min.js"></script>
+<script src="./js/jquery-ui.js"></script>
+<script>
+    if (window.module)
+        module = window.module;
+</script>
+<!-- Tiff -->
+<script src="./js/tiff.js" defer></script>
+<!-- Custom JS -->
+<script src="./js/requires.js" defer></script>
+<script src="./js/global.js" defer></script>
+<script src="./js/dice.js" defer></script>
+<script src="./js/utils.js" defer></script>
+<script src="./js/file_utils.js" defer></script>
+<script src="./js/draw.js" defer></script>
+<script src="./js/parser.js" defer></script>
+<script src="./js/live_plot_utils.js" defer></script>
+<script src="./js/show_tracking.js" defer></script>
+<!-- SVG -->
+<script src="./js/svg.js" defer></script>
+<script src="./js/svg.draggable.min.js" defer></script>
+<!-- Panzoom -->
+<script src="./js/jquery.panzoom.min.js" defer></script>
+<script src="./js/viewer.js" defer></script>
+<!-- Local style sheet -->
+<link rel="stylesheet" type="text/css" href="style.css">
+<!-- Google fonts and icons -->
+<link rel="stylesheet" type="text/css" href="open_sans.css">
+<link rel="stylesheet" type="text/css" href="material_icons.css">
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <img src="./images/DICe_logo_white-01.png" alt="DICe logo" height="42" width="auto">
+      <div id="stackButton" title="toggle stack and column view" class="banner-button stack-button">
+        <div style="float: left; width: auto;">
+          <i id="stackIcon" class="material-icons md-light md-28">view_agenda</i>
         </div>
       </div>
-      <div id="contentDiv" class="content">
-       <div class="fixed-col">
-         <h1>IMAGES</h1>
-          <p class="nav-item">file select method:</p>
-           <select id="fileSelectMode" style="width:95%; margin-bottom:10px; margin-left:10px;">
-               <option value="list">select individually</option>
-               <option value="sequence">sequence of images</option>
-               <option value="cine">.cine video frames</option>
-           </select>
+      <div id="stereoButton" title="toggle stereo on/off" class="banner-button stereo-button">
+        <div style="float: left; width: auto;">
+          <i class="material-icons md-light md-28">camera_alt</i>
+        </div>
+        <div id="x1x2" style="float: left; width: auto; padding-left: 5px;">x 1</div>
+      </div>
+      <div id="paramsButton" title="toggle opions pane shown/hidden"
+        class="banner-button params-button"
+      >
+        <i class="material-icons md-light md-36">menu</i>
+      </div>
+    </div>
+    <div id="contentDiv" class="content">
+      <div class="fixed-col">
+        <h1>IMAGES</h1>
+        <p class="nav-item">file select method:</p>
+        <select id="fileSelectMode" style="width: 95%; margin-bottom: 10px; margin-left: 10px;">
+          <option value="list">select individually</option>
+          <option value="sequence">sequence of images</option>
+          <option value="cine">.cine video frames</option>
+        </select>
 
-          <div id="leftImageMenu">
-            <!-- begin list input -->
-            <div class="nav-list">
-              <div class="nav-two-cam nav-item">LEFT</div>
-              <label for="leftRefInput" class="custom-file-input action-li">
-                <i class="material-icons md-dark md-br-pad">add_a_photo</i>
-                load reference     
-              </label>
-              <input id="leftRefInput" type="file" accept="image/*">
-             <div id="refImageText" style="word-wrap: break-word; margin-left:10px;"><span id="refImageTextSpan"></span></div>
-              <label for="leftDefInput" class="custom-file-input action-li">
-                <i class="material-icons md-dark md-br-pad">add_a_photo</i>
-                load deformed    
-              </label>
-              <input id="leftDefInput" type="file" multiple accept="image/*">
-              <div id="defImageListLeftContainer" class="def-image-list-container">
-                <ul id="defImageListLeft" class="def-image-ul">
-                </ul>
-              </div>
+        <div id="leftImageMenu">
+          <!-- begin list input -->
+          <div class="nav-list">
+            <div class="nav-two-cam nav-item">LEFT</div>
+            <label for="leftRefInput" class="custom-file-input action-li"> <i
+              class="material-icons md-dark md-br-pad"
+            >add_a_photo</i> load reference
+            </label> <input id="leftRefInput" type="file" accept="image/*">
+            <div id="refImageText" style="word-wrap: break-word; margin-left: 10px;">
+              <span id="refImageTextSpan"></span>
             </div>
-            <!-- end list input -->
-            <!-- begin sequence input -->
-            <div class="nav-sequence">
-             <div id="changeImageFolder" class="action-li"><i class="material-icons md-dark md-br-pad">folder</i>
-                image folder
-             </div>
-             <div id="imageFolder" style="word-wrap: break-word;"><span id="imageFolderSpan"></span></div>
-             <div>prefix</div>
-             <input type="text" id="imagePrefix" name="imagePrefix" value="" style="width:100%;">
-             <div>ref index</div>
-             <input type="text" id="refIndex" name="refIndex" value="0" style="width:100%;">
-             <div>start index</div>
-             <input type="text" id="startIndex" name="startIndex" value="0" style="width:100%;">
-             <div>end index</div>
-             <input type="text" id="endIndex" name="endIndex" value="0" style="width:100%;">
-             <div>frame interval</div>
-             <input type="text" id="skipIndex" name="skipIndex" value="1" style="width:100%;">
-             <div>digits in number</div>
-             <input type="text" id="numDigits" name="numDigits" value="1" style="width:100%;">
-             <div class="nav-two-cam">stereo left suffix</div>
-             <input class="nav-two-cam" type="text" id="stereoLeftSuffix" name="stereoLeftSuffix" value="_0" style="width:100%;">
-             <div class="nav-two-cam">stereo right suffix</div>
-             <input class="nav-two-cam" type="text" id="stereoRightSuffix" name="stereoRightSuffix" value="_1" style="width:100%;">
-             <div class="nav-three-cam">trinoc middle suffix</div>
-             <input class="nav-three-cam" type="text" id="stereoMiddleSuffix" name="stereoMiddleSuffix" value="_2" style="width:100%;">
-             <div>extension</div>
-             <input type="text" id="imageExtension" name="imageExtension" value="" style="width:100%; margin-bottom:10px;">
-             <div style="margin-bottom:4px;">reference image</div>
-             <div id="imageSequencePreview" class="sample-filename" style="word-wrap: break-word; margin-bottom:10px;"><span id="imageSequencePreviewSpan"></span></div>
-             <label id="loadRef" class="action-li">
-                <i class="material-icons md-dark md-br-pad">add_a_photo</i>
-                refresh preview     
-             </label>
+            <label for="leftDefInput" class="custom-file-input action-li"> <i
+              class="material-icons md-dark md-br-pad"
+            >add_a_photo</i> load deformed
+            </label> <input id="leftDefInput" type="file" multiple accept="image/*">
+            <div id="defImageListLeftContainer" class="def-image-list-container">
+              <ul id="defImageListLeft" class="def-image-ul">
+              </ul>
             </div>
-            <!-- end sequence input -->
-            <!-- begin cine input -->
-            <div class="nav-cine">
-              <label for="leftCineInput" class="custom-file-input action-li">
-                <i class="material-icons md-dark md-br-pad">camera_roll</i>
-                load cine   
-              </label>
-             <div id="cineLeftPreview" style="word-wrap: break-word; margin-bottom:10px;" class="nav-item"><span id="cineLeftPreviewSpan"></span></div>
-             <input id="leftCineInput" type="file" accept=".cine">
+          </div>
+          <!-- end list input -->
+          <!-- begin sequence input -->
+          <div class="nav-sequence">
+            <div id="changeImageFolder" class="action-li">
+              <i class="material-icons md-dark md-br-pad">folder</i> image folder
+            </div>
+            <div id="imageFolder" style="word-wrap: break-word;">
+              <span id="imageFolderSpan"></span>
+            </div>
+            <div>prefix</div>
+            <input type="text" id="imagePrefix" name="imagePrefix" value="" style="width: 100%;">
+            <div>ref index</div>
+            <input type="text" id="refIndex" name="refIndex" value="0" style="width: 100%;">
+            <div>start index</div>
+            <input type="text" id="startIndex" name="startIndex" value="0" style="width: 100%;">
+            <div>end index</div>
+            <input type="text" id="endIndex" name="endIndex" value="0" style="width: 100%;">
+            <div>frame interval</div>
+            <input type="text" id="skipIndex" name="skipIndex" value="1" style="width: 100%;">
+            <div>digits in number</div>
+            <input type="text" id="numDigits" name="numDigits" value="1" style="width: 100%;">
+            <div class="nav-two-cam">stereo left suffix</div>
+            <input class="nav-two-cam" type="text" id="stereoLeftSuffix" name="stereoLeftSuffix"
+              value="_0" style="width: 100%;"
+            >
+            <div class="nav-two-cam">stereo right suffix</div>
+            <input class="nav-two-cam" type="text" id="stereoRightSuffix" name="stereoRightSuffix"
+              value="_1" style="width: 100%;"
+            >
+            <div class="nav-three-cam">trinoc middle suffix</div>
+            <input class="nav-three-cam" type="text" id="stereoMiddleSuffix"
+              name="stereoMiddleSuffix" value="_2" style="width: 100%;"
+            >
+            <div>extension</div>
+            <input type="text" id="imageExtension" name="imageExtension" value=""
+              style="width: 100%; margin-bottom: 10px;"
+            >
+            <div style="margin-bottom: 4px;">reference image</div>
+            <div id="imageSequencePreview" class="sample-filename"
+              style="word-wrap: break-word; margin-bottom: 10px;"
+            >
+              <span id="imageSequencePreviewSpan"></span>
+            </div>
+            <label id="loadRef" class="action-li"> <i
+              class="material-icons md-dark md-br-pad"
+            >add_a_photo</i> refresh preview
+            </label>
+          </div>
+          <!-- end sequence input -->
+          <!-- begin cine input -->
+          <div class="nav-cine">
+            <label for="leftCineInput" class="custom-file-input action-li"> <i
+              class="material-icons md-dark md-br-pad"
+            >camera_roll</i> load cine
+            </label>
+            <div id="cineLeftPreview" style="word-wrap: break-word; margin-bottom: 10px;"
+              class="nav-item"
+            >
+              <span id="cineLeftPreviewSpan"></span>
+            </div>
+            <input id="leftCineInput" type="file" accept=".cine">
             <div class="nav-two-cam">
-              <label for="rightCineInput" class="custom-file-input action-li">
-                <i class="material-icons md-dark md-br-pad">camera_roll</i>
-                load stereo cine   
-              </label>
-              <input id="rightCineInput" type="file" accept=".cine">
-              <div id="cineRightPreview" style="word-wrap: break-word; margin-bottom:10px;" class="nav-item"><span id="cineRightPreviewSpan"></span></div>
-            </div> <!-- end nav two cam -->
+              <label for="rightCineInput" class="custom-file-input action-li"> <i
+                class="material-icons md-dark md-br-pad"
+              >camera_roll</i> load stereo cine
+              </label> <input id="rightCineInput" type="file" accept=".cine">
+              <div id="cineRightPreview" style="word-wrap: break-word; margin-bottom: 10px;"
+                class="nav-item"
+              >
+                <span id="cineRightPreviewSpan"></span>
+              </div>
+            </div>
+            <!-- end nav two cam -->
             <div class="nav-three-cam">
-              <label for="middleCineInput" class="custom-file-input action-li">
-                <i class="material-icons md-dark md-br-pad">camera_roll</i>
-                load trinoc cine   
-              </label>
-              <input id="middleCineInput" type="file" accept=".cine">
-              <div id="cineMiddlePreview" style="word-wrap: break-word; margin-bottom:20px;" class="nav-item"><span id="cineMiddlePreviewSpan"></span></div>
-            </div> <!-- end nav three cam -->
-              <p class="nav-item">frames:</p>
-              <div style="display:block" id="cineRangePreview" class="nav-item"><span id="cineStartPreviewSpan" style="display:block; float:left; width:33%;"></span><span id="cineCurrentPreviewSpan" style="display:block; float:left; text-align:center;  width:33%;"></span><span id="cineEndPreviewSpan" style="display:block; text-align:right; float:right; width:33%;"></span></div>
-              <input class="nav-item" style="width:95%;" id="frameScroller" type="range" min="0" max="1" defaultValue="0" value="0" step="1">
-              <div class="nav-item">ref index</div>
-              <input class="nav-item" type="text" id="cineRefIndex" name="cineRefIndex" value="0" style="width:95%;">
-              <div class="nav-item">start index</div>
-              <input class="nav-item" type="text" id="cineStartIndex" name="cineStartIndex" value="0" style="width:95%;">
-              <div class="nav-item">end index</div>
-              <input class="nav-item" type="text" id="cineEndIndex" name="cineEndIndex" value="0" style="width:95%;">
-              <div class="nav-item">frame interval</div>
-              <input class="nav-item" type="text" id="cineSkipIndex" name="cineSkipIndex" value="1" style="width:95%;">
-            </div>
-            <!-- end cine input -->
-          </div>
-          <!-- start nav-three-cam -->
-          <div id="middleImageMenu" class="nav-three-cam">
-            <!-- start list -->
-            <div class="nav-list">
-              <div class="nav-three-cam nav-item">MIDDLE</div>
-              <label for="middleRefInput" class="custom-file-input action-li">
-                <i class="material-icons md-dark md-br-pad">add_a_photo</i>
-                load reference     
-              </label>
-              <input id="middleRefInput" type="file" accept="image/*">                  
-              <div id="refImageTextMiddle" style="word-wrap: break-word; margin-left:10px;"><span id="refImageTextMiddleSpan"></span></div>
-              <label for="middleDefInput" class="custom-file-input action-li">
-                <i class="material-icons md-dark md-br-pad">add_a_photo</i>
-                load deformed    
-              </label>
-              <input id="middleDefInput" type="file" multiple accept="image/*">                  
-              <div id="defImageListMiddleContainer" class="def-image-list-container">
-                <ul id="defImageListMiddle" class="def-image-ul">
-                </ul>
+              <label for="middleCineInput" class="custom-file-input action-li"> <i
+                class="material-icons md-dark md-br-pad"
+              >camera_roll</i> load trinoc cine
+              </label> <input id="middleCineInput" type="file" accept=".cine">
+              <div id="cineMiddlePreview" style="word-wrap: break-word; margin-bottom: 20px;"
+                class="nav-item"
+              >
+                <span id="cineMiddlePreviewSpan"></span>
               </div>
             </div>
-            <!-- end list -->            
-          </div>
-          <!-- end nav-three-cam -->
-          <!-- start nav-two-cam -->
-          <div id="rightImageMenu" class="nav-two-cam">
-            <!-- start list -->
-            <div class="nav-list">
-              <div class="nav-two-cam nav-item">RIGHT</div>
-              <label for="rightRefInput" class="custom-file-input action-li">
-                <i class="material-icons md-dark md-br-pad">add_a_photo</i>
-                load reference     
-              </label>
-              <input id="rightRefInput" type="file" accept="image/*">                  
-              <div id="refImageTextRight" style="word-wrap: break-word; margin-left:10px;"><span id="refImageTextRightSpan"></span></div>
-              <label for="rightDefInput" class="custom-file-input action-li">
-                <i class="material-icons md-dark md-br-pad">add_a_photo</i>
-                load deformed    
-              </label>
-              <input id="rightDefInput" type="file" multiple accept="image/*">                  
-              <div id="defImageListRightContainer" class="def-image-list-container">
-                <ul id="defImageListRight" class="def-image-ul">
-                </ul>
-              </div>
+            <!-- end nav three cam -->
+            <p class="nav-item">frames:</p>
+            <div style="display: block" id="cineRangePreview" class="nav-item">
+              <span id="cineStartPreviewSpan" style="display: block; float: left; width: 33%;"></span>
+              <span id="cineCurrentPreviewSpan"
+                style="display: block; float: left; text-align: center; width: 33%;"
+              ></span> <span id="cineEndPreviewSpan"
+                style="display: block; text-align: right; float: right; width: 33%;"
+              ></span>
             </div>
-            <!-- end list -->
-            <!--<button class="cross-button float-left" id="readInput" typ="button">read input.xml</button>-->
-              <h1 style="margin-top:30px;">CALIBRATION</h1>
-              <label id="performCal" class="custom-file-input action-li">
-                <i class="material-icons md-dark md-br-pad">grain</i>
-                perform cal
-              </label>
-              <label for="calInput" class="custom-file-input action-li">
-                <i class="material-icons md-dark md-br-pad">image_aspect_ratio</i>
-                load cal file   
-              </label>
-              <input id="calInput" type="file" accept=".txt,.xml">                  
-              <div id="calContainer" class="cal-list-container">
-                <ul id="calList" class="cal-ul">
-                </ul>
-              </div>
-              <label id="calInfo" class="custom-file-input action-li">
-                <i class="material-icons md-dark md-br-pad">help_outline</i>
-                cal help
-              </label>
+            <input class="nav-item" style="width: 95%;" id="frameScroller" type="range" min="0"
+              max="1" defaultValue="0" value="0" step="1"
+            >
+            <div class="nav-item">ref index</div>
+            <input class="nav-item" type="text" id="cineRefIndex" name="cineRefIndex" value="0"
+              style="width: 95%;"
+            >
+            <div class="nav-item">start index</div>
+            <input class="nav-item" type="text" id="cineStartIndex" name="cineStartIndex" value="0"
+              style="width: 95%;"
+            >
+            <div class="nav-item">end index</div>
+            <input class="nav-item" type="text" id="cineEndIndex" name="cineEndIndex" value="0"
+              style="width: 95%;"
+            >
+            <div class="nav-item">frame interval</div>
+            <input class="nav-item" type="text" id="cineSkipIndex" name="cineSkipIndex" value="1"
+              style="width: 95%;"
+            >
           </div>
-          <!-- end nav-two-cam-->
-          <h1 style="margin-top:40px;">ANALYSIS</h1>
-          <div id="runLoader" class="pre-loader"></div>
-          <ul>
-            <li id="changeWorkingDirLi" class="action-li"><i class="material-icons md-dark md-br-pad">folder</i>
-              set working dir
-            </li>
-            <li id="runLi" class="action-li"><i class="material-icons md-dark md-br-pad">play_circle_filled</i>
-              <span>run 2d</span>
-            </li>
-            <li id="writeLi" class="action-li"><i class="material-icons md-dark md-br-pad">archive</i>
-              <span>save working dir</span>
-            </li>
-            <li id="clearLi" class="action-li"><i class="material-icons md-dark md-br-pad">backspace</i>
-              <span>clear working dir</span>
-            </li>
-            <li id="abortLi" class="action-li"><i class="material-icons md-dark md-br-pad">cancel</i>
-              <span>abort analysis</span>
-            </li>
-          </ul>
-          <svg class="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
-            <circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+          <!-- end cine input -->
+        </div>
+        <!-- start nav-three-cam -->
+        <div id="middleImageMenu" class="nav-three-cam">
+          <!-- start list -->
+          <div class="nav-list">
+            <div class="nav-three-cam nav-item">MIDDLE</div>
+            <label for="middleRefInput" class="custom-file-input action-li"> <i
+              class="material-icons md-dark md-br-pad"
+            >add_a_photo</i> load reference
+            </label> <input id="middleRefInput" type="file" accept="image/*">
+            <div id="refImageTextMiddle" style="word-wrap: break-word; margin-left: 10px;">
+              <span id="refImageTextMiddleSpan"></span>
+            </div>
+            <label for="middleDefInput" class="custom-file-input action-li"> <i
+              class="material-icons md-dark md-br-pad"
+            >add_a_photo</i> load deformed
+            </label> <input id="middleDefInput" type="file" multiple accept="image/*">
+            <div id="defImageListMiddleContainer" class="def-image-list-container">
+              <ul id="defImageListMiddle" class="def-image-ul">
+              </ul>
+            </div>
+          </div>
+          <!-- end list -->
+        </div>
+        <!-- end nav-three-cam -->
+        <!-- start nav-two-cam -->
+        <div id="rightImageMenu" class="nav-two-cam">
+          <!-- start list -->
+          <div class="nav-list">
+            <div class="nav-two-cam nav-item">RIGHT</div>
+            <label for="rightRefInput" class="custom-file-input action-li"> <i
+              class="material-icons md-dark md-br-pad"
+            >add_a_photo</i> load reference
+            </label> <input id="rightRefInput" type="file" accept="image/*">
+            <div id="refImageTextRight" style="word-wrap: break-word; margin-left: 10px;">
+              <span id="refImageTextRightSpan"></span>
+            </div>
+            <label for="rightDefInput" class="custom-file-input action-li"> <i
+              class="material-icons md-dark md-br-pad"
+            >add_a_photo</i> load deformed
+            </label> <input id="rightDefInput" type="file" multiple accept="image/*">
+            <div id="defImageListRightContainer" class="def-image-list-container">
+              <ul id="defImageListRight" class="def-image-ul">
+              </ul>
+            </div>
+          </div>
+          <!-- end list -->
+          <!--<button class="cross-button float-left" id="readInput" typ="button">read input.xml</button>-->
+          <h1 style="margin-top: 30px;">CALIBRATION</h1>
+          <label id="performCal" class="custom-file-input action-li"> <i
+            class="material-icons md-dark md-br-pad"
+          >grain</i> perform cal
+          </label> <label for="calInput" class="custom-file-input action-li"> <i
+            class="material-icons md-dark md-br-pad"
+          >image_aspect_ratio</i> load cal file
+          </label> <input id="calInput" type="file" accept=".txt,.xml">
+          <div id="calContainer" class="cal-list-container">
+            <ul id="calList" class="cal-ul">
+            </ul>
+          </div>
+          <label id="calInfo" class="custom-file-input action-li"> <i
+            class="material-icons md-dark md-br-pad"
+          >help_outline</i> cal help
+          </label>
+        </div>
+        <!-- end nav-two-cam-->
+        <h1 style="margin-top: 40px;">ANALYSIS</h1>
+        <div id="runLoader" class="pre-loader"></div>
+        <ul>
+          <li id="changeWorkingDirLi" class="action-li"><i
+            class="material-icons md-dark md-br-pad"
+          >folder</i> set working dir</li>
+          <li id="runLi" class="action-li"><i class="material-icons md-dark md-br-pad">play_circle_filled</i>
+            <span>run 2d</span></li>
+          <li id="writeLi" class="action-li"><i class="material-icons md-dark md-br-pad">archive</i>
+            <span>save working dir</span></li>
+          <li id="clearLi" class="action-li"><i class="material-icons md-dark md-br-pad">backspace</i>
+            <span>clear working dir</span></li>
+          <li id="abortLi" class="action-li"><i class="material-icons md-dark md-br-pad">cancel</i>
+            <span>abort analysis</span></li>
+        </ul>
+        <svg class="spinner" width="65px" height="65px" viewBox="0 0 66 66"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+            <circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33"
+            r="30"
+          ></circle>
           </svg>
-          <div class="test-animation"> </div>
-        </div> <!-- end fixed-col -->
-        <div class="fluid-col">
-          <div id="innerFluidLeftCol" class="inner-fluid-left-col">
-            <div id="viewerFillDiv" class="fill-div">
-              <div id="leftMinimized" class="minimized-bar">
-                <div class="minimized-bar-banner">
-                    <span class="toggle-icon action-li" title="show this view"><i class="material-icons md-dark pane-opener" style="transform:rotate(90deg)">open_in_browser</i></span>
-                </div>
-              </div>
-              <div id="subFillDivLeft" class="sub-fill-div">
-                <div class="toggle-div">
-                  <div class="toggle-div-banner">
-                    <span class="toggle-title">VIEW CONTROL</span>
-                    <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
-                    <span class="toggle-icon action-li" id="leftPaneToggle" title="hide this view"><i class="material-icons md-dark pane-closer" style="transform:rotate(270deg)">open_in_browser</i></span>
-                  </div> <!-- end toggle div banner -->
-                  <div class="toggle-div-body">
-                    <i id="sssigPreview" class="material-icons md-dark action-li full-field" title="preview sssig mask">check_circle</i>
-                    <i class="material-icons md-dark action-li zoom-in-left" title="zoom in">zoom_in</i>
-                    <i class="material-icons md-dark action-li zoom-out-left" title="zoom out">zoom_out</i>
-                    <input type="range" class="zoom-range-left">                   
-                    <i class="material-icons md-dark action-li reset-left" title="actual size">aspect_ratio</i>
-                    <i class="material-icons md-dark action-li" id="zoomToFitLeft" title="zoom to fit">zoom_out_map</i>
-                    <label id="leftDims"></label>
-                    <label id="leftPos"></label>
-                  </div> <!-- end toggle div body -->
-                </div> <!-- end toggle div -->
-                <div class="toggle-div">
-                  <div class="toggle-div-banner">
-                    <span class="toggle-title">REGIONS OF INTEREST</span>
-                    <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
-                  </div> <!-- end toggle div banner -->
-                  <div class="toggle-div-body">
-                    <i id="addROIs" class="material-icons md-dark action-li" title="add ROI">add_circle</i>
-                    <i id="removeLastROI" class="material-icons md-dark action-li" title="remove last ROI">remove_circle</i>
-                    <i id="addExcludeds" class="material-icons md-dark action-li" title="add exclusion">add_circle_outline</i>
-                    <i id="removeLastExcluded"class="material-icons md-dark action-li" title="remove last exclusion">remove_circle_outline</i>
-                    <i id="addObstructed" class="material-icons md-dark action-li tracking" title="add obstruction">add_box</i>
-                    <i id="removeLastObstructed" class="material-icons md-dark action-li tracking" title="remove last obstruction">indeterminate_check_box</i>
-                    <i id="resetROIs"class="material-icons md-dark action-li" title="reset ROIs">block</i>
-                    <i id="addLivePlotPts"class="material-icons md-dark action-li full-field-global" title="add live plot pt" style="margin-left:40px;">gps_fixed</i>
-                    <i id="addLivePlotLine"class="material-icons md-dark action-li full-field-global" title="add live plot line">location_disabled</i>
-                    <i id="resetLivePlotPts"class="material-icons md-dark action-li full-field-global" title="reset live plot pts">block</i>
-                    <label id="ROIProgress"></label>
-                  </div> <!-- end toggle div body -->
-                </div> <!-- end toggle div -->
-                <div id="viewWindowLeft" class="fill-div" style="background-color:darkgray;">
-                  <div id="panzoomLeft" class="panzoom">
-                    <!--<svg id="svgLeft" width="300" height="300"> -->
-                    <!--  <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />-->
-                    <!--</svg>-->
-                    <div id="svgContainer" class="svg-container"></div>
-                  </div>
-                 </div>
-              </div> <!-- end fill div left -->
-
-              <div id="middleMinimized" class="minimized-bar">
-                <div class="minimized-bar-banner">
-                    <span class="toggle-icon action-li" title="show this view"><i class="material-icons md-dark pane-opener" style="transform:rotate(90deg)">open_in_browser</i></span>
-                </div>
-              </div>
-              <div id="subFillDivMiddle" class="sub-fill-div">
-                <div class="toggle-div">
-                <div class="toggle-div-banner">
-                    <span class="toggle-title">VIEW CONTROL</span>
-                    <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
-                    <span class="toggle-icon action-li" title="hide this view"><i class="material-icons md-dark pane-closer" style="transform:rotate(270deg)">open_in_browser</i></span>
-                </div> <!-- end toggle div banner -->
-                <div class="toggle-div-body">
-                    <i class="material-icons md-dark action-li zoom-in-middle" title="zoom in">zoom_in</i>
-                    <i class="material-icons md-dark action-li zoom-out-middle" title="zoom out">zoom_out</i>
-                    <input type="range" class="zoom-range-middle">                   
-                    <i class="material-icons md-dark action-li reset-middle" title="actual size">aspect_ratio</i>
-                    <i class="material-icons md-dark action-li" id="zoomToFitMiddle" title="zoom to fit">zoom_out_map</i>
-                    <label id="middleDims"></label>
-                    <label id="middlePos"></label>
-                   </div> <!-- end toggle div body -->
-                </div> <!-- end toggle div -->
-                <div class="toggle-div">
-                  <div class="toggle-div-banner">
-                    <span class="toggle-title">TRINOCULAR UTILS</span>
-                    <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
-                  </div> <!-- end toggle div banner -->
-                  <div class="toggle-div-body" style="min-height:30px;">
-                  </div> <!-- end toggle div body -->
-                </div> <!-- end toggle div -->
-                 <div id="viewWindowMiddle" class="fill-div"  style="background-color:darkgray;">
-                   <div id="panzoomMiddle" class="panzoom"></div>
-                 </div>
-              </div> <!-- end fill div middle -->
-              <div id="rightMinimized" class="minimized-bar">
-                <div class="minimized-bar-banner">
-                    <span class="toggle-icon action-li" title="show this view"><i class="material-icons md-dark pane-opener" style="transform:rotate(90deg)">open_in_browser</i></span>
-                </div>
-              </div>
-              <div id="subFillDivRight" class="sub-fill-div">
-                <div class="toggle-div">
-                <div class="toggle-div-banner">
-                    <span class="toggle-title">VIEW CONTROL</span>
-                    <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
-                    <span class="toggle-icon action-li" title="hide this view"><i class="material-icons md-dark pane-closer" style="transform:rotate(270deg)">open_in_browser</i></span>
-                </div> <!-- end toggle div banner -->
-                <div class="toggle-div-body">
-                    <i class="material-icons md-dark action-li zoom-in-right" title="zoom in">zoom_in</i>
-                    <i class="material-icons md-dark action-li zoom-out-right" title="zoom out">zoom_out</i>
-                    <input type="range" class="zoom-range-right">                   
-                    <i class="material-icons md-dark action-li reset-right" title="actual size">aspect_ratio</i>
-                    <i class="material-icons md-dark action-li" id="zoomToFitRight" title="zoom to fit">zoom_out_map</i>
-                    <label id="rightDims"></label>
-                    <label id="rightPos"></label>
-                   </div> <!-- end toggle div body -->
-                </div> <!-- end toggle div -->
-                <div class="toggle-div">
-                  <div class="toggle-div-banner">
-                    <span class="toggle-title">CROSS CORRELATION UTILS</span>
-                    <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
-                  </div> <!-- end toggle div banner -->
-                  <div class="toggle-div-body" style="min-height:30px;">
-                    <i id="previewCross" class="material-icons md-dark action-li" title="preview cross initialization">collections</i>
-                    <i id="initCross" class="material-icons md-dark action-li" title="seed nonlinear warp">photo_size_select_large</i>
-                    <i id="clearCross" class="material-icons md-dark action-li" title="clear nonlinear warp">block</i>
-                  </div> <!-- end toggle div body -->
-                </div> <!-- end toggle div -->
-
-                 <div id="viewWindowRight" class="fill-div"  style="background-color:darkgray;">
-                   <div id="panzoomRight" class="panzoom"></div>
-                 </div>
-               </div> <!-- end fill div right -->
-              
-            </div> <!-- end fill div -->
-                 
-                 <div class="toggle-div">
-                   <div class="toggle-div-banner">
-                       <span class="toggle-title">CONSOLE</span>
-                       <span class="toggle-icon action-li">
-                         <i id="clearConsoleIcon" class="material-icons md-dark action-li" title="clear console">block</i>
-                         <i id="consoleToggle" class="material-icons md-dark toggler">swap_vertical_circle</i>
-                       </span>
-                   </div> <!-- end toggle div banner -->
-                   <div class="toggle-div-body">
-                       <div id="consoleWindow" class="console">
-                            Console output: <br/><br/>
-                       </div>
-                   </div> <!-- end toggle div body -->
-                 </div> <!-- end toggle div -->
-                 
-            </div> <!-- end inner-fluid-left-col -->
-            <div id="innerFluidRightCol" class="inner-fluid-right-col">
-              <div class="toggle-div">
-                   <div class="toggle-div-banner">
-                       <span class="toggle-title">OPTIONS</span>
-                       <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
-                   </div> <!-- end toggle div banner -->
-                   <div class="toggle-div-body">
-                       <p>analysis mode:</p>
-                       <select id="analysisModeSelect">
-                           <option value="subset">subset-based full-field</option>
-                           <option value="tracking">tracking</option>
-                           <option value="global">global</option>
-                       </select>
-                       <div id="subsetParams" class="param-options full-field">
-                           <p>initialization method:</p>
-                           <select id="initSelect">
-                               <option value="featureMatching">feature matching</option>
-                               <option value="fieldValues">field values</option>
-                               <option value="neighborValues">neighbor values</option>
-                           </select>
-                           <p>sssig threshold: <label id="sssigLabel">150</label></p>
-                           <input id="sssigThresh" type="range" min="0" max="500.0" defaultValue="150" value="150" step="2">
-                           <p>subset size: <label id="subsetSizeLabel">31</label> (pixels)</p>
-                           <input id="subsetSize" type="range" min="9" max="51" defaultValue="31" value="31" step="2">
-                           <p>step size: <label id="stepSizeLabel">15</label> (pixels)</p>
-                           <input id="stepSize" type="range" min="1" max="100" defaultValue="15" value="15" step="1">
-                           <p>shape functions:</p>
-                           <p><input id="translationCheck" type="checkbox" checked> translation</p>
-                           <p><input id="rotationCheck" type="checkbox" > rotation</p>
-                           <p><input id="normalStrainCheck" type="checkbox" > normal stretch</p>
-                           <p><input id="shearStrainCheck" type="checkbox" > shear stretch</p>
-                           <p>strain:</p>
-                           <p><input id="strainCheck" type="checkbox" checked> compute strain</p>
-                           <p>gauge size: <label id="strainGaugeSizeLabel">45</label> (pixels)</p>
-                           <input id="strainGaugeSize" type="range" min="15" max="150" defaultValue="45" value="45" step="15"> 
-                           <p><input id="omitTextCheck" type="checkbox" > omit text output</p>
-                           <div id="stereoParams" class="param-options">
-                               <p><input id="bestFitCheck" type="checkbox"> use best fit plane</p>
-                               <p><input id="bestFitYAxisCheck" type="checkbox"> treat axis as y-axis</p>
-                           </div>
-                       </div> <!-- end subset params -->
-                       <div id="trackingParams" class="param-options tracking">
-                         <p>optimization method:</p>
-                         <select id="optModeSelect" style="margin-bottom:20px;">
-                           <option value="gradient-based">gradient-based</option>
-                           <option value="simplex">simplex</option>
-                         </select>
-                       </div>
-                       <div id="globalParams" class="param-options global">
-                         <p>mesh size: <label id="meshSizeLabel">50</label> (pixels^2)</p>
-                         <input id="meshSize" type="range" min="3" max="500" defaultValue="50" value="50" step="1">
-                         <p>regularization constant: <label id="regularizationConstantLabel">25</label></p>
-                         <input id="regularizationConstant" type="range" min="0" max="200" defaultValue="25" value="25" step="1">
-                         <p>element type:</p>
-                         <select id="elementTypeSelect">
-                           <option value="TRI6">quadratic triangle (TRI6)</option>
-                           <option value="TRI3">linear triangle (TRI3)</option>
-                         </select>
-                       </div>
-                       <div id="generalParams" class="param-options">
-                           <p>filtering:</p>
-                           <p><input id="filterCheck" type="checkbox"> gauss filter images</p>
-                           <p>filter window: <label id="filterSizeLabel">5</label> (pixels)</p>
-                           <input id="filterSize" style="margin-bottom:10px;" type="range" min="5" max="13" defaultValue="5" value="5" step="2">
-                       </div>                       
-                       <div id="generalParams" class="param-options tracking">
-                         <p><input id="showDeformedCheck" type="checkbox" style="margin-bottom:10px;"> show tracked ROIs</p>
-                         <p><input id="exportMovieCheck" type="checkbox" style="margin-bottom:10px;"> export movie</p>
-                       </div>
-                       <div class="tracking">
-                         <p><input id="binaryCheck" class="filterOption" type="checkbox"> binary threshold</p>
-                         <p class="suboption">thresholding method:</p>
-                         <p class="suboption filterOption"><select id="binarySelect">
-                             <option value="binaryMean">local mean value</option>
-                             <option value="binaryGaussian">local gaussian weighted sum</option>
-                         </select></p>
-                           <p class="suboption filterOption"><input id="binaryInvertedCheck" type="checkbox"> inverted</p>
-                           <p class="suboption">block size: <label id="binaryThreshBlockSizeLabel">75</label> (pixels)</p>
-                           <input class="suboption filterOption" id="binaryThreshBlockSize" type="range" min="3" max="101.0" defaultValue="75" value="75" step="2">
-                           <p class="suboption">thresholding constant: <label id="binaryThreshConstantLabel">10</label> (counts)</p>
-                           <input class="suboption filterOption" id="binaryThreshConstant" type="range" min="-50" max="50.0" defaultValue="10" value="10" step="1">
-                           <div style="display: none;">
-                           <p><input id="blobCheck" class="filterOption" type="checkbox" style="margin-top:20px;"> blob detection</p>
-                           <div class="suboption-wrapper">
-                           <div class="suboption-col">
-                           <p class="suboption"><input id="blobAreaCheck" class="filterOption" type="checkbox"> filter on area (pixels)</p>
-                           <p class="subsuboption">min: <label id="blobAreaMinLabel">0</label></p>
-                           <input class="subsuboption filterOption blobOption" id="blobAreaMin" type="range" min="1" max="200" defaultValue="0" value="0" step="1">
-                           <p class="subsuboption">max: <label id="blobAreaMaxLabel">100</label></p>
-                           <input class="subsuboption filterOption blobOption" id="blobAreaMax" type="range" min="1" max="200" defaultValue="100" value="100" step="1">
-                           <p class="suboption"><input id="blobCircularityCheck" class="filterOption" type="checkbox"> filter on circularity</p>
-                           <p class="subsuboption">min: <label id="blobCircularityMinLabel">0</label></p>
-                           <input class="subsuboption filterOption blobOption" id="blobCircularityMin" type="range" min="0" max="1" defaultValue="0" value="0" step="0.01">
-                           <p class="subsuboption">max: <label id="blobCircularityMaxLabel">1</label></p>
-                           <input class="subsuboption filterOption blobOption" id="blobCircularityMax" type="range" min="0" max="1" defaultValue="1" value="1" step="0.01">
-                           </div>
-                           <div class="suboption-col">
-                           <p class="suboption"><input id="blobEccentricityCheck" class="filterOption" type="checkbox"> filter on eccentricity</p>
-                           <p class="subsuboption">min: <label id="blobEccentricityMinLabel">0</label></p>
-                           <input class="subsuboption filterOption blobOption" id="blobEccentricityMin" type="range" min="0" max="1" defaultValue="0" value="0" step="0.01">
-                           <p class="subsuboption">max: <label id="blobEccentricityMaxLabel">1</label></p>
-                           <input class="subsuboption filterOption blobOption" id="blobEccentricityMax" type="range" min="0" max="1" defaultValue="1" value="1" step="0.01">
-                           <p class="suboption"><input id="blobConvexityCheck" class="filterOption" type="checkbox"> filter on convexity</p>
-                           <p class="subsuboption">min: <label id="blobConvexityMinLabel">0</label></p>
-                           <input class="subsuboption filterOption blobOption" id="blobConvexityMin" type="range" min="0" max="1" defaultValue="0" value="0" step="0.01">
-                           <p class="subsuboption">max: <label id="blobConvexityMaxLabel">1</label></p>
-                           <input class="subsuboption filterOption blobOption" id="blobConvexityMax" type="range" min="0" max="1" defaultValue="1" value="1" step="0.01">
-                           </div>
-                           </div>
-                           </div>
-                           <hr style="margin-top: 20px;">
-                           <ul>
-                           <li id="previewFilterLi" class="action-li-horiz"><i class="material-icons md-dark md-br-pad">autorenew</i>
-                             <span>preview</span>
-                           </li>
-                           <li id="previewFilterResetLi" class="action-li-horiz"><i class="material-icons md-dark md-br-pad">keyboard_backspace</i>
-                               <span>reset</span>
-                           </li>
-                           <li><input id="binaryAutoUpdateCheck" type="checkbox"> auto preview</li>
-                           </ul>
-                       </div>
-                   </div> <!-- end toggle div body -->
-              </div> <!-- end toggle div -->
-              <div class="toggle-div">
-                   <div class="toggle-div-banner">
-                       <span class="toggle-title">REFERENCE</span>
-                       <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
-                   </div> <!-- end toggle div banner -->
-                   <div class="toggle-div-body">
-                     <div class="reference-text">
-                     <h3>Running an Analysis</h3>
-                     <p>Select at least one reference and deformed image (or .cine file). Then the "run" and "write input" buttons should appear. (For stereo analysis, a reference image and deformed image must be selected for the right camera as well as a calibration file for the buttons to appear.) </p>
-                     <p>Press "run 2d" or "run stereo" if you want to run the DICe executable in serial on this machine. Choose "write input" if you want to write the input files to be run via the command line later (do this to run on an HPC system in parallel). </p>
-                     <h3>Regions of Interest</h3>
-                     <p>In full-field mode, regions of interest can be selected using the <i class="material-icons md-dark">add_circle</i> button.</p>
-                     <p>To preview the areas of the image that will be analyzed click the <i class="material-icons md-dark">check_circle</i> button. Automatic detection of speckled potions of the image is based on the SSSIG contrast criteria. Change the SSSIG threshold in the OPTIONS pane to increase or decrease the necessary contrast</p>
-                     <h3>Global mode</h3>
-                     <p>To use the global DIC formulation (currently, only in 2D) set the analysis mode to 'global'. In this mode, the user has two parameters to set, the mesh size (the average area of a mesh element in pixels^2) and the regularization constant. The regularization constant will introduce smoothing to the results for high values.</p>
-                     <h3>Tracking mode</h3>
-                     <p>To track objects in the field of view, rather than compute full-field displacements and strains, select the 'tracking' analysis mode. If the tracking mode is enabled, ROIs must be drawn on the image using the  <i class="material-icons md-dark">add_circle</i> button. Portions of a particular ROI can be omitted using the <i class="material-icons md-dark">add_circle_outline</i> button. To mark regions of the image that will obstruct the view of any ROI, use the <i class="material-icons md-dark">add_box</i> button to add an obstructed region.</p>
-                     <h3>Visualizing Results</h3>
-                     <p>In full-field mode, live plots of the field values at a particular point in the image will be generated if any live plot points are defined using the <i class="material-icons md-dark">gps_fixed</i> button. Additionally, a line plot of field values will also get created if the <i class="material-icons md-dark">location_disabled</i> button is active.</p>
-                     <p>Visualize the ExodusII (*.e) output file in the results folder using ParaView (an open source visulaization software with lots of plotting utilities). A comma separated text file with results values is also created in the results folder.</p>
-                     <p>Note that the default working directory is your home directory. Results files and folders will be gnerated in the working directory</p>
-                     <h3>View Control</h3>
-                     <p>Use the left mouse button to draw ROI vertices, the middle mouse button to drag the image, wheel to zoom, and the right mouse button to end drawing an ROI polygon. View control buttons are also provided at the top of each view.</p>
-                     </div>
-                     <p>Having trouble? Submit an issue at: <a href="http://github.com/dicengine/dice/issues" alt="">issues</a></p>
-                     <p><a href="http://dicengine.github.io/dice/" alt="">class and namespace documentation</a></p>
-                     <p><a href="http://github.com/dicengine/dice" alt="">source code</a></p>
-                   </div> <!-- end toggle div body -->
-              </div> <!-- end toggle div -->
-              <div class="toggle-div">
-                   <div class="toggle-div-banner">
-                       <span class="toggle-title">WORKING DIRECTORY</span>
-                       <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
-                   </div> <!-- end toggle div banner -->
-                   <div class="toggle-div-body">
-                       <div style="width:100%; line-height: 24px;">
-                           current working directory: </br>
-                           <label id="workingDirLabel" style="word-wrap: break-word;">${home}</label> 
-                       </div>
-                       <div style="background-color: #f2f2f2; padding 2px; line-height: 18px; width: 100%; overflow: scroll;">
-                           <div style="background-color:#cccccc; padding: 5px; width: 100%;">results files:</div>
-                           <div id="resultsFilesList" style="padding: 2px; line-height: 22px;"> </div>
-                       </div>
-                   </div> <!-- end toggle div body -->
-              </div> <!-- end toggle div -->
-            </div> <!-- end inner-fluid-right-col -->
-        </div> <!-- end fluid-col -->
-      </div> <!-- end content -->
-      <div class="footer">
-        Copyright 2017 Sandia Corporation
+        <div class="test-animation"></div>
       </div>
-    </div> <!-- end wrapper -->
-  </body>
+      <!-- end fixed-col -->
+      <div class="fluid-col">
+        <div id="innerFluidLeftCol" class="inner-fluid-left-col">
+          <div id="viewerFillDiv" class="fill-div">
+            <div id="leftMinimized" class="minimized-bar">
+              <div class="minimized-bar-banner">
+                <span class="toggle-icon action-li" title="show this view"><i
+                  class="material-icons md-dark pane-opener" style="transform: rotate(90deg)"
+                >open_in_browser</i></span>
+              </div>
+            </div>
+            <div id="subFillDivLeft" class="sub-fill-div">
+              <div class="toggle-div">
+                <div class="toggle-div-banner">
+                  <span class="toggle-title">VIEW CONTROL</span> <span class="toggle-icon action-li"><i
+                    class="material-icons md-dark toggler"
+                  >swap_vertical_circle</i></span> <span class="toggle-icon action-li" id="leftPaneToggle"
+                    title="hide this view"
+                  ><i class="material-icons md-dark pane-closer" style="transform: rotate(270deg)">open_in_browser</i></span>
+                </div>
+                <!-- end toggle div banner -->
+                <div class="toggle-div-body">
+                  <i id="sssigPreview" class="material-icons md-dark action-li full-field"
+                    title="preview sssig mask"
+                  >check_circle</i> <i class="material-icons md-dark action-li zoom-in-left"
+                    title="zoom in"
+                  >zoom_in</i> <i class="material-icons md-dark action-li zoom-out-left"
+                    title="zoom out"
+                  >zoom_out</i> <input type="range" class="zoom-range-left"> <i
+                    class="material-icons md-dark action-li reset-left" title="actual size"
+                  >aspect_ratio</i> <i class="material-icons md-dark action-li" id="zoomToFitLeft"
+                    title="zoom to fit"
+                  >zoom_out_map</i> <label id="leftDims"></label> <label id="leftPos"></label>
+                </div>
+                <!-- end toggle div body -->
+              </div>
+              <!-- end toggle div -->
+              <div class="toggle-div">
+                <div class="toggle-div-banner">
+                  <span class="toggle-title">REGIONS OF INTEREST</span> <span
+                    class="toggle-icon action-li"
+                  ><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
+                </div>
+                <!-- end toggle div banner -->
+                <div class="toggle-div-body">
+                  <i id="addROIs" class="material-icons md-dark action-li" title="add ROI">add_circle</i>
+                  <i id="removeLastROI" class="material-icons md-dark action-li"
+                    title="remove last ROI"
+                  >remove_circle</i> <i id="addExcludeds" class="material-icons md-dark action-li"
+                    title="add exclusion"
+                  >add_circle_outline</i> <i id="removeLastExcluded"
+                    class="material-icons md-dark action-li" title="remove last exclusion"
+                  >remove_circle_outline</i> <i id="addObstructed"
+                    class="material-icons md-dark action-li tracking" title="add obstruction"
+                  >add_box</i> <i id="removeLastObstructed"
+                    class="material-icons md-dark action-li tracking"
+                    title="remove last obstruction"
+                  >indeterminate_check_box</i> <i id="resetROIs"
+                    class="material-icons md-dark action-li" title="reset ROIs"
+                  >block</i> <i id="addLivePlotPts"
+                    class="material-icons md-dark action-li full-field-global"
+                    title="add live plot pt" style="margin-left: 40px;"
+                  >gps_fixed</i> <i id="addLivePlotLine"
+                    class="material-icons md-dark action-li full-field-global"
+                    title="add live plot line"
+                  >location_disabled</i> <i id="resetLivePlotPts"
+                    class="material-icons md-dark action-li full-field-global"
+                    title="reset live plot pts"
+                  >block</i> <label id="ROIProgress"></label>
+                </div>
+                <!-- end toggle div body -->
+              </div>
+              <!-- end toggle div -->
+              <div id="viewWindowLeft" class="fill-div" style="background-color: darkgray;">
+                <div id="panzoomLeft" class="panzoom">
+                  <!--<svg id="svgLeft" width="300" height="300"> -->
+                  <!--  <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />-->
+                  <!--</svg>-->
+                  <div id="svgContainer" class="svg-container"></div>
+                </div>
+              </div>
+            </div>
+            <!-- end fill div left -->
+
+            <div id="middleMinimized" class="minimized-bar">
+              <div class="minimized-bar-banner">
+                <span class="toggle-icon action-li" title="show this view"><i
+                  class="material-icons md-dark pane-opener" style="transform: rotate(90deg)"
+                >open_in_browser</i></span>
+              </div>
+            </div>
+            <div id="subFillDivMiddle" class="sub-fill-div">
+              <div class="toggle-div">
+                <div class="toggle-div-banner">
+                  <span class="toggle-title">VIEW CONTROL</span> <span class="toggle-icon action-li"><i
+                    class="material-icons md-dark toggler"
+                  >swap_vertical_circle</i></span> <span class="toggle-icon action-li" title="hide this view"><i
+                    class="material-icons md-dark pane-closer" style="transform: rotate(270deg)"
+                  >open_in_browser</i></span>
+                </div>
+                <!-- end toggle div banner -->
+                <div class="toggle-div-body">
+                  <i class="material-icons md-dark action-li zoom-in-middle" title="zoom in">zoom_in</i>
+                  <i class="material-icons md-dark action-li zoom-out-middle" title="zoom out">zoom_out</i>
+                  <input type="range" class="zoom-range-middle"> <i
+                    class="material-icons md-dark action-li reset-middle" title="actual size"
+                  >aspect_ratio</i> <i class="material-icons md-dark action-li" id="zoomToFitMiddle"
+                    title="zoom to fit"
+                  >zoom_out_map</i> <label id="middleDims"></label> <label id="middlePos"></label>
+                </div>
+                <!-- end toggle div body -->
+              </div>
+              <!-- end toggle div -->
+              <div class="toggle-div">
+                <div class="toggle-div-banner">
+                  <span class="toggle-title">TRINOCULAR UTILS</span> <span
+                    class="toggle-icon action-li"
+                  ><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
+                </div>
+                <!-- end toggle div banner -->
+                <div class="toggle-div-body" style="min-height: 30px;"></div>
+                <!-- end toggle div body -->
+              </div>
+              <!-- end toggle div -->
+              <div id="viewWindowMiddle" class="fill-div" style="background-color: darkgray;">
+                <div id="panzoomMiddle" class="panzoom"></div>
+              </div>
+            </div>
+            <!-- end fill div middle -->
+            <div id="rightMinimized" class="minimized-bar">
+              <div class="minimized-bar-banner">
+                <span class="toggle-icon action-li" title="show this view"><i
+                  class="material-icons md-dark pane-opener" style="transform: rotate(90deg)"
+                >open_in_browser</i></span>
+              </div>
+            </div>
+            <div id="subFillDivRight" class="sub-fill-div">
+              <div class="toggle-div">
+                <div class="toggle-div-banner">
+                  <span class="toggle-title">VIEW CONTROL</span> <span class="toggle-icon action-li"><i
+                    class="material-icons md-dark toggler"
+                  >swap_vertical_circle</i></span> <span class="toggle-icon action-li" title="hide this view"><i
+                    class="material-icons md-dark pane-closer" style="transform: rotate(270deg)"
+                  >open_in_browser</i></span>
+                </div>
+                <!-- end toggle div banner -->
+                <div class="toggle-div-body">
+                  <i class="material-icons md-dark action-li zoom-in-right" title="zoom in">zoom_in</i>
+                  <i class="material-icons md-dark action-li zoom-out-right" title="zoom out">zoom_out</i>
+                  <input type="range" class="zoom-range-right"> <i
+                    class="material-icons md-dark action-li reset-right" title="actual size"
+                  >aspect_ratio</i> <i class="material-icons md-dark action-li" id="zoomToFitRight"
+                    title="zoom to fit"
+                  >zoom_out_map</i> <label id="rightDims"></label> <label id="rightPos"></label>
+                </div>
+                <!-- end toggle div body -->
+              </div>
+              <!-- end toggle div -->
+              <div class="toggle-div">
+                <div class="toggle-div-banner">
+                  <span class="toggle-title">CROSS CORRELATION UTILS</span> <span
+                    class="toggle-icon action-li"
+                  ><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
+                </div>
+                <!-- end toggle div banner -->
+                <div class="toggle-div-body" style="min-height: 30px;">
+                  <i id="previewCross" class="material-icons md-dark action-li"
+                    title="preview cross initialization"
+                  >collections</i> <i id="initCross" class="material-icons md-dark action-li"
+                    title="seed nonlinear warp"
+                  >photo_size_select_large</i> <i id="clearCross"
+                    class="material-icons md-dark action-li" title="clear nonlinear warp"
+                  >block</i>
+                </div>
+                <!-- end toggle div body -->
+              </div>
+              <!-- end toggle div -->
+
+              <div id="viewWindowRight" class="fill-div" style="background-color: darkgray;">
+                <div id="panzoomRight" class="panzoom"></div>
+              </div>
+            </div>
+            <!-- end fill div right -->
+
+          </div>
+          <!-- end fill div -->
+
+          <div class="toggle-div">
+            <div class="toggle-div-banner">
+              <span class="toggle-title">CONSOLE</span> <span class="toggle-icon action-li">
+                <i id="clearConsoleIcon" class="material-icons md-dark action-li"
+                title="clear console"
+              >block</i> <i id="consoleToggle" class="material-icons md-dark toggler">swap_vertical_circle</i>
+              </span>
+            </div>
+            <!-- end toggle div banner -->
+            <div class="toggle-div-body">
+              <div id="consoleWindow" class="console">
+                Console output: <br /> <br />
+              </div>
+            </div>
+            <!-- end toggle div body -->
+          </div>
+          <!-- end toggle div -->
+
+        </div>
+        <!-- end inner-fluid-left-col -->
+        <div id="innerFluidRightCol" class="inner-fluid-right-col">
+          <div class="toggle-div">
+            <div class="toggle-div-banner">
+              <span class="toggle-title">OPTIONS</span> <span class="toggle-icon action-li"><i
+                class="material-icons md-dark toggler"
+              >swap_vertical_circle</i></span>
+            </div>
+            <!-- end toggle div banner -->
+            <div class="toggle-div-body">
+              <p>analysis mode:</p>
+              <select id="analysisModeSelect">
+                <option value="subset">subset-based full-field</option>
+                <option value="tracking">tracking</option>
+                <option value="global">global</option>
+              </select>
+              <div id="subsetParams" class="param-options full-field">
+                <p>initialization method:</p>
+                <select id="initSelect">
+                  <option value="featureMatching">feature matching</option>
+                  <option value="fieldValues">field values</option>
+                  <option value="neighborValues">neighbor values</option>
+                </select>
+                <p>
+                  sssig threshold: <label id="sssigLabel">150</label>
+                </p>
+                <input id="sssigThresh" type="range" min="0" max="500.0" defaultValue="150"
+                  value="150" step="2"
+                >
+                <p>
+                  subset size: <label id="subsetSizeLabel">31</label> (pixels)
+                </p>
+                <input id="subsetSize" type="range" min="9" max="51" defaultValue="31" value="31"
+                  step="2"
+                >
+                <p>
+                  step size: <label id="stepSizeLabel">15</label> (pixels)
+                </p>
+                <input id="stepSize" type="range" min="1" max="100" defaultValue="15" value="15"
+                  step="1"
+                >
+                <p>shape functions:</p>
+                <p>
+                  <input id="translationCheck" type="checkbox" checked> translation
+                </p>
+                <p>
+                  <input id="rotationCheck" type="checkbox"> rotation
+                </p>
+                <p>
+                  <input id="normalStrainCheck" type="checkbox"> normal stretch
+                </p>
+                <p>
+                  <input id="shearStrainCheck" type="checkbox"> shear stretch
+                </p>
+                <p>strain:</p>
+                <p>
+                  <input id="strainCheck" type="checkbox" checked> compute strain
+                </p>
+                <p>
+                  gauge size: <label id="strainGaugeSizeLabel">45</label> (pixels)
+                </p>
+                <input id="strainGaugeSize" type="range" min="15" max="150" defaultValue="45"
+                  value="45" step="15"
+                >
+                <p>
+                  <input id="omitTextCheck" type="checkbox"> omit text output
+                </p>
+                <div id="stereoParams" class="param-options">
+                  <p>
+                    <input id="bestFitCheck" type="checkbox"> use best fit plane
+                  </p>
+                  <p>
+                    <input id="bestFitYAxisCheck" type="checkbox"> treat axis as y-axis
+                  </p>
+                </div>
+              </div>
+              <!-- end subset params -->
+              <div id="trackingParams" class="param-options tracking">
+                <p>optimization method:</p>
+                <select id="optModeSelect" style="margin-bottom: 20px;">
+                  <option value="gradient-based">gradient-based</option>
+                  <option value="simplex">simplex</option>
+                </select>
+              </div>
+              <div id="globalParams" class="param-options global">
+                <p>
+                  mesh size: <label id="meshSizeLabel">50</label> (pixels^2)
+                </p>
+                <input id="meshSize" type="range" min="3" max="500" defaultValue="50" value="50"
+                  step="1"
+                >
+                <p>
+                  regularization constant: <label id="regularizationConstantLabel">25</label>
+                </p>
+                <input id="regularizationConstant" type="range" min="0" max="200" defaultValue="25"
+                  value="25" step="1"
+                >
+                <p>element type:</p>
+                <select id="elementTypeSelect">
+                  <option value="TRI6">quadratic triangle (TRI6)</option>
+                  <option value="TRI3">linear triangle (TRI3)</option>
+                </select>
+              </div>
+              <div id="generalParams" class="param-options">
+                <p>filtering:</p>
+                <p>
+                  <input id="filterCheck" type="checkbox"> gauss filter images
+                </p>
+                <p>
+                  filter window: <label id="filterSizeLabel">5</label> (pixels)
+                </p>
+                <input id="filterSize" style="margin-bottom: 10px;" type="range" min="5" max="13"
+                  defaultValue="5" value="5" step="2"
+                >
+              </div>
+              <div id="generalParams" class="param-options tracking">
+                <p>
+                  <input id="showDeformedCheck" type="checkbox" style="margin-bottom: 10px;">
+                  show tracked ROIs
+                </p>
+                <p>
+                  <input id="exportMovieCheck" type="checkbox" style="margin-bottom: 10px;">
+                  export movie
+                </p>
+              </div>
+              <div class="tracking">
+                <p>
+                  <input id="binaryCheck" class="filterOption" type="checkbox"> binary
+                  threshold
+                </p>
+                <p class="suboption">thresholding method:</p>
+                <p class="suboption filterOption">
+                  <select id="binarySelect">
+                    <option value="binaryMean">local mean value</option>
+                    <option value="binaryGaussian">local gaussian weighted sum</option>
+                  </select>
+                </p>
+                <p class="suboption filterOption">
+                  <input id="binaryInvertedCheck" type="checkbox"> inverted
+                </p>
+                <p class="suboption">
+                  block size: <label id="binaryThreshBlockSizeLabel">75</label> (pixels)
+                </p>
+                <input class="suboption filterOption" id="binaryThreshBlockSize" type="range"
+                  min="3" max="101.0" defaultValue="75" value="75" step="2"
+                >
+                <p class="suboption">
+                  thresholding constant: <label id="binaryThreshConstantLabel">10</label> (counts)
+                </p>
+                <input class="suboption filterOption" id="binaryThreshConstant" type="range"
+                  min="-50" max="50.0" defaultValue="10" value="10" step="1"
+                >
+                <div style="display: none;">
+                  <p>
+                    <input id="blobCheck" class="filterOption" type="checkbox"
+                      style="margin-top: 20px;"
+                    > blob detection
+                  </p>
+                  <div class="suboption-wrapper">
+                    <div class="suboption-col">
+                      <p class="suboption">
+                        <input id="blobAreaCheck" class="filterOption" type="checkbox">
+                        filter on area (pixels)
+                      </p>
+                      <p class="subsuboption">
+                        min: <label id="blobAreaMinLabel">0</label>
+                      </p>
+                      <input class="subsuboption filterOption blobOption" id="blobAreaMin"
+                        type="range" min="1" max="200" defaultValue="0" value="0" step="1"
+                      >
+                      <p class="subsuboption">
+                        max: <label id="blobAreaMaxLabel">100</label>
+                      </p>
+                      <input class="subsuboption filterOption blobOption" id="blobAreaMax"
+                        type="range" min="1" max="200" defaultValue="100" value="100" step="1"
+                      >
+                      <p class="suboption">
+                        <input id="blobCircularityCheck" class="filterOption" type="checkbox">
+                        filter on circularity
+                      </p>
+                      <p class="subsuboption">
+                        min: <label id="blobCircularityMinLabel">0</label>
+                      </p>
+                      <input class="subsuboption filterOption blobOption" id="blobCircularityMin"
+                        type="range" min="0" max="1" defaultValue="0" value="0" step="0.01"
+                      >
+                      <p class="subsuboption">
+                        max: <label id="blobCircularityMaxLabel">1</label>
+                      </p>
+                      <input class="subsuboption filterOption blobOption" id="blobCircularityMax"
+                        type="range" min="0" max="1" defaultValue="1" value="1" step="0.01"
+                      >
+                    </div>
+                    <div class="suboption-col">
+                      <p class="suboption">
+                        <input id="blobEccentricityCheck" class="filterOption" type="checkbox">
+                        filter on eccentricity
+                      </p>
+                      <p class="subsuboption">
+                        min: <label id="blobEccentricityMinLabel">0</label>
+                      </p>
+                      <input class="subsuboption filterOption blobOption" id="blobEccentricityMin"
+                        type="range" min="0" max="1" defaultValue="0" value="0" step="0.01"
+                      >
+                      <p class="subsuboption">
+                        max: <label id="blobEccentricityMaxLabel">1</label>
+                      </p>
+                      <input class="subsuboption filterOption blobOption" id="blobEccentricityMax"
+                        type="range" min="0" max="1" defaultValue="1" value="1" step="0.01"
+                      >
+                      <p class="suboption">
+                        <input id="blobConvexityCheck" class="filterOption" type="checkbox">
+                        filter on convexity
+                      </p>
+                      <p class="subsuboption">
+                        min: <label id="blobConvexityMinLabel">0</label>
+                      </p>
+                      <input class="subsuboption filterOption blobOption" id="blobConvexityMin"
+                        type="range" min="0" max="1" defaultValue="0" value="0" step="0.01"
+                      >
+                      <p class="subsuboption">
+                        max: <label id="blobConvexityMaxLabel">1</label>
+                      </p>
+                      <input class="subsuboption filterOption blobOption" id="blobConvexityMax"
+                        type="range" min="0" max="1" defaultValue="1" value="1" step="0.01"
+                      >
+                    </div>
+                  </div>
+                </div>
+                <hr style="margin-top: 20px;">
+                <ul>
+                  <li id="previewFilterLi" class="action-li-horiz"><i
+                    class="material-icons md-dark md-br-pad"
+                  >autorenew</i> <span>preview</span></li>
+                  <li id="previewFilterResetLi" class="action-li-horiz"><i
+                    class="material-icons md-dark md-br-pad"
+                  >keyboard_backspace</i> <span>reset</span></li>
+                  <li><input id="binaryAutoUpdateCheck" type="checkbox"> auto preview</li>
+                </ul>
+              </div>
+            </div>
+            <!-- end toggle div body -->
+          </div>
+          <!-- end toggle div -->
+          <div class="toggle-div">
+            <div class="toggle-div-banner">
+              <span class="toggle-title">REFERENCE</span> <span class="toggle-icon action-li"><i
+                class="material-icons md-dark toggler"
+              >swap_vertical_circle</i></span>
+            </div>
+            <!-- end toggle div banner -->
+            <div class="toggle-div-body">
+              <div class="reference-text">
+                <h3>Running an Analysis</h3>
+                <p>Select at least one reference and deformed image (or .cine file). Then the
+                  "run" and "write input" buttons should appear. (For stereo analysis, a reference
+                  image and deformed image must be selected for the right camera as well as a
+                  calibration file for the buttons to appear.)</p>
+                <p>Press "run 2d" or "run stereo" if you want to run the DICe executable in
+                  serial on this machine. Choose "write input" if you want to write the input files
+                  to be run via the command line later (do this to run on an HPC system in
+                  parallel).</p>
+                <h3>Regions of Interest</h3>
+                <p>
+                  In full-field mode, regions of interest can be selected using the <i
+                    class="material-icons md-dark"
+                  >add_circle</i> button.
+                </p>
+                <p>
+                  To preview the areas of the image that will be analyzed click the <i
+                    class="material-icons md-dark"
+                  >check_circle</i> button. Automatic detection of speckled potions of the image is
+                  based on the SSSIG contrast criteria. Change the SSSIG threshold in the OPTIONS
+                  pane to increase or decrease the necessary contrast
+                </p>
+                <h3>Global mode</h3>
+                <p>To use the global DIC formulation (currently, only in 2D) set the analysis
+                  mode to 'global'. In this mode, the user has two parameters to set, the mesh size
+                  (the average area of a mesh element in pixels^2) and the regularization constant.
+                  The regularization constant will introduce smoothing to the results for high
+                  values.</p>
+                <h3>Tracking mode</h3>
+                <p>
+                  To track objects in the field of view, rather than compute full-field
+                  displacements and strains, select the 'tracking' analysis mode. If the tracking
+                  mode is enabled, ROIs must be drawn on the image using the <i
+                    class="material-icons md-dark"
+                  >add_circle</i> button. Portions of a particular ROI can be omitted using the <i
+                    class="material-icons md-dark"
+                  >add_circle_outline</i> button. To mark regions of the image that will obstruct the
+                  view of any ROI, use the <i class="material-icons md-dark">add_box</i> button to
+                  add an obstructed region.
+                </p>
+                <h3>Visualizing Results</h3>
+                <p>
+                  In full-field mode, live plots of the field values at a particular point in the
+                  image will be generated if any live plot points are defined using the <i
+                    class="material-icons md-dark"
+                  >gps_fixed</i> button. Additionally, a line plot of field values will also get
+                  created if the <i class="material-icons md-dark">location_disabled</i> button is
+                  active.
+                </p>
+                <p>Visualize the ExodusII (*.e) output file in the results folder using ParaView
+                  (an open source visulaization software with lots of plotting utilities). A comma
+                  separated text file with results values is also created in the results folder.</p>
+                <p>Note that the default working directory is your home directory. Results files
+                  and folders will be gnerated in the working directory</p>
+                <h3>View Control</h3>
+                <p>Use the left mouse button to draw ROI vertices, the middle mouse button to
+                  drag the image, wheel to zoom, and the right mouse button to end drawing an ROI
+                  polygon. View control buttons are also provided at the top of each view.</p>
+              </div>
+              <p>
+                Having trouble? Submit an issue at: <a
+                  href="http://github.com/dicengine/dice/issues" alt=""
+                >issues</a>
+              </p>
+              <p>
+                <a href="http://dicengine.github.io/dice/" alt="">class and namespace
+                  documentation</a>
+              </p>
+              <p>
+                <a href="http://github.com/dicengine/dice" alt="">source code</a>
+              </p>
+            </div>
+            <!-- end toggle div body -->
+          </div>
+          <!-- end toggle div -->
+          <div class="toggle-div">
+            <div class="toggle-div-banner">
+              <span class="toggle-title">WORKING DIRECTORY</span> <span
+                class="toggle-icon action-li"
+              ><i class="material-icons md-dark toggler">swap_vertical_circle</i></span>
+            </div>
+            <!-- end toggle div banner -->
+            <div class="toggle-div-body">
+              <div style="width: 100%; line-height: 24px;">
+                current working directory: </br> <label id="workingDirLabel"
+                  style="word-wrap: break-word;"
+                >${home}</label>
+              </div>
+              <div
+                style="background-color: #f2f2f2; padding 2px; line-height: 18px; width: 100%; overflow: scroll;"
+              >
+                <div style="background-color: #cccccc; padding: 5px; width: 100%;">results
+                  files:</div>
+                <div id="resultsFilesList" style="padding: 2px; line-height: 22px;"></div>
+              </div>
+            </div>
+            <!-- end toggle div body -->
+          </div>
+          <!-- end toggle div -->
+        </div>
+        <!-- end inner-fluid-right-col -->
+      </div>
+      <!-- end fluid-col -->
+    </div>
+    <!-- end content -->
+    <div class="footer">Copyright 2017 Sandia Corporation</div>
+  </div>
+  <!-- end wrapper -->
+</body>
 </html>
