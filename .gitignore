@@ -1,3 +1,5 @@
 *~
 .dice-*.js
 .DS_Store
+.project
+.settings
