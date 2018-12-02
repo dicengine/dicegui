@@ -67,12 +67,6 @@ function loadResultsFiles(){
                 $("#showDeformedCheck").prop("checked", false);
                 return;
 	    }
-            //console.log(resultsDataObjs);
-    	    //dataObjsToDataTables(dataObjs,dataTables);
-    	    //var firstValidIndex = getFirstValidIndex();
-    	    //plotDataTable();
-	    //console.log('I am in the respose and string vec is');
-	    //console.log(stringVec);
             resultsFresh = false;
             updateDeformedCoords();
     	},function(error) {
@@ -101,6 +95,10 @@ function updateDeformedCoords(){
         deformedROIDefsY.push(ROIDefsY[roi].slice());
     }
     var num_excluded = excludedDefsX.length;
+    var statusVec = [true];
+    for(i=0;i<num_ROIs-1;++i){
+	statusVec.push(true);
+    }
     var deformedExcludedDefsX = [excludedDefsX[0].slice()];
     var deformedExcludedDefsY = [excludedDefsY[0].slice()];
     for(roi=1;roi<num_excluded;++roi){
@@ -116,6 +114,7 @@ function updateDeformedCoords(){
         var dispXColID=-1;
         var dispYColID=-1;
         var rotationColID=-1;
+        var sigmaColID=-1;
         for(i=0;i<headers.length;++i){
 	    if(headers[i]=="FRAME")frameColID=i;
 	    if(headers[i]=="COORDINATE_X")coordsXColID=i;
@@ -123,6 +122,7 @@ function updateDeformedCoords(){
 	    if(headers[i]=="DISPLACEMENT_X")dispXColID=i;
 	    if(headers[i]=="DISPLACEMENT_Y")dispYColID=i;
 	    if(headers[i]=="ROTATION_Z")rotationColID=i;        
+	    if(headers[i]=="SIGMA")sigmaColID=i;        
         }
         //console.log('FrameColID ' + frameColID);
         //console.log('CoordsXColID ' + coordsXColID);
@@ -130,7 +130,7 @@ function updateDeformedCoords(){
         //console.log('DispXColID ' + dispXColID);
         //console.log('DispYColID ' + dispYColID);
         //console.log('RotationColID ' + rotationColID);
-        if(frameColID<0||coordsXColID<0||coordsYColID<0||dispXColID<0||dispYColID<0||rotationColID<0)return;    
+        if(frameColID<0||coordsXColID<0||coordsYColID<0||dispXColID<0||dispYColID<0||rotationColID<0||sigmaColID<0)return;    
 
         // test that the frame number is valid
         var frameRow = -1;
@@ -146,21 +146,28 @@ function updateDeformedCoords(){
         var u     = resultsDataObjs[roi].data[frameRow][dispXColID];
         var v     = resultsDataObjs[roi].data[frameRow][dispYColID];
         var theta = resultsDataObjs[roi].data[frameRow][rotationColID];
+        var sigma = resultsDataObjs[roi].data[frameRow][sigmaColID];
         var cost = Math.cos(theta);
         var sint = Math.sin(theta);
+        // note the data objs may not have been loaded in order (asynch) so check the subset id
+        var roi_id = resultsDataObjs[roi].roi_id;
+        if(sigma < 0.0){
+            statusVec[roi_id] = false;
+	}
+        //alert('file ' + resultsDataObjs[roi].fileName + ' roi_id ' + roi_id);
 
-        for(pt=0;pt<deformedROIDefsX[roi].length;++pt){
-	    var ptx = deformedROIDefsX[roi][pt];
-	    var pty = deformedROIDefsY[roi][pt];
+        for(pt=0;pt<deformedROIDefsX[roi_id].length;++pt){
+	    var ptx = deformedROIDefsX[roi_id][pt];
+	    var pty = deformedROIDefsY[roi_id][pt];
             var dx = ptx - cx;
             var dy = pty - cy;
             //console.log('before x ' + ptx + ' y ' + pty); 
-	    deformedROIDefsX[roi][pt] = cost*dx - sint*dy + u + cx;
-	    deformedROIDefsY[roi][pt] = sint*dx + cost*dy + v + cy; 
-            //console.log('after x ' + deformedROIDefsX[roi][pt] + ' y ' + deformedROIDefsY[roi][pt]); 
+	    deformedROIDefsX[roi_id][pt] = cost*dx - sint*dy + u + cx;
+	    deformedROIDefsY[roi_id][pt] = sint*dx + cost*dy + v + cy; 
+            //console.log('after x ' + deformedROIDefsX[roi_id][pt] + ' y ' + deformedROIDefsY[roi_id][pt]); 
 	}
 	for(var j = 0, jl = excludedAssignments.length; j < jl; j++) {
-	    if(excludedAssignments[j]==roi){
+	    if(excludedAssignments[j]==roi_id){
               for(pt=0;pt<deformedExcludedDefsX[j].length;++pt){
   	        var ptx = deformedExcludedDefsX[j][pt];
 	        var pty = deformedExcludedDefsY[j][pt];
@@ -175,11 +182,12 @@ function updateDeformedCoords(){
     }
     //console.log(deformedROIDefsX);
     //console.log(deformedROIDefsY);
-    drawDeformedROIs(deformedROIDefsX,deformedROIDefsY,deformedExcludedDefsX,deformedExcludedDefsY);
+    //console.log(statusVec);
+    drawDeformedROIs(deformedROIDefsX,deformedROIDefsY,deformedExcludedDefsX,deformedExcludedDefsY,statusVec);
     return;
 }
 
-function drawDeformedROIs(deformedROIDefsX,deformedROIDefsY,deformedExcludedDefsX,deformedExcludedDefsY){
+function drawDeformedROIs(deformedROIDefsX,deformedROIDefsY,deformedExcludedDefsX,deformedExcludedDefsY,statusVec){
     clearDrawnROIs();
     var draw = SVG('panzoomLeft').size(refImageWidthLeft, refImageHeightLeft);
     var polygon;
@@ -204,9 +212,11 @@ function drawDeformedROIs(deformedROIDefsX,deformedROIDefsY,deformedExcludedDefs
     }
     if(coordsString!=' M '){
         hasROI = true;
-        polygon = draw.path(coordsString).attr({fill:'#FFFF00','fill-opacity':'0.4',stroke:'#FFFF00','stroke-opacity':'1','stroke-width':'2','stroke-linecap':'round' });
+        polygon = draw.path(coordsString).attr({fill:'#FFFF00','fill-opacity':'0.4',stroke:'#FFFF00','stroke-opacity':'1',
+                       'stroke-width':'2','stroke-linecap':'round' });
     }
     coordsString = '';
+    /// draw all the subset IDs on the image:                        
     for(var i = 0, l = 1; i < deformedExcludedDefsX.length; i++) {
 	var ROIX = deformedExcludedDefsX[i];
 	var ROIY = deformedExcludedDefsY[i];
@@ -235,6 +245,24 @@ function drawDeformedROIs(deformedROIDefsX,deformedROIDefsY,deformedExcludedDefs
         var backMask = draw.rect(refImageWidthLeft,refImageHeightLeft).attr({fill: 'white'});
         var mask = draw.mask().add(backMask).add(excluded);
         polygon.maskWith(mask);
+    }
+    for(var i = 0, l = 1; i < deformedROIDefsX.length; i++) {
+        var hsize = 7;
+        var color_id = '#ffffff';
+        if(statusVec[i]==false){
+            color_id = '#ff0000';
+	}
+        var centroid = centroidOfPolygon(deformedROIDefsX[i],deformedROIDefsY[i]);
+        var pt_cross = draw.polyline([[centroid.x,centroid.y-hsize],
+				      [centroid.x,centroid.y+hsize],
+				      [centroid.x,centroid.y],
+				      [centroid.x-hsize,centroid.y],
+				      [centroid.x+hsize,centroid.y]]).attr({ fill:'none',
+									     stroke: '#ff33cc',
+									     'stroke-opacity': '1.0',
+									     'stroke-width': '3',
+									     'stroke-linecap':'round' });
+        var text = draw.text(i.toString()).attr({x:centroid.x,y:centroid.y, fill:color_id});
     }
     draw.style('z-index',2);
     draw.style('position','absolute');

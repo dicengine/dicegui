@@ -446,7 +446,24 @@ function drawROIs(){
         var pt_cross = draw.polyline([[livePlotPtsX[i],livePlotPtsY[i]-hsize],[livePlotPtsX[i],livePlotPtsY[i]+hsize],[livePlotPtsX[i],livePlotPtsY[i]],[livePlotPtsX[i]-hsize,livePlotPtsY[i]],[livePlotPtsX[i]+hsize,livePlotPtsY[i]]]).attr({ fill : 'none', stroke: '#ff33cc', 'stroke-opacity': '1.0','stroke-width': '3', 'stroke-linecap':'round' });
         var text = draw.text(i.toString()).attr({x:livePlotPtsX[i],y:livePlotPtsY[i], fill:'#ffffff'});
     }
-    
+    /// draw all the subset IDs on the image:                   
+    if($("#analysisModeSelect").val()=="tracking"){
+        var hsize = 7;
+        for(var i = 0, l = ROIDefsX.length; i < l; i++) {
+            var centroid = centroidOfPolygon(ROIDefsX[i],ROIDefsY[i]);
+            var pt_cross = draw.polyline([[centroid.x,centroid.y-hsize],
+                              [centroid.x,centroid.y+hsize],
+                              [centroid.x,centroid.y],
+                              [centroid.x-hsize,centroid.y],
+                              [centroid.x+hsize,centroid.y]]).attr({ fill:'none',
+                                        stroke: '#ff33cc', 
+                                        'stroke-opacity': '1.0',
+                                        'stroke-width': '3', 
+                                        'stroke-linecap':'round' });
+            var text = draw.text(i.toString()).attr({x:centroid.x,y:centroid.y, fill:'#ffffff'});
+        }    
+    }
+
     // draw a default subset on the image in the center
     if($("#analysisModeSelect").val()=="subset"){
         var ss_size = $("#subsetSize").val();

@@ -325,7 +325,7 @@ function callDICeExec(resolution,ss_locs) {
             }else if(ss_locs){
                 drawDotsAndBoxesForSubsets();
             }else{
-                showParaviewMsg();
+                postExecTasks();
             }
         }
     });
@@ -686,10 +686,15 @@ function callCrossInitExec() {
     });
 }
 
-function showParaviewMsg(){
+function postExecTasks(){
     if(paraviewMsg){
         alert('Analysis successful\n\nView the results files using ParaView\nwhich can be freely downloaded at\nwww.paraview.org');
         paraviewMsg = false;
+    }
+    if($("#exportMovieCheck")[0].checked){
+        consoleMsg('writing results movie to results folder');
+        var child_process = require('child_process');
+        var proc = child_process.spawn(execTrackingMoviePath,['input.xml'],{cwd:workingDirectory});
     }
 }
 
