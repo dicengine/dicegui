@@ -450,6 +450,7 @@ function drawROIs(){
     if($("#analysisModeSelect").val()=="tracking"){
         var hsize = 7;
         for(var i = 0, l = ROIDefsX.length; i < l; i++) {
+            if(ROIDefsX[i].length<3) continue;
             var centroid = centroidOfPolygon(ROIDefsX[i],ROIDefsY[i]);
             var pt_cross = draw.polyline([[centroid.x,centroid.y-hsize],
                               [centroid.x,centroid.y+hsize],
