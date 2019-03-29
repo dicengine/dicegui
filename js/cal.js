@@ -1,24 +1,36 @@
 $(window).load(function(){
     workingDirectory = localStorage.getItem("workingDirectory"); 
     localStorage.setItem("calFileName","");
+    execCalPath = localStorage.getItem("execCalPath");
+    execOpenCVServerPath = localStorage.getItem("execOpenCVServerPath");
+    console.log('using cal exec: ' + execCalPath);
     $("#calibrateButton").prop("disabled",true);
     $("#acceptButton").prop("disabled",true);
     $("#cancelButton").hide();
-    $('.board-size').hide();
+    //
+    //$('.board-size').hide();
 
-    console.log('useTrinoc is ' + localStorage.getItem("useTrinoc"));
-    if(localStorage.getItem("useTrinoc")=='true'){
-        $( '.trinocOption' ).show();
-        $('#leftPreviewToggle').css('width','32%');        
-        $('#rightPreviewToggle').css('width','32%');        
-    }
-    else{
+    console.log('showStereoPane is ' + localStorage.getItem("showStereoPane"));
+    if(localStorage.getItem("showStereoPane")==0){ // 2d analysis
         $( '.trinocOption' ).hide();
-        $('#leftPreviewToggle').css('width','48.5%');        
-        $('#rightPreviewToggle').css('width','48.5%');        
+        $( '.stereoOption' ).hide();
+        $( '.stereoPrefix' ).hide();
+        $('#leftPreviewToggle').css('width','48.5%');
+        $('#leftPreviewToggle').css('float','');
+        $('#leftPreviewToggle').css('margin','0 auto');
+    }else if(localStorage.getItem("showStereoPane")==1){ // stereo
+        $( '.trinocOption' ).hide();
+        $('#leftPreviewToggle').css('width','48.5%');
+        $('#rightPreviewToggle').css('width','48.5%');
+    }else{ // trinoc
+        $( '.trinocOption' ).show();
+        $('#leftPreviewToggle').css('width','32%');
+        $('#rightPreviewToggle').css('width','32%');
     }
     $("#calThreshP").hide();
     $("#calThreshConstant").hide();
+    $(".adaptive-thresh").hide();
+    $("#calUseAdaptiveThreshP").hide();
     // .load the images if they exist
     //refreshCalDisplayImages();
 
@@ -26,7 +38,7 @@ $(window).load(function(){
     //fs.watchFile(fullPath('','.cal_left.png'), (curr, prev) => {
     //    refreshCalDisplayImages();
     //});
-    // initialize panzooms                                                                                                            
+    // initialize panzooms
     $("#panzoomLeftCal").panzoom({
         which: 2,
         minScale: 0.05,
@@ -49,6 +61,9 @@ $("#calThreshConstant").on('input',function(){
 });
 $("#calAdaptiveThreshConstant").on('input',function(){
     $("#calAdaptiveThreshConstantLabel").text($(this).val());
+});
+$("#calBlockSize").on('input',function(){
+    $("#calBlockSizeLabel").text($(this).val());
 });
 
 // zoom on focal point from mousewheel 
@@ -138,7 +153,7 @@ function refreshCalDisplayImages(){
         }
     });
 }
-               
+
 function startProgress (){
     $("#runLoaderCal").removeClass('post-loader-success');
     $("#runLoaderCal").removeClass('post-loader-fail');
@@ -156,128 +171,197 @@ function endProgress (success){
 
 $("#calMode").on('change',function (){
     if($(this).val()=="checkerboard"){
-        $("#boardImage").attr("src","./images/CheckerboardExample.png");
+        $("#boardImage").attr("src","./images/checkerboard_diagram.png");
         $("#binaryThresh").val(30);
         $("#binaryLabel").text($("#binaryThresh").val());
-        $('.board-size').show();
+        $('.origin-loc').hide();
+        $('.threshold-options').hide();
+        $('.board-size-dots').hide();
     }
     else if($(this).val()=="vic3d"){
-        $("#boardImage").attr("src","./images/MarkerCalExample.png");
+        $("#boardImage").attr("src","./images/dots_diagram.png");
         $("#binaryThresh").val(30);
         $("#binaryLabel").text($("#binaryThresh").val());
-        $('.board-size').hide();
+        $('.origin-loc').show();
+        $('.threshold-options').show();
+        $('.board-size-dots').show();
     }
     else if($(this).val()=="vic3dDark"){
-        $("#boardImage").attr("src","./images/DarkMarkerCalExample.png");
+        $("#boardImage").attr("src","./images/dots_black_diagram.png");
         $("#binaryThresh").val(100);
         $("#binaryLabel").text($("#binaryThresh").val());
-        $('.board-size').hide();
+        $('.origin-loc').show();
+        $('.threshold-options').show();
+        $('.board-size-dots').show();
     }
 });
 
-function previewCalImages(){
+function previewCalImages(first_load=false){
     // set up the arguments for the OpenCVServer
     var args = [];
     // create the list of files:
-    var leftName = concatImageSequenceName($("#calFrameScroller").val(),0);
+    var leftName;
+    if(localStorage.getItem("showStereoPane")==0)
+        leftName = concatImageSequenceName($("#calFrameScroller").val(),3); // use mode 3 to avoid the stereo suffix
+    else
+        leftName = concatImageSequenceName($("#calFrameScroller").val(),0);
     console.log('leftName ' + leftName);
     args.push(leftName);
     args.push('.cal_left.png');
-    
-    var rightName = concatImageSequenceName($("#calFrameScroller").val(),1);
-    console.log('rightName ' + rightName);
-    args.push(rightName);
-    args.push('.cal_right.png');
-    if(localStorage.getItem("useTrinoc")=='true'){
+    if(localStorage.getItem("showStereoPane")==1){
+        var rightName = concatImageSequenceName($("#calFrameScroller").val(),1);
+        console.log('rightName ' + rightName);
+        args.push(rightName);
+        args.push('.cal_right.png');
+    }
+    if(localStorage.getItem("showStereoPane")==2){
         var middleName = concatImageSequenceName($("#calFrameScroller").val(),2);
         console.log('middleName ' + middleName);
         args.push(middleName);
         args.push('.cal_middle.png');
     }
-    if($("#previewThreshCheck")[0].checked)
-        args.push('Filter:PreviewThreshold');
-    var thresh = 0;
-    if($("#adaptiveThreshCheck")[0].checked){
-        args.push('Filter:AdaptiveThreshold');
-        thresh = $("#calAdaptiveThreshConstant").val();
+    if(first_load){
+        args.push('filter:none');
     }
-    else{
-        thresh = $("#calThreshConstant").val();
-    }
-    args.push('Filter:CalPreview');
-    if($("#calMode").val()=="checkerboard"){
-    args.push('Filter:BoardSize');
+    else if($("#calMode").val()=="checkerboard"){
+        args.push('filter:checkerboard_targets');
+        args.push('num_cal_fiducials_x');
         args.push($("#calWidth").val());
+        args.push('num_cal_fiducials_y');
         args.push($("#calHeight").val());
+    }else{ // dot target
+        args.push('filter:dot_targets');
+        args.push('cal_target_type');
+        if($("#calMode").val()=="vic3dDark")
+            args.push('WHITE_ON_BLACK_W_DONUT_DOTS'); // invert the colors for the dark pattern
+        else
+            args.push('BLACK_ON_WHITE_W_DONUT_DOTS');
+        if($("#previewThreshCheck")[0].checked){
+            args.push('preview_threshold');
+            args.push('true');
+        }
+        args.push('num_cal_fiducials_x');
+        args.push($("#calWidth").val());
+        args.push('num_cal_fiducials_y');
+        args.push($("#calHeight").val());
+        args.push('num_cal_fiducials_origin_to_x_marker');
+        args.push($("#calInnerWidth").val());
+        args.push('num_cal_fiducials_origin_to_y_marker');
+        args.push($("#calInnerHeight").val());
+        args.push('cal_origin_x');
+        args.push($("#calOriginX").val());
+        args.push('cal_origin_y');
+        args.push($("#calOriginY").val());
+        if($("#autoThreshCheck")[0].checked){
+            // no op so the default sweep range gets used
+        }else{
+            // adaptive only gets used if the threshold is set, not swept 
+            if($("#adaptiveThreshCheck")[0].checked){
+                args.push('use_adaptive_threshold');
+                args.push('true');
+                args.push('threshold_start');
+                args.push($("#calAdaptiveThreshConstant").val());
+                args.push('threshold_end');
+                args.push($("#calAdaptiveThreshConstant").val());
+                args.push('threshold_step');
+                args.push($("#calAdaptiveThreshConstant").val());
+                args.push('block_size');
+                args.push($("#calBlockSize").val());
+            }else{
+                args.push('threshold_start');
+                args.push($("#calThreshConstant").val());
+                args.push('threshold_end');
+                args.push($("#calThreshConstant").val());
+                args.push('threshold_step');
+                args.push($("#calThreshConstant").val());
+            }
+        }
+        //args.push('dot_tol'); // TODO enable user to set these (default is 0.25)
+        //args.push('filter_mode'); // default is 1 
+        //args.push('block_size'); // default is 3
     }
-    args.push('Filter:PatternSpacing');
-    args.push($("#targetSpacingSize").val());
-    args.push('Filter:BinaryThreshold');
-    args.push(1); // 0 is gaussian 1 is mean
-    args.push(75); // block size
-    args.push(thresh); // threshold constant
-    if($("#calMode").val()=="vic3dDark"){
-        args.push(1.0); // invert the colors for the dark pattern
-    }else{
-        args.push(0); // otherwise, do not invert
-    }
-    args.push('Filter:Blob');
-    args.push(0); // use area filter
-    args.push(50); // min area
-    args.push(200); // max area
-    args.push(0); // use circularity
-    args.push(0.75); // circ min
-    args.push(1.0); // circ max
-    args.push(0); // eccentricity filter
-    args.push(0.0); // ecc min
-    args.push(1.0); // ecc max
-    args.push(0); // convexity
-    args.push(0.0); // convexity min
-    args.push(1.0); // convexity max
+//    var thresh = 0;
+//    if($("#adaptiveThreshCheck")[0].checked){
+//        args.push('Filter:AdaptiveThreshold');
+//        thresh = $("#calAdaptiveThreshConstant").val();
+//    }
+//    else{
+//        thresh = $("#calThreshConstant").val();
+//    }
+//    args.push('Filter:PatternSpacing');
+//    args.push($("#targetSpacingSize").val());
+//    args.push('Filter:BinaryThreshold');
+//    args.push(1); // 0 is gaussian 1 is mean
+//    args.push(75); // block size
+//    args.push(thresh); // threshold constant
+//    args.push('Filter:Blob');
+//    args.push(0); // use area filter
+//    args.push(50); // min area
+//    args.push(200); // max area
+//    args.push(0); // use circularity
+//    args.push(0.75); // circ min
+//    args.push(1.0); // circ max
+//    args.push(0); // eccentricity filter
+//    args.push(0.0); // ecc min
+//    args.push(1.0); // ecc max
+//    args.push(0); // convexity
+//    args.push(0.0); // convexity min
+//    args.push(1.0); // convexity max
     // call the filter exec
     var child_process = require('child_process');
     var readline      = require('readline');
+    //alert('opencv server: ' + execOpenCVServerPath);
+    startProgress();
     var proc = child_process.spawn(execOpenCVServerPath,args,{cwd:workingDirectory});//,maxBuffer:1024*1024});
     proc.on('error', function(){
         alert('DICe OpenCVServer failed: invalid executable: ' + execOpenCVServerPath);
     });
+    setTimeout(function(){ if($("#calMode").val()=="checkerboard"){proc.kill()}}, 10000);
     proc.on('close', (code) => {
         console.log(`OpenCVServer exited with code ${code}`);
         if(code==0){
+            endProgress(true);
             refreshCalDisplayImages();
-            $("#leftPreviewBody").css('border', '3px solid #00cc00');
-            $("#rightPreviewBody").css('border', '3px solid #00cc00');
-            $("#middlePreviewBody").css('border', '3px solid #00cc00');
+            if(first_load){
+                $("#leftPreviewBody").css('border', '');
+                $("#rightPreviewBody").css('border', '');
+                $("#middlePreviewBody").css('border', '');
+            }
+            else{
+                $("#leftPreviewBody").css('border', '3px solid #00cc00');
+                $("#rightPreviewBody").css('border', '3px solid #00cc00');
+                $("#middlePreviewBody").css('border', '3px solid #00cc00');
+            }
             $("#previewLeftSpan").text("");
             $("#previewRightSpan").text("");
             $("#previewMiddleSpan").text("");
         }else{
-            if(code>=2&&code<=8){
-                refreshCalDisplayImages();
-                if(code==2||code==4||code==6||code==8){
-                    $("#leftPreviewBody").css('border', '3px solid red');
-                    $("#previewLeftSpan").text("error finding cal dots");
-                }
-                if(code==3||code==5||code==7){
-                    $("#leftPreviewBody").css('border', '3px solid #00cc00');
-                    $("#previewLeftSpan").text("");
-                }
-                if(code==3||code==4||code==7||code==8){
-                    $("#rightPreviewBody").css('border', '3px solid red');
-                    $("#previewRightSpan").text("error finding cal dots");
-                }
-                if(code==2||code==5||code==6){
-                    $("#rightPreviewBody").css('border', '3px solid #00cc00');
-                    $("#previewRightSpan").text("");
-                }
-                if(code==5||code==6||code==7||code==8){
-                    $("#middlePreviewBody").css('border', '3px solid red');
-                    $("#previewMiddleSpan").text("error finding cal dots");
-                }
-                if(code==2||code==3||code==4){
-                    $("#middlePreviewBody").css('border', '3px solid #00cc00');
-                    $("#previewMiddleSpan").text("");
-                }
+            //if(code>=2&&code<=8){
+//                refreshCalDisplayImages();
+//                if(code==2||code==4||code==6||code==8){
+//                    $("#leftPreviewBody").css('border', '3px solid red');
+//                    $("#previewLeftSpan").text("error finding cal dots");
+//                }
+//                if(code==3||code==5||code==7){
+//                    $("#leftPreviewBody").css('border', '3px solid #00cc00');
+//                    $("#previewLeftSpan").text("");
+//                }
+//                if(code==3||code==4||code==7||code==8){
+//                    $("#rightPreviewBody").css('border', '3px solid red');
+//                    $("#previewRightSpan").text("error finding cal dots");
+//                }
+//                if(code==2||code==5||code==6){
+//                    $("#rightPreviewBody").css('border', '3px solid #00cc00');
+//                    $("#previewRightSpan").text("");
+//                }
+//                if(code==5||code==6||code==7||code==8){
+//                    $("#middlePreviewBody").css('border', '3px solid red');
+//                    $("#previewMiddleSpan").text("error finding cal dots");
+//                }
+//                if(code==2||code==3||code==4){
+//                    $("#middlePreviewBody").css('border', '3px solid #00cc00');
+//                    $("#previewMiddleSpan").text("");
+//                }
                 //if(code==9||code==11||code==13||code==15){
                 //    $("#leftPreviewBody").css('border', '3px solid red');
                 //    $("#previewLeftSpan").text("invalid num cal dots");
@@ -302,7 +386,26 @@ function previewCalImages(){
                 //    $("#middlePreviewBody").css('border', '3px solid #00cc00');
                 //    $("#previewMiddleSpan").text("");
                 //}
-            }else if(code==9){
+            //}
+            if(code==1||code==2||code==3){
+                refreshCalDisplayImages();
+                endProgress(false);
+                // remove border on preview windows
+                $("#leftPreviewBody").css('border', '3px solid red');
+                $("#rightPreviewBody").css('border', '3px solid red');
+                $("#middlePreviewBody").css('border', '3px solid red');
+                $("#previewLeftSpan").text("");
+                $("#previewRightSpan").text("");
+                $("#previewMiddleSpan").text("");
+                // clear the preview images
+                $("#panzoomLeftCal").html('');
+                $("#panzoomRightCal").html('');
+                $("#panzoomMiddleCal").html('');
+                $("#previewLeftSpan").text("marker location failed");
+                $("#previewRightSpan").text("marker location failed");
+                $("#previewMiddleSpan").text("marker location failed");
+            }else if(code==4){
+                endProgress(false);
                 // remove border on preview windows
                 $("#leftPreviewBody").css('border', '3px solid red');
                 $("#rightPreviewBody").css('border', '3px solid red');
@@ -318,6 +421,8 @@ function previewCalImages(){
                 $("#previewRightSpan").text("image load failure");
                 $("#previewMiddleSpan").text("image load failure");
             }else{
+                endProgress(false);
+                refreshCalDisplayImages();
                 //alert('OpenCVServer failed');
                 // remove border on preview windows
                 $("#leftPreviewBody").css('border', '3px solid red');
@@ -345,13 +450,53 @@ function previewCalImages(){
 }
 
 function updateCalSequenceLabels(stats){
+    // catch someone trying to load a serial image set for a stereo cal
+    if(localStorage.getItem("showStereoPane")==1){ // is stereo
+        if(stats.leftPrefix==""&&stats.leftSuffix==""){
+            alert("warning, auto detection of file naming convention failed.");
+            return;
+        }
+    }
+    
+    
     $("#imagePrefix").val(stats.prefix);
     $("#startIndex").val(stats.startIndex);
     $("#endIndex").val(stats.endIndex);
     $("#skipIndex").val(stats.frameInterval);
     $("#numDigits").val(stats.numDigits);
     $("#stereoLeftSuffix").val(stats.leftSuffix);
+    $("#stereoLeftPrefix").val(stats.leftPrefix);
+    // check if someone is trying to load a folder with stereo images for a single camera calibration
+    if(localStorage.getItem("showStereoPane")==0){ // is 2d
+        if(stats.leftSuffix!=''){
+            alert('Warning: stereo file name suffix detected, but this is a single camera calibration.');
+            $('.leftSuffix').show();
+            $("#stereoLeftSuffixText").text('suffix');
+        }else if(stats.leftPrefix!=''){
+            alert('Warning: stereo file name prefix detected, but this is a single camera calibration.');
+            $("#imagePrefix").val(stats.leftPrefix);
+            $('.leftSuffix').hide();
+            $("#stereoLeftSuffixText").text('stereo left suffix');
+        }else{
+            $('.leftSuffix').hide();
+            $("#stereoLeftSuffixText").text('stereo left suffix');
+        }
+    }
+//    if(localStorage.getItem("showStereoPane")==1){
+//        if(stats.leftPrefix!=''){
+//            //$('.prefixOption').hide();
+//            //$('.stereoPrefix').show();
+//            //$('.leftSuffix').hide();
+//            //$('.rightSuffix').hide();
+//        }else{
+//            $('.prefixOption').show();
+//            //$('.steroePrefix').hide();
+//            //$('.leftSuffix').show();
+//            //$('.rightSuffix').show();
+//        }
+//    }
     $("#stereoRightSuffix").val(stats.rightSuffix);
+    $("#stereoRightPrefix").val(stats.rightPrefix);
     $("#imageExtension").val(stats.extension);
 
     $("#calFrameScroller").val(stats.startIndex);
@@ -366,20 +511,23 @@ function updateCalSequenceLabels(stats){
 
     updateSelectableList();
 
-    previewCalImages();
+    previewCalImages(true);
 }
 
 $("#changeImageFolder").on("click",function () {
     this.value = null;
 });
 
+$("#previewCal").on("click",function () {
+    previewCalImages();
+});
 
 
 $("#changeImageFolder").click(function(){
     var path =  dialog.showOpenDialog({defaultPath: workingDirectory, properties: ['openDirectory']});
     if(path){
         autoDetectImageSequence(path[0],updateCalSequenceLabels);
-        $('#imageFolder span').text(path[0]);    
+        $('#imageFolder span').text(path[0]);
     }
 });
 
@@ -391,7 +539,7 @@ $("#imagePrefix,#startIndex,#endIndex,#skipIndex,#numDigits,#imageExtension,#ste
     $("#frameStartPreviewSpan").text($("#startIndex").val());
     $("#frameCurrentPreviewSpan").text($("#startIndex").val());
     $("#frameEndPreviewSpan").text($("#endIndex").val());
-    updateImageSequencePreview(updateSelectableList);
+    updateImageSequencePreview(function(){updateSelectableList;previewCalImages(true)});
 });
 
 $("#binaryThresh").on('input',function(){
@@ -399,17 +547,29 @@ $("#binaryThresh").on('input',function(){
 });
 
 function concatImageSequenceName(frame,mode){
+    // set mode to 0 for left stereo
+    // set mode to 1 for right stereo
+    // set mode to 2 for trinoc
+    // set mode to 3 for 2d
     var fullImageName = "";
     mode = mode || 0;
+    frame = frame || 0;
     if(!arguments.length)
-        $('#imageSequencePreview span').text('');    
+        $('#imageSequencePreview span').text('');
     fullImageName = $("#imageFolderSpan").text();
     if(os.platform()=='win32'){
         fullImageName += '\\';
     }else{
         fullImageName += '/';
     }
-    fullImageName += $("#imagePrefix").val();
+    //if($('.stereoPrefix').is(":visible")){
+    if(mode==0)
+        fullImageName += $("#stereoLeftPrefix").val();
+    else if (mode==1)
+        fullImageName += $("#stereoRightPrefix").val();
+    //}else{
+    fullImageName += $("#imagePrefix").val(); // note this might be empty
+    //}
     // get the number of digits in the ref index
     var tmpNum = 0;
     if(arguments.length)
@@ -431,12 +591,15 @@ function concatImageSequenceName(frame,mode){
         fullImageName += frame;
     else
         fullImageName += $("#startIndex").val();
-    if(mode==0)
-      fullImageName += $("#stereoLeftSuffix").val();                                                       
-    else if(mode==1)
-      fullImageName += $("#stereoRightSuffix").val();                                                       
-    else if(mode==2)
-      fullImageName += $("#stereoMiddleSuffix").val();                                                       
+    
+    if($('.leftSuffix').is(":visible")){
+        if(mode==0||mode==3)
+            fullImageName += $("#stereoLeftSuffix").val();
+        else if(mode==1)
+            fullImageName += $("#stereoRightSuffix").val();
+        else
+            fullImageName += $("#stereoMiddleSuffix").val();
+    }
     fullImageName += $("#imageExtension").val();
     return fullImageName;
 }
@@ -456,7 +619,10 @@ function updateSelectableList(){
     // for each file in the sequence, add an item to the selectable list:
     var index = 0;
     for(i=si;i<=ei;i+=step){
-        fileName = concatImageSequenceName(i);
+        if(localStorage.getItem("showStereoPane")==1||localStorage.getItem("showStereoPane")==2)
+            fileName = concatImageSequenceName(i);
+        else
+            fileName = concatImageSequenceName(i,3);
         // strip off everything before the last slash or backslash
         fileName = fileName.split(/[\\\/]/).pop();
         $("#selectable").append('<li style="display:block;" id="calListItem_'+index+'" class="ui-widget-content"><span style="float:left;">'+fileName+'</span></li>');
@@ -465,7 +631,11 @@ function updateSelectableList(){
 }
 
 function updateImageSequencePreview(cb){
-    var fullImageName = concatImageSequenceName();
+    var fullImageName='';
+    if(localStorage.getItem("showStereoPane")==1||localStorage.getItem("showStereoPane")==2)
+        fullImageName = concatImageSequenceName($("#startIndex").val(),0);
+    else
+        fullImageName = concatImageSequenceName($("#startIndex").val(),3);
     $('#imageSequencePreview span').text(fullImageName);
 
     cb = cb || $.noop;
@@ -477,28 +647,50 @@ function updateImageSequencePreview(cb){
             cb();
         }
         else{
-            $("#imageSequencePreview").css({color:"#ff0000"})            
+            $("#imageSequencePreview").css({color:"#ff0000"})
             $("#calibrateButton").prop("disabled",true);
             $("#acceptButton").prop("disabled",true);
         }
     });
 }
 
-$("#previewThreshCheck,#calAdaptiveThreshConstant,#calThreshConstant").change(function() {
-        previewCalImages();
+//$("#previewThreshCheck,#calAdaptiveThreshConstant,#calThreshConstant").change(function() {
+//        previewCalImages();
+//});
+
+$("#autoThreshCheck").change(function() {
+    if(this.checked) {
+        $("#calThreshP").hide();
+        $("#calThreshConstant").hide();
+        $(".adaptive-thresh").hide();
+        //$("#calAdaptiveThreshConstant").hide();
+        $("#calUseAdaptiveThreshP").hide();
+    }else{
+        $("#calUseAdaptiveThreshP").show();
+        if($("#adaptiveThreshCheck")[0].checked){
+            $(".adaptive-thresh").show();
+            //$("#calAdaptiveThreshConstant").show();
+        }
+        else{
+            $("#calThreshP").show();
+            $("#calThreshConstant").show();
+        }
+    }
 });
 
 $("#adaptiveThreshCheck").change(function() {
     if(this.checked) {
         $("#calThreshP").hide();
         $("#calThreshConstant").hide();
-        $("#calAdaptiveThreshP").show();
-        $("#calAdaptiveThreshConstant").show();
+        $('.adaptive-thresh').show();
+        //$("#calAdaptiveThreshP").show();
+        //$("#calAdaptiveThreshConstant").show();
     }else{
         $("#calThreshP").show();
         $("#calThreshConstant").show();
-        $("#calAdaptiveThreshP").hide();
-        $("#calAdaptiveThreshConstant").hide();        
+        $('.adaptive-thresh').hide();
+        //$("#calAdaptiveThreshP").hide();
+        //$("#calAdaptiveThreshConstant").hide();
     }
 });
 
@@ -536,70 +728,100 @@ function writeInputFile() {
     }else{
        folderName += '/';
     }
+    content += '<Parameter name="xml_file_format" type="string" value="DICe_xml_calibration_file" />\n';
     content += '<Parameter name="image_folder" type="string" value="'+folderName +'" />\n';
+    content += '<Parameter name="image_file_extension" type="string" value="'+$("#imageExtension").val()+'" />\n';
+    
+    if(localStorage.getItem("showStereoPane")==1){
+        if($("#stereoLeftPrefix").val()!=''){ // stereo analysis
+            content += '<Parameter name="stereo_left_file_prefix" type="string" value="'+$("#stereoLeftPrefix").val()+'"/>\n';
+            content += '<Parameter name="stereo_right_file_prefix" type="string" value="'+$("#stereoRightPrefix").val()+'"/>\n';
+        }else{
+            content += '<Parameter name="stereo_left_suffix" type="string" value="'+$("#stereoLeftSuffix").val()+'"/>\n';
+            content += '<Parameter name="stereo_right_suffix" type="string" value="'+$("#stereoRightSuffix").val()+'"/>\n';
+            content += '<Parameter name="image_file_prefix" type="string" value="'+$("#imagePrefix").val()+'" />\n';
+        }
+    }else{
+        content += '<Parameter name="image_file_prefix" type="string" value="'+$("#imagePrefix").val()+'" />\n';
+    }
+    
+    if(localStorage.getItem("showStereoPane")==0 && $('.leftSuffix').is(":visible")){ // 2d, but the files have a suffix
+        content += '<Parameter name="file_suffix" type="string" value="'+$("#stereoLeftSuffix").val()+'"/>\n';
+    }
+    
     content += '<Parameter name="reference_image_index" type="int" value="'+$("#startIndex").val()+'" />\n';
     content += '<Parameter name="start_image_index" type="int" value="'+$("#startIndex").val()+'" />\n';
     content += '<Parameter name="end_image_index" type="int" value="'+$("#endIndex").val()+'" />\n';
     content += '<Parameter name="skip_image_index" type="int" value="'+$("#skipIndex").val()+'" />\n';
     content += '<Parameter name="num_file_suffix_digits" type="int" value="'+$("#numDigits").val()+'" />\n';
-    content += '<Parameter name="image_file_extension" type="string" value="'+$("#imageExtension").val()+'" />\n';
-    content += '<Parameter name="image_file_prefix" type="string" value="'+$("#imagePrefix").val()+'" />\n';
-    content += '<Parameter name="stereo_left_suffix" type="string" value="'+$("#stereoLeftSuffix").val()+'"/>\n';
-    content += '<Parameter name="stereo_right_suffix" type="string" value="'+$("#stereoRightSuffix").val()+'"/>\n';
-    content += '<Parameter name="cal_target_has_adaptive" type="bool" value="';
-    var thresh = 0;
-    if($("#adaptiveThreshCheck")[0].checked){
-        content += 'true';
-        thresh = $("#calAdaptiveThreshConstant").val();
-    }
-    else{
-        content += 'false';
-        thresh = $("#calThreshConstant").val();
-    }
-    content += '"/>\n';    
-    content += '<Parameter name="cal_target_binary_constant" type="double" value="'+thresh+'"/>\n';
-    content += '<Parameter name="cal_target_block_size" type="double" value="75"/>\n'; // for now this is fixed
-    content += '<Parameter name="cal_target_is_inverted" type="bool" value="';
-    if($("#calMode").val()=="vic3dDark"){
-        content += 'true';
-    }
-    else{
-        content += 'false';
-    }
-    content += '"/>\n';
+    
     if($("#calMode").val()=="checkerboard"){
-        content += '<Parameter name="cal_mode" type="int" value="0"/>\n';
-        content += '<Parameter name="cal_target_width" type="int" value="'+$("#calWidth").val()+'"/>\n';
-        content += '<Parameter name="cal_target_height" type="int" value="'+$("#calHeight").val()+'"/>\n';
-    }
-    else if($("#calMode").val()=="vic3d")
-        content += '<Parameter name="cal_mode" type="int" value="1"/>\n';
-    else if($("#calMode").val()=="vic3dDark"){
-        content += '<Parameter name="cal_mode" type="int" value="2"/>\n';
+        content += '<Parameter name="cal_target_type" type="string" value="CHECKER_BOARD"/>\n';
+    }else{
+        if($("#calMode").val()=="vic3d")
+            content += '<Parameter name="cal_target_type" type="string" value="BLACK_ON_WHITE_W_DONUT_DOTS"/>\n';
+        else if($("#calMode").val()=="vic3dDark"){
+            content += '<Parameter name="cal_target_type" type="string" value="WHITE_ON_BLACK_W_DONUT_DOTS"/>\n';
+        }
+        content += '<Parameter name="num_cal_fiducials_origin_to_x_marker" type="int" value="'+$("#calInnerWidth").val()+'"/>\n';
+        content += '<Parameter name="num_cal_fiducials_origin_to_y_marker" type="int" value="'+$("#calInnerHeight").val()+'"/>\n';
+        content += '<Parameter name="cal_origin_x" type="int" value="'+$("#calOriginX").val()+'"/>\n';
+        content += '<Parameter name="cal_origin_y" type="int" value="'+$("#calOriginY").val()+'"/>\n';
     }
     content += '<Parameter name="cal_target_spacing_size" type="double" value="'+$("#targetSpacingSize").val()+'"/>\n';
-    // turn off any images that have been manually turned off
+    content += '<Parameter name="num_cal_fiducials_x" type="int" value="'+$("#calWidth").val()+'"/>\n';
+    content += '<Parameter name="num_cal_fiducials_y" type="int" value="'+$("#calHeight").val()+'"/>\n';
 
-    var hasManualOffs = false;
-    $('#selectable .ui-selected').each(function() {
-        if(!hasManualOffs){
-            content += '<ParameterList name="cal_manual_skip_images">\n';
+    if($("#autoThreshCheck")[0].checked){
+        // no op so the default sweep range gets used
+    }else{
+        // adaptive only gets used if the threshold is set, not swept 
+        if($("#adaptiveThreshCheck")[0].checked){
+            content += '<Parameter name="threshold_start" type="int" value="'+$("#calAdaptiveThreshConstant").val()+'"/>\n';
+            content += '<Parameter name="threshold_end" type="int" value="'+$("#calAdaptiveThreshConstant").val()+'"/>\n';
+            content += '<Parameter name="threshold_step" type="int" value="'+$("#calAdaptiveThreshConstant").val()+'"/>\n';
+            content += '<Parameter name="use_adaptive_threshold" type="bool" value="true"/>\n';
+            content += '<Parameter name="block_size" type="int" value="'+$("#calBlockSize").val()+'"/>\n';
+        }else{
+            content += '<Parameter name="threshold_start" type="int" value="'+$("#calThreshConstant").val()+'"/>\n';
+            content += '<Parameter name="threshold_end" type="int" value="'+$("#calThreshConstant").val()+'"/>\n';
+            content += '<Parameter name="threshold_step" type="int" value="'+$("#calThreshConstant").val()+'"/>\n';
+            content += '<Parameter name="use_adaptive_threshold" type="bool" value="false"/>\n';
         }
-        // convert the list id to an index and add it to the params
-        content += '<Parameter name="skip_'+$(this).attr('id').split('_').pop()+'" type="bool" value="true"/>\n';
+    }
+    hasManualOffs = false;
+    $('#selectable .ui-selected').each(function() {
         hasManualOffs = true;
     })
     if(hasManualOffs){
-        content += '</ParameterList>\n';
+        content += '<Parameter name="cal_disable_image_indices" type="string" value="{';
+        firstId = true;
+        $('#selectable .ui-selected').each(function() {
+            if(!firstId)
+                content += ',';
+            content += $(this).index();
+            firstId = false;
+//            id_num_str = $(this).attr('id').split('_').pop();
+//            if(id_num_str.length>0){
+//                if(!firstId)
+//                    content += ',';
+//                content += id_num_str;
+//                firstId = false;
+//            }
+        })
+        content += '}" />\n';
     }
+
     content += '</ParameterList>\n';
+    
     fs.writeFile(fileName, content, function (err) {
         if(err){
             alert("Error: an error ocurred creating the file "+ err.message);
             return;
          }
         console.log('cal_input.xml file has been successfully saved');
-        callCalExec();
+        deleteFileIfExists("cal.log",function(){deleteFileIfExists("cal_errors.txt",callCalExec())});
+        //callCalExec();
     });
 }
 
@@ -667,13 +889,13 @@ function callCalExec() {
                          }
                         var resDataLines = dataS.toString().split(/\r?\n/);
                         for(i=0;i<resDataLines.length;++i){
-                            if(resDataLines[i].includes("RMS error=")){
-                                var outputString = resDataLines[i].substring(resDataLines[i].indexOf("=")+1,resDataLines[i].length);
+                            if(resDataLines[i].includes("RMS error:")){
+                                var outputString = resDataLines[i].substring(resDataLines[i].indexOf(":")+1,resDataLines[i].length);
                                 $('#rmsPreview span').text(outputString);
                             }
-                            else if(resDataLines[i].includes("epipolar")){
-                                var outputString = resDataLines[i].substring(resDataLines[i].indexOf("=")+1,resDataLines[i].length);
-                                $('#epipolarPreview span').text(outputString);                                
+                            else if(resDataLines[i].includes("average epipolar error")){
+                                var outputString = resDataLines[i].substring(resDataLines[i].indexOf(":")+1,resDataLines[i].length);
+                                $('#epipolarPreview span').text(outputString);
                             }
                         }
                     }); // end read file
@@ -688,26 +910,35 @@ function callCalExec() {
                          if (err) {
                               return console.log(err);
                          }
-                        var resDataLines = dataS.toString().split(/\r?\n/);
+                        resDataLines = dataS.toString().split(/\r?\n/);
                         console.log(resDataLines);
-                        var numImages = $('#selectable li').length;
-                        if(numImages==resDataLines.length-1){
+                        numActiveImages = $('#selectable li').length;
+                        $('#selectable li').each(function() {
+                            if ($(this).hasClass("ui-selected")){
+                                //numActiveImages--;
+                                $('.error-span').html('');
+                            }
+                        })
+                        if(numActiveImages==resDataLines.length-1){
                             // remove all the exiting error notes
                             $('.error-span').html('');
-                            var lineIndex = 0;
+                            //lineIndex = 0;
                             $('#selectable li').each(function() {
-                                // update the string in each list item for the images
-                                $(this).append('<span class="error-span" style="float:right;">'+resDataLines[lineIndex]+'<\span>');
-                                lineIndex++;
-                             })
+                                // skip deactivated images
+                                if (!$(this).hasClass("ui-selected")){
+                                    // update the string in each list item for the images
+                                    $(this).append('<span class="error-span" style="float:right;">'+resDataLines[$(this).index()]+'<\span>');
+                                    //lineIndex++;
+                                }
+                            })
                         }
                         else{
-                            console.log('could not update image errors ' + numImages + ' ' + resDataLines.length);
+                            console.log('could not update image errors ' + numActiveImages + ' ' + resDataLines.length);
                         }
                     }); // end read cal_error.txt file
                 } // end null err
                 else{
-                    console.log("error: could not open the cal error file " + errorName);
+                    console.log("could not open the cal error file " + errorName);
                 }
             }); // end stat
         } // end else

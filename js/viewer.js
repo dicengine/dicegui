@@ -434,12 +434,13 @@ function loadImage(file,viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCla
                         // clear the drawn ROIs
                         clearDrawnROIs();
                     }
-                    if($("#showDeformedCheck")[0].checked){
-                        updateDeformedCoords();
-		    }else{
-                        if(typeof drawROIs === "function")
-                            drawROIs();
-		    }
+                    if(typeof $("#showDeformedCheck")[0] != "undefined")
+                        if($("#showDeformedCheck")[0].checked){
+                            updateDeformedCoords();
+                        }else{
+                            if(typeof drawROIs === "function")
+                                drawROIs();
+                        }
                     callBack();
                     return true;
                 }
@@ -462,12 +463,13 @@ function loadImage(file,viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCla
                 // clear the drawn ROIs
                 clearDrawnROIs();
             }
-            if($("#showDeformedCheck")[0].checked){
-                updateDeformedCoords();
-	    }else{
-                if(typeof drawROIs === "function")
-                    drawROIs();
-	    }
+            if(typeof $("#showDeformedCheck")[0] != "undefined")
+                if($("#showDeformedCheck")[0].checked){
+                    updateDeformedCoords();
+                }else{
+                    if(typeof drawROIs === "function")
+                        drawROIs();
+                }
             callBack();
             //if($("#binaryAutoUpdateCheck")[0].checked)
             //    callOpenCVServerExec();
@@ -843,10 +845,9 @@ $("#initCross").click(function () {
 $("#performCal").click(function () {
     localStorage.setItem("workingDirectory",workingDirectory);
     localStorage.setItem("calFileName","");
-    if(showStereoPane==2)
-        localStorage.setItem("useTrinoc",true);
-    else
-        localStorage.setItem("useTrinoc",false);
+    localStorage.setItem("execCalPath",execCalPath);
+    localStorage.setItem("execOpenCVServerPath",execOpenCVServerPath);
+    localStorage.setItem("showStereoPane",showStereoPane);
     var win = new BrowserWindow({ width: 1200, height: 1200 });
     win.on('closed', () => {
         calFileName = localStorage["calFileName"];

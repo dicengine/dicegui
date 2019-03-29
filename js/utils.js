@@ -78,6 +78,13 @@ function initialize_gui(load_existing){
                 }else{
                     unstackViews();
                 }
+                if(typeof execPathOverride === 'undefined'){}
+                else{
+                    if(execPathOverride!=''){
+                        //alert('setting the exec path to: ' + execPathOverride);
+                        setExecPaths(execPathOverride);
+                    }
+                }
                 paraviewMsg = paraviewMsgState;
                 workingDirectory = WD;
                 updateWorkingDirLabel();
@@ -208,7 +215,7 @@ function concatImageSequenceName(stereoImageFlag){
         fullImageName += '/';
     }
     fullImageName += $("#imagePrefix").val();
-    // get the number of digits in the ref index                                                                     
+    // get the number of digits in the ref index
     var tmpNum = Number($("#refIndex").val());
     var defDig = 0;
     if(tmpNum==0)
@@ -222,13 +229,13 @@ function concatImageSequenceName(stereoImageFlag){
             fullImageName += "0";
         }
     fullImageName += $("#refIndex").val();
-    if((showStereoPane==1||showStereoPane==2)&&stereoImageFlag==0){                                                              
+    if((showStereoPane==1||showStereoPane==2)&&stereoImageFlag==0){
         fullImageName += $("#stereoLeftSuffix").val();
     }else if((showStereoPane==1||showStereoPane==2)&&stereoImageFlag==1){
-        fullImageName += $("#stereoRightSuffix").val();                                                       
+        fullImageName += $("#stereoRightSuffix").val();
     }else if((showStereoPane==1||showStereoPane==2)&&stereoImageFlag==2){
-        fullImageName += $("#stereoMiddleSuffix").val();                                                       
-    }                                                                                                               
+        fullImageName += $("#stereoMiddleSuffix").val();
+    }
     fullImageName += $("#imageExtension").val();
     return fullImageName;
 }
@@ -768,6 +775,12 @@ function saveStateFile() {
         content += 'var paraviewMsgState = true;\n';
     }else{
         content += 'var paraviewMsgState = false;\n';
+    }
+    if(typeof execPathOverride === 'undefined'){
+    }else{
+        if(execPathOverride!=''){
+            content += 'var execPathOverride = "'+ exePathOverride +'";\n';
+        }
     }
     fs.writeFile(fileName, content, function (err) {
         if(err){
