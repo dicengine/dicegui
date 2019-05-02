@@ -31,6 +31,7 @@ function initialize_gui(load_existing){
     $(".tracking").hide();
     // hide the global tools
     $(".global").hide();
+    $(".cal-options").hide();
     //$("#trackingParams").hide();
     $("#analysisModeSelect").val("subset");
 
@@ -569,6 +570,12 @@ function show2DViewer(){
     $('#subFillDivLeft').css('width','100%');
     $('#subFillDivLeft').css('height','100%');
     $(".nav-two-cam").css('display','none');
+    $(".nav-one-cam").show();
+    if($("#calibrationCheck")[0].checked){
+        $(".cal-options").show();
+    }else{
+        $(".cal-options").hide();
+    }
     $(".nav-three-cam").css('display','none');
     $("#stackButton").css('display','none');
     showStereoPane = 0;
@@ -591,6 +598,7 @@ function showTrinocViewer(){
     $(".nav-two-cam").css('display','block');
     $(".nav-three-cam").css('display','block');
     $("#stackButton").css('display','block');
+    $(".nav-one-cam").hide();
     showStereoPane = 2;
     if(viewersStacked){
         stackViews();
@@ -609,6 +617,8 @@ function showStereoViewer(){
     $('#subFillDivRight').css('display','inline-block');
     $('#subFillDivRight').css('width','50%');
     $('#subFillDivLeft').css('width','50%');
+    $(".nav-one-cam").hide();
+    $(".cal-options").show();
     $("#rightMinimized").hide();
     $("#middleMinimized").hide();
     $("#leftMinimized").hide();

@@ -257,21 +257,24 @@
         <!-- end nav-two-cam-->
         <div class="nav-item">
           <h1 style="margin-top: 30px;">CALIBRATION</h1>
-          <label id="performCal" class="custom-file-input action-li"> <i
-            class="material-icons md-dark md-br-pad"
-          >grain</i> perform cal
-          </label> <label for="calInput" class="custom-file-input action-li"> <i
-            class="material-icons md-dark md-br-pad"
-          >image_aspect_ratio</i> load cal file
-          </label> <input id="calInput" type="file" accept=".txt,.xml">
-          <div id="calContainer" class="cal-list-container">
-            <ul id="calList" class="cal-ul">
-            </ul>
+          <div class="nav-one-cam"><input id="calibrationCheck" type="checkbox" style="margin-left:10px;"> calibrate results</div>
+          <div class="cal-options">
+            <label id="performCal" class="custom-file-input action-li"> <i
+              class="material-icons md-dark md-br-pad"
+            >grain</i> perform cal
+            </label> <label for="calInput" class="custom-file-input action-li"> <i
+              class="material-icons md-dark md-br-pad"
+            >image_aspect_ratio</i> load cal file
+            </label> <input id="calInput" type="file" accept=".txt,.xml">
+            <div id="calContainer" class="cal-list-container">
+              <ul id="calList" class="cal-ul">
+              </ul>
+            </div>
+            <label id="calInfo" class="custom-file-input action-li"> <i
+              class="material-icons md-dark md-br-pad"
+            >help_outline</i> cal help
+            </label>
           </div>
-          <label id="calInfo" class="custom-file-input action-li"> <i
-            class="material-icons md-dark md-br-pad"
-          >help_outline</i> cal help
-          </label>
         </div>
         <!-- end nav-two-cam-->
         <h1 style="margin-top: 40px;">ANALYSIS</h1>

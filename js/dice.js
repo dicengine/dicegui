@@ -753,7 +753,10 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
         content += '<Parameter name="no_text_output_files" type="bool" value="true" />\n';
     }
     if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs&&$("#analysisModeSelect").val()=="subset"){
-        content += '<Parameter name="calibration_parameters_file" type="string" value="' + calPath + '" />\n';
+        content += '<Parameter name="camera_system_file" type="string" value="' + calPath + '" />\n';
+    }
+    if(showStereoPane==0&&$("#calibrationCheck")[0].checked){
+        content += '<Parameter name="camera_system_file" type="string" value="' + calPath + '" />\n';
     }
     var fileSelectMode = $("#fileSelectMode").val();
     if(fileSelectMode=="list"){
@@ -983,16 +986,15 @@ function writeParamsFile(only_write,resolution,ss_locs) {
     content += '<Parameter name="COORDINATE_Y" type="bool" value="true" />\n';
     content += '<Parameter name="DISPLACEMENT_X" type="bool" value="true" />\n';
     content += '<Parameter name="DISPLACEMENT_Y" type="bool" value="true" />\n';
-    
+    if((showStereoPane==1||showStereoPane==2)&&$("#analysisModeSelect").val()=="subset"||(showStereoPane==0&&$("#calibrationCheck")[0].checked)){
+        content += '<Parameter name="MODEL_COORDINATES_X" type="bool" value="true" />\n';
+        content += '<Parameter name="MODEL_COORDINATES_Y" type="bool" value="true" />\n';
+        content += '<Parameter name="MODEL_COORDINATES_Z" type="bool" value="true" />\n';
+        content += '<Parameter name="MODEL_DISPLACEMENT_X" type="bool" value="true" />\n';
+        content += '<Parameter name="MODEL_DISPLACEMENT_Y" type="bool" value="true" />\n';
+        content += '<Parameter name="MODEL_DISPLACEMENT_Z" type="bool" value="true" />\n';
+    }
     if($("#analysisModeSelect").val()=="subset"){
-        if((showStereoPane==1||showStereoPane==2)){
-            content += '<Parameter name="MODEL_COORDINATES_X" type="bool" value="true" />\n';
-            content += '<Parameter name="MODEL_COORDINATES_Y" type="bool" value="true" />\n';
-            content += '<Parameter name="MODEL_COORDINATES_Z" type="bool" value="true" />\n';
-            content += '<Parameter name="MODEL_DISPLACEMENT_X" type="bool" value="true" />\n';
-            content += '<Parameter name="MODEL_DISPLACEMENT_Y" type="bool" value="true" />\n';
-            content += '<Parameter name="MODEL_DISPLACEMENT_Z" type="bool" value="true" />\n';
-        }
         content += '<Parameter name="SIGMA" type="bool" value="true" />\n';
         content += '<Parameter name="GAMMA" type="bool" value="true" />\n';
         content += '<Parameter name="BETA" type="bool" value="true" />\n';
@@ -1178,6 +1180,11 @@ function checkValidInput() {
                 validInput = false;
             }
         }
+        if(showStereoPane==0&&$("#calibrationCheck")[0].checked){
+            if(calPath=='undefined'){
+                validInput = false;
+            }
+        }
     }
     else{
     // see if the left reference image is set:
@@ -1204,9 +1211,10 @@ function checkValidInput() {
       }
     }
 
-    if(showStereoPane==1||showStereoPane==2){
-      if(calPath=='undefined')
+    if(showStereoPane==1||showStereoPane==2||(showStereoPane==0&&$("#calibrationCheck")[0].checked)){
+      if(!calPath){
           validInput = false;
+      }
       if(!isSequence){
         for(var i = 0, l = defImagePathsRight.length; i < l; i++) {
           var defExtension = defImagePathsRight[i].name.split('.').pop().toLowerCase();
@@ -1233,7 +1241,7 @@ function checkValidInput() {
     // TODO see if the left and right ref have the same dimensions
     // TODO check the number of def images left and right
     
-    if(validInput){       
+    if(validInput){
         $("#runLi").show();
         $("#writeLi").show();
         consoleMsg("input requirements successful");
@@ -1249,8 +1257,8 @@ function checkValidInput() {
         $("#initCross").hide();
     }
     //if(enableResolution){
-    //    $("#resolutionLi").show();                
+    //    $("#resolutionLi").show();
     //}else{
-    //    $("#resolutionLi").hide();                
+    //    $("#resolutionLi").hide();
     //}
 }

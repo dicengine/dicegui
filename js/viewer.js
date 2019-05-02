@@ -873,4 +873,12 @@ function openPreviewCross() {
     //win.webContents.openDevTools()
 }
 
+$("#calibrationCheck").change(function() {
+    if(this.checked) {
+        $(".cal-options").show();
+    }else{
+        $(".cal-options").hide();
+    }
+    checkValidInput();
+});
 

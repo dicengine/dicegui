@@ -15,14 +15,17 @@ $(window).load(function(){
         $( '.trinocOption' ).hide();
         $( '.stereoOption' ).hide();
         $( '.stereoPrefix' ).hide();
+        $( '.2dOption' ).show();
         $('#leftPreviewToggle').css('width','48.5%');
         $('#leftPreviewToggle').css('float','');
         $('#leftPreviewToggle').css('margin','0 auto');
     }else if(localStorage.getItem("showStereoPane")==1){ // stereo
+        $( '.2dOption' ).hide();
         $( '.trinocOption' ).hide();
         $('#leftPreviewToggle').css('width','48.5%');
         $('#rightPreviewToggle').css('width','48.5%');
     }else{ // trinoc
+        $( '.2dOption' ).hide();
         $( '.trinocOption' ).show();
         $('#leftPreviewToggle').css('width','32%');
         $('#rightPreviewToggle').css('width','32%');
@@ -461,6 +464,7 @@ function updateCalSequenceLabels(stats){
     
     $("#imagePrefix").val(stats.prefix);
     $("#startIndex").val(stats.startIndex);
+    $("#imagePoseIndex").val(stats.startIndex);
     $("#endIndex").val(stats.endIndex);
     $("#skipIndex").val(stats.frameInterval);
     $("#numDigits").val(stats.numDigits);
@@ -705,7 +709,7 @@ $("#acceptButton").on('click',function(){
     }else{
         outName += '/';
     }
-    outName += 'cal.txt';
+    outName += 'cal.xml';
     localStorage.setItem("calFileName",outName);
     window.close();
 });
@@ -755,6 +759,9 @@ function writeInputFile() {
     content += '<Parameter name="skip_image_index" type="int" value="'+$("#skipIndex").val()+'" />\n';
     content += '<Parameter name="num_file_suffix_digits" type="int" value="'+$("#numDigits").val()+'" />\n';
     
+    if(localStorage.getItem("showStereoPane")==0){ // add the pose estimation index for 2d
+        content += '<Parameter name="pose_estimation_index" type="int" value="'+$("#imagePoseIndex").val()+'" />\n';
+    }    
     if($("#calMode").val()=="checkerboard"){
         content += '<Parameter name="cal_target_type" type="string" value="CHECKER_BOARD"/>\n';
     }else{
