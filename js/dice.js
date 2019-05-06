@@ -924,6 +924,9 @@ function writeParamsFile(only_write,resolution,ss_locs) {
         else if(initMode=="fieldValues"){
             content += '<Parameter name="initialization_method" type="string" value="USE_FIELD_VALUES" />\n';
         }
+        else if(initMode=="imageRegistration"){
+            content += '<Parameter name="initialization_method" type="string" value="USE_IMAGE_REGISTRATION" />\n';
+        }
         else if(initMode=="neighborValues"){
             content += '<Parameter name="initialization_method" type="string" value="USE_NEIGHBOR_VALUES" />\n';
         }
@@ -993,6 +996,9 @@ function writeParamsFile(only_write,resolution,ss_locs) {
         content += '<Parameter name="MODEL_DISPLACEMENT_X" type="bool" value="true" />\n';
         content += '<Parameter name="MODEL_DISPLACEMENT_Y" type="bool" value="true" />\n';
         content += '<Parameter name="MODEL_DISPLACEMENT_Z" type="bool" value="true" />\n';
+    }
+    if($("#analysisModeSelect").val()=="subset" && $("#initSelect").val()=="imageRegistration"){
+        content += '<Parameter name="ROTATION_Z" type="bool" value="true" />\n';
     }
     if($("#analysisModeSelect").val()=="subset"){
         content += '<Parameter name="SIGMA" type="bool" value="true" />\n';

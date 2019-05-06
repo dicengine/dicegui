@@ -424,6 +424,9 @@ function impl_params_xml_file(xml){
     if(init_method=="USE_NEIGHBOR_VALUES"){
         $("#initSelect").val("neighborValues");
     }
+    if(init_method=="USE_IMAGE_REGISTRATION"){
+        $("#initSelect").val("imageRegistration");
+    }
     // set the sssig threshold
     sssig = xml_get(xml,"sssig_threshold");
     console.log('sssig_threshold: ' + sssig);

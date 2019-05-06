@@ -852,7 +852,7 @@ function callCalExec() {
     }
     fileName += 'cal_input.xml';
     logName += 'cal.log';
-    outName += 'cal.txt';
+    outName += 'cal.xml';
     errorName += 'cal_errors.txt';
     console.log('running ' + execCalPath +' with input file: ' + fileName);
     var child_process = require('child_process');
