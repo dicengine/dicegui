@@ -527,10 +527,15 @@
                 <p>initialization method:</p>
                 <select id="initSelect">
                   <option value="featureMatching">feature matching</option>
+                  <option value="featureMatchingWThresh">feature matching w/thresh</option>
                   <option value="fieldValues">field values</option>
                   <option value="imageRegistration">image registration</option>
                   <option value="neighborValues">neighbor values</option>
                 </select>
+                <p class="feature-thresh">thresh block size: <input type="text" id="threshBlockSize" name="threshBlockSize" value="5001"
+                    style="width: 100%; margin-bottom: 3px;"
+                  >
+                </p>
                 <p>
                   sssig threshold: <label id="sssigLabel">150</label>
                 </p>

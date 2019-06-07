@@ -29,6 +29,8 @@ function initialize_gui(load_existing){
     $("#initCross").hide();
     // hide the tracking tools
     $(".tracking").hide();
+    // hide the thresholding option
+    $(".feature-thresh").hide();
     // hide the global tools
     $(".global").hide();
     $(".cal-options").hide();
@@ -692,6 +694,14 @@ $("#fileSelectMode").on('change',function (){
     }
     resetWorkingDirectory();
 });
+
+$("#initSelect").on('change',function (){
+    if($(this).val()=="featureMatchingWThresh")
+        $(".feature-thresh").show();
+    else
+        $(".feature-thresh").hide();
+});
+
 
 $("#subsetSize").on('input',function(){
     var ss_size =  $(this).val();

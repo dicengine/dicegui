@@ -921,6 +921,10 @@ function writeParamsFile(only_write,resolution,ss_locs) {
         if(initMode=="featureMatching"){
             content += '<Parameter name="initialization_method" type="string" value="USE_FEATURE_MATCHING" />\n';
         }
+        if(initMode=="featureMatchingWThresh"){
+            content += '<Parameter name="initialization_method" type="string" value="USE_FEATURE_MATCHING" />\n';
+            content += '<Parameter name="threshold_block_size" type="int" value="' + $("#threshBlockSize").val() + '" />\n';
+        }
         else if(initMode=="fieldValues"){
             content += '<Parameter name="initialization_method" type="string" value="USE_FIELD_VALUES" />\n';
         }
