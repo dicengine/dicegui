@@ -854,7 +854,7 @@ $("#performCal").click(function () {
         if(calFileName != ""){
             $("#calList").empty();
             calPath = calFileName;
-            $("#calList").append("<li class='calListLi'>cal.txt</li>");
+            $("#calList").append("<li class='calListLi'>cal.xml</li>");
             checkValidInput();
         }
         win = null
