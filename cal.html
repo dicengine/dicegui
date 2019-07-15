@@ -44,34 +44,42 @@
           </div>
           <div class="prefixOption">image prefix</div>
           <input class="prefixOption" type="text" id="imagePrefix" name="imagePrefix" value="" style="width: 100%;">
-          <div class="stereoOption stereoPrefix" id="stereoLeftPrefixText">stereo left prefix</div>
-          <input class="stereoOption stereoPrefix" type="text" id="stereoLeftPrefix" name="stereoLeftPrefix" value=""
-            style="width: 100%;"
-          >
-          <div class="stereoOption stereoPrefix" id="stereoRightPrefixText">stereo right prefix</div>
-          <input class="stereoOption stereoPrefix" type="text" id="stereoRightPrefix" name="stereoRightPrefix" value=""
-            style="width: 100%;"
-          >
-          <div>start index</div>
-          <input type="text" id="startIndex" name="startIndex" value="0" style="width: 100%;">
-          <div>end index</div>
-          <input type="text" id="endIndex" name="endIndex" value="0" style="width: 100%;">
+          <div class="stereoOption stereoPrefix" style="display: flex;">
+            <div id="stereoLeftPrefixText" style="flex: 50%; margin-right:10px;">
+              stereo left prefix <input type="text" id="stereoLeftPrefix" name="stereoLeftPrefix"
+                value="" style="width: 100%;"
+              >
+            </div>
+            <div id="stereoRightPrefixText" style="flex: 50%">
+              stereo right prefix <input type="text" id="stereoRightPrefix" name="stereoRightPrefix"
+                value="" style="width: 100%;"
+              >
+            </div>
+          </div>
+          <div style="display: flex;">
+            <div style="flex: 50%; margin-right: 10px;">start index
+            <input type="text" id="startIndex" name="startIndex" value="0" style="width: 100%;"></div>
+            <div style="flex: 50%">end index
+            <input type="text" id="endIndex" name="endIndex" value="0" style="width: 100%;"></div>
+          </div>
           <div>frame interval</div>
           <input type="text" id="skipIndex" name="skipIndex" value="1" style="width: 100%;">
           <div>digits in number</div>
           <input type="text" id="numDigits" name="numDigits" value="1" style="width: 100%;">
-          <div class="stereoOption leftSuffix" id="stereoLeftSuffixText">stereo left suffix</div>
-          <input class="stereoOption leftSuffix" type="text" id="stereoLeftSuffix" name="stereoLeftSuffix" value="_0"
-            style="width: 100%;"
-          >
-          <div class="trinocOption">stereo middle suffix</div>
-          <input class="trinocOption" type="text" id="stereoMiddleSuffix" name="stereoMiddleSuffix"
-            value="" style="width: 100%;"
-          >
-          <div class="stereoOption rightSuffix">stereo right suffix</div>
-          <input class="stereoOption rightSuffix" type="text" id="stereoRightSuffix" name="stereoRightSuffix" value="_1"
-            style="width: 100%"
-          >
+          <div style="display: flex;">
+            <div class="stereoOption leftSuffix" id="stereoLeftSuffixText" style="flex: 50%; margin-right:10px;">stereo left suffix
+            <input class="stereoOption leftSuffix" type="text" id="stereoLeftSuffix"
+              name="stereoLeftSuffix" value="_0" style="width: 100%;"
+            ></div>
+            <div class="trinocOption">stereo middle suffix
+            <input class="trinocOption" type="text" id="stereoMiddleSuffix"
+              name="stereoMiddleSuffix" value="" style="width: 100%;"
+            ></div>
+            <div class="stereoOption rightSuffix" style="flex: 50%">stereo right suffix
+            <input class="stereoOption rightSuffix" type="text" id="stereoRightSuffix"
+              name="stereoRightSuffix" value="_1" style="width: 100%"
+            ></div>
+          </div>
           <div>extension</div>
           <input type="text" id="imageExtension" name="imageExtension" value=""
             style="width: 100%; margin-bottom: 10px;"
