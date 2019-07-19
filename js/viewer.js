@@ -613,7 +613,7 @@ $("#cineRefIndex").change(function () {
     if(cinePathLeft!="undefined")
         updateCineDisplayImage(cinePathLeft,offsetIndex,0);
     if(cinePathRight!="undefined")
-        updateCineDisplayImage(cinePathRight,offsetIndex,1);    
+        updateCineDisplayImage(cinePathRight,offsetIndex,1);
     if(cinePathMiddle!="undefined")
         updateCineDisplayImage(cinePathMiddle,offsetIndex,2);
     if($("#binaryAutoUpdateCheck")[0].checked)

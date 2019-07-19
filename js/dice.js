@@ -404,7 +404,7 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
         readline.createInterface({
             input     : proc.stdout,
             terminal  : false
-        }).on('line', function(line) {                
+        }).on('line', function(line) {
             consoleMsg(line);
         });
         proc.on('error', function(){

@@ -18,6 +18,7 @@
 <script type="text/javascript" src="./js/loader.js"></script>
 <script src="./js/requires.js" defer></script>
 <script src="./js/file_utils.js" defer></script>
+<script src="./js/global.js" defer></script>
 <script src="./js/cal.js" defer></script>
 <!-- Panzoom -->
 <script src="./js/jquery.panzoom.min.js" defer></script>
@@ -31,29 +32,69 @@
 <body>
   <div class="wrapper" style="padding: 10px;">
     <!-- image selection column -->
-    <div style="width: 100%; height: 700px; display: inline-block; min-height: 700px;">
+    <div style="width: 100%; height: 650px; display: inline-block; min-height: 650px;">
       <div calss="toggle-div" style="width: 32%; height: 100%; float: left;">
         <div class="toggle-div-banner">FILE SELECTION</div>
         <div class="toggle-div-body" style="height: calc(100% - 32px);">
-          <div id="changeImageFolder" class="action-li" style="margin-top: 10px;">
-            <i class="material-icons md-dark md-br-pad" style="margin-bottom: 0px;">folder</i>
-            image folder
-          </div>
-          <div id="imageFolder" style="word-wrap: break-word; margin-bottom: 10px;">
-            <span id="imageFolderSpan"></span>
-          </div>
-          <div class="prefixOption">image prefix</div>
-          <input class="prefixOption" type="text" id="imagePrefix" name="imagePrefix" value="" style="width: 100%;">
-          <div class="stereoOption stereoPrefix" style="display: flex;">
-            <div id="stereoLeftPrefixText" style="flex: 50%; margin-right:10px;">
-              stereo left prefix <input type="text" id="stereoLeftPrefix" name="stereoLeftPrefix"
-                value="" style="width: 100%;"
-              >
+          <select id="calFileSelectMode" style="width: 95%; margin-top: 10px;">
+            <option value="sequence">sequence of images</option>
+            <option value="cine">.cine video frames</option>
+          </select>
+          <div class="cine-input">
+            <label for="leftCalCineInput" class="custom-file-input action-li" style="padding-left:0px;"> <i
+              class="material-icons md-dark md-br-pad"
+            >camera_roll</i> load cine
+            </label>
+            <div id="cineCalLeftPreview" style="word-wrap: break-word; margin-bottom: 10px;"
+              class="nav-item"
+            >
+              <span id="cineCalLeftPreviewSpan"></span>
             </div>
-            <div id="stereoRightPrefixText" style="flex: 50%">
-              stereo right prefix <input type="text" id="stereoRightPrefix" name="stereoRightPrefix"
-                value="" style="width: 100%;"
+            <input id="leftCalCineInput" type="file" accept=".cine">
+            <div class="cine-input stereoOption">
+              <label for="rightCalCineInput" class="custom-file-input action-li" style="padding-left:0px;"> <i
+                class="material-icons md-dark md-br-pad"
+              >camera_roll</i> load stereo cine
+              </label>
+              <div id="cineCalRightPreview" style="word-wrap: break-word; margin-bottom: 10px;"
+                class="nav-item"
               >
+                <span id="cineCalRightPreviewSpan"></span>
+              </div>
+              <input id="rightCalCineInput" type="file" accept=".cine">
+            </div>
+            <div id="cineCalStart" style="word-wrap: break-word; margin-bottom: 10px; margin-left:0px;"
+              class="nav-item"
+            >file start index: 
+              <span id="cineCalStartSpan"></span>
+            </div>
+            <div id="cineCalEnd" style="word-wrap: break-word; margin-bottom: 10px; margin-left:0px;"
+              class="nav-item"
+            >file end index: 
+              <span id="cineCalEndSpan"></span>
+            </div>
+          </div>
+          <div class="sequence-input">
+            <div id="changeImageFolder" class="action-li" style="margin-top: 10px;">
+              <i class="material-icons md-dark md-br-pad" style="margin-bottom: 0px;">folder</i>
+              image folder
+            </div>
+            <div id="imageFolder" style="word-wrap: break-word; margin-bottom: 10px;">
+              <span id="imageFolderSpan"></span>
+            </div>
+            <div>image prefix</div>
+            <input type="text" id="imagePrefix" name="imagePrefix" value="" style="width: 100%;">
+            <div class="stereoOption stereoPrefix" style="display: flex;">
+              <div id="stereoLeftPrefixText" style="flex: 50%; margin-right: 10px;">
+                stereo left prefix <input type="text" id="stereoLeftPrefix" name="stereoLeftPrefix"
+                  value="" style="width: 100%;"
+                >
+              </div>
+              <div id="stereoRightPrefixText" style="flex: 50%">
+                stereo right prefix <input type="text" id="stereoRightPrefix"
+                  name="stereoRightPrefix" value="" style="width: 100%;"
+                >
+              </div>
             </div>
           </div>
           <div style="display: flex;">
@@ -64,33 +105,48 @@
           </div>
           <div>frame interval</div>
           <input type="text" id="skipIndex" name="skipIndex" value="1" style="width: 100%;">
-          <div>digits in number</div>
-          <input type="text" id="numDigits" name="numDigits" value="1" style="width: 100%;">
-          <div style="display: flex;">
-            <div class="stereoOption leftSuffix" id="stereoLeftSuffixText" style="flex: 50%; margin-right:10px;">stereo left suffix
-            <input class="stereoOption leftSuffix" type="text" id="stereoLeftSuffix"
-              name="stereoLeftSuffix" value="_0" style="width: 100%;"
-            ></div>
-            <div class="trinocOption">stereo middle suffix
-            <input class="trinocOption" type="text" id="stereoMiddleSuffix"
-              name="stereoMiddleSuffix" value="" style="width: 100%;"
-            ></div>
-            <div class="stereoOption rightSuffix" style="flex: 50%">stereo right suffix
-            <input class="stereoOption rightSuffix" type="text" id="stereoRightSuffix"
-              name="stereoRightSuffix" value="_1" style="width: 100%"
-            ></div>
+          <div class="sequence-input">
+            <div>
+              digits in number <input type="text" id="numDigits" name="numDigits" value="1"
+                style="width: 100%;"
+              >
+            </div>
+            <div style="display: flex;">
+              <div class="stereoOption leftSuffix" id="stereoLeftSuffixText"
+                style="flex: 50%; margin-right: 10px;"
+              >
+                stereo left suffix <input class="stereoOption leftSuffix" type="text"
+                  id="stereoLeftSuffix" name="stereoLeftSuffix" value="_0" style="width: 100%;"
+                >
+              </div>
+              <div class="trinocOption">
+                stereo middle suffix <input class="trinocOption" type="text" id="stereoMiddleSuffix"
+                  name="stereoMiddleSuffix" value="" style="width: 100%;"
+                >
+              </div>
+              <div class="stereoOption rightSuffix" style="flex: 50%">
+                stereo right suffix <input class="stereoOption rightSuffix" type="text"
+                  id="stereoRightSuffix" name="stereoRightSuffix" value="_1" style="width: 100%"
+                >
+              </div>
+            </div>
+            <div>extension</div>
+            <input type="text" id="imageExtension" name="imageExtension" value=""
+              style="width: 100%; margin-bottom: 10px;"
+            >
           </div>
-          <div>extension</div>
-          <input type="text" id="imageExtension" name="imageExtension" value=""
-            style="width: 100%; margin-bottom: 10px;"
-          >
           <div class="2dOption">pose estimation frame</div>
           <input class="2dOption" type="text" id="imagePoseIndex" name="imagePoseIndex" value="0"
             style="width: 100%; margin-bottom: 10px;"
           >
-          <div id="previewCal" class="action-li" style="margin-top: 10px; ">
-            <i class="material-icons md-dark md-br-pad" style="margin-bottom: 0px;">check_circle</i>
-            preview
+          <div style="display: flex;">
+            <div id="previewCal" class="action-li" style="margin-top: 10px; flex:30%;">
+              <i class="material-icons md-dark md-br-pad" style="margin-bottom: 0px;">check_circle</i>
+              preview
+            </div>
+            <div style="flex: 70%; margin-top:10px;">
+              <input id="previewThreshCheck" type="checkbox"> include threshold
+            </div>
           </div>
           <div id="framePreview" style="width: 100%;">
             <span id="frameStartPreviewSpan" style="display: block; float: left; width: 33%;">0</span><span
@@ -103,8 +159,8 @@
           <input style="width: 100%;" id="calFrameScroller" type="range" min="0" max="1"
             defaultValue="0" value="0" step="1"
           >
-          <div style="margin-bottom: 4px; margin-top: 10px;">sample left cal image filename:</div>
-          <div id="imageSequencePreview" class="sample-filename"
+          <div class="sequence-input" style="margin-bottom: 4px; margin-top: 10px;">sample left cal image filename:</div>
+          <div id="imageSequencePreview" class="sample-filename sequence-input"
             style="word-wrap: break-word; margin-bottom: 10px; height: 200px;"
           >
             <span id="imageSequencePreviewSpan"></span>
@@ -241,16 +297,14 @@
             style="width: 30%; margin-top: 5px;"
           >
           <div class="threshold-options">
-            <p style="margin-top: 10px;">
-              <input id="previewThreshCheck" type="checkbox"> preview threshold
-            </p>
-            <p style="margin-top: 10px;">
-              <input id="autoThreshCheck" type="checkbox" checked> auto threshold
-            </p>
-            <p id="calUseAdaptiveThreshP" style="margin-top: 10px;">
-              <input id="adaptiveThreshCheck" type="checkbox"> use adaptive
-              threshold
-            </p>
+            <div style="display: flex;">
+              <div style="margin-top: 10px; flex:50%;">
+                <input id="autoThreshCheck" type="checkbox" checked> auto threshold
+              </div>
+              <div id="calUseAdaptiveThreshP" style="margin-top: 10px; flex:50%;">
+                <input id="adaptiveThreshCheck" type="checkbox"> use adaptive
+              </div>
+            </div>
             <div class="adaptive-thresh">
               <div style="display:block; float:left; margin-right:10px;">
                 <p id="calAdaptiveThreshP" style="margin-top: 0px;">
@@ -310,8 +364,9 @@
           >
             avg epipolar error: <span style="font-weight: normal;" id="epipolarPreviewSpan"></span>
           </div>
-          <div style="margin-top: 20px;">select files to skip (ctrl click to deselect):</div>
-          <div class="selectable-box">
+          <div class="sequence-input" style="margin-top: 20px;">select files to skip (ctrl click
+            to deselect):</div>
+          <div class="selectable-box sequence-input">
             <ol id="selectable">
               <!--<li class="ui-widget-content">Item 1</li>-->
             </ol>
@@ -321,7 +376,7 @@
       </div>
     </div>
     <!-- end second row -->
-    <div style="width: 100%; height: calc(100% - 700px); float: left;">
+    <div style="width: 100%; height: calc(100% - 650px); float: left;">
       <div id="leftPreviewToggle" class="toggle-div" style="float: left; height: 100%; width: 32%;">
         <div class="toggle-div-banner">
           <span style="display: block; float: left; text-align: left; width: 40%;">PREVIEW

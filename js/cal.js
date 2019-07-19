@@ -34,6 +34,7 @@ $(window).load(function(){
     $("#calThreshConstant").hide();
     $(".adaptive-thresh").hide();
     $("#calUseAdaptiveThreshP").hide();
+    $(".cine-input").hide();
     // .load the images if they exist
     //refreshCalDisplayImages();
 
@@ -58,6 +59,71 @@ $(window).load(function(){
         cursor: "pointer"
     });
 });
+
+$("#calFileSelectMode").on('change',function (){
+    if($(this).val()=="sequence"){
+        if(localStorage.getItem("showStereoPane")!=0){
+            $(".stereoPrefix").show();
+        }
+        $(".sequence-input").show();
+        $(".cine-input").hide();
+    }
+    else if($(this).val()=="cine"){
+        $(".sequence-input").hide();
+        $(".cine-input").show();
+    }
+    if(localStorage.getItem("showStereoPane")==0){
+        $(".stereoOption").hide();
+    }else{
+        $(".stereoOption").show();
+    }
+});
+
+
+$("#leftCalCineInput").on("click",function () {
+    this.value = null;
+});
+$("#leftCalCineInput").change(function (evt) {
+    var tgt = evt.target || window.event.srcElement,
+        file = tgt.files[0];
+    if(file){
+        $("#cineCalLeftPreview span").text(file.path);
+        fs.stat(file.path, function(err, stat) {
+            if(err == null) {
+                if(localStorage.getItem("showStereoPane")!=0) {// stereo?
+                    fs.stat($("#cineCalRightPreview span").text(), function(err2, stat) {
+                        if(err2 == null) {
+                            callCalCineStatExec(file.path,function(){previewCalImages(true)});
+                        }
+                    });
+                }else{
+                    callCalCineStatExec(file.path,function(){previewCalImages(true)});
+                }
+            }
+        });
+    }
+});
+
+$("#rightCalCineInput").on("click",function () {
+    this.value = null;
+});
+$("#rightCalCineInput").change(function (evt) {
+    var tgt = evt.target || window.event.srcElement,
+        file = tgt.files[0];
+    if(file){
+        $("#cineCalRightPreview span").text(file.path);
+        fs.stat(file.path, function(err, stat) {
+            if(err == null) {
+                fs.stat($("#cineCalLeftPreview span").text(), function(err2, stat) {
+                    if(err2 == null) {
+                        callCalCineStatExec(file.path,function(){previewCalImages(true)});
+                    }
+                });
+            }
+        });
+    }
+});
+
 
 $("#calThreshConstant").on('input',function(){
     $("#calThreshConstantLabel").text($(this).val());
@@ -199,27 +265,183 @@ $("#calMode").on('change',function (){
     }
 });
 
+function updateCalCinePreviewImages(cb){
+    console.log('updateCalCinePreviewImages');
+    cine_left = $("#cineCalLeftPreview span").text();
+    cine_right = $("#cineCalRightPreview span").text();
+    child_process = require('child_process');
+    readline      = require('readline');
+    tifLeft  = fullPath('','.cal_') + 'left.tif';
+    tifRight = fullPath('','.cal_') + 'right.tif';
+    index = $("#calFrameScroller").val();
+    console.log("updateCalCinePreviewImages: converting file " + cine_left + " index " + index + " to .tif for display");
+    var procConv = child_process.spawn(execCineToTiffPath, [cine_left,index,index,tifLeft],{cwd:workingDirectory});//,maxBuffer:1024*1024})
+    readline.createInterface({
+        input     : procConv.stdout,
+        terminal  : false
+    }).on('line', function(line) {
+        console.log(line);
+    });
+    procConv.on('error', function(){
+        alert('DICe .cine file converstion to .tiff failed: invalid executable: ' + execCineToTiffPath);
+    });
+    procConv.on('close', (code) => {
+        console.log(`child process exited with code ${code}`);
+        if(code!=0){
+            //alert('DICe .cine file conversion to .tiff failed');
+        }
+        else{
+            if(localStorage.getItem("showStereoPane")==0){
+                cb = cb || $.noop;
+                cb();
+            }else{
+                console.log("updateCalCinePreviewImages: converting (right file) file " + cine_right + " index " + index + " to .tif for display");
+                var procConvRight = child_process.spawn(execCineToTiffPath, [cine_right,index,index,tifRight],{cwd:workingDirectory});//,maxBuffer:1024*1024})
+                readline.createInterface({
+                    input     : procConvRight.stdout,
+                    terminal  : false
+                }).on('line', function(line) {
+                    console.log(line);
+                });
+                procConvRight.on('error', function(){
+                    alert('DICe .cine file right converstion to .tiff failed: invalid executable: ' + execCineToTiffPath);
+                });
+                procConvRight.on('close', (code) => {
+                    console.log(`child process exited with code ${code}`);
+                    if(code!=0){
+                        //alert('DICe .cine file conversion to .tiff failed');
+                    }
+                    else{
+                        cb = cb || $.noop;
+                        cb();
+                    }
+                });
+            }
+            
+        }
+    });
+
+}
+
+function callCalCineStatExec(file,callback) {
+    var child_process = require('child_process');
+    var readline      = require('readline');
+    var proc;
+
+//    var fileName = file.path;
+    console.log('callCalCineStatExec: loading cal cine file: ' + file)
+    fs.stat(file, function(err, stat) {
+        if(err != null) {
+            alert("could not find .cine file: " + file);
+            return false;
+        }
+        else{
+            console.log("getting frame range of cine file: " + file);
+            var proc = child_process.spawn(execCineStatPath, [file],{cwd:workingDirectory});//,maxBuffer:1024*1024})
+        }
+        readline.createInterface({
+            input     : proc.stdout,
+            terminal  : false
+        }).on('line', function(line) {
+            console.log(line);
+        });
+        proc.on('error', function(){
+            alert('DICe .cine file stat failed: invalid executable: ' + execCineStatPath);
+            return false;
+        });
+        proc.on('close', (code) => {
+            console.log(`child process exited with code ${code}`);
+            if(code!=0){
+                alert('DICe .cine file stat failed');
+                return false;
+            }
+            else{
+                // read the output file:
+                var statFileName = fullPath('','cine_stats.dat');
+                fs.stat(statFileName, function(err, stat) {
+                    if(err != null) {
+                        alert("could not find .cine stats file: " + statFileName);
+                        return false;
+                    }else{
+                         fs.readFile(statFileName, 'utf8', function (err,data) {
+                             if (err) {
+                                 console.log(err);
+                                 return false;
+                             }
+                             var stats = data.toString().split(/\s+/g).map(Number);
+                             if($("#frameStartPreviewSpan").text()!=stats[1]||$("#frameEndPreviewSpan").text()!=stats[2]){
+                                 console.log('callCalCineStatExec: updating cine file stats');
+                                 $("#startIndex").val(stats[1]);
+                                 $("#endIndex").val(stats[2]);
+                                 $("#frameStartPreviewSpan").text(stats[1]);
+                                 $("#frameCurrentPreviewSpan").text(stats[1]);
+                                 $("#frameEndPreviewSpan").text(stats[2]);
+                                 $("#cineCalStartSpan").text(stats[1]);
+                                 $("#cineCalEndSpan").text(stats[2]);
+                                 $("#calFrameScroller").attr('min',stats[1]);
+                                 $("#calFrameScroller").attr('max',stats[2]);
+                                 $("#calFrameScroller").val(stats[1]);
+                             }
+                             callback = callback || $.noop;
+                             callback();
+                             return true;
+                         }); // end else
+                    }
+                });
+            }
+        }); // end proc.on    
+    }); // end fileName fs.stat
+}
+
+//function generateCineCalImages(cb){
+//    cine_file = $("#cineCalLeftPreview span").text();
+//    console.log('generateCineCalImages: ' + cine_file);
+//    callCalCineStatExec(cine_file,function(){updateCalCinePreviewImages(cb)});
+//}
+
 function previewCalImages(first_load=false){
+    // create the list of files:
+    leftName="";
+    rightName="";
+    middleName="";
+    console.log('previewCalImages called');
+    
+    if($("#calFileSelectMode").val()=="cine"){
+        leftName=".cal_left.tif";
+        rightName=".cal_right.tif";
+        middleName=".cal_middle.tif";
+        updateCalCinePreviewImages(function(){previewCalImagesImpl(first_load,leftName,rightName,middleName)});
+        $("#calibrateButton").prop("disabled",false);
+        //generateCineCalImages(function(){previewCalImagesImpl(first_load,leftName,rightName,middleName)});
+    }else{
+        if(localStorage.getItem("showStereoPane")==0)
+            leftName = concatImageSequenceName($("#calFrameScroller").val(),3); // use mode 3 to avoid the stereo suffix
+        else
+            leftName = concatImageSequenceName($("#calFrameScroller").val(),0);
+        console.log('leftName ' + leftName);
+        if(localStorage.getItem("showStereoPane")==1){
+            rightName = concatImageSequenceName($("#calFrameScroller").val(),1);
+            console.log('rightName ' + rightName);
+        }
+        if(localStorage.getItem("showStereoPane")==2){
+            middleName = concatImageSequenceName($("#calFrameScroller").val(),2);
+            console.log('middleName ' + middleName);
+        }
+        previewCalImagesImpl(first_load,leftName,rightName,middleName);
+    }
+}
+
+function previewCalImagesImpl(first_load, leftName,rightName,middleName){
     // set up the arguments for the OpenCVServer
     var args = [];
     // create the list of files:
-    var leftName;
-    if(localStorage.getItem("showStereoPane")==0)
-        leftName = concatImageSequenceName($("#calFrameScroller").val(),3); // use mode 3 to avoid the stereo suffix
-    else
-        leftName = concatImageSequenceName($("#calFrameScroller").val(),0);
-    console.log('leftName ' + leftName);
     args.push(leftName);
     args.push('.cal_left.png');
     if(localStorage.getItem("showStereoPane")==1){
-        var rightName = concatImageSequenceName($("#calFrameScroller").val(),1);
-        console.log('rightName ' + rightName);
         args.push(rightName);
         args.push('.cal_right.png');
     }
     if(localStorage.getItem("showStereoPane")==2){
-        var middleName = concatImageSequenceName($("#calFrameScroller").val(),2);
-        console.log('middleName ' + middleName);
         args.push(middleName);
         args.push('.cal_middle.png');
     }
@@ -535,7 +757,28 @@ $("#changeImageFolder").click(function(){
     }
 });
 
-$("#imagePrefix,#startIndex,#endIndex,#skipIndex,#numDigits,#imageExtension,#stereoLeftSuffix,#stereoRightSuffix").on('keyup',function(){
+function updateFrameScroller(){
+    if($("#calFileSelectMode").val()=="cine"){
+        should_return = false;
+        if(Number($("#startIndex").val())>Number($("#EndIndex").val())){
+            alert('start index ' + Number($("#startIndex").val()) + ' cannot be greater than the end index ' + Number($("#EndIndex").val()));
+            should_return = true;
+        }
+        if(Number($("#endIndex").val())<Number($("#StartIndex").val())){
+            alert('end index cannot be less than the start index');
+            should_return = true;
+        }
+        if(Number($("#endIndex").val())>Number($("#cineCalEndSpan").text())){
+            alert('end index cannot be greater than the file end index');
+            should_return = true;
+        }
+        if(Number($("#startIndex").val())<Number($("#cineCalStartSpan").text())){
+            alert('Start index ' + Number($("#startIndex").val()) + ' cannot be less than the file start index ' + Number($("#cineCalStartSpan").text()));
+            should_return = true;
+        }
+        if(should_return)
+            return;
+    }
     $("#calFrameScroller").val($("#startIndex").val());
     $("#calFrameScroller").attr('min',$("#startIndex").val());
     $("#calFrameScroller").attr('max',$("#endIndex").val());
@@ -543,6 +786,16 @@ $("#imagePrefix,#startIndex,#endIndex,#skipIndex,#numDigits,#imageExtension,#ste
     $("#frameStartPreviewSpan").text($("#startIndex").val());
     $("#frameCurrentPreviewSpan").text($("#startIndex").val());
     $("#frameEndPreviewSpan").text($("#endIndex").val());
+}
+
+$("#startIndex,#endIndex,#skipIndex").on('focusout',function(e){
+    updateFrameScroller();
+    updateImageSequencePreview(function(){updateSelectableList;previewCalImages(true)});
+});
+
+$("#imagePrefix,#startIndex,#endIndex,#skipIndex,#numDigits,#imageExtension,#stereoLeftSuffix,#stereoRightSuffix").keypress(function(e){
+    if(e.which!=13) return;
+    updateFrameScroller();
     updateImageSequencePreview(function(){updateSelectableList;previewCalImages(true)});
 });
 
@@ -575,27 +828,28 @@ function concatImageSequenceName(frame,mode){
     fullImageName += $("#imagePrefix").val(); // note this might be empty
     //}
     // get the number of digits in the ref index
-    var tmpNum = 0;
-    if(arguments.length)
-        tmpNum = Number(frame);
-    else
-        tmpNum = Number($("#startIndex").val());
-    var defDig = 0;
-    if(tmpNum==0)
-        defDig = 1;
-    else{
-        while (tmpNum) {tmpNum = Math.floor(tmpNum/10); defDig++;}
-    }
-    var digits = Number($("#numDigits").val());
-    if(digits > 1)
-        for(j=0;j<digits - defDig;++j){
-            fullImageName += "0";
+    if($("#calFileSelectMode").val()=="sequence"){
+        var tmpNum = 0;
+        if(arguments.length)
+            tmpNum = Number(frame);
+        else
+            tmpNum = Number($("#startIndex").val());
+        var defDig = 0;
+        if(tmpNum==0)
+            defDig = 1;
+        else{
+            while (tmpNum) {tmpNum = Math.floor(tmpNum/10); defDig++;}
         }
-    if(arguments.length)
-        fullImageName += frame;
-    else
-        fullImageName += $("#startIndex").val();
-    
+        var digits = Number($("#numDigits").val());
+        if(digits > 1)
+            for(j=0;j<digits - defDig;++j){
+                fullImageName += "0";
+            }
+        if(arguments.length)
+            fullImageName += frame;
+        else
+            fullImageName += $("#startIndex").val();
+    }
     if($('.leftSuffix').is(":visible")){
         if(mode==0||mode==3)
             fullImageName += $("#stereoLeftSuffix").val();
@@ -636,6 +890,12 @@ function updateSelectableList(){
 
 function updateImageSequencePreview(cb){
     var fullImageName='';
+    
+    if($("#calFileSelectMode").val()=="cine"){
+        $("#calibrateButton").prop("disabled",false);
+        return;
+    }
+    
     if(localStorage.getItem("showStereoPane")==1||localStorage.getItem("showStereoPane")==2)
         fullImageName = concatImageSequenceName($("#startIndex").val(),0);
     else
@@ -733,35 +993,45 @@ function writeInputFile() {
        folderName += '/';
     }
     content += '<Parameter name="xml_file_format" type="string" value="DICe_xml_calibration_file" />\n';
-    content += '<Parameter name="image_folder" type="string" value="'+folderName +'" />\n';
-    content += '<Parameter name="image_file_extension" type="string" value="'+$("#imageExtension").val()+'" />\n';
     
-    if(localStorage.getItem("showStereoPane")==1){
-        if($("#stereoLeftPrefix").val()!=''){ // stereo analysis
-            content += '<Parameter name="stereo_left_file_prefix" type="string" value="'+$("#stereoLeftPrefix").val()+'"/>\n';
-            content += '<Parameter name="stereo_right_file_prefix" type="string" value="'+$("#stereoRightPrefix").val()+'"/>\n';
-        }else{
-            content += '<Parameter name="stereo_left_suffix" type="string" value="'+$("#stereoLeftSuffix").val()+'"/>\n';
-            content += '<Parameter name="stereo_right_suffix" type="string" value="'+$("#stereoRightSuffix").val()+'"/>\n';
-            content += '<Parameter name="image_file_prefix" type="string" value="'+$("#imagePrefix").val()+'" />\n';
+    if($("#calFileSelectMode").val()=="cine"){
+        content += '<Parameter name="image_folder" type="string" value="" />\n';
+        content += '<Parameter name="cine_file" type="string" value="'+ $("#cineCalLeftPreview span").text() +'" />\n';
+        content += '<Parameter name="cine_ref_index" type="int" value="'+$("#startIndex").val()+'" />\n';
+        content += '<Parameter name="cine_start_index" type="int" value="'+$("#startIndex").val()+'" />\n';
+        content += '<Parameter name="cine_skip_index" type="int" value="'+$("#skipIndex").val()+'" />\n';
+        content += '<Parameter name="cine_end_index" type="int" value="'+$("#endIndex").val()+'" />\n';
+        if(localStorage.getItem("showStereoPane")==1){
+            content += '<Parameter name="stereo_cine_file" type="string" value="'+ $("#cineCalRightPreview span").text() +'" />\n';
         }
     }else{
-        content += '<Parameter name="image_file_prefix" type="string" value="'+$("#imagePrefix").val()+'" />\n';
+        content += '<Parameter name="image_folder" type="string" value="'+folderName +'" />\n';
+        content += '<Parameter name="image_file_extension" type="string" value="'+$("#imageExtension").val()+'" />\n';
+        if(localStorage.getItem("showStereoPane")==1){
+            if($("#stereoLeftPrefix").val()!=''){ // stereo analysis
+                content += '<Parameter name="stereo_left_file_prefix" type="string" value="'+$("#stereoLeftPrefix").val()+'"/>\n';
+                content += '<Parameter name="stereo_right_file_prefix" type="string" value="'+$("#stereoRightPrefix").val()+'"/>\n';
+            }else{
+                content += '<Parameter name="stereo_left_suffix" type="string" value="'+$("#stereoLeftSuffix").val()+'"/>\n';
+                content += '<Parameter name="stereo_right_suffix" type="string" value="'+$("#stereoRightSuffix").val()+'"/>\n';
+                content += '<Parameter name="image_file_prefix" type="string" value="'+$("#imagePrefix").val()+'" />\n';
+            }
+        }else{
+            content += '<Parameter name="image_file_prefix" type="string" value="'+$("#imagePrefix").val()+'" />\n';
+        }
+        if(localStorage.getItem("showStereoPane")==0 && $('.leftSuffix').is(":visible")){ // 2d, but the files have a suffix
+            content += '<Parameter name="file_suffix" type="string" value="'+$("#stereoLeftSuffix").val()+'"/>\n';
+        }
+        content += '<Parameter name="reference_image_index" type="int" value="'+$("#startIndex").val()+'" />\n';
+        content += '<Parameter name="start_image_index" type="int" value="'+$("#startIndex").val()+'" />\n';
+        content += '<Parameter name="end_image_index" type="int" value="'+$("#endIndex").val()+'" />\n';
+        content += '<Parameter name="skip_image_index" type="int" value="'+$("#skipIndex").val()+'" />\n';
+        content += '<Parameter name="num_file_suffix_digits" type="int" value="'+$("#numDigits").val()+'" />\n';
+        if(localStorage.getItem("showStereoPane")==0){ // add the pose estimation index for 2d
+            content += '<Parameter name="pose_estimation_index" type="int" value="'+$("#imagePoseIndex").val()+'" />\n';
+        }
     }
     
-    if(localStorage.getItem("showStereoPane")==0 && $('.leftSuffix').is(":visible")){ // 2d, but the files have a suffix
-        content += '<Parameter name="file_suffix" type="string" value="'+$("#stereoLeftSuffix").val()+'"/>\n';
-    }
-    
-    content += '<Parameter name="reference_image_index" type="int" value="'+$("#startIndex").val()+'" />\n';
-    content += '<Parameter name="start_image_index" type="int" value="'+$("#startIndex").val()+'" />\n';
-    content += '<Parameter name="end_image_index" type="int" value="'+$("#endIndex").val()+'" />\n';
-    content += '<Parameter name="skip_image_index" type="int" value="'+$("#skipIndex").val()+'" />\n';
-    content += '<Parameter name="num_file_suffix_digits" type="int" value="'+$("#numDigits").val()+'" />\n';
-    
-    if(localStorage.getItem("showStereoPane")==0){ // add the pose estimation index for 2d
-        content += '<Parameter name="pose_estimation_index" type="int" value="'+$("#imagePoseIndex").val()+'" />\n';
-    }    
     if($("#calMode").val()=="checkerboard"){
         content += '<Parameter name="cal_target_type" type="string" value="CHECKER_BOARD"/>\n';
     }else{
