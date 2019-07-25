@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Camera Calibration Options</title>
+<script>
+    if (typeof module === 'object') {
+        window.module = module;
+        module = undefined;
+    }
+</script>
+<script src="./js/jquery.min.js"></script>
+<script src="./js/jquery-ui.js"></script>
+<script src="./js/cal_options.js" defer></script>
+<script>
+    if (window.module)
+        module = window.module;
+</script>
+<!-- Local style sheet -->
+<link rel="stylesheet" type="text/css" href="style.css">
+<!-- Google fonts and icons -->
+<link rel="stylesheet" type="text/css" href="open_sans.css">
+<link rel="stylesheet" type="text/css" href="material_icons.css">
+</head>
+<body>
+  <div
+    style="padding-left: 20px; padding-top: 10px; background-color: white; width: auto; height: 620px;"
+  >
+    <div style="display: flex;">
+      <div style="flex: 40%; padding-top: 5px;">
+        <input id="calOpFixIntrinsicCheck" type="checkbox"> fix intrinsic
+      </div>
+      <div style="flex: 60%; padding-top: 5px;">Fix the values of fx, fy, cx, and cy based on
+        the initial guess provided to OpenCV by the DICe calibration tool.</div>
+    </div>
+    <div style="display: flex;">
+      <div style="flex: 40%; padding-top: 5px;">
+        <input id="calOpUseIntrinsicCheck" type="checkbox" checked> use intrinsic guess
+      </div>
+      <div style="flex: 60%; padding-top: 5px;">Begin with the initial values of fx, fy, cx,
+        and cy provided to OpenCV then optimize further. Otherwise, (cx, cy) is initially set to the
+        image center, and focal distances are computed in a least-squares fashion.</div>
+    </div>
+    <div style="display: flex;">
+      <div style="flex: 40%; padding-top: 5px;">
+        <input id="calOpUseExtrinsicCheck" type="checkbox"> use extrinsic guess
+      </div>
+      <div style="flex: 60%; padding-top: 5px;">Begin with the initial values of the extrinsic
+        parameters and optimize further.</div>
+    </div>
+    <div style="display: flex;">
+      <div style="flex: 40%; padding-top: 5px;">
+        <input id="calOpFixPrincipalCheck" type="checkbox"> fix principal point
+      </div>
+      <div style="flex: 60%; padding-top: 5px;">Use the image centroid as the principal point.</div>
+    </div>
+    <div style="display: flex;">
+      <div style="flex: 40%; padding-top: 5px;">
+        <input id="calOpFixAspectCheck" type="checkbox"> fix aspect ratio
+      </div>
+      <div style="flex: 60%; padding-top: 5px;">Only consider fy a free parameter, the
+        ratio between fx and fy is fixed.</div>
+    </div>
+    <div style="display: flex;">
+      <div style="flex: 40%; padding-top: 5px;">
+        <input id="calOpSameFocalCheck" type="checkbox"> same focal length
+      </div>
+      <div style="flex: 60%; padding-top: 5px;">Constrain fx and fy to be the same.</div>
+    </div>
+    <div style="display: flex;">
+      <div style="flex: 40%; padding-top: 5px;">
+        <input id="calOpZeroTangentCheck" type="checkbox" checked> zero tangent dist
+      </div>
+      <div style="flex: 60%; padding-top: 5px;">Set tangential distortions to zero.</div>
+    </div>
+    <div style="display: flex;">
+      <div style="flex: 40%; padding-top: 5px;">
+        <input id="calOpFixK1Check" type="checkbox"> fix K1
+      </div>
+      <div style="flex: 60%; padding-top: 5px;">Keep the K1 parameter constant during the
+          optimization. If use_initial_guess is not active, K1 is set to 0. (Same for K2 and K3 if selected below)</div>
+    </div>
+    <div style="padding-top: 5px;">
+      <input id="calOpFixK2Check" type="checkbox"> fix K2
+    </div>
+    <div style="padding-top: 5px;">
+      <input id="calOpFixK3Check" type="checkbox"> fix K3
+    </div>
+    <button class="calib-button float-left" id="calOptionsApplyButton" type="button"
+      style="margin-top: 15px;"
+    >apply</button>
+    <button class="calib-button float-left" id="calOptionsDefaultsButton" type="button"
+      style="margin-top: 15px;"
+    >defaults</button>
+  </div>
+</body>
+</html>
+
+<!--
+    <div style="padding-top: 5px;"><input id="calOpFixSCheck" type="checkbox"> fix S1 S2 S3 S4 </div>
+    <div style="padding-top: 5px;"><input id="calOpFixTauCheck" type="checkbox"> fix tau_x tau_y </div>
+    <div style="padding-top: 5px;"><input id="calOpFixK4Check" type="checkbox"> fix K4 </div>
+    <div style="padding-top: 5px;"><input id="calOpFixK5Check" type="checkbox"> fix K5 </div>
+    <div style="padding-top: 5px;"><input id="calOpFixK6Check" type="checkbox"> fix K6 </div>
+    <div style="padding-top: 5px;"><input id="calOpRationalCheck" type="checkbox"> rational model </div>
+    <div style="padding-top: 5px;"><input id="calOpThinPrismCheck" type="checkbox"> thin prism model </div>
+    <div style="padding-top: 5px;"><input id="calOpTiltedCheck" type="checkbox"> tilted model </div>
+    -->

@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Stereo Camera Calibration</title>
+<title>Camera Calibration</title>
 <script>
     if (typeof module === 'object') {
         window.module = module;
@@ -292,13 +292,22 @@
               </select>
             </div>
           </div>
-          <div style="margin-top: 10px;">pattern spacing size</div>
-          <input type="text" id="targetSpacingSize" name="targetSpacingSize" value="1.0"
-            style="width: 30%; margin-top: 5px;"
-          >
+          <div style="display:flex;">
+            <div style="margin-top: 10px; flex: 30%;">
+              pattern spacing <input type="text" id="targetSpacingSize"
+                name="targetSpacingSize" value="1.0" style="width: 30%; margin-top: 5px;"
+              >
+            </div>
+            <div style="flex:50%;">
+              <div id="calOptionsButton" class="action-li" style="margin-top: 10px;">
+                <i class="material-icons md-dark md-br-pad" style="margin-bottom: 0px;">settings</i>
+                cal options
+              </div>
+            </div>
+          </div>
           <div class="threshold-options">
             <div style="display: flex;">
-              <div style="margin-top: 10px; flex:50%;">
+              <div style="margin-top: 10px; flex:70%;">
                 <input id="autoThreshCheck" type="checkbox" checked> auto threshold
               </div>
               <div id="calUseAdaptiveThreshP" style="margin-top: 10px; flex:50%;">

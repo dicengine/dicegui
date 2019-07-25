@@ -1,6 +1,16 @@
 $(window).load(function(){
     workingDirectory = localStorage.getItem("workingDirectory"); 
     localStorage.setItem("calFileName","");
+    calFixIntrinsic = "false";
+    calUseIntrinsic = "true";
+    calUseExtrinsic = "false";
+    calFixPrincipal = "false";
+    calFixAspect = "false";
+    calSameFocalLength = "false";
+    calZeroTangentDist = "true";
+    calFixK1 ="false";
+    calFixK2 = "false";
+    calFixK3 = "false";
     execCalPath = localStorage.getItem("execCalPath");
     execOpenCVServerPath = localStorage.getItem("execOpenCVServerPath");
     console.log('using cal exec: ' + execCalPath);
@@ -58,6 +68,7 @@ $(window).load(function(){
         minScale: 0.05,
         cursor: "pointer"
     });
+    deleteCalDisplayImageFiles();
 });
 
 $("#calFileSelectMode").on('change',function (){
@@ -862,6 +873,47 @@ function concatImageSequenceName(frame,mode){
     return fullImageName;
 }
 
+$("#calOptionsButton").click(function () {
+    localStorage.setItem("workingDirectory",workingDirectory);
+    localStorage.setItem("calFixIntrinsic",calFixIntrinsic);
+    localStorage.setItem("calUseIntrinsic",calUseIntrinsic);
+    localStorage.setItem("calUseExtrinsic",calUseExtrinsic);
+    localStorage.setItem("calFixPrincipal",calFixPrincipal);
+    localStorage.setItem("calFixAspect",calFixAspect);
+    localStorage.setItem("calSameFocalLength",calSameFocalLength);
+    localStorage.setItem("calZeroTangentDist",calZeroTangentDist);
+    localStorage.setItem("calFixK1",calFixK1);
+    localStorage.setItem("calFixK2",calFixK2);
+    localStorage.setItem("calFixK3",calFixK3);
+    var win = new BrowserWindow({ width: 500, height: 650});
+    win.on('closed', () => {
+        calFixIntrinsic = localStorage["calFixIntrinsic"];
+        calUseIntrinsic = localStorage["calUseIntrinsic"];
+        calUseExtrinsic = localStorage["calUseExtrinsic"];
+        calFixPrincipal = localStorage["calFixPrincipal"];
+        calFixAspect = localStorage["calFixAspect"];
+        calSameFocalLength = localStorage["calSameFocalLength"];
+        calZeroTangentDist = localStorage["calZeroTangentDist"];
+        calFixK1 = localStorage["calFixK1"];
+        calFixK2 = localStorage["calFixK2"];
+        calFixK3 = localStorage["calFixK3"];
+        console.log("calibration options set to \n"
+                + "fix intrinsic " + calFixIntrinsic + "\n"
+                + "use intrinsic " + calUseIntrinsic + "\n"
+                + "use extrinsic  " + calUseExtrinsic + "\n"
+                + "fix principal  " + calFixPrincipal + "\n"
+                + "fix aspect " + calFixAspect + "\n"
+                + "same focal " + calSameFocalLength + "\n"
+                + "zero tangent " + calZeroTangentDist + "\n"
+                + "fix K1 " + calFixK1 + "\n"
+                + "fix K2 " + calFixK2 + "\n"
+                + "fix K3 " + calFixK3 + "\n");
+        win = null
+    })
+    win.loadURL('file://' + __dirname + '/cal_options.html');
+    //win.webContents.openDevTools()
+});
+
 function updateSelectableList(){
     $("#selectable").empty();
 
@@ -1066,6 +1118,18 @@ function writeInputFile() {
             content += '<Parameter name="use_adaptive_threshold" type="bool" value="false"/>\n';
         }
     }
+    content += '<ParameterList name="cal_opencv_options">\n';
+      content += '<Parameter name="CALIB_FIX_INTRINSIC" type="bool" value="'+calFixIntrinsic+'"/>\n';
+      content += '<Parameter name="CALIB_USE_INTRINSIC" type="bool" value="'+calUseIntrinsic+'"/>\n';
+      content += '<Parameter name="CALIB_USE_EXTRINSIC" type="bool" value="'+calUseExtrinsic+'"/>\n';
+      content += '<Parameter name="CALIB_FIX_PRINCIPAL_POINT" type="bool" value="'+calFixPrincipal+'"/>\n';
+      content += '<Parameter name="CALIB_FIX_ASPECT_RATIO" type="bool" value="'+calFixAspect+'"/>\n';
+      content += '<Parameter name="CALIB_SAME_FOCAL_LENGTH" type="bool" value="'+calSameFocalLength+'"/>\n';
+      content += '<Parameter name="CALIB_ZERO_TANGENT_DIST" type="bool" value="'+calZeroTangentDist+'"/>\n';
+      content += '<Parameter name="CALIB_FIX_K1" type="bool" value="'+calFixK1+'"/>\n';
+      content += '<Parameter name="CALIB_FIX_K2" type="bool" value="'+calFixK2+'"/>\n';
+      content += '<Parameter name="CALIB_FIX_K3" type="bool" value="'+calFixK3+'"/>\n';
+    content += '</ParameterList>\n';
     hasManualOffs = false;
     $('#selectable .ui-selected').each(function() {
         hasManualOffs = true;
@@ -1171,7 +1235,7 @@ function callCalExec() {
                                 $('#rmsPreview span').text(outputString);
                             }
                             else if(resDataLines[i].includes("average epipolar error")){
-                                var outputString = resDataLines[i].substring(resDataLines[i].indexOf(":")+1,resDataLines[i].length);
+                                var outputString = resDataLines[i].substring(resDataLines[i].lastIndexOf(":")+1,resDataLines[i].length);
                                 $('#epipolarPreview span').text(outputString);
                             }
                         }
@@ -1221,3 +1285,62 @@ function callCalExec() {
         } // end else
     });
 }
+
+function deleteCalDisplayImageFiles(cb){
+    var cbCalled = false;
+    cb = cb || $.noop;
+    filesToRemove = [];
+    filesToRemove.push('.cal_left.png');
+    filesToRemove.push('.cal_left.tif');
+    filesToRemove.push('.cal_middle.png');
+    filesToRemove.push('.cal_middle.tif');
+    filesToRemove.push('.cal_right.png');
+    filesToRemove.push('.cal_right.tif');
+    filesToRemove.push('cal.log');
+    filesToRemove.push('cal_errors.txt');
+    filesToRemove.push('cine_stats.dat');
+    console.log('removing any existing calibration files');
+    fs.readdir(workingDirectory, (err,dir) => {
+        // es5
+        // count up the number of potential files to delete
+        numExistingFiles = 0;
+        if(!dir)return;
+        for(i=0; i<dir.length; i++) {
+            for(j=0;j<filesToRemove.length;j++)
+                if(dir[i].includes(filesToRemove[j]))
+                    numExistingFiles++;
+        }
+        console.log(numExistingFiles + ' display image files exist');
+        if(numExistingFiles==0){
+            cb();
+            return;
+        }
+        for(i=0; i<dir.length;i++) {
+            (function(i) {
+                filePath = dir[i];
+                for(j=0;j<filesToRemove.length;j++){
+                    if(filePath.includes(filesToRemove[j])){
+                        numExistingFiles--;
+                        console.log('attempting to delete file ' + filePath);
+                        var fullFilePath = fullPath('',filePath);
+                        fs.stat(fullFilePath, function(err, stat) {
+                            console.log('stat called on file ' + fullFilePath);
+                            if(err == null) {
+                                fs.unlink(fullFilePath, (err) => {
+                                    if (err) throw err;
+                                    console.log('successfully deleted '+fullFilePath+' '+i);
+                                    if(numExistingFiles==0) {
+                                        cb();
+                                    }
+                                });
+                        }else{
+                            // no-op
+                        }
+                        }); // end stat
+                    } //end includes
+                }
+            })(i);
+        }
+    });
+}
+
