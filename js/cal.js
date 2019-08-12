@@ -78,10 +78,30 @@ $("#calFileSelectMode").on('change',function (){
         }
         $(".sequence-input").show();
         $(".cine-input").hide();
+        calFixIntrinsic = "false";
+        calUseIntrinsic = "true";
+        calUseExtrinsic = "false";
+        calFixPrincipal = "false";
+        calFixAspect = "false";
+        calSameFocalLength = "false";
+        calZeroTangentDist = "true";
+        calFixK1 ="false";
+        calFixK2 = "false";
+        calFixK3 = "false";
     }
     else if($(this).val()=="cine"){
         $(".sequence-input").hide();
         $(".cine-input").show();
+        calFixIntrinsic = "false";
+        calUseIntrinsic = "true";
+        calUseExtrinsic = "false";
+        calFixPrincipal = "true";
+        calFixAspect = "false";
+        calSameFocalLength = "false";
+        calZeroTangentDist = "true";
+        calFixK1 ="true";
+        calFixK2 = "true";
+        calFixK3 = "true";
     }
     if(localStorage.getItem("showStereoPane")==0){
         $(".stereoOption").hide();
@@ -104,11 +124,11 @@ $("#leftCalCineInput").change(function (evt) {
                 if(localStorage.getItem("showStereoPane")!=0) {// stereo?
                     fs.stat($("#cineCalRightPreview span").text(), function(err2, stat) {
                         if(err2 == null) {
-                            callCalCineStatExec(file.path,function(){previewCalImages(true)});
+                            callCalCineStatExec(file.path,function(){updateSelectableList();previewCalImages(true)});
                         }
                     });
                 }else{
-                    callCalCineStatExec(file.path,function(){previewCalImages(true)});
+                    callCalCineStatExec(file.path,function(){updateSelectableList();previewCalImages(true)});
                 }
             }
         });
@@ -127,7 +147,7 @@ $("#rightCalCineInput").change(function (evt) {
             if(err == null) {
                 fs.stat($("#cineCalLeftPreview span").text(), function(err2, stat) {
                     if(err2 == null) {
-                        callCalCineStatExec(file.path,function(){previewCalImages(true)});
+                        callCalCineStatExec(file.path,function(){updateSelectableList();previewCalImages(true)});
                     }
                 });
             }
@@ -770,33 +790,28 @@ $("#changeImageFolder").click(function(){
 
 function updateFrameScroller(){
     if($("#calFileSelectMode").val()=="cine"){
-        should_return = false;
-        if(Number($("#startIndex").val())>Number($("#EndIndex").val())){
-            alert('start index ' + Number($("#startIndex").val()) + ' cannot be greater than the end index ' + Number($("#EndIndex").val()));
-            should_return = true;
+        invalid = false;
+        if(Number($("#startIndex").val())>Number($("#endIndex").val())){
+            invalid = true;
+        }else if(Number($("#endIndex").val())<Number($("#startIndex").val())){
+            invalid = true;
+        }else if(Number($("#endIndex").val())>Number($("#cineCalEndSpan").text())){
+            invalid = true;
+        }else if(Number($("#startIndex").val())<Number($("#cineCalStartSpan").text())){
+            invalid = true;
         }
-        if(Number($("#endIndex").val())<Number($("#StartIndex").val())){
-            alert('end index cannot be less than the start index');
-            should_return = true;
+        if(invalid){
+            $("#startIndex").val(Number($("#cineCalStartSpan").text()));
+            $("#endIndex").val(Number($("#cineCalEndSpan").text()));
         }
-        if(Number($("#endIndex").val())>Number($("#cineCalEndSpan").text())){
-            alert('end index cannot be greater than the file end index');
-            should_return = true;
-        }
-        if(Number($("#startIndex").val())<Number($("#cineCalStartSpan").text())){
-            alert('Start index ' + Number($("#startIndex").val()) + ' cannot be less than the file start index ' + Number($("#cineCalStartSpan").text()));
-            should_return = true;
-        }
-        if(should_return)
-            return;
     }
-    $("#calFrameScroller").val($("#startIndex").val());
     $("#calFrameScroller").attr('min',$("#startIndex").val());
     $("#calFrameScroller").attr('max',$("#endIndex").val());
     $("#calFrameScroller").attr('step',$("#skipIndex").val());
     $("#frameStartPreviewSpan").text($("#startIndex").val());
     $("#frameCurrentPreviewSpan").text($("#startIndex").val());
     $("#frameEndPreviewSpan").text($("#endIndex").val());
+    $("#calFrameScroller").val($("#startIndex").val());
 }
 
 $("#startIndex,#endIndex,#skipIndex").on('focusout',function(e){
@@ -929,12 +944,17 @@ function updateSelectableList(){
     // for each file in the sequence, add an item to the selectable list:
     var index = 0;
     for(i=si;i<=ei;i+=step){
-        if(localStorage.getItem("showStereoPane")==1||localStorage.getItem("showStereoPane")==2)
-            fileName = concatImageSequenceName(i);
-        else
-            fileName = concatImageSequenceName(i,3);
-        // strip off everything before the last slash or backslash
-        fileName = fileName.split(/[\\\/]/).pop();
+        fileName = "";
+        if($("#calFileSelectMode").val()=="cine"){
+            fileName = "frame_" + i;
+        }else{
+            if(localStorage.getItem("showStereoPane")==1||localStorage.getItem("showStereoPane")==2)
+                fileName = concatImageSequenceName(i);
+            else
+                fileName = concatImageSequenceName(i,3);
+            // strip off everything before the last slash or backslash
+            fileName = fileName.split(/[\\\/]/).pop();
+        }
         $("#selectable").append('<li style="display:block;" id="calListItem_'+index+'" class="ui-widget-content"><span style="float:left;">'+fileName+'</span></li>');
         index++;
     }
@@ -945,6 +965,7 @@ function updateImageSequencePreview(cb){
     
     if($("#calFileSelectMode").val()=="cine"){
         $("#calibrateButton").prop("disabled",false);
+        updateSelectableList();
         return;
     }
     
