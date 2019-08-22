@@ -799,7 +799,7 @@ function saveStateFile() {
     if(typeof execPathOverride === 'undefined'){
     }else{
         if(execPathOverride!=''){
-            content += 'var execPathOverride = "'+ exePathOverride +'";\n';
+            content += 'var execPathOverride = "'+ execPathOverride +'";\n';
         }
     }
     fs.writeFile(fileName, content, function (err) {
