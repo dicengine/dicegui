@@ -19,6 +19,7 @@
 <script src="./js/requires.js" defer></script>
 <script src="./js/file_utils.js" defer></script>
 <script src="./js/global.js" defer></script>
+<script src="./js/parser.js" defer></script>
 <script src="./js/cal.js" defer></script>
 <!-- Panzoom -->
 <script src="./js/jquery.panzoom.min.js" defer></script>
@@ -45,7 +46,7 @@
               class="material-icons md-dark md-br-pad"
             >camera_roll</i> load cine
             </label>
-            <div id="cineCalLeftPreview" style="word-wrap: break-word; margin-bottom: 10px;"
+            <div id="cineCalLeftPreview" style="word-wrap: break-word; margin-bottom: 0px;"
               class="nav-item"
             >
               <span id="cineCalLeftPreviewSpan"></span>
@@ -173,7 +174,17 @@
         <div class="toggle-div-body" style="height: calc(100% - 32px);">
           <div>
             <!-- style="width:30%; height:100%; float:left;">-->
-            <select id="calMode" style="width: 75%; margin-bottom: 10px; margin-top: 10px;">
+            <div style="display: inline-block;">
+              <label for="calTargetInput" class="custom-file-input action-li"
+                style="display: inline-block; width: 170px; padding-left: 0px;"
+              > <i class="material-icons md-dark md-br-pad">folder</i> load pattern
+              </label> <input id="calTargetInput" type="file" accept=".xml">
+              <div id="calSaveTargetButton" class="action-li" style="display:inline-block; margin-top: 10px; width: 145px">
+                <i class="material-icons md-dark md-br-pad" style="margin-bottom: 0px;">save</i>
+                save pattern
+              </div>
+            </div>
+            <select id="calMode" style="width: 75%; margin-bottom: 5px; margin-top: 5px;">
               <option value="vic3d">symmetric dot grid with special corner dots</option>
               <option value="vic3dDark">symmetric dot grid with special corner dots (white
                 dots on black)</option>
@@ -183,8 +194,8 @@
             >
           </div>
            <div class="board-size" >
-            <div style="display: inline-block; margin-bottom: 2px; ">
-              <p style="width: 140px; margin-top: 10px;">total pattern width</p>
+            <div style="display: inline-block; margin-bottom: 0px; ">
+              <p style="width: 170px; margin-top: 5px;">total pattern width</p>
               <select id="calWidth" style="width: 100px;">
                 <option value="3">3</option>
                 <option value="4">4</option>
@@ -241,8 +252,8 @@
             </div>
           </div>
           <div class="board-size-dots" >
-            <div style="display: inline-block; margin-bottom: 2px;">
-              <p style="width: 140px; margin-top: 10px;">inner pattern width</p>
+            <div style="display: inline-block; margin-bottom: 0px;">
+              <p style="width: 170px; margin-top: 5px;">inner pattern width</p>
               <select id="calInnerWidth" style="width: 100px; ">
                 <option value="3">3</option>
                 <option value="4">4</option>
@@ -269,8 +280,8 @@
             </div>
           </div>
           <div class="origin-loc">
-            <div style="display: inline-block; margin-bottom: 2px;">
-              <p style="width: 140px;  margin-top: 10px;">origin offset x</p>
+            <div style="display: inline-block; margin-bottom: 0px;">
+              <p style="width: 170px;  margin-top: 5px;">origin offset x</p>
               <select class="origin-loc" id="calOriginX" style="width: 100px;">
                 <option value="0">0</option>
                 <option value="1">1</option>
@@ -292,25 +303,26 @@
               </select>
             </div>
           </div>
-          <div style="display:flex;">
-            <div style="margin-top: 10px; flex: 30%;">
-              pattern spacing <input type="text" id="targetSpacingSize"
-                name="targetSpacingSize" value="1.0" style="width: 30%; margin-top: 5px;"
-              >
-            </div>
-            <div style="flex:50%;">
+          <div style="display:inline-block;">
+            <div style="display:inline-block; width:170px;">
               <div id="calOptionsButton" class="action-li" style="margin-top: 10px;">
                 <i class="material-icons md-dark md-br-pad" style="margin-bottom: 0px;">settings</i>
                 cal options
               </div>
+              <div style="margin-top: 5px; width:170px;">
+                <input id="autoThreshCheck" type="checkbox" checked> auto threshold
+              </div>
+            </div>
+            <div style="margin-top: 0px; display:inline-block; width:145px;">
+              pattern spacing</br> 
+              <input type="text" id="targetSpacingSize"
+                name="targetSpacingSize" value="1.0" style="width: 60%; margin-top: 5px;"
+              >
             </div>
           </div>
           <div class="threshold-options">
-            <div style="display: flex;">
-              <div style="margin-top: 10px; flex:70%;">
-                <input id="autoThreshCheck" type="checkbox" checked> auto threshold
-              </div>
-              <div id="calUseAdaptiveThreshP" style="margin-top: 10px; flex:50%;">
+            <div style="display: inline-block;">
+              <div id="calUseAdaptiveThreshP" style="margin-top: 10px; width:145px;">
                 <input id="adaptiveThreshCheck" type="checkbox"> use adaptive
               </div>
             </div>

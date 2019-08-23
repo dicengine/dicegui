@@ -111,6 +111,106 @@ $("#calFileSelectMode").on('change',function (){
 });
 
 
+$("#calSaveTargetButton").on("click",function () {
+    targetFile = fullPath('','target.xml');
+    console.log('writing target file ' + targetFile);
+    content = '';
+    content += '<!-- Calibration target definition file from DICe GUI -->\n';
+    content += '<ParameterList>\n';
+    content += '<Parameter name="xml_file_format" type="string" value="DICe_xml_cal_target_definition_file" />\n';
+    content += '<Parameter name="total_pattern_width" type="int" value="'+ $("#calWidth").val() +'" />\n';
+    content += '<Parameter name="total_pattern_height" type="int" value="'+ $("#calHeight").val() +'" />\n';
+    content += '<Parameter name="inner_pattern_width" type="int" value="'+ $("#calInnerWidth").val() +'" />\n';
+    content += '<Parameter name="inner_pattern_height" type="int" value="'+ $("#calInnerHeight").val() +'" />\n';
+    content += '<Parameter name="origin_offset_x" type="int" value="'+ $("#calOriginX").val() +'" />\n';
+    content += '<Parameter name="origin_offset_y" type="int" value="'+ $("#calOriginY").val() +'" />\n';
+    content += '<Parameter name="cal_target_spacing_size" type="double" value="'+$("#targetSpacingSize").val()+'"/>\n';
+    if($("#calMode").val()=="checkerboard")
+        content += '<Parameter name="cal_target_type" type="string" value="CHECKER_BOARD"/>\n';
+    else if($("#calMode").val()=="vic3d")
+        content += '<Parameter name="cal_target_type" type="string" value="BLACK_ON_WHITE_W_DONUT_DOTS"/>\n';
+    else if($("#calMode").val()=="vic3dDark")
+        content += '<Parameter name="cal_target_type" type="string" value="WHITE_ON_BLACK_W_DONUT_DOTS"/>\n';
+    content += '</ParameterList>\n';
+    fs.writeFile(targetFile, content, function (err) {
+        if(err){
+            alert("Error: an error ocurred creating the target definition file "+ err.message)
+         }
+        console.log('target.xml file has been successfully saved');
+    });
+});
+
+
+$("#calTargetInput").change(function (evt) {
+    var tgt = evt.target || window.event.srcElement,
+        file = tgt.files[0];
+    if(file){
+        fs.stat(file.path, function(err, stat) {
+            if(err == null) {
+                parse_target_xml_file(file.path);
+            }
+        });
+    }
+});
+
+function parse_target_xml_file(filename){
+    console.log("parsing target file " + filename);
+    fs.stat(filename, function(err, stat) {
+        if(err == null) {
+            $.ajax({
+                type: "GET",
+                url: filename,
+            dataType: "xml",
+            success: function(xml) {
+                    impl_target_xml_file(xml);
+            }, // end success
+            }); // end ajax
+        }else{ // file doesn't exist
+        }
+    }); // end stat
+}
+
+function impl_target_xml_file(xml){
+    file_format = xml_get(xml,"xml_file_format");
+    console.log('file format: ' + file_format);
+    if(file_format!="DICe_xml_cal_target_definition_file"){
+        alert("Invalid calibration target definition xml file");
+        return;
+    }
+    total_pattern_width = xml_get(xml,"total_pattern_width");
+    console.log('total pattern width: ' + total_pattern_width);
+    $("#calWidth").val(total_pattern_width);
+    total_pattern_height = xml_get(xml,"total_pattern_height");
+    console.log('total pattern height: ' + total_pattern_height);
+    $("#calHeight").val(total_pattern_height);
+    inner_pattern_width = xml_get(xml,"inner_pattern_width");
+    console.log('inner pattern width: ' + inner_pattern_width);
+    $("#calInnerWidth").val(inner_pattern_width);
+    inner_pattern_height = xml_get(xml,"inner_pattern_height");
+    console.log('inner pattern height: ' + inner_pattern_height);
+    $("#calInnerHeight").val(inner_pattern_height);
+    origin_offset_x = xml_get(xml,"origin_offset_x");
+    console.log('origin offset x: ' + origin_offset_x);
+    $("#calOriginX").val(origin_offset_x);
+    origin_offset_y = xml_get(xml,"origin_offset_y");
+    console.log('origin offset y: ' + origin_offset_y);
+    $("#calOriginY").val(origin_offset_y);
+    pattern_spacing = xml_get(xml,"cal_target_spacing_size");
+    console.log('spacing_size: ' + pattern_spacing);
+    $("#targetSpacingSize").val(pattern_spacing);
+    target_type = xml_get(xml,"cal_target_type");
+    console.log('target_type: ' + target_type);
+    if(target_type=="CHECKER_BOARD")
+        $("#calMode").val("checkerboard");
+    else if(target_type=="BLACK_ON_WHITE_W_DONUT_DOTS")
+        $("#calMode").val("vic3d");
+    else if(target_type=="WHITE_ON_BLACK_W_DONUT_DOTS")
+        $("#calMode").val("vic3dDark");
+    else
+        alert("Inavlid calibration target type");
+    $("#calMode").trigger("change");
+}
+
 $("#leftCalCineInput").on("click",function () {
     this.value = null;
 });

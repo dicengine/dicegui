@@ -8,7 +8,7 @@ function parse_input_xml_file(filename){
     	        url: filename,
 	        dataType: "xml",
 	        success: function(xml) {
-                    impl_input_xml_file(xml);            
+                    impl_input_xml_file(xml);
 	        }, // end success
             }); // end ajax
         }else{ // file doesn't exist
