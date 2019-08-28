@@ -20,6 +20,7 @@ document.getElementById("runLi").onclick = function() {
                 startProgress();
                 writeInputFile(false);
                 $("#abortLi").show();
+                $("#sssigPreview").hide();
             }else{
                 return false;
             }
@@ -29,6 +30,7 @@ document.getElementById("runLi").onclick = function() {
             startProgress();
             writeInputFile(false);
             $("#abortLi").show();
+            $("#sssigPreview").hide();
         }
     });
 };
@@ -279,7 +281,7 @@ function callDICeExec(resolution,ss_locs) {
         readline.createInterface({
             input     : child.stdout,
             terminal  : false
-        }).on('line', function(line) {                
+        }).on('line', function(line) {
             consoleMsg(line);
         });
     }
@@ -288,6 +290,7 @@ function callDICeExec(resolution,ss_locs) {
         alert('DICe execution failed: invalid executable: ' + execPath);
         endProgress(false);
         $("#abortLi").hide();
+        $("#sssigPreview").show();
     });
 
     $("#abortLi").on('click',function(){
@@ -300,12 +303,14 @@ function callDICeExec(resolution,ss_locs) {
         alert('DICe execution failed: invalid executable: ' + execPath);
         endProgress(false);
         $("#abortLi").hide();
+        $("#sssigPreview").show();
     });
 
     child.on('close', function (code) {
         console.log(`child process exited with code ${code}`);
         updateResultsFilesList();
         $("#abortLi").hide();
+        $("#sssigPreview").show();
         if(code!=0){
             alert('DICe execution failed (see console for details)');
             endProgress(false);
