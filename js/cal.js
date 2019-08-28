@@ -71,6 +71,22 @@ $(window).load(function(){
     deleteCalDisplayImageFiles();
 });
 
+
+fs.watch('/Users/dzturne/dice_working_dir', (eventType, filename) => {
+    //console.log(eventType);
+    // could be either 'rename' or 'change'. new file event and delete
+    // also generally emit 'rename'
+    //console.log(filename);
+    if($("#cancelButton").is(":hidden"))
+        return;
+    if(filename==".cal_left.png"||filename==".cal_right.png"){
+        refreshCalDisplayImages();
+        $("#leftPreviewBody").css('border', '');
+        $("#rightPreviewBody").css('border', '');
+        $("#middlePreviewBody").css('border', '');
+    }
+})
+
 $("#calFileSelectMode").on('change',function (){
     if($(this).val()=="sequence"){
         if(localStorage.getItem("showStereoPane")!=0){
@@ -112,7 +128,7 @@ $("#calFileSelectMode").on('change',function (){
 
 
 $("#calSaveTargetButton").on("click",function () {
-    targetFile = fullPath('','target.xml');
+    targetFile = fullPath('','cal_target.xml');
     console.log('writing target file ' + targetFile);
     content = '';
     content += '<!-- Calibration target definition file from DICe GUI -->\n';
@@ -136,8 +152,9 @@ $("#calSaveTargetButton").on("click",function () {
         if(err){
             alert("Error: an error ocurred creating the target definition file "+ err.message)
          }
-        console.log('target.xml file has been successfully saved');
+        console.log('cal_target.xml file has been successfully saved');
     });
+    alert('Cal pattern saved to file: ' + targetFile);
 });
 
 
@@ -1221,7 +1238,14 @@ function writeInputFile() {
     content += '<Parameter name="cal_target_spacing_size" type="double" value="'+$("#targetSpacingSize").val()+'"/>\n';
     content += '<Parameter name="num_cal_fiducials_x" type="int" value="'+$("#calWidth").val()+'"/>\n';
     content += '<Parameter name="num_cal_fiducials_y" type="int" value="'+$("#calHeight").val()+'"/>\n';
-
+    content += '<Parameter name="draw_intersection_image" type="bool" value="true"/>\n';
+    outName = localStorage.getItem("workingDirectory");
+    if(os.platform()=='win32'){
+        outName += '\\';
+    }else{
+        outName += '/';
+    }
+    content += '<Parameter name="cal_debug_folder" type="string" value="' + outName + '"/>\n';
     if($("#autoThreshCheck")[0].checked){
         // no op so the default sweep range gets used
     }else{

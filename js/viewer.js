@@ -26,7 +26,7 @@ var getFileObject = function(filePathOrUrl, cb) {
         cb(blobToFile(blob, filePathOrUrl));
     });
 };
-//////////////////////////////////////////////////                                                                                 
+//////////////////////////////////////////////////
 // initialize panzooms
 $("#panzoomLeft").panzoom({
     $zoomIn: $(".zoom-in-left"),
