@@ -94,7 +94,7 @@ function showLivePlots(){
     localStorage.setItem("workingDirectory",workingDirectory);
     if($("#analysisModeSelect").val()=="tracking"){
         var livePlotFiles = '';
-        var numDigitsTotal = integerLength(ROIDefsX.length);        
+        var numDigitsTotal = integerLength(ROIDefsX.length);
         // set up the files to read
         for(i=0;i<ROIDefsX.length;++i){
             if(os.platform()=='win32'){

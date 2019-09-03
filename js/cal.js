@@ -13,6 +13,7 @@ $(window).load(function(){
     calFixK3 = "false";
     execCalPath = localStorage.getItem("execCalPath");
     execOpenCVServerPath = localStorage.getItem("execOpenCVServerPath");
+    execCineToTiffPath = localStorage.getItem("execCineToTiffPath");
     console.log('using cal exec: ' + execCalPath);
     $("#calibrateButton").prop("disabled",true);
     $("#acceptButton").prop("disabled",true);
@@ -69,14 +70,22 @@ $(window).load(function(){
         cursor: "pointer"
     });
     deleteCalDisplayImageFiles();
+    
+    // see if there is a cal_target.xml file in the working directory, if so, load it:
+    targetFile = fullPath('','cal_target.xml');
+    fs.stat(targetFile, function(err, stat) {
+        if(err == null) {
+            parse_target_xml_file(targetFile);
+        }
+    });
 });
 
 
-fs.watch('/Users/dzturne/dice_working_dir', (eventType, filename) => {
+fs.watch(localStorage.getItem("workingDirectory"), (eventType, filename) => {
     //console.log(eventType);
     // could be either 'rename' or 'change'. new file event and delete
     // also generally emit 'rename'
-    //console.log(filename);
+    //console.log(workingDirectory);
     if($("#cancelButton").is(":hidden"))
         return;
     if(filename==".cal_left.png"||filename==".cal_right.png"){
@@ -156,7 +165,6 @@ $("#calSaveTargetButton").on("click",function () {
     });
     alert('Cal pattern saved to file: ' + targetFile);
 });
-
 
 $("#calTargetInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,

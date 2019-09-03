@@ -847,6 +847,7 @@ $("#performCal").click(function () {
     localStorage.setItem("calFileName","");
     localStorage.setItem("execCalPath",execCalPath);
     localStorage.setItem("execOpenCVServerPath",execOpenCVServerPath);
+    localStorage.setItem("execCineToTiffPath",execCineToTiffPath);
     localStorage.setItem("showStereoPane",showStereoPane);
     var win = new BrowserWindow({ width: 1200, height: 1200 });
     win.on('closed', () => {
