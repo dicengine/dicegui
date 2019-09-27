@@ -823,6 +823,33 @@ function updateDimsLabels (){
     $("#middleDims").text("w:" + refImageWidthMiddle  + " h:" + refImageHeightMiddle);
 }
 
+$("#drawEpipolar").click(function(){
+    // check if cal.xml file exists
+    fs.stat(fullPath('','cal.xml'), function(err, stat) {
+        if(err == null) {
+            completeShape();
+            addROIsActive = false;
+            addExcludedActive = false;
+            addObstructedActive = false;
+            addLivePlotPtsActive = false;
+            $("#addExcludeds").css('color','rgba(0, 0, 0, 0.5)');
+            $("#addObstructed").css('color','rgba(0, 0, 0, 0.5)');
+            $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
+            $("#addROIs").css('color','rgba(0, 0, 0, 0.5)');
+            drawEpipolarActive = !drawEpipolarActive;
+            if(drawEpipolarActive){
+                $("#drawEpipolar").css('color','#33ccff');
+            }else{
+                //$("#drawEpipolar").css('color','rgba(0, 0, 0, 0.5)');
+                deactivateEpipolar();
+            }
+        }else {
+            alert('cal.xml file does not exist (this utility only works once a calibration has been performed)');
+            return;
+        }
+    });
+});
+
 $("#initCross").click(function () {
     localStorage.setItem("rightFileName",refImagePathRight);
     localStorage.setItem("leftFileName",refImagePathLeft);

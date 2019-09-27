@@ -53,21 +53,36 @@ $("#panzoomLeft").mousemove(function(){
     }
 });
 
+$("#panzoomRight").mousedown(function(){
+    // add point to shapeon left click
+    scale = $("#panzoomRight").panzoom("getMatrix")[0];
+    viewX = event.pageX - $(this).offset().left;
+    viewY = event.pageY - $(this).offset().top;
+    imgX = Math.round(viewX / scale);
+    imgY = Math.round(viewY / scale);
+    if(event.button == 0 && drawEpipolarActive){
+        drawEpipolarLine(false,imgX,imgY)
+    }
+});
+
 $("#panzoomLeft").mousedown(function(){
     // add point to shapeon left click
+    scale = $("#panzoomLeft").panzoom("getMatrix")[0];
+    viewX = event.pageX - $(this).offset().left;
+    viewY = event.pageY - $(this).offset().top;
+    imgX = Math.round(viewX / scale);
+    imgY = Math.round(viewY / scale);
     if(event.button == 0){
-        if(addROIsActive){
+        if(drawEpipolarActive){
+            drawEpipolarLine(true,imgX,imgY)
+        }
+        else if(addROIsActive){
             if(shapeInProgress==false && currentROIIndex > 0){
                 ROIDefsX.push([]);
                 ROIDefsY.push([]);
             }
             shapeInProgress = true;
             $("#ROIProgress").text("ROI in progress");
-            var scale = $("#panzoomLeft").panzoom("getMatrix")[0];
-            var viewX = event.pageX - $(this).offset().left;
-            var viewY = event.pageY - $(this).offset().top;
-            var imgX = Math.round(viewX / scale);
-            var imgY = Math.round(viewY / scale);
             if(imgX>=0&&imgX<refImageWidthLeft&&imgY>=0&&imgY<refImageHeightLeft){
                 ROIDefsX[currentROIIndex].push(imgX);
                 ROIDefsY[currentROIIndex].push(imgY);
@@ -82,11 +97,6 @@ $("#panzoomLeft").mousedown(function(){
             }
             shapeInProgress = true;
             $("#ROIProgress").text("exclusion in progress");
-            var scale = $("#panzoomLeft").panzoom("getMatrix")[0];
-            var viewX = event.pageX - $(this).offset().left;
-            var viewY = event.pageY - $(this).offset().top;
-            var imgX = Math.round(viewX / scale);
-            var imgY = Math.round(viewY / scale);
             if(imgX>=0&&imgX<refImageWidthLeft&&imgY>=0&&imgY<refImageHeightLeft){
                 //var shapeIndex = 0;
                 excludedDefsX[currentExcludedIndex].push(imgX);
@@ -101,11 +111,6 @@ $("#panzoomLeft").mousedown(function(){
             }
             shapeInProgress = true;
             $("#ROIProgress").text("obstruction in progress");
-            var scale = $("#panzoomLeft").panzoom("getMatrix")[0];
-            var viewX = event.pageX - $(this).offset().left;
-            var viewY = event.pageY - $(this).offset().top;
-            var imgX = Math.round(viewX / scale);
-            var imgY = Math.round(viewY / scale);
             if(imgX>=0&&imgX<refImageWidthLeft&&imgY>=0&&imgY<refImageHeightLeft){
                 //var shapeIndex = 0;
                 obstructedDefsX[currentObstructedIndex].push(imgX);
@@ -114,18 +119,12 @@ $("#panzoomLeft").mousedown(function(){
             }
         }
         if(addLivePlotPtsActive){
-            var scale = $("#panzoomLeft").panzoom("getMatrix")[0];
-            var viewX = event.pageX - $(this).offset().left;
-            var viewY = event.pageY - $(this).offset().top;
-            var imgX = Math.round(viewX / scale);
-            var imgY = Math.round(viewY / scale);
             if(imgX>=0&&imgX<refImageWidthLeft&&imgY>=0&&imgY<refImageHeightLeft){
                 livePlotPtsX.push(imgX);
                 livePlotPtsY.push(imgY);
             }
             drawROIs();
         }
-        
     }
     // end shape if right click
     else if(event.button == 2 && shapeInProgress){
@@ -169,10 +168,13 @@ $("#addLivePlotPts").click(function(){
         addROIsActive = false;
         addObstructedActive = false;
         addExcludedActive = false;
+        drawEpipolarActive = false;
         $("#addLivePlotPts").css('color','#33ccff');
         $("#addROIs").css('color','rgba(0, 0, 0, 0.5)');
         $("#addExcludeds").css('color','rgba(0, 0, 0, 0.5)');
         $("#addObstructed").css('color','rgba(0, 0, 0, 0.5)');
+        deactivateEpipolar();
+        //$("#drawEpipolar").css('color','rgba(0, 0, 0, 0.5)');
         // TODO abort any excluded shapes in progress
     }else{
         //$("#addROIs").css('background-color','transparent');
@@ -200,12 +202,15 @@ $("#addROIs").click(function(){
         addExcludedActive = false;
         addObstructedActive = false;
         addLivePlotPtsActive = false;
+        drawEpipolarActive = false;
         //$("#addROIs").css('background-color','#33ccff');
         $("#addROIs").css('color','#33ccff');
         //$("#addExcludeds").css('background-color','transparent');
         $("#addExcludeds").css('color','rgba(0, 0, 0, 0.5)');
         $("#addObstructed").css('color','rgba(0, 0, 0, 0.5)');
         $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
+        //$("#drawEpipolar").css('color','rgba(0, 0, 0, 0.5)');
+        deactivateEpipolar();
         // TODO abort any excluded shapes in progress
     }else{
         //$("#addROIs").css('background-color','transparent');
@@ -222,10 +227,13 @@ $("#addObstructed").click(function(){
         addLivePlotPtsActive = false;
         addObstructedActive = true;
         addExcludedActive = false;
+        drawEpipolarActive = false;
         $("#addObstructed").css('color','#33ccff');
         $("#addROIs").css('color','rgba(0, 0, 0, 0.5)');
         $("#addExcludeds").css('color','rgba(0, 0, 0, 0.5)');
         $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
+        //$("#drawEpipolar").css('color','rgba(0, 0, 0, 0.5)');
+        deactivateEpipolar();
         // TODO abort any ROI shapes in progress
     }else{
         $("#addObstructed").css('color','rgba(0, 0, 0, 0.5)');
@@ -240,12 +248,15 @@ $("#addExcludeds").click(function(){
         addLivePlotPtsActive = false;
         addExcludedActive = true;
         addObstructedActive = false;
+        drawEpipolarActive = false;
         //$("#addExcludeds").css('background-color','#33ccff');
         $("#addExcludeds").css('color','#33ccff');
         //$("#addROIs").css('background-color','transparent');
         $("#addROIs").css('color','rgba(0, 0, 0, 0.5)');
         $("#addObstructed").css('color','rgba(0, 0, 0, 0.5)');
         $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
+        //$("#drawEpipolar").css('color','rgba(0, 0, 0, 0.5)');
+        deactivateEpipolar();
         // TODO abort any ROI shapes in progress
     }else{
         //$("#addExcludeds").css('background-color','transparent');

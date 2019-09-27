@@ -516,7 +516,17 @@ for (var i = 0; i < blobElements.length; i++) {
   });
 }
 
+function deactivateEpipolar(){
+    $("#drawEpipolar").css('color','rgba(0, 0, 0, 0.5)');
+    drawEpipolarLine(false,0,0,true);
+}
+
 function callOpenCVServerExec() {
+    
+    // TODO these filters have the old syntax, not the new one (Filter:BinaryThreshold vs. filter:binary_threshold)
+    alert('ERROR This routine needs to be refactored!');
+    return;
+    
     if($("#analysisModeSelect").val()!="tracking") return;
     // check to see that there is at least one image selected:
     if(refImagePathLeft=='undefined'&&refImagePathRight=='undefined'&&refImagePathMiddle=='undefined') return;
@@ -610,7 +620,7 @@ function callOpenCVServerExec() {
                     if(err == null) {
                         getFileObject(fullPath('','.display_image_right_filter.png'), function (fileObject) {
                             loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
-                        });                 
+                        });
                     }else{
                     }
                 });
@@ -618,7 +628,7 @@ function callOpenCVServerExec() {
                     if(err == null) {
                         getFileObject(fullPath('','.display_image_middle_filter.png'), function (fileObject) {
                             loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",false);
-                        });                 
+                        });
                     }else{
                     }
                 });
@@ -632,6 +642,97 @@ function callOpenCVServerExec() {
         });
     });
 }
+
+function drawEpipolarLine(isLeft,dot_x,dot_y,reset=false) {
+    if($("#analysisModeSelect").val()!="tracking") return;
+    // check to see that there is at least one image selected:
+    if(refImagePathLeft=='undefined'&&refImagePathRight=='undefined'&&refImagePathMiddle=='undefined') return;
+    // generate the command line
+    args = [];
+    leftName = '';
+    leftNameFilter = '';
+    rightName = '';
+    rightNameFilter = '';
+    fs.readdir(workingDirectory, (err,dir) => {
+        for(var i = 0; i < dir.length; i++) {
+            if(dir[i].includes('.display_image_left')&&!dir[i].includes('filter')){
+                leftName = dir[i];
+                leftNameFilter = dir[i].replace('.'+dir[i].split('.').pop(),"_filter.png");
+            }else if(dir[i].includes('.display_image_right')&&!dir[i].includes('filter')){
+                rightName = dir[i];
+                rightNameFilter = dir[i].replace('.'+dir[i].split('.').pop(),"_filter.png");
+            }
+        }
+        if(reset){
+            getFileObject(fullPath('',leftName), function (fileObject) {
+                loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
+            });
+            getFileObject(fullPath('',rightName), function (fileObject) {
+                loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
+            });
+            return;
+        }
+        args.push(leftName);
+        args.push(leftNameFilter);
+        args.push(rightName);
+        args.push(rightNameFilter);
+        args.push('filter:epipolar_line');
+        args.push('epipolar_is_left');
+        if(isLeft)
+            args.push('true');
+        else
+            args.push('false');
+        args.push('epipolar_dot_x');
+        args.push(dot_x);
+        args.push('epipolar_dot_y');
+        args.push(dot_y);
+        args.push('cal_file');
+        args.push(fullPath('','cal.xml'));
+        consoleMsg('calling OpenCVServerExec with args ' + args);
+
+        // call the filter exec
+        var child_process = require('child_process');
+        var readline      = require('readline');
+        var proc = child_process.spawn(execOpenCVServerPath,args,{cwd:workingDirectory});//,maxBuffer:1024*1024});
+
+        proc.on('error', function(){
+            alert('DICe OpenCVServer failed for epipolar line: invalid executable: ' + execOpenCVServerPath);
+        });
+        proc.on('close', (code) => {
+            console.log(`OpenCVServer exited with code ${code}`);
+            if(code!=0){
+                alert('OpenCVServer failed');
+            }
+            else{
+                // load new preview images
+                fs.stat(fullPath('','.display_image_left_filter.png'), function(err, stat) {
+                    if(err == null) {
+                        getFileObject(fullPath('','.display_image_left_filter.png'), function (fileObject) {
+                            loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
+                        });
+                    }else{
+                    }
+                });
+                fs.stat(fullPath('','.display_image_right_filter.png'), function(err, stat) {
+                    if(err == null) {
+                        getFileObject(fullPath('','.display_image_right_filter.png'), function (fileObject) {
+                            loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
+                        });
+                    }else{
+                    }
+                });
+            }
+        });
+        readline.createInterface({
+            input     : proc.stdout,
+            terminal  : false
+        }).on('line', function(line) {
+            consoleMsg(line);
+        });
+    })
+}
+
+
 
 function callCrossInitExec() {
 

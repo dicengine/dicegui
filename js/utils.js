@@ -53,8 +53,8 @@ function initialize_gui(load_existing){
                 }
                 $("#fileSelectMode").val(fileSelectMode).change();
                 $("#analysisModeSelect").val(analysisModeSelect).change();
-                if($("#analysisModeSelect").val()=='tracking')
-                    showStereoPaneState=0;
+                //if($("#analysisModeSelect").val()=='tracking')
+                //    showStereoPaneState=0;
                 if($("#analysisModeSelect").val()=='global')
                     showStereoPaneState=0;
                 if(showStereoPaneState==1){
@@ -465,7 +465,7 @@ function resizeFullDivs(targetDiv){
 // toggle boxes up and down
 $("#stereoButton").click(function(){
     // if tracking mode is selected button is disabled:
-    if($("#analysisModeSelect").val()=='tracking') return;
+    //if($("#analysisModeSelect").val()=='tracking') return;
     if($("#analysisModeSelect").val()=='global') return;
     
     // get the current state of stereo on or off:

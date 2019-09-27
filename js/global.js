@@ -71,6 +71,7 @@ var obstructedDefsY = [[]];
 var firstClick = true;
 var shapeInProgress = false;
 var addROIsActive = false;
+var drawEpipolarActive = false;
 var addExcludedActive = false;
 var addObstructedActive = false;
 var currentROIIndex = 0;
