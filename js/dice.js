@@ -65,6 +65,9 @@ document.getElementById("runLi").onclick = function() {
 
 document.getElementById("sssigPreview").onclick = function() {
     if(refImagePathLeft=="undefined") return;
+    //if(subsetLocationsFile!=''){
+     //   drawDotsAndBoxesForSubsets(subsetLocationsFile);
+    //}
     else{
         startProgress();
         writeInputFile(false,false,true);
@@ -328,7 +331,7 @@ function callDICeExec(resolution,ss_locs) {
                 win.loadURL('file://' + __dirname + '/resolution.html');
                 //win.webContents.openDevTools()
             }else if(ss_locs){
-                drawDotsAndBoxesForSubsets();
+                drawDotsAndBoxesForSubsets(fullPath('','.subset_locs.txt'));
             }else{
                 postExecTasks();
             }
@@ -823,15 +826,19 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
     fileName     = fullPath('','input.xml');
     outputFolder = fullPath('results','');
     paramsFile   = fullPath('','params.xml');
-    subsetFile   = fullPath('','subset_defs.txt');
+    subsetFile   = fullPath('','subset_defs.txt'); // defines the ROIs
+    hasSubsetFile = subsetLocationsFile!=''; // a different file loaded by the user that defines specific subset locations
     consoleMsg('writing input file ' + fileName);
     var content = '';
     content += '<!-- Auto generated input file from DICe GUI -->\n';
     content += '<ParameterList>\n';
     content += '<Parameter name="output_folder" type="string" value="' + outputFolder + '" /> \n';
     content += '<Parameter name="correlation_parameters_file" type="string" value="' + paramsFile + '" />\n';
+    //CHECK cant hab-ve ROIs and subsets fiel
     if(ROIDefsX[0].length>=3){
         content += '<Parameter name="subset_file" type="string" value="' + subsetFile + '" />\n';
+    }else if(hasSubsetFile){
+        content += '<Parameter name="subset_file" type="string" value="' + subsetLocationsFile + '" />\n';
     }
     if(ROIDefsX[0].length==0&&$("#analysisModeSelect").val()=="global"){
         content += '<Parameter name="subset_file" type="string" value="' + subsetFile + '" />\n';
@@ -847,7 +854,8 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
     }
     if($("#analysisModeSelect").val()=="subset"){
         content += '<Parameter name="subset_size" type="int" value="'+$("#subsetSize").val()+'" />\n';
-        content += '<Parameter name="step_size" type="int" value="'+$("#stepSize").val()+'" />\n';
+        if(!hasSubsetFile)
+            content += '<Parameter name="step_size" type="int" value="'+$("#stepSize").val()+'" />\n';
         content += '<Parameter name="separate_output_file_for_each_subset" type="bool" value="false" />\n';
     }else if($("#analysisModeSelect").val()=="tracking"){
         content += '<Parameter name="separate_output_file_for_each_subset" type="bool" value="true" />\n';

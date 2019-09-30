@@ -534,6 +534,35 @@ function load_image_sequence(reset_ref_ROIs){
     });    
 }
 
+$("#loadSubsetFileInput").on("click",function () {
+    this.value = null;
+});
+$("#loadSubsetFileInput").change(function (evt) {
+    if (confirm('Loading a subset locations file will reset the ROIs. Continue loading?')) {
+        var tgt = evt.target || window.event.srcElement,
+        file = tgt.files[0];
+        if(file){
+            clearROIs();
+            clearExcluded();
+            clearObstructed();
+            clearDrawnROIs();
+            drawROIs();
+            $("#loadSubsetFileInputIcon").css('color','#33ccff');
+            drawDotsAndBoxesForSubsets(file.path);
+            subsetLocationsFile = file.path;
+        }
+    }else{
+        return false;
+    }
+});
+
+$("#resetSubsetLocations").click(function (){
+    subsetLocationsFile = '';
+    $("#loadSubsetFileInputIcon").css('color','rgba(0, 0, 0, 0.5)');
+    drawROIs();
+});
+
+
 $("#loadRef").click(function (){
     load_image_sequence(true);
 });

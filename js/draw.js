@@ -800,11 +800,11 @@ function drawDefaultROI(){
     drawROIs();
 }
 
-function drawDotsAndBoxesForSubsets(){
+function drawDotsAndBoxesForSubsets(locsFile){
     drawROIs();
     // get the current step value
     var stepSize = $("#stepSize").val();
-    var locsFile = fullPath('','subset_locs.txt');
+    //var locsFile = fullPath('','.subset_locs.txt');
     fs.stat(locsFile, function(err, stat) {
         if(err == null) {
             fs.readFile(locsFile, 'utf8', function (err,dataS) {
@@ -814,16 +814,23 @@ function drawDotsAndBoxesForSubsets(){
                 //else{
                    //console.log(dataS);
                 //}
+                if(!dataS.toString().includes("BEGIN SUBSET_COORDINATES")){
+                    alert('invalid subset locations file syntax ' + locsFile);
+                    subsetLocationsFile = '';
+                    $("#loadSubsetFileInput").css('color','rgba(0, 0, 0, 0.5)');
+                    return;
+                }
                 var locsData = dataS.toString().split(/\s+/g).map(Number);
                 //console.log(locsData);
                 var draw = SVG('panzoomLeft').size(refImageWidthLeft, refImageHeightLeft);
                 var stride = 2;
-                if(stepSize <=3) stride = 4;
+                if(stepSize <=3) stride = 4; // striding is used so that for small step sizes, it's not too crowded
                 if(stepSize <=2) stride = 6;
                 if(stepSize <=1) stride = 8;
                 for(i=0;i<locsData.length-1;i+=stride){
-                    var x = locsData[i];
-                    var y = locsData[i+1];
+                    if(isNaN(locsData[i])) continue;
+                    var x = locsData[i]-2.5;
+                    var y = locsData[i+1]-2.5;
                     var dot = draw.circle(5).move(x,y).fill('#ffff00');
                 }
                 draw.style('opacity',0.75);
