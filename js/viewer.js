@@ -76,7 +76,7 @@ function zoomToFitLeft(){
         var scale = (windowHeight-10) / imageHeight;
         $("#panzoomLeft").panzoom("setMatrix", [ 1, 0, 0, 1, 0, 0 ]);
         $("#panzoomLeft").panzoom("zoom",scale,{focal: e });
-    }                              
+    }
 }
 
 function zoomToFitRight(){
@@ -88,7 +88,7 @@ function zoomToFitRight(){
         var scale = (windowHeight-10) / imageHeight;
         $("#panzoomRight").panzoom("setMatrix", [ 1, 0, 0, 1, 0, 0 ]);
         $("#panzoomRight").panzoom("zoom",scale,{focal: e });
-    }                              
+    }
 }
 
 function zoomToFitMiddle(){
@@ -100,7 +100,7 @@ function zoomToFitMiddle(){
         var scale = (windowHeight-10) / imageHeight;
         $("#panzoomMiddle").panzoom("setMatrix", [ 1, 0, 0, 1, 0, 0 ]);
         $("#panzoomMiddle").panzoom("zoom",scale,{focal: e });
-    }                              
+    }
 }
 
 $("#zoomToFitLeft").click(function(){zoomToFitLeft();});
@@ -179,38 +179,38 @@ $("#panzoomMiddle").parent().on('mousewheel.focal', function( e ) {
     });
 });
 
-$("#previewFilterLi").click(function (){
-    callOpenCVServerExec();
-});
+//$("#previewFilterLi").click(function (){
+//    callOpenCVServerExec();
+//});
 
-$("#previewFilterResetLi").click(function (){
-    $("#binaryCheck")[0].checked = false;
-    $("#binaryInvertedCheck")[0].checked = false;
-    $("#binaryThreshBlockSizeLabel").text("75");
-    $("#binaryThreshBlockSize").val(75);
-    $("#binaryThreshConstantLabel").text("10");
-    $("#binaryThreshConstant").val(10);
-    // re-load the original images, but don't change the stored values of ref images in global vars
-    fs.readdir(workingDirectory, (err,dir) => {
-        for(var i = 0; i < dir.length; i++) {
-            if(dir[i].includes('.display_image_left')&&!dir[i].includes('filter')){
-                getFileObject(fullPath('',dir[i]), function (fileObject) {
-                    loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
-                });
-            }
-            if(dir[i].includes('.display_image_right')&&!dir[i].includes('filter')){
-                getFileObject(fullPath('',dir[i]), function (fileObject) {
-                    loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
-                });
-            }
-            if(dir[i].includes('.display_image_middle')&&!dir[i].includes('filter')){
-                getFileObject(fullPath('',dir[i]), function (fileObject) {
-                    loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",false);
-                });
-            }
-        }
-    });
-});
+//$("#previewFilterResetLi").click(function (){
+//    $("#binaryCheck")[0].checked = false;
+//    $("#binaryInvertedCheck")[0].checked = false;
+//    $("#binaryThreshBlockSizeLabel").text("75");
+//    $("#binaryThreshBlockSize").val(75);
+//    $("#binaryThreshConstantLabel").text("10");
+//    $("#binaryThreshConstant").val(10);
+//    // re-load the original images, but don't change the stored values of ref images in global vars
+//    fs.readdir(workingDirectory, (err,dir) => {
+//        for(var i = 0; i < dir.length; i++) {
+//            if(dir[i].includes('.display_image_left')&&!dir[i].includes('filter')){
+//                getFileObject(fullPath('',dir[i]), function (fileObject) {
+//                    loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
+//                });
+//            }
+//            if(dir[i].includes('.display_image_right')&&!dir[i].includes('filter')){
+//                getFileObject(fullPath('',dir[i]), function (fileObject) {
+//                    loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
+//                });
+//            }
+//            if(dir[i].includes('.display_image_middle')&&!dir[i].includes('filter')){
+//                getFileObject(fullPath('',dir[i]), function (fileObject) {
+//                    loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",false);
+//                });
+//            }
+//        }
+//    });
+//});
 
 function deleteDisplayImageFiles(lrm,cb){
     var cbCalled = false;
@@ -504,10 +504,12 @@ function load_image_sequence(reset_ref_ROIs){
                       return;
                     }
                     getFileObject(fullImageName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+                        //loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true);
                     });
                     getFileObject(fullStereoImageName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+                        //loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+                        loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true);
                     });
                     flagSequenceImages();
                 });
@@ -518,7 +520,8 @@ function load_image_sequence(reset_ref_ROIs){
                             return;
                         }
                         getFileObject(fullTrinocImageName, function (fileObject) {
-                            loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+                            //loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+                            loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",true);
                         });
                         flagSequenceImages();
                     });
@@ -526,7 +529,8 @@ function load_image_sequence(reset_ref_ROIs){
             }
             else{
                  getFileObject(fullImageName, function (fileObject) {
-                     loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+                     //loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+                     loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true);
                  });
                  flagSequenceImages();
             }
@@ -645,8 +649,8 @@ $("#cineRefIndex").change(function () {
         updateCineDisplayImage(cinePathRight,offsetIndex,1);
     if(cinePathMiddle!="undefined")
         updateCineDisplayImage(cinePathMiddle,offsetIndex,2);
-    if($("#binaryAutoUpdateCheck")[0].checked)
-        callOpenCVServerExec();
+    //if($("#binaryAutoUpdateCheck")[0].checked)
+    //    callOpenCVServerExec();
 });
 
 $("#frameScroller").on('input', function () {
@@ -663,7 +667,8 @@ $("#rightRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
     $("#refImageTextRight span").text(file.name);
-    loadImage(file,"#panzoomRight","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+    //loadImage(file,"#panzoomRight","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+    loadImage(file,"#panzoomRight","auto","auto",1,false,false,"","",true);
 });
 
 $("#middleRefInput").on("click",function () {
@@ -673,7 +678,8 @@ $("#middleRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
     $("#refImageTextMiddle span").text(file.name);
-    loadImage(file,"#panzoomMiddle","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+    //loadImage(file,"#panzoomMiddle","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+    loadImage(file,"#panzoomMiddle","auto","auto",1,false,false,"","",true);
 });
 
 $("#calInput").on("click",function () {
@@ -705,7 +711,8 @@ $("#leftRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
     $("#refImageText span").text(file.name);
-    loadImage(file,"#panzoomLeft","auto","auto",1,false,true,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+    //loadImage(file,"#panzoomLeft","auto","auto",1,false,true,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+    loadImage(file,"#panzoomLeft","auto","auto",1,false,true,"","",true);
 });
 
 $("#leftDefInput").on("click",function () {

@@ -376,15 +376,18 @@ function updateCineDisplayImage(fileName,index,mode,reset_ref_ROIs){
             else{
 		if(mode==0){
                     getFileObject(tiffImageName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+                        //loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true);
                     });
                 }else if(mode==1){
                     getFileObject(tiffImageName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+                        //loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+                        loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true);
                     });
                 }else{
                     getFileObject(tiffImageName, function (fileObject) {
-                        loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+                        //loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+                        loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",true);
                     });
                 }
             }
@@ -484,167 +487,166 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
     }); // end fileName fs.stat
 }
 
-var binaryElements = document.getElementsByClassName("filterOption");
-for (var i = 0; i < binaryElements.length; i++) {
-    binaryElements[i].addEventListener('change', function() {
-        if(!$("#binaryAutoUpdateCheck")[0].checked) return;
-        callOpenCVServerExec();
-  });
-}
-
-var blobElements = document.getElementsByClassName("blobOption");
-for (var i = 0; i < blobElements.length; i++) {
-    blobElements[i].addEventListener('change', function() {
-        // convert the id into the right label
-        var inputId = $(this).attr('id');
-        var spanLabel = '#' + inputId + 'Label';
-        var otherInputId = inputId.substr(0,inputId.length-3);
-        // ensure that the max is always greater than the min
-        var lastThree = inputId.substr(inputId.length - 3);
-        if(lastThree == "Max"){
-            otherInputId = '#' + otherInputId + 'Min';
-            var otherVal = $(otherInputId).val();
-            if(+$(this).val() < +otherVal){
-                $(this).val(otherVal);
-            }
-        }else{
-            otherInputId = '#' + otherInputId + 'Max';
-            var otherVal = $(otherInputId).val();
-            console.log('val is ' + $(this).val() + ' other val is ' + otherVal);
-            if(+$(this).val() > +otherVal){
-                $(this).val(otherVal);
-            }
-        }        
-        $(spanLabel).text($(this).val());
-  });
-}
+//var binaryElements = document.getElementsByClassName("filterOption");
+//for (var i = 0; i < binaryElements.length; i++) {
+//    binaryElements[i].addEventListener('change', function() {
+//        if(!$("#binaryAutoUpdateCheck")[0].checked) return;
+//        callOpenCVServerExec();
+//  });
+//}
+//var blobElements = document.getElementsByClassName("blobOption");
+//for (var i = 0; i < blobElements.length; i++) {
+//    blobElements[i].addEventListener('change', function() {
+//        // convert the id into the right label
+//        var inputId = $(this).attr('id');
+//        var spanLabel = '#' + inputId + 'Label';
+//        var otherInputId = inputId.substr(0,inputId.length-3);
+//        // ensure that the max is always greater than the min
+//        var lastThree = inputId.substr(inputId.length - 3);
+//        if(lastThree == "Max"){
+//            otherInputId = '#' + otherInputId + 'Min';
+//            var otherVal = $(otherInputId).val();
+//            if(+$(this).val() < +otherVal){
+//                $(this).val(otherVal);
+//            }
+//        }else{
+//            otherInputId = '#' + otherInputId + 'Max';
+//            var otherVal = $(otherInputId).val();
+//            console.log('val is ' + $(this).val() + ' other val is ' + otherVal);
+//            if(+$(this).val() > +otherVal){
+//                $(this).val(otherVal);
+//            }
+//        }        
+//        $(spanLabel).text($(this).val());
+//  });
+//}
 
 function deactivateEpipolar(){
     $("#drawEpipolar").css('color','rgba(0, 0, 0, 0.5)');
     drawEpipolarLine(false,0,0,true);
 }
 
-function callOpenCVServerExec() {
-    
-    // TODO these filters have the old syntax, not the new one (Filter:BinaryThreshold vs. filter:binary_threshold)
-    alert('ERROR This routine needs to be refactored!');
-    return;
-    
-    if($("#analysisModeSelect").val()!="tracking") return;
-    // check to see that there is at least one image selected:
-    if(refImagePathLeft=='undefined'&&refImagePathRight=='undefined'&&refImagePathMiddle=='undefined') return;
-    
-    // check to see if any filters are applied:
-    if(!$("#binaryCheck")[0].checked&&!$("#blobCheck")[0].checked){
-        return;
-    }
-    // generate the command line
-    var args = [];
-    // get the files to filter:
-    fs.readdir(workingDirectory, (err,dir) => {
-        for(var i = 0; i < dir.length; i++) {
-            if(dir[i].includes('.display_image')&&!dir[i].includes('filter')){
-                args.push(dir[i]);
-                args.push(dir[i].replace('.'+dir[i].split('.').pop(),"_filter.png"));
-            }
-        }
-        if($("#binaryCheck")[0].checked){
-            args.push('Filter:BinaryThreshold');
-            if($("#binarySelect").val()=="binaryMean"){
-                args.push(1);
-            }else{
-                args.push(0);
-            }
-            args.push($("#binaryThreshBlockSize").val());
-            args.push($("#binaryThreshConstant").val());
-            if($("#binaryInvertedCheck")[0].checked){
-                args.push(1);
-            }else{
-                args.push(0);
-            }            
-        }
-        if($("#blobCheck")[0].checked){
-            args.push('Filter:Blob');
-            if($("#blobAreaCheck")[0].checked){
-                args.push(1);
-            }else{
-                args.push(0);
-            }            
-            args.push($("#blobAreaMin").val());
-            args.push($("#blobAreaMax").val());
-            if($("#blobCircularityCheck")[0].checked){
-                args.push(1);
-            }else{
-                args.push(0);
-            }            
-            args.push($("#blobCircularityMin").val());
-            args.push($("#blobCircularityMax").val());
-            if($("#blobEccentricityCheck")[0].checked){
-                args.push(1);
-            }else{
-                args.push(0);
-            }            
-            args.push($("#blobEccentricityMin").val());
-            args.push($("#blobEccentricityMax").val());
-            if($("#blobConvexityCheck")[0].checked){
-                args.push(1);
-            }else{
-                args.push(0);
-            }            
-            args.push($("#blobConvexityMin").val());
-            args.push($("#blobConvexityMax").val());
-        }
-        consoleMsg('calling OpenCVServerExec with args ' + args);    
-    
-        // call the filter exec
-        var child_process = require('child_process');
-        var readline      = require('readline');
-        var proc = child_process.spawn(execOpenCVServerPath,args,{cwd:workingDirectory});//,maxBuffer:1024*1024});
-
-        proc.on('error', function(){
-            alert('DICe OpenCVServer failed: invalid executable: ' + execOpenCVServerPath);
-        });
-        proc.on('close', (code) => {
-            console.log(`OpenCVServer exited with code ${code}`);
-            if(code!=0){
-                alert('OpenCVServer failed');
-            }
-            else{
-                // load new preview images
-                fs.stat(fullPath('','.display_image_left_filter.png'), function(err, stat) {
-                    if(err == null) {
-                        getFileObject(fullPath('','.display_image_left_filter.png'), function (fileObject) {
-                            loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
-                        });                 
-                    }else{
-                    }
-                });
-                fs.stat(fullPath('','.display_image_right_filter.png'), function(err, stat) {
-                    if(err == null) {
-                        getFileObject(fullPath('','.display_image_right_filter.png'), function (fileObject) {
-                            loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
-                        });
-                    }else{
-                    }
-                });
-                fs.stat(fullPath('','.display_image_middle_filter.png'), function(err, stat) {
-                    if(err == null) {
-                        getFileObject(fullPath('','.display_image_middle_filter.png'), function (fileObject) {
-                            loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",false);
-                        });
-                    }else{
-                    }
-                });
-            }
-        });
-        readline.createInterface({
-            input     : proc.stdout,
-            terminal  : false
-        }).on('line', function(line) {
-            consoleMsg(line);
-        });
-    });
-}
+//function callOpenCVServerExec() {
+//    
+//    // TODO these filters have the old syntax, not the new one (Filter:BinaryThreshold vs. filter:binary_threshold)
+//    alert('ERROR This routine needs to be refactored!');
+//    return;
+//    
+//    if($("#analysisModeSelect").val()!="tracking") return;
+//    // check to see that there is at least one image selected:
+//    if(refImagePathLeft=='undefined'&&refImagePathRight=='undefined'&&refImagePathMiddle=='undefined') return;
+//    
+//    // check to see if any filters are applied:
+//    if(!$("#binaryCheck")[0].checked&&!$("#blobCheck")[0].checked){
+//        return;
+//    }
+//    // generate the command line
+//    var args = [];
+//    // get the files to filter:
+//    fs.readdir(workingDirectory, (err,dir) => {
+//        for(var i = 0; i < dir.length; i++) {
+//            if(dir[i].includes('.display_image')&&!dir[i].includes('filter')){
+//                args.push(dir[i]);
+//                args.push(dir[i].replace('.'+dir[i].split('.').pop(),"_filter.png"));
+//            }
+//        }
+//        if($("#binaryCheck")[0].checked){
+//            args.push('Filter:BinaryThreshold');
+//            if($("#binarySelect").val()=="binaryMean"){
+//                args.push(1);
+//            }else{
+//                args.push(0);
+//            }
+//            args.push($("#binaryThreshBlockSize").val());
+//            args.push($("#binaryThreshConstant").val());
+//            if($("#binaryInvertedCheck")[0].checked){
+//                args.push(1);
+//            }else{
+//                args.push(0);
+//            }            
+//        }
+//        if($("#blobCheck")[0].checked){
+//            args.push('Filter:Blob');
+//            if($("#blobAreaCheck")[0].checked){
+//                args.push(1);
+//            }else{
+//                args.push(0);
+//            }            
+//            args.push($("#blobAreaMin").val());
+//            args.push($("#blobAreaMax").val());
+//            if($("#blobCircularityCheck")[0].checked){
+//                args.push(1);
+//            }else{
+//                args.push(0);
+//            }            
+//            args.push($("#blobCircularityMin").val());
+//            args.push($("#blobCircularityMax").val());
+//            if($("#blobEccentricityCheck")[0].checked){
+//                args.push(1);
+//            }else{
+//                args.push(0);
+//            }            
+//            args.push($("#blobEccentricityMin").val());
+//            args.push($("#blobEccentricityMax").val());
+//            if($("#blobConvexityCheck")[0].checked){
+//                args.push(1);
+//            }else{
+//                args.push(0);
+//            }            
+//            args.push($("#blobConvexityMin").val());
+//            args.push($("#blobConvexityMax").val());
+//        }
+//        consoleMsg('calling OpenCVServerExec with args ' + args);    
+//    
+//        // call the filter exec
+//        var child_process = require('child_process');
+//        var readline      = require('readline');
+//        var proc = child_process.spawn(execOpenCVServerPath,args,{cwd:workingDirectory});//,maxBuffer:1024*1024});
+//
+//        proc.on('error', function(){
+//            alert('DICe OpenCVServer failed: invalid executable: ' + execOpenCVServerPath);
+//        });
+//        proc.on('close', (code) => {
+//            console.log(`OpenCVServer exited with code ${code}`);
+//            if(code!=0){
+//                alert('OpenCVServer failed');
+//            }
+//            else{
+//                // load new preview images
+//                fs.stat(fullPath('','.display_image_left_filter.png'), function(err, stat) {
+//                    if(err == null) {
+//                        getFileObject(fullPath('','.display_image_left_filter.png'), function (fileObject) {
+//                            loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
+//                        });                 
+//                    }else{
+//                    }
+//                });
+//                fs.stat(fullPath('','.display_image_right_filter.png'), function(err, stat) {
+//                    if(err == null) {
+//                        getFileObject(fullPath('','.display_image_right_filter.png'), function (fileObject) {
+//                            loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
+//                        });
+//                    }else{
+//                    }
+//                });
+//                fs.stat(fullPath('','.display_image_middle_filter.png'), function(err, stat) {
+//                    if(err == null) {
+//                        getFileObject(fullPath('','.display_image_middle_filter.png'), function (fileObject) {
+//                            loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",false);
+//                        });
+//                    }else{
+//                    }
+//                });
+//            }
+//        });
+//        readline.createInterface({
+//            input     : proc.stdout,
+//            terminal  : false
+//        }).on('line', function(line) {
+//            consoleMsg(line);
+//        });
+//    });
+//}
 
 function drawEpipolarLine(isLeft,dot_x,dot_y,reset=false) {
     if($("#analysisModeSelect").val()!="tracking") return;
@@ -834,13 +836,17 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
     content += '<ParameterList>\n';
     content += '<Parameter name="output_folder" type="string" value="' + outputFolder + '" /> \n';
     content += '<Parameter name="correlation_parameters_file" type="string" value="' + paramsFile + '" />\n';
-    //CHECK cant hab-ve ROIs and subsets fiel
+    
+    // check that some ROIs have been defined if this is the tracking mode
+    if($("#analysisModeSelect").val()=="tracking" && ROIDefsX[0].length==0 && !only_write){
+        alert('ROIs must be defined');
+        return;
+    }
     if(ROIDefsX[0].length>=3){
         content += '<Parameter name="subset_file" type="string" value="' + subsetFile + '" />\n';
     }else if(hasSubsetFile){
         content += '<Parameter name="subset_file" type="string" value="' + subsetLocationsFile + '" />\n';
-    }
-    if(ROIDefsX[0].length==0&&$("#analysisModeSelect").val()=="global"){
+    }else if(ROIDefsX[0].length==0&&$("#analysisModeSelect").val()=="global"){
         content += '<Parameter name="subset_file" type="string" value="' + subsetFile + '" />\n';
         // if no ROIs are defined for global, define one large ROI
         ROIDefsX[0].push(20);
@@ -866,7 +872,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
     if($("#omitTextCheck")[0].checked&&$("#analysisModeSelect").val()=="subset"){
         content += '<Parameter name="no_text_output_files" type="bool" value="true" />\n';
     }
-    if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs&&$("#analysisModeSelect").val()=="subset"){
+    if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs&&$("#analysisModeSelect").val()!="global"){
         content += '<Parameter name="camera_system_file" type="string" value="' + calPath + '" />\n';
     }
     if(showStereoPane==0&&$("#calibrationCheck")[0].checked){
@@ -879,20 +885,20 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
       content += '<ParameterList name="deformed_images">\n';
         // add the deformed images
         if(resolution||ss_locs){
-            content += '<Parameter name="'+refImagePathLeft+'" type="bool" value="true" />\n';        
+            content += '<Parameter name="'+refImagePathLeft+'" type="bool" value="true" />\n';
         }
         else{
             for(var i = 0, l = defImagePathsLeft.length; i < l; i++) {
-                content += '<Parameter name="'+defImagePathsLeft[i].path+'" type="bool" value="true" />\n';        
+                content += '<Parameter name="'+defImagePathsLeft[i].path+'" type="bool" value="true" />\n';
             }
         }
       content += '</ParameterList>\n';
-      if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs&&$("#analysisModeSelect").val()=="subset"){
+      if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs&&$("#analysisModeSelect").val()!="global"){
           content += '<Parameter name="stereo_reference_image" type="string" value="' + refImagePathRight + '" />\n';
           content += '<ParameterList name="stereo_deformed_images">\n';
           // add the deformed images
           for(var i = 0, l = defImagePathsRight.length; i < l; i++) {
-              content += '<Parameter name="'+defImagePathsRight[i].path+'" type="bool" value="true" />\n';        
+              content += '<Parameter name="'+defImagePathsRight[i].path+'" type="bool" value="true" />\n';
           }
           content += '</ParameterList>\n';
       }
@@ -912,7 +918,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
         content += '<Parameter name="num_file_suffix_digits" type="int" value="'+$("#numDigits").val()+'" />\n';
         content += '<Parameter name="image_file_extension" type="string" value="'+$("#imageExtension").val()+'" />\n';
         content += '<Parameter name="image_file_prefix" type="string" value="'+$("#imagePrefix").val()+'" />\n';
-        if((showStereoPane==1||showStereoPane==2)&&$("#analysisModeSelect").val()=="subset"){
+        if((showStereoPane==1||showStereoPane==2)&&$("#analysisModeSelect").val()!="subset"){
             content += '<Parameter name="stereo_left_suffix" type="string" value="'+$("#stereoLeftSuffix").val()+'"/>\n';
             content += '<Parameter name="stereo_right_suffix" type="string" value="'+$("#stereoRightSuffix").val()+'" />\n';
         }
@@ -924,7 +930,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
         content += '<Parameter name="cine_start_index" type="int" value="'+$("#cineStartIndex").val()+'" />\n';
         content += '<Parameter name="cine_skip_index" type="int" value="'+$("#cineSkipIndex").val()+'" />\n';
         content += '<Parameter name="cine_end_index" type="int" value="'+$("#cineEndIndex").val()+'" />\n';
-        if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs&&$("#analysisModeSelect").val()=="subset"){
+        if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs&&$("#analysisModeSelect").val()!="subset"){
             content += '<Parameter name="stereo_cine_file" type="string" value="'+cinePathRight+'" />\n';
         }
     }

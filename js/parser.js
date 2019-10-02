@@ -221,7 +221,7 @@ function impl_input_xml_file(xml){
                         var tokens = lines[line].split(/\s+/g).map(Number);
                         for(i=0;i<tokens.length;++i){
                             if(!isNaN(tokens[i])&&tokens[i]!=0) coord_data.push(tokens[i]);
-                        }            
+                        }
                     }
                     console.log('best fit coord data: ' + coord_data);
                     // set the coordinates
@@ -235,7 +235,7 @@ function impl_input_xml_file(xml){
                         $("#bestFitYAxisCheck")[0].checked = true;
                     }
                     drawROIs();
-                }                
+                }
             }); // end readfile
         }else{
             $("#bestFitCheck")[0].checked = false;
@@ -272,13 +272,13 @@ function impl_input_xml_file(xml){
                     }
                     // set the coordinates
                     drawROIs();
-                }                
+                }
             }); // end readfile
         }
     });
 
     // see if there is a calibration parameters file
-    calPath = xml_get(xml,"calibration_parameters_file");
+    calPath = xml_get(xml,"camera_system_file");
     console.log('has calibration file: ' + calPath);
     if(calPath && calPath !== 'null' && calPath != 'undefined'){
         $("#calList").empty();
