@@ -816,8 +816,6 @@ function drawDotsAndBoxesForSubsets(locsFile){
                 //}
                 if(!dataS.toString().includes("BEGIN SUBSET_COORDINATES")){
                     alert('invalid subset locations file syntax ' + locsFile);
-                    subsetLocationsFile = '';
-                    $("#loadSubsetFileInput").css('color','rgba(0, 0, 0, 0.5)');
                     return;
                 }
                 var locsData = dataS.toString().split(/\s+/g).map(Number);

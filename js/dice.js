@@ -829,7 +829,6 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
     outputFolder = fullPath('results','');
     paramsFile   = fullPath('','params.xml');
     subsetFile   = fullPath('','subset_defs.txt'); // defines the ROIs
-    hasSubsetFile = subsetLocationsFile!=''; // a different file loaded by the user that defines specific subset locations
     consoleMsg('writing input file ' + fileName);
     var content = '';
     content += '<!-- Auto generated input file from DICe GUI -->\n';
@@ -844,8 +843,6 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
     }
     if(ROIDefsX[0].length>=3){
         content += '<Parameter name="subset_file" type="string" value="' + subsetFile + '" />\n';
-    }else if(hasSubsetFile){
-        content += '<Parameter name="subset_file" type="string" value="' + subsetLocationsFile + '" />\n';
     }else if(ROIDefsX[0].length==0&&$("#analysisModeSelect").val()=="global"){
         content += '<Parameter name="subset_file" type="string" value="' + subsetFile + '" />\n';
         // if no ROIs are defined for global, define one large ROI
@@ -1221,7 +1218,7 @@ function writeSubsetFile(only_write,resolution,ss_locs){
             for(var j = 0, jl = ROIx.length; j < jl; j++) {
                 content += '        ' +  ROIx[j] + ' ' + ROIy[j] + '\n';
             }
-            content += '      end vertices\n';           
+            content += '      end vertices\n';
             content += '    end polygon\n';
             content += '  end boundary\n';
             // excluded
@@ -1242,7 +1239,7 @@ function writeSubsetFile(only_write,resolution,ss_locs){
                     for(var k = 0, kl = ROIx.length; k < kl; k++) {
                         content += '        ' +  ROIx[k] + ' ' + ROIy[k] + '\n';
                     }
-                    content += '      end vertices\n';           
+                    content += '      end vertices\n';
                     content += '    end polygon\n';
                 }
             }
@@ -1261,7 +1258,7 @@ function writeSubsetFile(only_write,resolution,ss_locs){
                         for(var k = 0, kl = ROIx.length; k < kl; k++) {
                             content += '        ' +  ROIx[k] + ' ' + ROIy[k] + '\n';
                         }
-                        content += '      end vertices\n';           
+                        content += '      end vertices\n';
                         content += '    end polygon\n';
                     }
                     content += '  end obstructed\n';

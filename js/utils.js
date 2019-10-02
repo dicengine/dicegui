@@ -644,6 +644,7 @@ $("#analysisModeSelect").on('change',function() {
     if($(this).val()=="subset"){
         $(".full-field").show();
         $(".full-field-global").show();
+        $(".full-field-and-tracking").show();
         $(".tracking").hide();
         $(".global").hide();
         //$("#subsetParams").show();
@@ -653,6 +654,7 @@ $("#analysisModeSelect").on('change',function() {
     else if($(this).val()=="tracking"){
         $(".full-field").hide();
         $(".full-field-global").hide();
+        $(".full-field-and-tracking").show();
         $(".global").hide();
         $(".tracking").show();
         // force 2D
@@ -666,6 +668,7 @@ $("#analysisModeSelect").on('change',function() {
     else if($(this).val()=="global"){
         $(".full-field").hide();
         $(".full-field-global").show();
+        $(".full-field-and-tracking").hide();
         $(".tracking").hide();
         $(".global").show();
         // force 2D

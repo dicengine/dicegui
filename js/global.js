@@ -83,7 +83,6 @@ var livePlotLineXOrigin = 0;
 var livePlotLineYOrigin = 0;
 var livePlotLineXAxis = 0;
 var livePlotLineYAxis = 0;
-var subsetLocationsFile = '';
 
 // state of windows etc. in interface
 var showPrefPane = true;

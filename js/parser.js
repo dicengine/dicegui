@@ -27,14 +27,7 @@ function impl_input_xml_file(xml){
                 fs.readFile(subset_file,'utf8',function(err,data){
                     if(err){
                     }else{
-                        // check if this is a custom subset points file or not
-                        subsetFileString = data.toString();
-                        if((subsetFileString.includes("BEGIN SUBSET_COORDINATES")&&!subsetFileString.includes("BEGIN CONFROMAL_SUBSET"))||
-                                (subsetFileString.includes("begin subset_coordinates")&&!subsetFileString.includes("begin conformal_subset"))){
-                            subsetLocationsFile = subset_file;
-                            $("#loadSubsetFileInputIcon").css('color','#33ccff');
-                        }else
-                            read_subset_file(data);
+                        read_subset_file(data);
                     }
                 }); // end readfile
             }else{ // file doesn't exist
