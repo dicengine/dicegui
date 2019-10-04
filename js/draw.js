@@ -141,6 +141,11 @@ function completeShape(){
     var validPolygon = validatePolygon();
     if(validPolygon){
         if(addROIsActive){
+            if($("#analysisModeSelect").val()=="tracking"){
+                centroid = centroidOfPolygon(ROIDefsX[currentROIIndex],ROIDefsY[currentROIIndex]);
+                subsetCoordinatesX.push(centroid.x);
+                subsetCoordinatesY.push(centroid.y);
+            }
             currentROIIndex += 1;
         }else if(addExcludedActive){
             currentExcludedIndex += 1;
@@ -168,7 +173,6 @@ $("#addLivePlotPts").click(function(){
         addROIsActive = false;
         addObstructedActive = false;
         addExcludedActive = false;
-        drawEpipolarActive = false;
         $("#addLivePlotPts").css('color','#33ccff');
         $("#addROIs").css('color','rgba(0, 0, 0, 0.5)');
         $("#addExcludeds").css('color','rgba(0, 0, 0, 0.5)');
@@ -196,13 +200,21 @@ $("#addLivePlotLine").click(function(){
 });
 
 $("#addROIs").click(function(){
+    if(subsetCoordinatesX.length>0&&$("#analysisModeSelect").val()=="subset"){
+        if (confirm('Subset locations have been defined by loading a subset file. Defining ROIs will reset these. Continue?')) {
+            subsetCoordinatesX = [];
+            subsetCoordinatesY = [];
+            clearDrawnROIs();
+        }else{
+            return false;
+        }
+    }
     completeShape();
     if(addROIsActive==false){
         addROIsActive = true;
         addExcludedActive = false;
         addObstructedActive = false;
         addLivePlotPtsActive = false;
-        drawEpipolarActive = false;
         //$("#addROIs").css('background-color','#33ccff');
         $("#addROIs").css('color','#33ccff');
         //$("#addExcludeds").css('background-color','transparent');
@@ -227,7 +239,6 @@ $("#addObstructed").click(function(){
         addLivePlotPtsActive = false;
         addObstructedActive = true;
         addExcludedActive = false;
-        drawEpipolarActive = false;
         $("#addObstructed").css('color','#33ccff');
         $("#addROIs").css('color','rgba(0, 0, 0, 0.5)');
         $("#addExcludeds").css('color','rgba(0, 0, 0, 0.5)');
@@ -248,7 +259,6 @@ $("#addExcludeds").click(function(){
         addLivePlotPtsActive = false;
         addExcludedActive = true;
         addObstructedActive = false;
-        drawEpipolarActive = false;
         //$("#addExcludeds").css('background-color','#33ccff');
         $("#addExcludeds").css('color','#33ccff');
         //$("#addROIs").css('background-color','transparent');
@@ -343,6 +353,8 @@ function clearLivePlotPts () {
 function clearROIs () {
     ROIDefsX = [[]];
     ROIDefsY = [[]];
+    subsetCoordinatesX = [];
+    subsetCoordinatesY = [];
     currentROIIndex = 0;
 }
 
@@ -372,7 +384,7 @@ function drawROIs(){
     var excluded;
     // draw existing ROIs using the svg element:
     if(ROIDefsX && ROIDefsY){
-        var coordsString = '';        
+        var coordsString = '';
         for(var i = 0, l = 1; i < ROIDefsX.length; i++) {
             var ROIX = ROIDefsX[i];
             var ROIY = ROIDefsY[i];
@@ -396,7 +408,7 @@ function drawROIs(){
     }
     // draw existing Obstructions using the svg element:
     if(obstructedDefsX && obstructedDefsY && $("#analysisModeSelect").val()=="tracking"){
-        var coordsString = '';        
+        var coordsString = '';
         for(var i = 0, l = 1; i < obstructedDefsX.length; i++) {
             var ROIX = obstructedDefsX[i];
             var ROIY = obstructedDefsY[i];
@@ -420,7 +432,7 @@ function drawROIs(){
     // draw existing exclusions using the svg element:
     // draw excluded first because this serves as the mask
     if(excludedDefsX && excludedDefsY){
-        var coordsString = '';        
+        var coordsString = '';
         for(var i = 0, l = 1; i < excludedDefsX.length; i++) {
             var ROIX = excludedDefsX[i];
             var ROIY = excludedDefsY[i];
@@ -582,9 +594,13 @@ function removeLastROI(){
         if(ROIDefsX.length > 1){
             ROIDefsX.pop();
             ROIDefsY.pop();
+            subsetCoordinatesX.pop();
+            subsetCoordinatesY.pop();
         }else{
             ROIDefsX=[[]];
             ROIDefsY=[[]];
+            subsetCoordinatesX = [];
+            subsetCoordinatesY = [];
         }
     }
 }
@@ -706,10 +722,10 @@ function validatePolygon(){
         polysY = ROIDefsY;
     }else if(addExcludedActive){
         polysX = excludedDefsX;
-        polysY = excludedDefsY;            
+        polysY = excludedDefsY;
     }else{
         polysX = obstructedDefsX;
-        polysY = obstructedDefsY;            
+        polysY = obstructedDefsY;
     }
     if(polysX && polysY){
         var numPolys = polysX.length;
@@ -814,8 +830,55 @@ function drawDotsAndBoxesForSubsets(locsFile){
                 //else{
                    //console.log(dataS);
                 //}
-                if(!dataS.toString().includes("BEGIN SUBSET_COORDINATES")){
-                    alert('invalid subset locations file syntax ' + locsFile);
+                if($("#analysisModeSelect").val()=="tracking" && dataS.toString().toUpperCase().includes("REGION_OF_INTEREST")){
+                    alert('Error, invalid susbset definition file: REGION_OF_INTEREST should not be defined for tracking mode. CONFORMAL_SUBSET should be defined');
+                    clearROIs();
+                    clearExcluded();
+                    clearObstructed();
+                    // clear the drawn ROIs
+                    clearDrawnROIs();
+                    drawROIs();
+                }
+                if($("#analysisModeSelect").val()=="tracking" && !dataS.toString().toUpperCase().includes("SUBSET_COORDINATES")){
+                    alert('Error, invalid susbset definition file: SUBSET_COORDINATES block should be defined');
+                    clearROIs();
+                    clearExcluded();
+                    clearObstructed();
+                    // clear the drawn ROIs
+                    clearDrawnROIs();
+                    drawROIs();
+                }
+                if($("#analysisModeSelect").val()=="subset" && dataS.toString().toUpperCase().includes("CONFORMAL_SUBSET")){
+                    alert('Error, invalid susbset definition file: CONFORMAL_SUBSET should not be defined for full-field mode.');
+                    clearROIs();
+                    clearExcluded();
+                    clearObstructed();
+                    // clear the drawn ROIs
+                    clearDrawnROIs();
+                    drawROIs();
+                }
+                if($("#analysisModeSelect").val()=="subset" && dataS.toString().toUpperCase().includes("SUBSET_COORDINATES") && dataS.toString().toUpperCase().includes("REGION_OF_INTEREST")){
+                    alert('Error, invalid susbset definition file: Only SUBSET_COORDINATES or REGION_OF_INTEREST can be defined alone, not both.');
+                    clearROIs();
+                    clearExcluded();
+                    clearObstructed();
+                    // clear the drawn ROIs
+                    clearDrawnROIs();
+                    drawROIs();
+                }
+                if(dataS.toString().toUpperCase().includes("CONFORMAL_SUBSET") && dataS.toString().toUpperCase().includes("REGION_OF_INTEREST")){
+                    alert('Error, invalid susbset definition file: CONFORMAL_SUBSET and REGION_OF_INTEREST cannot be defined together.');
+                    clearROIs();
+                    clearExcluded();
+                    clearObstructed();
+                    // clear the drawn ROIs
+                    clearDrawnROIs();
+                    drawROIs();
+                }
+                
+                
+                if(!dataS.toString().toUpperCase().includes("SUBSET_COORDINATES")||dataS.toString().toUpperCase().includes("CONFORMAL_SUBSET")){
+                    //alert('invalid subset locations file syntax ' + locsFile);
                     return;
                 }
                 var locsData = dataS.toString().split(/\s+/g).map(Number);
@@ -834,8 +897,8 @@ function drawDotsAndBoxesForSubsets(locsFile){
                 draw.style('opacity',0.75);
                 draw.style('z-index',2);
                 draw.style('position','absolute');
-            }); // end readFile                                                                                   
-        } // end null                                                                                              
+            }); // end readFile
+        } // end null
         else{
             alert("could not read subset_locs.txt");
             return;

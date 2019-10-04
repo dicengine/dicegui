@@ -558,7 +558,7 @@ function unstackViews(){
     });
     viewersStacked = false;
     resizeViewerFillDivs();
-    resizeAll();    
+    resizeAll();
 }
 
 function show2DViewer(){
@@ -584,6 +584,7 @@ function show2DViewer(){
     $('#runLi span').text('run 2d');
     $("#stereoParams").hide();
     $('#x1x2').text('x 1');
+    deactivateEpipolar();
 }
 
 function showTrinocViewer(){

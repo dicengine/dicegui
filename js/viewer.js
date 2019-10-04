@@ -546,13 +546,26 @@ $("#loadSubsetFileInput").change(function (evt) {
         var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
         if(file){
-            alert('Not implemented yet');
-//            clearROIs();
-//            clearExcluded();
-//            clearObstructed();
-//            clearDrawnROIs();
-//            drawROIs();
-//            drawDotsAndBoxesForSubsets(file.path);
+            clearROIs();
+            clearExcluded();
+            clearObstructed();
+            clearDrawnROIs();
+            addLivePlotPtsActive = false;
+            addROIsActive = false;
+            addObstructedActive = false;
+            addExcludedActive = false;
+            $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
+            $("#addROIs").css('color','rgba(0, 0, 0, 0.5)');
+            $("#addExcludeds").css('color','rgba(0, 0, 0, 0.5)');
+            $("#addObstructed").css('color','rgba(0, 0, 0, 0.5)');
+            fs.readFile(file.path,'utf8',function(err,data){
+                if(err){
+                }else{
+                    read_subset_file(data);
+                    drawROIs();
+                    drawDotsAndBoxesForSubsets(file.path);
+                }
+            }); // end readfile
         }
     }else{
         return false;

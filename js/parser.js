@@ -296,7 +296,7 @@ function impl_input_xml_file(xml){
 // subset_id for a conformal subset, instead it assumes that the
 // subsets are always saved in order from 0 to n.
 // note: obstructed regions are copied in all subsets, as such only the
-// obstructed regions from the firs subeset are loaded
+// obstructed regions from the first subeset are loaded
 function read_subset_file(data){
     hierarchy = [];
     clearROIs();
@@ -307,12 +307,23 @@ function read_subset_file(data){
     for(line = 0;line < lines.length; line++){
         var split_line = lines[line].match(/\S+/g);
         if(split_line){
-            console.log('split line: ' + split_line);
-            if(split_line[0]=='begin'){
+            //console.log('split line: ' + split_line);
+            if(split_line[0].toUpperCase()=='BEGIN'){
                 hierarchy.push(split_line[1]);
-                
+                if(split_line[1].toUpperCase()=='SUBSET_COORDINATES'){
+                    vertex = 0;
+                    while(vertex < max_vertices){
+                        num_line = lines[line+1+vertex].match(/\S+/g).map(Number);
+                        if(isNaN(num_line[0])) break;
+                        vertex++;
+                        subsetCoordinatesX.push(num_line[0]);
+                        subsetCoordinatesY.push(num_line[1]);
+                    }
+                    line+=vertex;
+                }
+                // TODO check for valid input file (for example prevent loading a conformal subset for subset mode or an ROI for tracking)
                 // see if this is a set of vertices
-                if(split_line[1]=='vertices'){
+                if(split_line[1].toUpperCase()=='VERTICES'){
                     // read the sets of vertices
                     var vertex = 0;
                     var vertex_x = [];
@@ -327,7 +338,7 @@ function read_subset_file(data){
                     line+=vertex;
                     console.log('vertex x: ' + vertex_x);
                     console.log('vertex y: ' + vertex_y);
-                    if(hierarchy[hierarchy.length-3]=='boundary'){
+                    if(hierarchy[hierarchy.length-3].toUpperCase()=='BOUNDARY'){
                         //console.log('ciurrent ROI index is ' + currentROIIndex);
                         //console.log(ROIDefsX);
                         if(currentROIIndex!=0){
@@ -340,7 +351,7 @@ function read_subset_file(data){
                         }
                         currentROIIndex += 1;
                     }
-                    else if(hierarchy[hierarchy.length-3]=='excluded'){
+                    else if(hierarchy[hierarchy.length-3].toUpperCase()=='EXCLUDED'){
                         if(currentExcludedIndex!=0){
                             excludedDefsX.push([]);
                             excludedDefsY.push([]);
@@ -352,7 +363,7 @@ function read_subset_file(data){
                         excludedAssignments.push(currentROIIndex-1);
                         currentExcludedIndex += 1;
                     }
-                    else if(hierarchy[hierarchy.length-3]=='obstructed'&&currentROIIndex==1){
+                    else if((hierarchy[hierarchy.length-3].toUpperCase()=='OBSTRUCTED')&&currentROIIndex==1){
                         if(currentObstructedIndex!=0){
                             obstructedDefsX.push([]);
                             obstructedDefsY.push([]);
@@ -370,6 +381,10 @@ function read_subset_file(data){
             }
         } // end split_line
     } // end lines
+    console.log('subsetCoordinatesX');
+    console.log(subsetCoordinatesX);
+    console.log('subsetCoordinatesY');
+    console.log(subsetCoordinatesY);
     console.log('ROIDefsX:');
     console.log(ROIDefsX);
     console.log('ROIDefsY:');

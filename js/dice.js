@@ -522,7 +522,9 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
 //}
 
 function deactivateEpipolar(){
+    if(!drawEpipolarActive) return;
     $("#drawEpipolar").css('color','rgba(0, 0, 0, 0.5)');
+    drawEpipolarActive = false;
     drawEpipolarLine(false,0,0,true);
 }
 
@@ -841,7 +843,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
         alert('ROIs must be defined');
         return;
     }
-    if(ROIDefsX[0].length>=3){
+    if(ROIDefsX[0].length>=3||subsetCoordinatesX.length>0){
         content += '<Parameter name="subset_file" type="string" value="' + subsetFile + '" />\n';
     }else if(ROIDefsX[0].length==0&&$("#analysisModeSelect").val()=="global"){
         content += '<Parameter name="subset_file" type="string" value="' + subsetFile + '" />\n';
@@ -857,7 +859,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
     }
     if($("#analysisModeSelect").val()=="subset"){
         content += '<Parameter name="subset_size" type="int" value="'+$("#subsetSize").val()+'" />\n';
-        if(!hasSubsetFile)
+        if(subsetCoordinatesX.length==0)
             content += '<Parameter name="step_size" type="int" value="'+$("#stepSize").val()+'" />\n';
         content += '<Parameter name="separate_output_file_for_each_subset" type="bool" value="false" />\n';
     }else if($("#analysisModeSelect").val()=="tracking"){
@@ -1155,15 +1157,36 @@ function writeSubsetFile(only_write,resolution,ss_locs){
     consoleMsg('writing subset file ' + subsetFile);
     var content = '';
     content += '# Auto generated subset file from DICe GUI\n';
+    
+    if(subsetCoordinatesX.length>0){
+        // cannot have ROIs defined and subset coordinates for full field subset method
+        if($("#analysisModeSelect").val()=="global"){
+            alert('Custom subset locations cannot be defined for global method. ROIs must be cleared then redrawn.');
+            endProgress(false);
+            return;
+        }
+        if($("#analysisModeSelect").val()=="subset"&&ROIDefsX[0].length > 2&&subsetCoordinatesX.length>0){
+            alert('Custom subset coordinates and ROIs cannot be defined at the same time. ROIs must be cleared (to remove custom subset locations) then redrawn.');
+            endProgress(false);
+            return;
+        }
+        content += 'begin subset_coordinates\n';
+        for(i = 0, l = subsetCoordinatesX.length; i < l; i++) {
+            content += subsetCoordinatesX[i] + ' ' + subsetCoordinatesY[i] + '\n';
+        }
+        content += 'end subset_coordinates\n';
+    }
     if(($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global")&&ROIDefsX[0].length>=3){
         if(ROIDefsX[0].length != ROIDefsY[0].length){
             alert('Error: subset file creation failed, invalid vertices for region of interest');
+            endProgress(false);
             return false;
         }
+        
         content += 'begin region_of_interest\n';
         content += '  begin boundary\n';
         // write all the boundary shapes
-        for(var i = 0, l = ROIDefsX.length; i < l; i++) {
+        for(i = 0, l = ROIDefsX.length; i < l; i++) {
             var ROIx = ROIDefsX[i];
             var ROIy = ROIDefsY[i];
             content += '    begin polygon\n';
@@ -1178,7 +1201,7 @@ function writeSubsetFile(only_write,resolution,ss_locs){
         if(excludedDefsX.length>0){
             if(excludedDefsX[0].length > 2){
                 content += '  begin excluded\n';
-                for(var i = 0, l = excludedDefsX.length; i < l; i++) {
+                for(i = 0, l = excludedDefsX.length; i < l; i++) {
                     var ROIx = excludedDefsX[i];
                     var ROIy = excludedDefsY[i];
                     content += '    begin polygon\n';
@@ -1196,18 +1219,19 @@ function writeSubsetFile(only_write,resolution,ss_locs){
     }else if($("#analysisModeSelect").val()=="tracking"&&ROIDefsX[0].length>=3){ // tracking mode
         if(ROIDefsX[0].length != ROIDefsY[0].length){
             alert('Error: subset file creation failed, invalid vertices for region of interest');
+            endProgress(false);
             return false;
         }
-        content += 'begin subset_coordinates\n';
-        // use the centroid of each shape as the frame of reference origin
-        for(var i = 0, l = ROIDefsX.length; i < l; i++) {
-            var centroid = centroidOfPolygon(ROIDefsX[i],ROIDefsY[i]);
-            content += centroid.x + ' ' + centroid.y + '\n';
-        }
-        content += 'end subset_coordinates\n';
+//        content += 'begin subset_coordinates\n';
+//        // use the centroid of each shape as the frame of reference origin
+//        for(var i = 0, l = ROIDefsX.length; i < l; i++) {
+//            var centroid = centroidOfPolygon(ROIDefsX[i],ROIDefsY[i]);
+//            content += centroid.x + ' ' + centroid.y + '\n';
+//        }
+//        content += 'end subset_coordinates\n';
 
         // add a polygon for each ROI
-        for(var i = 0, l = ROIDefsX.length; i < l; i++) {
+        for(i = 0, l = ROIDefsX.length; i < l; i++) {
             content += 'begin conformal_subset\n';
             content += '  subset_id ' + i + '\n';
             content += '  begin boundary\n';
@@ -1215,7 +1239,7 @@ function writeSubsetFile(only_write,resolution,ss_locs){
             content += '      begin vertices\n';
             var ROIx = ROIDefsX[i];
             var ROIy = ROIDefsY[i];
-            for(var j = 0, jl = ROIx.length; j < jl; j++) {
+            for(j = 0, jl = ROIx.length; j < jl; j++) {
                 content += '        ' +  ROIx[j] + ' ' + ROIy[j] + '\n';
             }
             content += '      end vertices\n';
@@ -1223,20 +1247,20 @@ function writeSubsetFile(only_write,resolution,ss_locs){
             content += '  end boundary\n';
             // excluded
             var has_excluded = false;
-            for(var j = 0, jl = excludedAssignments.length; j < jl; j++) {
+            for(j = 0, jl = excludedAssignments.length; j < jl; j++) {
                 if(excludedAssignments[j]==i)
                     has_excluded = true;
             }
             if(has_excluded){
                 content += '  begin excluded\n';
             }
-            for(var j = 0, jl = excludedAssignments.length; j < jl; j++) {
+            for(j = 0, jl = excludedAssignments.length; j < jl; j++) {
                 if(excludedAssignments[j]==i){
                     content += '    begin polygon\n'; 
                     content += '      begin vertices\n';
                     var ROIx = excludedDefsX[j];
                     var ROIy = excludedDefsY[j];
-                    for(var k = 0, kl = ROIx.length; k < kl; k++) {
+                    for(k = 0, kl = ROIx.length; k < kl; k++) {
                         content += '        ' +  ROIx[k] + ' ' + ROIy[k] + '\n';
                     }
                     content += '      end vertices\n';
@@ -1250,12 +1274,12 @@ function writeSubsetFile(only_write,resolution,ss_locs){
             if(obstructedDefsX.length > 0){
                 if(obstructedDefsX[0].length >= 3){
                     content += '  begin obstructed\n';
-                    for(var j = 0, jl = obstructedDefsX.length; j < jl; j++) {
+                    for(j = 0, jl = obstructedDefsX.length; j < jl; j++) {
                         content += '    begin polygon\n'; 
                         content += '      begin vertices\n';
                         var ROIx = obstructedDefsX[j];
                         var ROIy = obstructedDefsY[j];
-                        for(var k = 0, kl = ROIx.length; k < kl; k++) {
+                        for(k = 0, kl = ROIx.length; k < kl; k++) {
                             content += '        ' +  ROIx[k] + ' ' + ROIy[k] + '\n';
                         }
                         content += '      end vertices\n';
@@ -1269,7 +1293,7 @@ function writeSubsetFile(only_write,resolution,ss_locs){
         // for each ROI add the excluded regions with the excludedAssignment = to the ROI id
         // add all obstructions to all ROIs
     }
-    if(ROIDefsX[0].length>=3){    
+    if(ROIDefsX[0].length>=3||subsetCoordinatesX.length>0){
         fs.writeFile(subsetFile, content, function (err) {
             if(err){
                 alert("Error: an error ocurred creating the file "+ err.message)
