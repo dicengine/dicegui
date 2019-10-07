@@ -331,7 +331,7 @@ function callDICeExec(resolution,ss_locs) {
                 win.loadURL('file://' + __dirname + '/resolution.html');
                 //win.webContents.openDevTools()
             }else if(ss_locs){
-                drawDotsAndBoxesForSubsets(fullPath('','.subset_locs.txt'));
+                drawDotsAndBoxesForSubsets(fullPath('.dice','.subset_locs.txt'));
             }else{
                 postExecTasks();
             }
@@ -350,7 +350,7 @@ function callDICeExec(resolution,ss_locs) {
 function updateCineDisplayImage(fileName,index,mode,reset_ref_ROIs){
     var child_process = require('child_process');
     var readline      = require('readline');
-    var tiffImageName = fullPath('','.display_image_');
+    var tiffImageName = fullPath('.dice','.display_image_');
     if(mode==0)
         tiffImageName += 'left.tif';
     else if(mode==1)
@@ -430,7 +430,7 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
             }
             else{
                 // read the output file:
-                var statFileName = fullPath('','cine_stats.dat');
+                var statFileName = fullPath('.dice','.cine_stats.dat');
                 fs.stat(statFileName, function(err, stat) {
                     if(err != null) {
                         alert("could not find .cine stats file: " + statFileName);
@@ -439,7 +439,7 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
                          fs.readFile(statFileName, 'utf8', function (err,data) {
                              if (err) {
                                  console.log(err);
-                                 return false;                  
+                                 return false;
                              }
                              var stats = data.toString().split(/\s+/g).map(Number);
                              //alert(stats[0]);
@@ -660,7 +660,8 @@ function drawEpipolarLine(isLeft,dot_x,dot_y,reset=false) {
     leftNameFilter = '';
     rightName = '';
     rightNameFilter = '';
-    fs.readdir(workingDirectory, (err,dir) => {
+    hiddenDir = fullPath('.dice','');
+    fs.readdir(hiddenDir, (err,dir) => {
         for(var i = 0; i < dir.length; i++) {
             if(dir[i].includes('.display_image_left')&&!dir[i].includes('filter')){
                 leftName = dir[i];
@@ -671,10 +672,10 @@ function drawEpipolarLine(isLeft,dot_x,dot_y,reset=false) {
             }
         }
         if(reset){
-            getFileObject(fullPath('',leftName), function (fileObject) {
+            getFileObject(fullPath('.dice',leftName), function (fileObject) {
                 loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
             });
-            getFileObject(fullPath('',rightName), function (fileObject) {
+            getFileObject(fullPath('.dice',rightName), function (fileObject) {
                 loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
             });
             return;
@@ -712,17 +713,17 @@ function drawEpipolarLine(isLeft,dot_x,dot_y,reset=false) {
             }
             else{
                 // load new preview images
-                fs.stat(fullPath('','.display_image_left_filter.png'), function(err, stat) {
+                fs.stat(fullPath('.dice','.display_image_left_filter.png'), function(err, stat) {
                     if(err == null) {
-                        getFileObject(fullPath('','.display_image_left_filter.png'), function (fileObject) {
+                        getFileObject(fullPath('.dice','.display_image_left_filter.png'), function (fileObject) {
                             loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
                         });
                     }else{
                     }
                 });
-                fs.stat(fullPath('','.display_image_right_filter.png'), function(err, stat) {
+                fs.stat(fullPath('.dice','.display_image_right_filter.png'), function(err, stat) {
                     if(err == null) {
-                        getFileObject(fullPath('','.display_image_right_filter.png'), function (fileObject) {
+                        getFileObject(fullPath('.dice','.display_image_right_filter.png'), function (fileObject) {
                             loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
                         });
                     }else{

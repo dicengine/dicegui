@@ -84,12 +84,13 @@ function initialize_gui(load_existing){
                 if(typeof execPathOverride === 'undefined'){}
                 else{
                     if(execPathOverride!=''){
-                        //alert('setting the exec path to: ' + execPathOverride);
+                        alert('setting the exec path to: ' + execPathOverride);
                         setExecPaths(execPathOverride);
                     }
                 }
                 paraviewMsg = paraviewMsgState;
                 workingDirectory = WD;
+                createHiddenDir();
                 updateWorkingDirLabel();
                 // remove all the display images:
                 deleteDisplayImageFiles(0);
@@ -122,6 +123,7 @@ function initialize_gui(load_existing){
                 } else {
                     console.log(e);
                 }
+                createHiddenDir();
             });
             updateWorkingDirLabel();
             // remove all the display images:
@@ -135,6 +137,22 @@ function initialize_gui(load_existing){
         }
     });
 };
+
+function createHiddenDir(){
+    // create a hidden folder for all of the file input output between the GUI and the analysis exec
+    hiddenDir = workingDirectory;
+    if(os.platform()=='win32'){
+        hiddenDir += '\\.dice';
+    }else{
+        hiddenDir += '/.dice';
+    }
+    fs.mkdir(hiddenDir,function(e){
+        if(!e || (e && e.code === 'EEXIST')){
+        } else {
+            console.log(e);
+        }
+    });
+}
 
 function testForDebugMsg(){
     // test if debugging messages are turned on or off
@@ -757,7 +775,7 @@ $("#binaryThreshConstant").on('input',function(){
 });
 
 
-function saveStateFile() {  
+function saveStateFile() {
     fileName = homeDir;
     if(os.platform()=='win32'){
         fileName += '\\.dice.js';

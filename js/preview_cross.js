@@ -61,10 +61,10 @@ var getFileObject = function(filePathOrUrl, cb) {
 $(document).ready(function(){
     var previewFileName = localStorage.getItem("workingDirectory");
     if(os.platform()=='win32'){
-        previewFileName += '\\right_projected_to_left_color.tif';
+        previewFileName += '\\.dice\\right_projected_to_left_color.tif';
     }else{
-        previewFileName += '/right_projected_to_left_color.tif';
-    }                      
+        previewFileName += '/.dice/right_projected_to_left_color.tif';
+    }
     getFileObject(previewFileName, function (fileObject) {
         loadImage(fileObject,"#panzoomCross","auto","auto",1,false,false,"","",false);
     });

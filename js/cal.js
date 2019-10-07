@@ -12,9 +12,11 @@ $(window).load(function(){
     calFixK2 = "false";
     calFixK3 = "false";
     execCalPath = localStorage.getItem("execCalPath");
+    execCineStatPath = localStorage.getItem("execCineStatPath");
     execOpenCVServerPath = localStorage.getItem("execOpenCVServerPath");
     execCineToTiffPath = localStorage.getItem("execCineToTiffPath");
     console.log('using cal exec: ' + execCalPath);
+    console.log('using cineToTiff exec: ' + execCineToTiffPath);
     $("#calibrateButton").prop("disabled",true);
     $("#acceptButton").prop("disabled",true);
     $("#cancelButton").hide();
@@ -80,8 +82,14 @@ $(window).load(function(){
     });
 });
 
+hiddenDir = localStorage.getItem("workingDirectory");
+if(os.platform()=='win32'){
+    hiddenDir+="\\.dice";
+}else{
+    hiddenDir+="/.dice";
+}
 
-fs.watch(localStorage.getItem("workingDirectory"), (eventType, filename) => {
+fs.watch(hiddenDir, (eventType, filename) => {
     //console.log(eventType);
     // could be either 'rename' or 'change'. new file event and delete
     // also generally emit 'rename'
@@ -338,7 +346,7 @@ function calConsoleMsg(string){
 }
 
 function refreshCalDisplayImages(){
-    var leftName = fullPath('','.cal_left.png');
+    var leftName = fullPath('.dice','.cal_left.png');
     fs.stat(leftName, function(err, stat) {
         if(err == null) {
             getFileObject(leftName, function (fileObject) {
@@ -351,7 +359,7 @@ function refreshCalDisplayImages(){
             // no-op if the file isn't there
         }
     });
-    var rightName = fullPath('','.cal_right.png');
+    var rightName = fullPath('.dice','.cal_right.png');
     fs.stat(rightName, function(err, stat) {
         if(err == null) {
             getFileObject(rightName, function (fileObject) {
@@ -364,7 +372,7 @@ function refreshCalDisplayImages(){
             // no-op if the file isn't there
         }
     });
-    var middleName = fullPath('','.cal_middle.png');
+    var middleName = fullPath('.dice','.cal_middle.png');
     fs.stat(middleName, function(err, stat) {
         if(err == null) {
             getFileObject(middleName, function (fileObject) {
@@ -427,8 +435,8 @@ function updateCalCinePreviewImages(cb){
     cine_right = $("#cineCalRightPreview span").text();
     child_process = require('child_process');
     readline      = require('readline');
-    tifLeft  = fullPath('','.cal_') + 'left.tif';
-    tifRight = fullPath('','.cal_') + 'right.tif';
+    tifLeft  = fullPath('.dice','.cal_') + 'left.tif';
+    tifRight = fullPath('.dice','.cal_') + 'right.tif';
     index = $("#calFrameScroller").val();
     console.log("updateCalCinePreviewImages: converting file " + cine_left + " index " + index + " to .tif for display");
     var procConv = child_process.spawn(execCineToTiffPath, [cine_left,index,index,tifLeft],{cwd:workingDirectory});//,maxBuffer:1024*1024})
@@ -513,7 +521,7 @@ function callCalCineStatExec(file,callback) {
             }
             else{
                 // read the output file:
-                var statFileName = fullPath('','cine_stats.dat');
+                var statFileName = fullPath('.dice','.cine_stats.dat');
                 fs.stat(statFileName, function(err, stat) {
                     if(err != null) {
                         alert("could not find .cine stats file: " + statFileName);
@@ -563,9 +571,15 @@ function previewCalImages(first_load=false){
     console.log('previewCalImages called');
     
     if($("#calFileSelectMode").val()=="cine"){
-        leftName=".cal_left.tif";
-        rightName=".cal_right.tif";
-        middleName=".cal_middle.tif";
+        if(os.platform()=='win32'){
+            leftName=".dice\\.cal_left.tif";
+            rightName=".dice\\.cal_right.tif";
+            middleName=".dice\\.cal_middle.tif";
+        }else{
+            leftName=".dice/.cal_left.tif";
+            rightName=".dice/.cal_right.tif";
+            middleName=".dice/.cal_middle.tif";
+        }
         updateCalCinePreviewImages(function(){previewCalImagesImpl(first_load,leftName,rightName,middleName)});
         $("#calibrateButton").prop("disabled",false);
         //generateCineCalImages(function(){previewCalImagesImpl(first_load,leftName,rightName,middleName)});
@@ -592,14 +606,26 @@ function previewCalImagesImpl(first_load, leftName,rightName,middleName){
     var args = [];
     // create the list of files:
     args.push(leftName);
-    args.push('.cal_left.png');
+    if(os.platform()=='win32'){
+        args.push('.dice\\.cal_left.png');
+    }else{
+        args.push('.dice/.cal_left.png');
+    }
     if(localStorage.getItem("showStereoPane")==1){
         args.push(rightName);
-        args.push('.cal_right.png');
+        if(os.platform()=='win32'){
+            args.push('.dice\\.cal_right.png');
+        }else{
+            args.push('.dice/.cal_right.png');
+        }
     }
     if(localStorage.getItem("showStereoPane")==2){
         args.push(middleName);
-        args.push('.cal_middle.png');
+        if(os.platform()=='win32'){
+            args.push('.dice\\.cal_middle.png');
+        }else{
+            args.push('.dice/.cal_middle.png');
+        }
     }
     if(first_load){
         args.push('filter:none');
@@ -1314,7 +1340,16 @@ function writeInputFile() {
             return;
          }
         console.log('cal_input.xml file has been successfully saved');
-        deleteFileIfExists("cal.log",function(){deleteFileIfExists("cal_errors.txt",callCalExec())});
+        calLog = "";
+        calErrors = "";
+        if(os.platform()=='win32'){
+            calLog += '\\.dice\\cal.log';
+            calErrors += '\\.dice\\cal_errors.txt';
+         }else{
+             calLog += '/.dice/cal.log';
+             calErrors += '/.dice/cal_errors.txt';
+         }
+        deleteFileIfExists(calLog,function(){deleteFileIfExists(calErrors,callCalExec())});
         //callCalExec();
     });
 }
@@ -1328,14 +1363,14 @@ function callCalExec() {
     var errorName = workingDirectory;
     if(os.platform()=='win32'){
         fileName += '\\';
-        logName += '\\';
+        logName += '\\.dice\\';
         outName += '\\';
-        errorName += '\\';
+        errorName += '\\.dice\\';
     }else{
         fileName += '/';
-        logName += '/';
+        logName += '/.dice/';
         outName += '/';
-        errorName += '/';
+        errorName += '/.dice/';
     }
     fileName += 'cal_input.xml';
     logName += 'cal.log';
@@ -1451,9 +1486,10 @@ function deleteCalDisplayImageFiles(cb){
     filesToRemove.push('.cal_right.tif');
     filesToRemove.push('cal.log');
     filesToRemove.push('cal_errors.txt');
-    filesToRemove.push('cine_stats.dat');
+    filesToRemove.push('.cine_stats.dat');
     console.log('removing any existing calibration files');
-    fs.readdir(workingDirectory, (err,dir) => {
+    hiddenDir = fullPath('.dice','');
+    fs.readdir(hiddenDir, (err,dir) => {
         // es5
         // count up the number of potential files to delete
         numExistingFiles = 0;
@@ -1475,7 +1511,7 @@ function deleteCalDisplayImageFiles(cb){
                     if(filePath.includes(filesToRemove[j])){
                         numExistingFiles--;
                         console.log('attempting to delete file ' + filePath);
-                        var fullFilePath = fullPath('',filePath);
+                        var fullFilePath = fullPath('.dice',filePath);
                         fs.stat(fullFilePath, function(err, stat) {
                             console.log('stat called on file ' + fullFilePath);
                             if(err == null) {

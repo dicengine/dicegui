@@ -224,7 +224,8 @@ function deleteDisplayImageFiles(lrm,cb){
         nameToCheck += 'middle';
     }
     console.log('removing any existing display image files with name base ' + nameToCheck);
-    fs.readdir(workingDirectory, (err,dir) => {
+    hiddenDir = fullPath('.dice','');
+    fs.readdir(hiddenDir, (err,dir) => {
         // es5
         // count up the number of potential files to delete
         var numExistingFiles = 0;
@@ -237,14 +238,14 @@ function deleteDisplayImageFiles(lrm,cb){
         if(numExistingFiles==0){
             cb();
             return;
-        }        
+        }
         for(var i = 0; i < dir.length; i++) {
             (function(i) {
                 var filePath = dir[i];
                 if(filePath.includes(nameToCheck)){
                     numExistingFiles--;
                     console.log('attempting to delete file ' + filePath);
-                    var fullFilePath = fullPath('',filePath);
+                    var fullFilePath = fullPath('.dice',filePath);
                     fs.stat(fullFilePath, function(err, stat) {
                         console.log('stat called on file ' + fullFilePath);
                         if(err == null) {
@@ -282,7 +283,7 @@ function copyFile(source, target, cb) {
     });
     rd.pipe(wr);
     function done(err) {
-        if (!cbCalled) {      
+        if (!cbCalled) {
             cb(err);
             cbCalled = true;
         }
@@ -317,7 +318,7 @@ function loadImage(file,viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCla
             lrm = 1;
             copyRequired = true;
         }
-        localFileName = fullPath('',localFileName);
+        localFileName = fullPath('.dice',localFileName);
         localFileName += extension;
         if(!file.name.includes('display_image_')&&copyRequired){
             // copy the image file to the working directory as the display image
@@ -916,7 +917,9 @@ $("#performCal").click(function () {
     localStorage.setItem("execCalPath",execCalPath);
     localStorage.setItem("execOpenCVServerPath",execOpenCVServerPath);
     localStorage.setItem("execCineToTiffPath",execCineToTiffPath);
+    localStorage.setItem("execCineStatPath",execCineStatPath);
     localStorage.setItem("showStereoPane",showStereoPane);
+    
     var win = new BrowserWindow({ width: 1200, height: 1200 });
     win.on('closed', () => {
         calFileName = localStorage["calFileName"];
