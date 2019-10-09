@@ -90,18 +90,35 @@ function initialize_gui(load_existing){
                 }
                 paraviewMsg = paraviewMsgState;
                 workingDirectory = WD;
-                createHiddenDir();
-                updateWorkingDirLabel();
+                if (fs.existsSync(workingDirectory)) {
+                    createHiddenDir();
+                    updateWorkingDirLabel();
+                    if(load_existing){
+                        // load the existing input file if there is one in this directory:
+                        var existing_input = fullPath('','input.xml');
+                        console.log('loading existing input file if it exists: ' + existing_input);
+                        parse_input_xml_file(existing_input);
+                    }
+                }else{
+                    workingDirectory = homeDir;
+                    if(os.platform()=='win32'){
+                        workingDirectory += '\\dice_working_dir';
+                    }else{
+                        workingDirectory += '/dice_working_dir';
+                    }
+                    fs.mkdir(workingDirectory,function(e){
+                        if(!e || (e && e.code === 'EEXIST')){
+                        } else {
+                            console.log(e);
+                        }
+                        createHiddenDir();
+                    });
+                    updateWorkingDirLabel();
+                }
                 // remove all the display images:
                 deleteDisplayImageFiles(0);
                 deleteDisplayImageFiles(1);
                 deleteDisplayImageFiles(2);
-                if(load_existing){
-                    // load the existing input file if there is one in this directory:
-                    var existing_input = fullPath('','input.xml');
-                    console.log('loading existing input file if it exists: ' + existing_input);
-                    parse_input_xml_file(existing_input);
-                }
                 // test if debugging messages are turned on or off
                 testForDebugMsg();
             });
@@ -156,15 +173,28 @@ function createHiddenDir(){
 
 function testForDebugMsg(){
     // test if debugging messages are turned on or off
-    var child_process = require('child_process');
-    var proc = child_process.execFile(execPath,['-d'],{cwd:workingDirectory});
+    child_process = require('child_process');
+    proc = child_process.execFile(execPath,['-d'],{cwd:workingDirectory});
     proc.on('error', function(){
         alert('Error! invalid DICe executable: ' + execPath);
     });
     proc.on('close', (code) => {
         console.log(`DICe test for debug messages exited with code ${code}`);
-        if(code==1){
+        if(code==0){
+            console.log("debug messages are on");
             diceDebugMsgOn = true;
+        }
+    });
+    // test if the tracking library is available
+    proc = child_process.execFile(execPath,['--tracklib'],{cwd:workingDirectory});
+    proc.on('error', function(){
+        alert('Error! invalid DICe executable: ' + execPath);
+    });
+    proc.on('close', (code) => {
+        console.log(`DICe test for tracklib exited with code ${code}`);
+        if(code==0){
+            console.log("tracklib is on");
+            diceTrackLibOn = true;
         }
     });
 }
@@ -483,7 +513,7 @@ function resizeFullDivs(targetDiv){
 // toggle boxes up and down
 $("#stereoButton").click(function(){
     // if tracking mode is selected button is disabled:
-    //if($("#analysisModeSelect").val()=='tracking') return;
+    if($("#analysisModeSelect").val()=='tracking'&&!diceTrackLibOn) return;
     if($("#analysisModeSelect").val()=='global') return;
     
     // get the current state of stereo on or off:
@@ -678,7 +708,8 @@ $("#analysisModeSelect").on('change',function() {
         $(".tracking").show();
         // force 2D
         resetLivePlots();
-        show2DViewer();
+        if(!diceTrackLibOn)
+            show2DViewer();
         //$("#subsetParams").hide();
         //$("#trackingParams").show();
         //$("#sssigPreview").hide();

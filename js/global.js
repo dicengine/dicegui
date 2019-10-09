@@ -30,6 +30,7 @@ else if(os.platform()=='darwin'){
 
 // true if debugging messages are turned on for the dice executable
 var diceDebugMsgOn = false;
+var diceTrackLibOn = false;
 
 // image sets
 var refImagePathLeft = "undefined";
