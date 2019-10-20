@@ -7,7 +7,14 @@ let win
 
 function createWindow () {
     // Create the browser window.
-    win = new BrowserWindow({width: 800, height: 600, icon: path.join(__dirname, 'images/icons/png/icon_32x32@2x.png')})
+    win = new BrowserWindow({
+        webPreferences: {
+            nodeIntegration: true
+        },
+        width: 800,
+        height: 600,
+        icon: path.join(__dirname, 'images/icons/png/icon_32x32@2x.png')
+    })
 
     win.maximize()
     
