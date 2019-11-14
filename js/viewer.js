@@ -703,7 +703,11 @@ $("#calInput").change(function (evt) {
 });
 
 $("#calInfo").click(function(){
-    var win = new BrowserWindow({ width: 500, height: 800 });
+	var win = new BrowserWindow({ 
+            webPreferences: {
+		nodeIntegration: true
+	    },
+            width: 500, height: 800 });
     win.on('closed', () => {
         win = null
     })
@@ -900,7 +904,11 @@ $("#initCross").click(function () {
     localStorage.setItem("leftWidth",refImageWidthLeft);
     localStorage.setItem("leftHeight",refImageHeightLeft);
     localStorage.setItem("workingDirectory",workingDirectory);
-    var win = new BrowserWindow({ width: 1200, height: 1000 });
+    var win = new BrowserWindow({
+            webPreferences: {
+		nodeIntegration: true
+	    },
+            width: 1200, height: 1000 });
     win.on('closed', () => {
         win = null
         $("#crossCorrInit").show();
@@ -920,7 +928,11 @@ $("#performCal").click(function () {
     localStorage.setItem("execCineStatPath",execCineStatPath);
     localStorage.setItem("showStereoPane",showStereoPane);
     
-    var win = new BrowserWindow({ width: 1200, height: 1200 });
+    var win = new BrowserWindow({
+            webPreferences: {
+		nodeIntegration: true
+	    },
+            width: 1200, height: 1200 });
     win.on('closed', () => {
         calFileName = localStorage["calFileName"];
         if(calFileName != ""){
@@ -937,7 +949,11 @@ $("#performCal").click(function () {
 
 function openPreviewCross() {
     localStorage.setItem("workingDirectory",workingDirectory);
-    var win = new BrowserWindow({ width: 1200, height: 1000 });
+    var win = new BrowserWindow({ 
+            webPreferences: {
+		nodeIntegration: true
+	    },
+            width: 1200, height: 1000 });
     win.on('closed', () => {
         win = null
     })

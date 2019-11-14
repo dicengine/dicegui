@@ -1051,7 +1051,9 @@ $("#calOptionsButton").click(function () {
     localStorage.setItem("calFixK1",calFixK1);
     localStorage.setItem("calFixK2",calFixK2);
     localStorage.setItem("calFixK3",calFixK3);
-    var win = new BrowserWindow({ width: 500, height: 650});
+    var win = new BrowserWindow({ webPreferences: {
+		nodeIntegration: true
+	    },width: 500, height: 650});
     win.on('closed', () => {
         calFixIntrinsic = localStorage["calFixIntrinsic"];
         calUseIntrinsic = localStorage["calUseIntrinsic"];

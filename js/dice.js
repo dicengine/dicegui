@@ -119,7 +119,11 @@ function showLivePlots(){
         if(livePlotWin !== null && typeof livePlotWin === 'object'){
             //livePlotWin.close();
         }else{
-            livePlotWin = new BrowserWindow({ width: 1155, height: 800 });
+            livePlotWin = new BrowserWindow({
+                webPreferences: {
+		    nodeIntegration: true
+		},
+                width: 1155, height: 800 });
         }
         livePlotWin.on('closed', () => {
             livePlotWin = null;
@@ -142,7 +146,11 @@ function showLivePlots(){
         if(livePlotWin !== null && typeof livePlotWin === 'object'){
             //livePlotWin.close();
         }else{
-            livePlotWin = new BrowserWindow({ width: 1155, height: 800 });
+            livePlotWin = new BrowserWindow({ 
+                webPreferences: {
+		    nodeIntegration: true
+		},
+                width: 1155, height: 800 });
         }
         livePlotWin.on('closed', () => {
             livePlotWin = null;
@@ -152,7 +160,11 @@ function showLivePlots(){
     if(addLivePlotLineActive){
         if(livePlotLineWin !== null && typeof livePlotLineWin === 'object'){
         }else{
-            livePlotLineWin = new BrowserWindow({ width: 1155, height: 800 });
+            livePlotLineWin = new BrowserWindow({ 
+                webPreferences: {
+		    nodeIntegration: true
+		},
+                width: 1155, height: 800 });
         }
         livePlotLineWin.on('closed', () => {
             livePlotLineWin = null;
@@ -324,7 +336,11 @@ function callDICeExec(resolution,ss_locs) {
             ROIsChanged = false;
             if(resolution){
                 localStorage.setItem("workingDirectory",workingDirectory);
-                var win = new BrowserWindow({ width: 850, height: 1000 });
+                var win = new BrowserWindow({ 
+                webPreferences: {
+		    nodeIntegration: true
+		},
+                width: 850, height: 1000 });
                 win.on('closed', () => {
                     win = null
                 })
