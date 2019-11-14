@@ -840,8 +840,11 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
     content += '<Parameter name="correlation_parameters_file" type="string" value="' + paramsFile + '" />\n';
     
     // check that some ROIs have been defined if this is the tracking mode
-    if($("#analysisModeSelect").val()=="tracking" && ROIDefsX[0].length==0 && !only_write){
+    if($("#analysisModeSelect").val()=="tracking" && showStereoPane==0 && ROIDefsX[0].length==0 && !only_write){
         alert('ROIs must be defined');
+        endProgress(false);
+        $("#abortLi").hide();
+        $("#sssigPreview").show();
         return;
     }
     if(ROIDefsX[0].length>=3||subsetCoordinatesX.length>0){
@@ -865,6 +868,9 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
         content += '<Parameter name="separate_output_file_for_each_subset" type="bool" value="false" />\n';
     }else if($("#analysisModeSelect").val()=="tracking"){
         content += '<Parameter name="separate_output_file_for_each_subset" type="bool" value="true" />\n';
+        if(showStereoPane==1){
+            content += '<Parameter name="use_tracklib" type="bool" value="true" />\n';
+        }
     }else{
         content += '<Parameter name="mesh_size" type="double" value="'+$("#meshSize").val()+'" />\n';
     }
@@ -1089,6 +1095,8 @@ function writeParamsFile(only_write,resolution,ss_locs) {
         }else{
             content += '<Parameter name="global_element_type" type="string" value="TRI6" />\n';
         }
+    }else if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1){ // signifies TrackLib
+        content += '<Parameter name="filter_failed_cine_pixels" type="bool" value="true" />\n';
     }else{ // assume tracking at this point
         content += '<Parameter name="use_tracking_default_params" type="bool" value="true" />\n';
         content += '<Parameter name="normalize_gamma_with_active_pixels" type="bool" value="true" />\n';
