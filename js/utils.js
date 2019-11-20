@@ -196,7 +196,7 @@ function testForDebugMsg(){
             console.log("tracklib is on");
             diceTrackLibOn = true;
             if(showStereoPaneState==1&&$("#analysisModeSelect").val()=='tracking'){
-                $(".roi-tools").hide();
+                $(".non-stereo-track-tools").hide();
             }
         }
     });
@@ -508,7 +508,7 @@ function resizeFullDivs(targetDiv){
     var totalHeight = $(targetDiv).outerHeight(true);
     var resizeHeight = totalHeight - sumHeight - 8;
     // NOTE assumes only one div in the targetDiv should fill the leftover space
-    $(targetDiv).find('.fill-div').each(function() {        
+    $(targetDiv).find('.fill-div').each(function() {
         $(this).outerHeight(resizeHeight);
     })
 }
@@ -524,9 +524,9 @@ $("#stereoButton").click(function(){
     if(oldText=='run 2d'){
         showStereoViewer();
         if($("#analysisModeSelect").val()=='tracking'&&showStereoPane==1){
-            $(".roi-tools").hide();
+            $(".non-stereo-track-tools").hide();
         }else{
-            $(".roi-tools").show();
+            $(".non-stereo-track-tools").show();
         }
         checkValidInput();
 //    }else if(oldText=='run stereo'){ // turn off trinocular for now
@@ -534,7 +534,7 @@ $("#stereoButton").click(function(){
 //        checkValidInput();        
     }else{
         show2DViewer();
-        $(".roi-tools").show();
+        $(".non-stereo-track-tools").show();
         checkValidInput();
     }
     drawROIs();
@@ -705,7 +705,7 @@ $("#analysisModeSelect").on('change',function() {
         $(".full-field-and-tracking").show();
         $(".tracking").hide();
         $(".global").hide();
-        $(".roi-tools").show();
+        $(".non-stereo-track-tools").show();
         //$("#subsetParams").show();
         //$("#trackingParams").hide();
         //$("#sssigPreview").show();
@@ -720,13 +720,13 @@ $("#analysisModeSelect").on('change',function() {
         resetLivePlots();
         if(!diceTrackLibOn){
             show2DViewer();
-            $(".roi-tools").show();
+            $(".non-stereo-track-tools").show();
         }else{
             if(showStereoPane==1){
-                $(".roi-tools").hide();
+                $(".non-stereo-track-tools").hide();
             }
             else{
-                $(".roi-tools").show();
+                $(".non-stereo-track-tools").show();
             }
         }
         //$("#subsetParams").hide();
@@ -740,7 +740,7 @@ $("#analysisModeSelect").on('change',function() {
         $(".full-field-and-tracking").hide();
         $(".tracking").hide();
         $(".global").show();
-        $(".roi-tools").show();
+        $(".non-stereo-track-tools").show();
         // force 2D
         //resetLivePlots();
         show2DViewer();
