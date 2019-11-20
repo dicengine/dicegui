@@ -538,7 +538,6 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
 //}
 
 function deactivateEpipolar(){
-    if(!drawEpipolarActive) return;
     $("#drawEpipolar").css('color','rgba(0, 0, 0, 0.5)');
     drawEpipolarActive = false;
     drawEpipolarLine(false,0,0,true);
@@ -667,7 +666,7 @@ function deactivateEpipolar(){
 //}
 
 function drawEpipolarLine(isLeft,dot_x,dot_y,reset=false) {
-    if($("#analysisModeSelect").val()!="tracking") return;
+    //if($("#analysisModeSelect").val()!="tracking") return;
     // check to see that there is at least one image selected:
     if(refImagePathLeft=='undefined'&&refImagePathRight=='undefined'&&refImagePathMiddle=='undefined') return;
     // generate the command line
@@ -680,18 +679,18 @@ function drawEpipolarLine(isLeft,dot_x,dot_y,reset=false) {
     fs.readdir(hiddenDir, (err,dir) => {
         for(var i = 0; i < dir.length; i++) {
             if(dir[i].includes('.display_image_left')&&!dir[i].includes('filter')){
-                leftName = dir[i];
-                leftNameFilter = dir[i].replace('.'+dir[i].split('.').pop(),"_filter.png");
+                leftName = fullPath('.dice',dir[i]);
+                leftNameFilter = fullPath('.dice',dir[i].replace('.'+dir[i].split('.').pop(),"_filter.png"));
             }else if(dir[i].includes('.display_image_right')&&!dir[i].includes('filter')){
-                rightName = dir[i];
-                rightNameFilter = dir[i].replace('.'+dir[i].split('.').pop(),"_filter.png");
+                rightName = fullPath('.dice',dir[i]);
+                rightNameFilter = fullPath('.dice',dir[i].replace('.'+dir[i].split('.').pop(),"_filter.png"));
             }
         }
         if(reset){
-            getFileObject(fullPath('.dice',leftName), function (fileObject) {
+            getFileObject(leftName, function (fileObject) {
                 loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
             });
-            getFileObject(fullPath('.dice',rightName), function (fileObject) {
+            getFileObject(rightName, function (fileObject) {
                 loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
             });
             return;

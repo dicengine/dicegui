@@ -871,7 +871,7 @@ function updateDimsLabels (){
 
 $("#drawEpipolar").click(function(){
     // check if cal.xml file exists
-    fs.stat(fullPath('','cal.xml'), function(err, stat) {
+    fs.stat(calPath, function(err, stat) {
         if(err == null) {
             completeShape();
             addROIsActive = false;
