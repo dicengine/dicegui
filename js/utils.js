@@ -195,6 +195,9 @@ function testForDebugMsg(){
         if(code==0){
             console.log("tracklib is on");
             diceTrackLibOn = true;
+            if(showStereoPaneState==1&&$("#analysisModeSelect").val()=='tracking'){
+                $(".roi-tools").hide();
+            }
         }
     });
 }
@@ -520,12 +523,18 @@ $("#stereoButton").click(function(){
     var oldText = $('#runLi span').text();
     if(oldText=='run 2d'){
         showStereoViewer();
+        if($("#analysisModeSelect").val()=='tracking'&&showStereoPane==1){
+            $(".roi-tools").hide();
+        }else{
+            $(".roi-tools").show();
+        }
         checkValidInput();
 //    }else if(oldText=='run stereo'){ // turn off trinocular for now
 //        showTrinocViewer();
 //        checkValidInput();        
     }else{
         show2DViewer();
+        $(".roi-tools").show();
         checkValidInput();
     }
     drawROIs();
@@ -696,6 +705,7 @@ $("#analysisModeSelect").on('change',function() {
         $(".full-field-and-tracking").show();
         $(".tracking").hide();
         $(".global").hide();
+        $(".roi-tools").show();
         //$("#subsetParams").show();
         //$("#trackingParams").hide();
         //$("#sssigPreview").show();
@@ -708,8 +718,17 @@ $("#analysisModeSelect").on('change',function() {
         $(".tracking").show();
         // force 2D
         resetLivePlots();
-        if(!diceTrackLibOn)
+        if(!diceTrackLibOn){
             show2DViewer();
+            $(".roi-tools").show();
+        }else{
+            if(showStereoPane==1){
+                $(".roi-tools").hide();
+            }
+            else{
+                $(".roi-tools").show();
+            }
+        }
         //$("#subsetParams").hide();
         //$("#trackingParams").show();
         //$("#sssigPreview").hide();
@@ -721,6 +740,7 @@ $("#analysisModeSelect").on('change',function() {
         $(".full-field-and-tracking").hide();
         $(".tracking").hide();
         $(".global").show();
+        $(".roi-tools").show();
         // force 2D
         //resetLivePlots();
         show2DViewer();
