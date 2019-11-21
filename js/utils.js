@@ -196,7 +196,8 @@ function testForDebugMsg(){
             console.log("tracklib is on");
             diceTrackLibOn = true;
             if(showStereoPaneState==1&&$("#analysisModeSelect").val()=='tracking'){
-                $(".non-stereo-track-tools").hide();
+                $(".non-tracklib-tools").hide();
+                $(".tracklib-tools").show();
             }
         }
     });
@@ -524,9 +525,11 @@ $("#stereoButton").click(function(){
     if(oldText=='run 2d'){
         showStereoViewer();
         if($("#analysisModeSelect").val()=='tracking'&&showStereoPane==1){
-            $(".non-stereo-track-tools").hide();
+            $(".non-tracklib-tools").hide();
+            $(".tracklib-tools").show();
         }else{
-            $(".non-stereo-track-tools").show();
+            $(".non-tracklib-tools").show();
+            $(".tracklib-tools").hide();
         }
         checkValidInput();
 //    }else if(oldText=='run stereo'){ // turn off trinocular for now
@@ -534,7 +537,8 @@ $("#stereoButton").click(function(){
 //        checkValidInput();        
     }else{
         show2DViewer();
-        $(".non-stereo-track-tools").show();
+        $(".non-tracklib-tools").show();
+        $(".tracklib-tools").hide();
         checkValidInput();
     }
     drawROIs();
@@ -705,7 +709,8 @@ $("#analysisModeSelect").on('change',function() {
         $(".full-field-and-tracking").show();
         $(".tracking").hide();
         $(".global").hide();
-        $(".non-stereo-track-tools").show();
+        $(".non-tracklib-tools").show();
+        $(".tracklib-tools").hide();
         //$("#subsetParams").show();
         //$("#trackingParams").hide();
         //$("#sssigPreview").show();
@@ -720,13 +725,17 @@ $("#analysisModeSelect").on('change',function() {
         resetLivePlots();
         if(!diceTrackLibOn){
             show2DViewer();
-            $(".non-stereo-track-tools").show();
+            $(".non-tracklib-tools").show();
+            $(".tracklib-tools").hide();
         }else{
             if(showStereoPane==1){
-                $(".non-stereo-track-tools").hide();
+                $(".non-tracklib-tools").hide();
+                $(".tracklib-tools").show();
+                $("#fileSelectMode").val("cine").change()
             }
             else{
-                $(".non-stereo-track-tools").show();
+                $(".non-tracklib-tools").show();
+                $(".tracklib-tools").hide();
             }
         }
         //$("#subsetParams").hide();
@@ -740,7 +749,8 @@ $("#analysisModeSelect").on('change',function() {
         $(".full-field-and-tracking").hide();
         $(".tracking").hide();
         $(".global").show();
-        $(".non-stereo-track-tools").show();
+        $(".non-tracklib-tools").show();
+        $(".tracklib-tools").hide();
         // force 2D
         //resetLivePlots();
         show2DViewer();
