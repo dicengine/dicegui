@@ -391,7 +391,7 @@ function updateCineDisplayImage(fileName,index,mode,reset_ref_ROIs){
             }
             else{
                 if(diceTrackLibOn && showStereoPane==1 && $("#segPreviewCheck")[0].checked){
-                    appllyFilterToImages(tiffImageName, mode);
+                    applyFilterToImages(tiffImageName, mode);
                 }else{
                     if(mode==0){
                         getFileObject(tiffImageName, function (fileObject) {
@@ -513,7 +513,7 @@ function deactivateEpipolar(){
     drawEpipolarLine(false,0,0,true);
 }
 
-function appllyFilterToImages(fileName, mode){
+function applyFilterToImages(fileName, mode){
     // set up the arguments for the OpenCVServer
     args = [];
     // create the list of files:
@@ -540,9 +540,26 @@ function appllyFilterToImages(fileName, mode){
     }
     args.push(outName);
     
-    // TODO push the arguments to opencvserver
+    // push the arguments to opencvserver
     args.push('filter:tracklib');
-    //console.log(args);
+    // thresholding method
+    args.push('threshold_mode');
+    if($("#threshModeSelect").val()=="mean"){
+        args.push('MEAN');
+    }else{
+        args.push('GAUSSIAN');
+    }
+    // block size
+    args.push('block_size');
+    args.push(parseInt($("#threshBlockSize").val()));
+    // adaptive constant
+    args.push('binary_constant'); // needs to be a double value
+    if($("#threshAdaptiveConstant").val().includes('.')){
+        args.push($("#threshAdaptiveConstant").val());
+    }else{
+        args.push($("#threshAdaptiveConstant").val()  +'.0');
+    }
+    console.log(args);
     var child_process = require('child_process');
     var readline      = require('readline');
     var proc = child_process.spawn(execOpenCVServerPath,args,{cwd:workingDirectory});//,maxBuffer:1024*1024});
