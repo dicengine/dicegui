@@ -551,7 +551,9 @@ function applyFilterToImages(fileName, mode){
     }
     // block size
     args.push('block_size');
-    args.push(parseInt($("#threshBlockSize").val()));
+    var blockSize = parseInt($("#threshBlockSize").val());
+    if(blockSize %2 ==0) blockSize++;
+    args.push(blockSize);
     // adaptive constant
     args.push('binary_constant'); // needs to be a double value
     if($("#threshAdaptiveConstant").val().includes('.')){
