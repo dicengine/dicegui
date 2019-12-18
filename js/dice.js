@@ -540,6 +540,41 @@ function applyFilterToImages(fileName, mode){
     }
     args.push(outName);
     
+    // for now always create a background to subtract (maybe later make this an option)
+    if(cinePathLeft!='undefined'&&cinePathRight!='undefined'){ // background substraction assumes a cine file
+        args.push('filter:background');
+        args.push('cine_file_name');
+        var background_out = '';
+        if(mode==0){
+            args.push(cinePathLeft);
+            if(os.platform()=='win32'){
+                background_out = '.dice\\.background_left.tif';
+            }else{
+                background_out = '.dice/.background_left.tif'
+            }
+        }else if(mode==1){
+            args.push(cinePathRight);
+            if(os.platform()=='win32'){
+                background_out ='.dice\\.background_right.tif';
+            }else{
+                background_out ='.dice/.background_right.tif';
+            }
+        }
+        args.push('background_file_name');
+        args.push(background_out);
+        args.push('background_ref_frame');
+        args.push($("#cineRefIndex").val());
+        args.push('background_num_frames');
+        var numBackgroundFrames = parseInt($("#numBackgroundFrames").val());
+        console.log('num background frames --- ' + numBackgroundFrames);
+        if(numBackgroundFrames<0||numBackgroundFrames > ($("#cineEndIndex").val()-$("#cineStartIndex").val())){
+            alert('warning: invalid num background frames (needs to be an integer value between 0 and the total num frames in the cine file)\nSetting num background frames to 0');
+            numBackgroundFrames = 0;
+            $("#numBackgroundFrames").val(0);
+        }
+        args.push(numBackgroundFrames); // TODO make this a user parameter in the GUI eventually
+    }
+    
     // push the arguments to opencvserver
     args.push('filter:tracklib');
     // thresholding method
