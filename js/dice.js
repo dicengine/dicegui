@@ -563,10 +563,10 @@ function applyFilterToImages(fileName, mode){
         args.push('background_file_name');
         args.push(background_out);
         args.push('background_ref_frame');
-        args.push($("#cineRefIndex").val());
+        args.push($("#cineStartIndex").val());
         args.push('background_num_frames');
         var numBackgroundFrames = parseInt($("#numBackgroundFrames").val());
-        console.log('num background frames --- ' + numBackgroundFrames);
+        //console.log('num background frames --- ' + numBackgroundFrames);
         if(numBackgroundFrames<0||numBackgroundFrames > ($("#cineEndIndex").val()-$("#cineStartIndex").val())){
             alert('warning: invalid num background frames (needs to be an integer value between 0 and the total num frames in the cine file)\nSetting num background frames to 0');
             numBackgroundFrames = 0;
