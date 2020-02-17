@@ -20,8 +20,7 @@ if(os.platform()=='win32'){
     setExecPaths(win_path);
 }else if(os.platform()=='linux'){
     setExecPaths(linux_path);
-}
-else if(os.platform()=='darwin'){
+}else if(os.platform()=='darwin'){
     setExecPaths(darwin_path);
 }
 // the exec paths above can be overridden by setting a execPathOverride
@@ -108,12 +107,12 @@ function setExecPaths(path){
     execOpenCVServerPath = path + 'DICe_OpenCVServer.exe';
     execTrackingMoviePath = path + 'DICe_TrackingMovieMaker.exe';
   }else if(os.platform()=='linux' || os.platform()=='darwin'){
-    execPath = path+'dice';
-    execCrossInitPath = path+'DICe_CrossInit';
-    execCineStatPath = path+'DICe_CineStat';
-    execCineToTiffPath = path+'DICe_CineToTiff';
-    execCalPath = path+'DICe_Cal';
-    execOpenCVServerPath = path+'DICe_OpenCVServer';
-    execTrackingMoviePath = path+'DICe_TrackingMovieMaker';
+    execPath = path + 'dice';
+    execCrossInitPath = path + 'DICe_CrossInit';
+    execCineStatPath = path + 'DICe_CineStat';
+    execCineToTiffPath = path + 'DICe_CineToTiff';
+    execCalPath = path + 'DICe_Cal';
+    execOpenCVServerPath = path + 'DICe_OpenCVServer';
+    execTrackingMoviePath = path + 'DICe_TrackingMovieMaker';    
   }
 }

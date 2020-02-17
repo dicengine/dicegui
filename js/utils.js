@@ -171,34 +171,56 @@ function createHiddenDir(){
     });
 }
 
-function testForDebugMsg(){
-    // test if debugging messages are turned on or off
-    child_process = require('child_process');
-    proc = child_process.execFile(execPath,['-d'],{cwd:workingDirectory});
-    proc.on('error', function(){
-        alert('Error! invalid DICe executable: ' + execPath);
-    });
-    proc.on('close', (code) => {
-        console.log(`DICe test for debug messages exited with code ${code}`);
-        if(code==0){
-            console.log("debug messages are on");
-            diceDebugMsgOn = true;
-        }
-    });
-    // test if the tracking library is available
-    proc = child_process.execFile(execPath,['--tracklib'],{cwd:workingDirectory});
-    proc.on('error', function(){
-        alert('Error! invalid DICe executable: ' + execPath);
-    });
-    proc.on('close', (code) => {
-        console.log(`DICe test for tracklib exited with code ${code}`);
-        if(code==0){
-            console.log("tracklib is on");
-            diceTrackLibOn = true;
-            if(showStereoPaneState==1&&$("#analysisModeSelect").val()=='tracking'){
-                $(".non-tracklib-tools").hide();
-                $(".tracklib-tools").show();
-            }
+function testForDebugMsg() {
+    // test if the dice exectuable path exists
+    exec_check = require('fs');
+    exec_check.access(execPath, (err) => {
+        if (err) {
+            alert("DICe executable path does not exist. Did you set the path in global.js?\nPlease select the correct path in the following dialog.");
+            dialog.showOpenDialog({
+                properties: ['openDirectory']
+            }, function (folder) {
+                if (folder != 'undefined'){
+                    if(os.platform()=='win32'){
+                        folder = folder +"\\";
+                    }else if(os.platform()=='linux' || os.platform()=='darwin'){
+                        folder = folder +"/";
+                    }
+                    execPathOverride = folder;
+                    alert('setting the exec path to: ' + execPathOverride);
+                    setExecPaths(execPathOverride);
+                }
+            });
+        } else {
+            // test if debugging messages are turned on or off
+            child_process = require('child_process');
+            proc = child_process.execFile(execPath, ['-d'], { cwd: workingDirectory });
+            proc.on('error', function () {
+                alert('Error! invalid DICe executable: ' + execPath);
+            });
+            proc.on('close', (code) => {
+                console.log(`DICe test for debug messages exited with code ${code}`);
+                if (code == 0) {
+                    console.log("debug messages are on");
+                    diceDebugMsgOn = true;
+                }
+            });
+            // test if the tracking library is available
+            proc = child_process.execFile(execPath, ['--tracklib'], { cwd: workingDirectory });
+            proc.on('error', function () {
+                alert('Error! invalid DICe executable: ' + execPath);
+            });
+            proc.on('close', (code) => {
+                console.log(`DICe test for tracklib exited with code ${code}`);
+                if (code == 0) {
+                    console.log("tracklib is on");
+                    diceTrackLibOn = true;
+                    if (showStereoPaneState == 1 && $("#analysisModeSelect").val() == 'tracking') {
+                        $(".non-tracklib-tools").hide();
+                        $(".tracklib-tools").show();
+                    }
+                }
+            });
         }
     });
 }
