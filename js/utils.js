@@ -729,10 +729,10 @@ $("#analysisModeSelect").on('change',function() {
         $(".full-field").show();
         $(".full-field-global").show();
         $(".full-field-and-tracking").show();
-        $(".tracking").hide();
         $(".global").hide();
         $(".non-tracklib-tools").show();
         $(".tracklib-tools").hide();
+        $(".tracking").hide();
         //$("#subsetParams").show();
         //$("#trackingParams").hide();
         //$("#sssigPreview").show();
@@ -769,10 +769,10 @@ $("#analysisModeSelect").on('change',function() {
         $(".full-field").hide();
         $(".full-field-global").show();
         $(".full-field-and-tracking").hide();
-        $(".tracking").hide();
         $(".global").show();
         $(".non-tracklib-tools").show();
         $(".tracklib-tools").hide();
+        $(".tracking").hide();
         // force 2D
         //resetLivePlots();
         show2DViewer();
