@@ -1021,117 +1021,140 @@ function writeParamsFile(only_write,resolution,ss_locs) {
         content += '<Parameter name="estimate_resolution_error_max_amplitude" type="double" value="1.0" />\n';
         content += '<Parameter name="estimate_resolution_error_amplitude_step" type="double" value="1.0" />\n';
     }
-    content += '<Parameter name="interpolation_method" type="string" value="KEYS_FOURTH" />\n';
-    if($("#analysisModeSelect").val()=="subset"){
-        content += '<Parameter name="sssig_threshold" type="double" value="'+$("#sssigThresh").val()+'" />\n';
-        content += '<Parameter name="optimization_method" type="string" value="GRADIENT_BASED" />\n';
-        var initMode = $("#initSelect").val();
-        if(initMode=="featureMatching"){
-            content += '<Parameter name="initialization_method" type="string" value="USE_FEATURE_MATCHING" />\n';
-        }
-        if(initMode=="featureMatchingWThresh"){
-            content += '<Parameter name="initialization_method" type="string" value="USE_FEATURE_MATCHING" />\n';
-            content += '<Parameter name="threshold_block_size" type="int" value="' + $("#threshBlockSize").val() + '" />\n';
-        }
-        else if(initMode=="fieldValues"){
-            content += '<Parameter name="initialization_method" type="string" value="USE_FIELD_VALUES" />\n';
-        }
-        else if(initMode=="imageRegistration"){
-            content += '<Parameter name="initialization_method" type="string" value="USE_IMAGE_REGISTRATION" />\n';
-        }
-        else if(initMode=="neighborValues"){
-            content += '<Parameter name="initialization_method" type="string" value="USE_NEIGHBOR_VALUES" />\n';
-        }
-        if($("#translationCheck")[0].checked){
-            content += '<Parameter name="enable_translation" type="bool" value="true" />\n';
+    if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1){ // signifies tracklib
+        content += '<Parameter name="block_size" type="int" value="' + parseInt($("#threshBlockSize").val()) +'" />\n';
+        content += '<Parameter name="binary_constant" type="double" value="';
+        if($("#threshAdaptiveConstant").val().includes('.')){
+            content += $("#threshAdaptiveConstant").val();
         }else{
-            content += '<Parameter name="enable_translation" type="bool" value="false" />\n';
+            content += $("#threshAdaptiveConstant").val()  +'.0';
         }
-        if($("#rotationCheck")[0].checked){
-            content += '<Parameter name="enable_rotation" type="bool" value="true" />\n';
+        content += '" />\n';
+        content += '<Parameter name="threshold_mode" type="string" value="';
+        if($("#threshModeSelect").val()=="mean"){
+            content += 'mean';
         }else{
-            content += '<Parameter name="enable_rotation" type="bool" value="false" />\n';
+            content += 'gaussian';
         }
-        if($("#normalStrainCheck")[0].checked){
-            content += '<Parameter name="enable_normal_strain" type="bool" value="true" />\n';
-        }else{
-            content += '<Parameter name="enable_normal_strain" type="bool" value="false" />\n';
-        }  
-        if($("#shearStrainCheck")[0].checked){
-            content += '<Parameter name="enable_shear_strain" type="bool" value="true" />\n';
-        }else{
-            content += '<Parameter name="enable_shear_strain" type="bool" value="false" />\n';
+        content += '" />\n';
+        var numBackgroundFrames = parseInt($("#numBackgroundFrames").val());
+        if(numBackgroundFrames<0||numBackgroundFrames > ($("#cineEndIndex").val()-$("#cineStartIndex").val())){
+            alert('warning: invalid num background frames (needs to be an integer value between 0 and the total num frames in the cine file)\nSetting num background frames to 0');
+            numBackgroundFrames = 0;
+            $("#numBackgroundFrames").val(0);
         }
-        if($("#strainCheck")[0].checked){
-            content += '<ParameterList name="post_process_vsg_strain">\n';
-            content += '<Parameter name="strain_window_size_in_pixels" type="int" value="'+$("#strainGaugeSize").val()+'" />\n';
-            content += '</ParameterList>\n';
-        }
-    }else if($("#analysisModeSelect").val()=="global"){
-        content += '<Parameter name="max_solver_iterations_fast" type="int" value="500" />\n';
-        content += '<Parameter name="global_solver" type="string" value="gmres_solver" />\n';
-        content += '<Parameter name="global_formulation" type="string" value="horn_schunck" />\n';
-        content += '<Parameter name="global_regularization_alpha" type="double" value="'+$("#regularizationConstant").val()+'" />\n';
-        if($("#elementTypeSelect").val()=="TRI3"){
-            content += '<Parameter name="global_element_type" type="string" value="TRI3" />\n';
-        }else{
-            content += '<Parameter name="global_element_type" type="string" value="TRI6" />\n';
-        }
-    }else if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1){ // signifies TrackLib
-        content += '<Parameter name="filter_failed_cine_pixels" type="bool" value="true" />\n';
-    }else{ // assume tracking at this point
-        content += '<Parameter name="use_tracking_default_params" type="bool" value="true" />\n';
-        content += '<Parameter name="normalize_gamma_with_active_pixels" type="bool" value="true" />\n';
-        content += '<Parameter name="filter_failed_cine_pixels" type="bool" value="true" />\n';
-        content += '<Parameter name="use_search_initialization_for_failed_steps" type="bool" value="true" />\n';
-        content += '<Parameter name="obstruction_skin_factor" type="double" value="1.0" />\n';
-        if($("#optModeSelect").val()=="simplex"){
-            content += '<Parameter name="optimization_method" type="string" value="SIMPLEX" />\n';
-            content += '<Parameter name="compute_image_gradients" type="bool" value="false" />\n';
-        }else{
-            content += '<Parameter name="compute_image_gradients" type="bool" value="true" />\n';
-            content += '<Parameter name="optimization_method" type="string" value="GRADIENT_BASED_THEN_SIMPLEX" />\n';
-        }
-    }
-    if($("#filterCheck")[0].checked){
-        content += '<Parameter name="gauss_filter_images" type="bool" value="true" />\n';
-        content += '<Parameter name="gauss_filter_mask_size" type="int" value="'+$("#filterSize").val()+'" />\n';
-    }
-    content += '<Parameter name="output_delimiter" type="string" value="," />\n'
-    content += '<ParameterList name="output_spec"> \n';
-    content += '<Parameter name="COORDINATE_X" type="bool" value="true" />\n';
-    content += '<Parameter name="COORDINATE_Y" type="bool" value="true" />\n';
-    content += '<Parameter name="DISPLACEMENT_X" type="bool" value="true" />\n';
-    content += '<Parameter name="DISPLACEMENT_Y" type="bool" value="true" />\n';
-    if((showStereoPane==1||showStereoPane==2)&&$("#analysisModeSelect").val()=="subset"||(showStereoPane==0&&$("#calibrationCheck")[0].checked)){
-        content += '<Parameter name="MODEL_COORDINATES_X" type="bool" value="true" />\n';
-        content += '<Parameter name="MODEL_COORDINATES_Y" type="bool" value="true" />\n';
-        content += '<Parameter name="MODEL_COORDINATES_Z" type="bool" value="true" />\n';
-        content += '<Parameter name="MODEL_DISPLACEMENT_X" type="bool" value="true" />\n';
-        content += '<Parameter name="MODEL_DISPLACEMENT_Y" type="bool" value="true" />\n';
-        content += '<Parameter name="MODEL_DISPLACEMENT_Z" type="bool" value="true" />\n';
-    }
-    if($("#analysisModeSelect").val()=="subset" && $("#initSelect").val()=="imageRegistration"){
-        content += '<Parameter name="ROTATION_Z" type="bool" value="true" />\n';
-    }
-    if($("#analysisModeSelect").val()=="subset"){
-        content += '<Parameter name="SIGMA" type="bool" value="true" />\n';
-        content += '<Parameter name="GAMMA" type="bool" value="true" />\n';
-        content += '<Parameter name="BETA" type="bool" value="true" />\n';
-        content += '<Parameter name="STATUS_FLAG" type="bool" value="true" />\n';
-        content += '<Parameter name="UNCERTAINTY" type="bool" value="true" />\n';
-        if($("#strainCheck")[0].checked){
-            content += '<Parameter name="VSG_STRAIN_XX" type="bool" value="true" />\n';
-            content += '<Parameter name="VSG_STRAIN_YY" type="bool" value="true" />\n';
-            content += '<Parameter name="VSG_STRAIN_XY" type="bool" value="true" />\n';
-        }
+        content += '<Parameter name="num_background_frames" type="int" value="' + numBackgroundFrames +'" />\n';
     }else{
-        content += '<Parameter name="ROTATION_Z" type="bool" value="true" />\n';
-        content += '<Parameter name="SIGMA" type="bool" value="true" />\n';
-        content += '<Parameter name="GAMMA" type="bool" value="true" />\n';
-        content += '<Parameter name="BETA" type="bool" value="true" />\n';    
+        content += '<Parameter name="interpolation_method" type="string" value="KEYS_FOURTH" />\n';
+        if($("#analysisModeSelect").val()=="subset"){
+            content += '<Parameter name="sssig_threshold" type="double" value="'+$("#sssigThresh").val()+'" />\n';
+            content += '<Parameter name="optimization_method" type="string" value="GRADIENT_BASED" />\n';
+            var initMode = $("#initSelect").val();
+            if(initMode=="featureMatching"){
+                content += '<Parameter name="initialization_method" type="string" value="USE_FEATURE_MATCHING" />\n';
+            }
+            if(initMode=="featureMatchingWThresh"){
+                content += '<Parameter name="initialization_method" type="string" value="USE_FEATURE_MATCHING" />\n';
+                content += '<Parameter name="threshold_block_size" type="int" value="' + $("#threshBlockSize").val() + '" />\n';
+            }
+            else if(initMode=="fieldValues"){
+                content += '<Parameter name="initialization_method" type="string" value="USE_FIELD_VALUES" />\n';
+            }
+            else if(initMode=="imageRegistration"){
+                content += '<Parameter name="initialization_method" type="string" value="USE_IMAGE_REGISTRATION" />\n';
+            }
+            else if(initMode=="neighborValues"){
+                content += '<Parameter name="initialization_method" type="string" value="USE_NEIGHBOR_VALUES" />\n';
+            }
+            if($("#translationCheck")[0].checked){
+                content += '<Parameter name="enable_translation" type="bool" value="true" />\n';
+            }else{
+                content += '<Parameter name="enable_translation" type="bool" value="false" />\n';
+            }
+            if($("#rotationCheck")[0].checked){
+                content += '<Parameter name="enable_rotation" type="bool" value="true" />\n';
+            }else{
+                content += '<Parameter name="enable_rotation" type="bool" value="false" />\n';
+            }
+            if($("#normalStrainCheck")[0].checked){
+                content += '<Parameter name="enable_normal_strain" type="bool" value="true" />\n';
+            }else{
+                content += '<Parameter name="enable_normal_strain" type="bool" value="false" />\n';
+            }  
+            if($("#shearStrainCheck")[0].checked){
+                content += '<Parameter name="enable_shear_strain" type="bool" value="true" />\n';
+            }else{
+                content += '<Parameter name="enable_shear_strain" type="bool" value="false" />\n';
+            }
+            if($("#strainCheck")[0].checked){
+                content += '<ParameterList name="post_process_vsg_strain">\n';
+                content += '<Parameter name="strain_window_size_in_pixels" type="int" value="'+$("#strainGaugeSize").val()+'" />\n';
+                content += '</ParameterList>\n';
+            }
+        }else if($("#analysisModeSelect").val()=="global"){
+            content += '<Parameter name="max_solver_iterations_fast" type="int" value="500" />\n';
+            content += '<Parameter name="global_solver" type="string" value="gmres_solver" />\n';
+            content += '<Parameter name="global_formulation" type="string" value="horn_schunck" />\n';
+            content += '<Parameter name="global_regularization_alpha" type="double" value="'+$("#regularizationConstant").val()+'" />\n';
+            if($("#elementTypeSelect").val()=="TRI3"){
+                content += '<Parameter name="global_element_type" type="string" value="TRI3" />\n';
+            }else{
+                content += '<Parameter name="global_element_type" type="string" value="TRI6" />\n';
+            }
+        }else{ // assume tracking at this point
+            content += '<Parameter name="use_tracking_default_params" type="bool" value="true" />\n';
+            content += '<Parameter name="normalize_gamma_with_active_pixels" type="bool" value="true" />\n';
+            content += '<Parameter name="filter_failed_cine_pixels" type="bool" value="true" />\n';
+            content += '<Parameter name="use_search_initialization_for_failed_steps" type="bool" value="true" />\n';
+            content += '<Parameter name="obstruction_skin_factor" type="double" value="1.0" />\n';
+            if($("#optModeSelect").val()=="simplex"){
+                content += '<Parameter name="optimization_method" type="string" value="SIMPLEX" />\n';
+                content += '<Parameter name="compute_image_gradients" type="bool" value="false" />\n';
+            }else{
+                content += '<Parameter name="compute_image_gradients" type="bool" value="true" />\n';
+                content += '<Parameter name="optimization_method" type="string" value="GRADIENT_BASED_THEN_SIMPLEX" />\n';
+            }
+        }
+        if($("#filterCheck")[0].checked){
+            content += '<Parameter name="gauss_filter_images" type="bool" value="true" />\n';
+            content += '<Parameter name="gauss_filter_mask_size" type="int" value="'+$("#filterSize").val()+'" />\n';
+        }
+        content += '<Parameter name="output_delimiter" type="string" value="," />\n'
+            content += '<ParameterList name="output_spec"> \n';
+        content += '<Parameter name="COORDINATE_X" type="bool" value="true" />\n';
+        content += '<Parameter name="COORDINATE_Y" type="bool" value="true" />\n';
+        content += '<Parameter name="DISPLACEMENT_X" type="bool" value="true" />\n';
+        content += '<Parameter name="DISPLACEMENT_Y" type="bool" value="true" />\n';
+        if((showStereoPane==1||showStereoPane==2)&&$("#analysisModeSelect").val()=="subset"||(showStereoPane==0&&$("#calibrationCheck")[0].checked)){
+            content += '<Parameter name="MODEL_COORDINATES_X" type="bool" value="true" />\n';
+            content += '<Parameter name="MODEL_COORDINATES_Y" type="bool" value="true" />\n';
+            content += '<Parameter name="MODEL_COORDINATES_Z" type="bool" value="true" />\n';
+            content += '<Parameter name="MODEL_DISPLACEMENT_X" type="bool" value="true" />\n';
+            content += '<Parameter name="MODEL_DISPLACEMENT_Y" type="bool" value="true" />\n';
+            content += '<Parameter name="MODEL_DISPLACEMENT_Z" type="bool" value="true" />\n';
+        }
+        if($("#analysisModeSelect").val()=="subset" && $("#initSelect").val()=="imageRegistration"){
+            content += '<Parameter name="ROTATION_Z" type="bool" value="true" />\n';
+        }
+        if($("#analysisModeSelect").val()=="subset"){
+            content += '<Parameter name="SIGMA" type="bool" value="true" />\n';
+            content += '<Parameter name="GAMMA" type="bool" value="true" />\n';
+            content += '<Parameter name="BETA" type="bool" value="true" />\n';
+            content += '<Parameter name="STATUS_FLAG" type="bool" value="true" />\n';
+            content += '<Parameter name="UNCERTAINTY" type="bool" value="true" />\n';
+            if($("#strainCheck")[0].checked){
+                content += '<Parameter name="VSG_STRAIN_XX" type="bool" value="true" />\n';
+                content += '<Parameter name="VSG_STRAIN_YY" type="bool" value="true" />\n';
+                content += '<Parameter name="VSG_STRAIN_XY" type="bool" value="true" />\n';
+            }
+        }else{
+            content += '<Parameter name="ROTATION_Z" type="bool" value="true" />\n';
+            content += '<Parameter name="SIGMA" type="bool" value="true" />\n';
+            content += '<Parameter name="GAMMA" type="bool" value="true" />\n';
+            content += '<Parameter name="BETA" type="bool" value="true" />\n';    
+        }
+        content += '</ParameterList>\n';
     }
-    content += '</ParameterList>\n';
     content += '</ParameterList>\n';
     fs.writeFile(paramsFile, content, function (err) {
         if(err){
