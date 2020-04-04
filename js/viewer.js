@@ -666,6 +666,16 @@ $("#frameScroller").on('input', function () {
     $("#cineRefIndex").trigger("change");
 });
 
+$(".update-tracklib-preview").keypress(function(event) { 
+    if (event.keyCode === 13) { 
+        $("#cineRefIndex").trigger("change");
+    } 
+}); 
+
+$("#segPreviewCheck").change(function () {
+    $("#cineRefIndex").trigger("change");
+}); 
+
 $("#rightRefInput").on("click",function () {
     this.value = null;
 });
