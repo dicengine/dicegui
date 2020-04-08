@@ -648,6 +648,8 @@ $("#cineRefIndex").change(function () {
             return;
         }
     var offsetIndex = Number(refIndex);// - cineFirstFrame;
+    cineLeftOpenCVComplete = false;
+    cineRightOpenCVComplete = false;
     //alert("offset_index " + offsetIndex);
     if(cinePathLeft!="undefined")
         updateCineDisplayImage(cinePathLeft,offsetIndex,0);
@@ -660,11 +662,11 @@ $("#cineRefIndex").change(function () {
 });
 
 $("#frameScroller").on('input', function () {
-    $("#cineCurrentPreviewSpan").text($(this).val());
-}).change(function(){
-    $("#cineRefIndex").val($(this).val());
-    $("#cineRefIndex").trigger("change");
-});
+        $("#cineCurrentPreviewSpan").text($(this).val());
+    }).change(function(){
+        $("#cineRefIndex").val($(this).val());
+        $("#cineRefIndex").trigger("change");
+    });
 
 $(".update-tracklib-preview").keypress(function(event) { 
     if (event.keyCode === 13) { 
@@ -673,6 +675,14 @@ $(".update-tracklib-preview").keypress(function(event) {
 }); 
 
 $("#segPreviewCheck").change(function () {
+    $("#cineRefIndex").trigger("change");
+    if($("#segPreviewCheck")[0].checked)
+        $("#threshPreviewCheck").removeAttr("disabled");
+    else
+        $("#threshPreviewCheck").attr("disabled", true);
+}); 
+
+$("#threshPreviewCheck").change(function () {
     $("#cineRefIndex").trigger("change");
 }); 
 
@@ -694,7 +704,7 @@ $("#middleRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
     $("#refImageTextMiddle span").text(file.name);
-    //loadImage(file,"#panzoomMiddle","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+    //loadImage(file,"#panzoomMiddle","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].) callOpenCVServerExec();});
     loadImage(file,"#panzoomMiddle","auto","auto",1,false,false,"","",true);
 });
 
@@ -900,7 +910,7 @@ $("#drawEpipolar").click(function(){
                 deactivateEpipolar();
             }
         }else {
-            alert('cal.xml file does not exist (this utility only works once a calibration has been performed)');
+            alert('calibration file has not been set (this utility only works once a calibration has been performed)');
             return;
         }
     });

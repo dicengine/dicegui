@@ -577,6 +577,16 @@ function applyFilterToImages(fileName, mode){
     
     // push the arguments to opencvserver
     args.push('filter:tracklib');
+    args.push('show_threshold');
+    if($("#threshPreviewCheck")[0].checked)
+        args.push('true');
+    else
+        args.push('false');
+    args.push('is_left');
+    if(mode==0)
+        args.push('true');
+    else
+        args.push('false');
     // thresholding method
     args.push('threshold_mode');
     if($("#threshModeSelect").val()=="mean"){
@@ -612,9 +622,13 @@ function applyFilterToImages(fileName, mode){
                 if(err == null) {
                     getFileObject(fullPath('',outName), function (fileObject) {
                         if(mode==0){
+                            cineLeftOpenCVComplete = true;
                             loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
+                            console.log("loading image after applying tracklib filter " + cineLeftOpenCVComplete + " " + cineRightOpenCVComplete);
                         }else{
+                            cineRightOpenCVComplete = true;
                             loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
+                            console.log("loading image after applying tracklib filter " + cineLeftOpenCVComplete + " " + cineRightOpenCVComplete);
                         }
                     });
                 }else{
@@ -645,12 +659,14 @@ function drawEpipolarLine(isLeft,dot_x,dot_y,reset=false) {
     hiddenDir = fullPath('.dice','');
     fs.readdir(hiddenDir, (err,dir) => {
         for(var i = 0; i < dir.length; i++) {
-            if(dir[i].includes('.display_image_left')&&!dir[i].includes('filter')){
+            if(dir[i].includes('.display_image_left')&&!dir[i].includes('filter')&&!dir[i].includes('epipolar')){
                 leftName = fullPath('.dice',dir[i]);
                 leftNameFilter = fullPath('.dice',dir[i].replace('.'+dir[i].split('.').pop(),"_filter.png"));
-            }else if(dir[i].includes('.display_image_right')&&!dir[i].includes('filter')){
+                leftNameEpipolar = fullPath('.dice',dir[i].replace('.'+dir[i].split('.').pop(),"_epipolar.png"));
+            }else if(dir[i].includes('.display_image_right')&&!dir[i].includes('filter')&&!dir[i].includes('epipolar')){
                 rightName = fullPath('.dice',dir[i]);
                 rightNameFilter = fullPath('.dice',dir[i].replace('.'+dir[i].split('.').pop(),"_filter.png"));
+                rightNameEpipolar = fullPath('.dice',dir[i].replace('.'+dir[i].split('.').pop(),"_epipolar.png"));
             }
         }
         if(reset){
@@ -662,10 +678,16 @@ function drawEpipolarLine(isLeft,dot_x,dot_y,reset=false) {
             });
             return;
         }
-        args.push(leftName);
-        args.push(leftNameFilter);
-        args.push(rightName);
-        args.push(rightNameFilter);
+        if($("#segPreviewCheck")[0].checked)
+            args.push(leftNameFilter);
+        else
+            args.push(leftName);
+        args.push(leftNameEpipolar);
+        if($("#segPreviewCheck")[0].checked)
+            args.push(rightNameFilter);
+        else
+            args.push(rightName);
+        args.push(rightNameEpipolar);
         args.push('filter:epipolar_line');
         args.push('epipolar_is_left');
         if(isLeft)
@@ -695,17 +717,17 @@ function drawEpipolarLine(isLeft,dot_x,dot_y,reset=false) {
             }
             else{
                 // load new preview images
-                fs.stat(fullPath('.dice','.display_image_left_filter.png'), function(err, stat) {
+                fs.stat(fullPath('.dice','.display_image_left_epipolar.png'), function(err, stat) {
                     if(err == null) {
-                        getFileObject(fullPath('.dice','.display_image_left_filter.png'), function (fileObject) {
+                        getFileObject(fullPath('.dice','.display_image_left_epipolar.png'), function (fileObject) {
                             loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
                         });
                     }else{
                     }
                 });
-                fs.stat(fullPath('.dice','.display_image_right_filter.png'), function(err, stat) {
+                fs.stat(fullPath('.dice','.display_image_right_epipolar.png'), function(err, stat) {
                     if(err == null) {
-                        getFileObject(fullPath('.dice','.display_image_right_filter.png'), function (fileObject) {
+                        getFileObject(fullPath('.dice','.display_image_right_epipolar.png'), function (fileObject) {
                             loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
                         });
                     }else{
