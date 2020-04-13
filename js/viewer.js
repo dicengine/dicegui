@@ -243,13 +243,13 @@ function deleteDisplayImageFiles(lrm,cb){
             (function(i) {
                 var filePath = dir[i];
                 if(filePath.includes(nameToCheck)){
-                    numExistingFiles--;
                     console.log('attempting to delete file ' + filePath);
                     var fullFilePath = fullPath('.dice',filePath);
                     fs.stat(fullFilePath, function(err, stat) {
                         console.log('stat called on file ' + fullFilePath);
                         if(err == null) {
                             fs.unlink(fullFilePath, (err) => {
+                                numExistingFiles--;
                                 if (err) throw err;
                                 console.log('successfully deleted '+fullFilePath+' '+i);
                                 if(numExistingFiles==0) {
@@ -259,6 +259,51 @@ function deleteDisplayImageFiles(lrm,cb){
                         }else{
                             // no-op
 	                }
+                    }); // end stat
+                } //end includes
+            })(i);
+        }
+    });
+}
+
+function deleteKeypointFiles(cb){
+    var cbCalled = false;
+    cb = cb || $.noop;
+    console.log('removing any existing keypoint files');
+    hiddenDir = fullPath('.dice','');
+    fs.readdir(hiddenDir, (err,dir) => {
+        // count up the number of potential files to delete
+        var numExistingFiles = 0;
+        if(!dir)return;
+        for(var i = 0; i < dir.length; i++) {
+            if(dir[i].includes('keypoints'))
+                numExistingFiles++;
+        }
+        console.log(numExistingFiles + ' keypoint files exist');
+        if(numExistingFiles==0){
+            cb();
+            return;
+        }
+        for(var i = 0; i < dir.length; i++) {
+            (function(i) {
+                var filePath = dir[i];
+                if(filePath.includes('keypoints')){
+                    console.log('attempting to delete file ' + filePath);
+                    var fullFilePath = fullPath('.dice',filePath);
+                    fs.stat(fullFilePath, function(err, stat) {
+                        console.log('stat called on file ' + fullFilePath);
+                        if(err == null) {
+                            fs.unlink(fullFilePath, (err) => {
+                                numExistingFiles--;
+                                if (err) throw err;
+                                console.log('successfully deleted '+fullFilePath+' '+i);
+                                if(numExistingFiles==0) {
+                                    cb();
+                                }
+                        });
+                        }else{
+                            // no-op
+                    }
                     }); // end stat
                 } //end includes
             })(i);
@@ -665,8 +710,23 @@ $("#frameScroller").on('input', function () {
         $("#cineCurrentPreviewSpan").text($(this).val());
     }).change(function(){
         $("#cineRefIndex").val($(this).val());
-        $("#cineRefIndex").trigger("change");
+        if(typeof arrowCausedEvent === 'undefined'){
+            deleteKeypointFiles(function(){$("#cineRefIndex").trigger("change");});
+        }else{
+            if(arrowCausedEvent){
+                $("#cineRefIndex").trigger("change");
+            }
+            else
+                deleteKeypointFiles(function(){$("#cineRefIndex").trigger("change");});
+        }
+        arrowCausedEvent = false;
     });
+
+$("#frameScroller").on('keydown', function(event) {
+    if (event.keyCode === 37 || event.keyCode === 39) { 
+        arrowCausedEvent = true;
+    } 
+}); 
 
 $(".update-tracklib-preview").keypress(function(event) { 
     if (event.keyCode === 13) { 

@@ -231,6 +231,8 @@ function resetWorkingDirectory(){
         deleteDisplayImageFiles(0);
         deleteDisplayImageFiles(1);
         deleteDisplayImageFiles(2);
+
+        deleteKeypointFiles(0);
 }
 
 document.getElementById("clearLi").onclick = function() {
@@ -495,6 +497,7 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
                                  cinePathMiddle = file.path;
                                  $("#cineMiddlePreview span").text(file.name);
                              }
+                             deleteKeypointFiles();
                              deleteDisplayImageFiles(mode,function(){updateCineDisplayImage(fileName,stats[1],mode,reset_ref_ROIs);});
                              callback = callback || $.noop;
                              callback();
@@ -577,6 +580,8 @@ function applyFilterToImages(fileName, mode){
     
     // push the arguments to opencvserver
     args.push('filter:tracklib');
+    args.push('frame_number');
+    args.push($("#cineRefIndex").val());
     args.push('show_threshold');
     if($("#threshPreviewCheck")[0].checked)
         args.push('true');
@@ -689,6 +694,8 @@ function drawEpipolarLine(isLeft,dot_x,dot_y,reset=false) {
             args.push(rightName);
         args.push(rightNameEpipolar);
         args.push('filter:epipolar_line');
+        args.push('frame_number');
+        args.push($("#cineRefIndex").val());
         args.push('epipolar_is_left');
         if(isLeft)
             args.push('true');
