@@ -232,7 +232,8 @@ function resetWorkingDirectory(){
         deleteDisplayImageFiles(1);
         deleteDisplayImageFiles(2);
 
-        deleteKeypointFiles(0);
+        deleteHiddenFiles('keypoints');
+        deleteHiddenFiles('background');
 }
 
 document.getElementById("clearLi").onclick = function() {
@@ -497,7 +498,7 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
                                  cinePathMiddle = file.path;
                                  $("#cineMiddlePreview span").text(file.name);
                              }
-                             deleteKeypointFiles();
+                             deleteHiddenFiles('keypoints');
                              deleteDisplayImageFiles(mode,function(){updateCineDisplayImage(fileName,stats[1],mode,reset_ref_ROIs);});
                              callback = callback || $.noop;
                              callback();
@@ -584,6 +585,11 @@ function applyFilterToImages(fileName, mode){
     args.push($("#cineRefIndex").val());
     args.push('show_threshold');
     if($("#threshPreviewCheck")[0].checked)
+        args.push('true');
+    else
+        args.push('false');
+    args.push('show_trajectory');
+    if($("#trajectoryPreviewCheck")[0].checked)
         args.push('true');
     else
         args.push('false');

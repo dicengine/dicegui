@@ -1,8 +1,9 @@
 //
 
 function fullPath(folder,file){
-    if(typeof workingDirectory === 'undefined')
+    if(typeof workingDirectory === 'undefined' || workingDirectory === null || workingDirectory == 'undefined'){
         workingDirectory = localStorage.getItem("workingDirectory");
+    }
     var filePath = workingDirectory;
     if(folder!=''){
         if(os.platform()=='win32'){

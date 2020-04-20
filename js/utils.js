@@ -97,6 +97,7 @@ function initialize_gui(load_existing){
                         // load the existing input file if there is one in this directory:
                         var existing_input = fullPath('','input.xml');
                         console.log('loading existing input file if it exists: ' + existing_input);
+                        deleteHiddenFiles('cine_stats');
                         parse_input_xml_file(existing_input);
                     }
                 }else{
@@ -119,6 +120,8 @@ function initialize_gui(load_existing){
                 deleteDisplayImageFiles(0);
                 deleteDisplayImageFiles(1);
                 deleteDisplayImageFiles(2);
+                deleteHiddenFiles('keypoints');
+                deleteHiddenFiles('background');
                 // test if debugging messages are turned on or off
                 testForDebugMsg();
             });
@@ -147,6 +150,8 @@ function initialize_gui(load_existing){
             deleteDisplayImageFiles(0);
             deleteDisplayImageFiles(1);
             deleteDisplayImageFiles(2);
+            deleteHiddenFiles('keypoints');
+            deleteHiddenFiles('background');
             // test if debugging messages are turned on or off
             testForDebugMsg();
         } else {

@@ -179,39 +179,6 @@ $("#panzoomMiddle").parent().on('mousewheel.focal', function( e ) {
     });
 });
 
-//$("#previewFilterLi").click(function (){
-//    callOpenCVServerExec();
-//});
-
-//$("#previewFilterResetLi").click(function (){
-//    $("#binaryCheck")[0].checked = false;
-//    $("#binaryInvertedCheck")[0].checked = false;
-//    $("#binaryThreshBlockSizeLabel").text("75");
-//    $("#binaryThreshBlockSize").val(75);
-//    $("#binaryThreshConstantLabel").text("10");
-//    $("#binaryThreshConstant").val(10);
-//    // re-load the original images, but don't change the stored values of ref images in global vars
-//    fs.readdir(workingDirectory, (err,dir) => {
-//        for(var i = 0; i < dir.length; i++) {
-//            if(dir[i].includes('.display_image_left')&&!dir[i].includes('filter')){
-//                getFileObject(fullPath('',dir[i]), function (fileObject) {
-//                    loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
-//                });
-//            }
-//            if(dir[i].includes('.display_image_right')&&!dir[i].includes('filter')){
-//                getFileObject(fullPath('',dir[i]), function (fileObject) {
-//                    loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
-//                });
-//            }
-//            if(dir[i].includes('.display_image_middle')&&!dir[i].includes('filter')){
-//                getFileObject(fullPath('',dir[i]), function (fileObject) {
-//                    loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",false);
-//                });
-//            }
-//        }
-//    });
-//});
-
 function deleteDisplayImageFiles(lrm,cb){
     var cbCalled = false;
     cb = cb || $.noop;
@@ -223,8 +190,8 @@ function deleteDisplayImageFiles(lrm,cb){
     }else{
         nameToCheck += 'middle';
     }
-    console.log('removing any existing display image files with name base ' + nameToCheck);
     hiddenDir = fullPath('.dice','');
+    console.log('removing any existing display image files with name base ' + nameToCheck + ' from ' + hiddenDir);
     fs.readdir(hiddenDir, (err,dir) => {
         // es5
         // count up the number of potential files to delete
@@ -266,20 +233,20 @@ function deleteDisplayImageFiles(lrm,cb){
     });
 }
 
-function deleteKeypointFiles(cb){
+function deleteHiddenFiles(find_str,cb){
     var cbCalled = false;
     cb = cb || $.noop;
-    console.log('removing any existing keypoint files');
     hiddenDir = fullPath('.dice','');
+    console.log('removing hidden files from ' + hiddenDir);
     fs.readdir(hiddenDir, (err,dir) => {
         // count up the number of potential files to delete
         var numExistingFiles = 0;
         if(!dir)return;
         for(var i = 0; i < dir.length; i++) {
-            if(dir[i].includes('keypoints'))
+            if(dir[i].includes(find_str))
                 numExistingFiles++;
         }
-        console.log(numExistingFiles + ' keypoint files exist');
+        console.log(numExistingFiles + ' hidden files exist');
         if(numExistingFiles==0){
             cb();
             return;
@@ -287,7 +254,7 @@ function deleteKeypointFiles(cb){
         for(var i = 0; i < dir.length; i++) {
             (function(i) {
                 var filePath = dir[i];
-                if(filePath.includes('keypoints')){
+                if(filePath.includes(find_str)){
                     console.log('attempting to delete file ' + filePath);
                     var fullFilePath = fullPath('.dice',filePath);
                     fs.stat(fullFilePath, function(err, stat) {
@@ -636,6 +603,8 @@ $("#leftCineInput").change(function (evt) {
                 deleteDisplayImageFiles(0);
                 deleteDisplayImageFiles(1);
                 deleteDisplayImageFiles(2);
+                deleteHiddenFiles('keypoints');
+                deleteHiddenFiles('background');
                 cinePathRight = "undefined";
                 $("#cineRightPreviewSpan").text("");
                 $("#cineStartPreviewSpan").text("");
@@ -711,13 +680,13 @@ $("#frameScroller").on('input', function () {
     }).change(function(){
         $("#cineRefIndex").val($(this).val());
         if(typeof arrowCausedEvent === 'undefined'){
-            deleteKeypointFiles(function(){$("#cineRefIndex").trigger("change");});
+            deleteHiddenFiles('keypoints',function(){$("#cineRefIndex").trigger("change");});
         }else{
             if(arrowCausedEvent){
                 $("#cineRefIndex").trigger("change");
             }
             else
-                deleteKeypointFiles(function(){$("#cineRefIndex").trigger("change");});
+                deleteHiddenFiles('keypoints',function(){$("#cineRefIndex").trigger("change");});
         }
         arrowCausedEvent = false;
     });
@@ -736,13 +705,20 @@ $(".update-tracklib-preview").keypress(function(event) {
 
 $("#segPreviewCheck").change(function () {
     $("#cineRefIndex").trigger("change");
-    if($("#segPreviewCheck")[0].checked)
+    if($("#segPreviewCheck")[0].checked){
         $("#threshPreviewCheck").removeAttr("disabled");
-    else
+        $("#trajectoryPreviewCheck").removeAttr("disabled");
+    }
+    else{
         $("#threshPreviewCheck").attr("disabled", true);
+        $("#trajectoryPreviewCheck").attr("disabled", true);
+    }
 }); 
 
 $("#threshPreviewCheck").change(function () {
+    $("#cineRefIndex").trigger("change");
+}); 
+$("#trajectoryPreviewCheck").change(function () {
     $("#cineRefIndex").trigger("change");
 }); 
 
