@@ -211,7 +211,7 @@ function resetWorkingDirectory(){
         clearObstructed();
         $("#runLoader").removeClass('post-loader-success');
         $("#runLoader").removeClass('post-loader-fail');
-        $("#runLoader").removeClass('loader');    
+        $("#runLoader").removeClass('loader');
 
         $("#panzoomLeft").html('');
         $("#panzoomRight").html('');
@@ -266,7 +266,9 @@ document.getElementById("clearCross").onclick = function() {
 function callDICeExec(resolution,ss_locs) {
 
     // load the live plot viewer if there are any live plots:
-    showLivePlots();
+    if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1){ // signifies tracklib
+    }else
+        showLivePlots();
     
     // nuke the old line plot and point live plot files
     fs.readdirSync(workingDirectory).forEach(file => {

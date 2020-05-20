@@ -603,7 +603,6 @@ $("#leftCineInput").change(function (evt) {
                 deleteDisplayImageFiles(0);
                 deleteDisplayImageFiles(1);
                 deleteDisplayImageFiles(2);
-                deleteHiddenFiles('keypoints');
                 deleteHiddenFiles('background');
                 cinePathRight = "undefined";
                 $("#cineRightPreviewSpan").text("");
@@ -679,15 +678,16 @@ $("#frameScroller").on('input', function () {
         $("#cineCurrentPreviewSpan").text($(this).val());
     }).change(function(){
         $("#cineRefIndex").val($(this).val());
-        if(typeof arrowCausedEvent === 'undefined'){
-            deleteHiddenFiles('keypoints',function(){$("#cineRefIndex").trigger("change");});
-        }else{
-            if(arrowCausedEvent){
-                $("#cineRefIndex").trigger("change");
-            }
-            else
-                deleteHiddenFiles('keypoints',function(){$("#cineRefIndex").trigger("change");});
-        }
+        $("#cineRefIndex").trigger("change");
+//        if(typeof arrowCausedEvent === 'undefined'){
+//            deleteHiddenFiles('keypoints',function(){$("#cineRefIndex").trigger("change");});
+//        }else{
+//            if(arrowCausedEvent){
+//                $("#cineRefIndex").trigger("change");
+//            }
+//            else
+//                deleteHiddenFiles('keypoints',function(){$("#cineRefIndex").trigger("change");});
+//        }
         arrowCausedEvent = false;
     });
 
