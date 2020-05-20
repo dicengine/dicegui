@@ -595,6 +595,11 @@ function applyFilterToImages(fileName, mode){
         args.push('true');
     else
         args.push('false');
+    args.push('invert_colors');
+    if($("#invertColorsCheck")[0].checked)
+        args.push('true');
+    else
+        args.push('false');
     args.push('is_left');
     if(mode==0)
         args.push('true');
@@ -1067,6 +1072,36 @@ function writeParamsFile(only_write,resolution,ss_locs) {
             content += $("#threshAdaptiveConstant").val()  +'.0';
         }
         content += '" />\n';
+        content += '<Parameter name="bucket_size_theta" type="double" value="';
+        if($("#bucketSizeTheta").val().includes('.')){
+            content += $("#bucketSizeTheta").val();
+        }else{
+            content += $("#bucketSizeTheta").val()  +'.0';
+        }
+        content += '" />\n';
+        content += '<Parameter name="bucket_size_r" type="double" value="';
+        if($("#bucketSizeR").val().includes('.')){
+            content += $("#bucketSizeR").val();
+        }else{
+            content += $("#bucketSizeR").val()  +'.0';
+        }
+        content += '" />\n';
+        content += '<Parameter name="cross_epi_tol" type="double" value="';
+        if($("#crossEpiTol").val().includes('.')){
+            content += $("#crossEpiTol").val();
+        }else{
+            content += $("#crossEpiTol").val()  +'.0';
+        }
+        content += '" />\n';
+        content += '<Parameter name="frag_neigh_radius_sq" type="double" value="';
+        if($("#neighRadSq").val().includes('.')){
+            content += $("#neighRadSq").val();
+        }else{
+            content += $("#neighRadSq").val()  +'.0';
+        }
+        content += '" />\n';
+        if($("#invertColorsCheck")[0].checked)
+            content += '<Parameter name="invert_colors" type="bool" value="true" />\n';
         content += '<Parameter name="threshold_mode" type="string" value="';
         if($("#threshModeSelect").val()=="mean"){
             content += 'mean';

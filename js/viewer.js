@@ -648,19 +648,15 @@ $("#middleCineInput").change(function (evt) {
     }
 });
 
-// reload the left and right cine image if the ref index is changed
-$("#cineRefIndex").change(function () {
-    // filename left and right
-    var refIndex = $("#cineRefIndex").val();
-    $("#frameScroller").val(refIndex);
-    $("#cineCurrentPreviewSpan").text(refIndex);
+
+function reload_cine_images(index){
     // check that the ref index is valid
     if(cinePathLeft!="undefined"||cinePathRight!="undefined"||cinePathMiddle!="undefined")
-        if(refIndex < Number($("#cineStartPreviewSpan").text()) || refIndex > Number($("#cineEndPreviewSpan").text())){
-            alert("invalid reference index");
+        if(index < Number($("#cineStartPreviewSpan").text()) || index > Number($("#cineEndPreviewSpan").text())){
+            alert("invalid index");
             return;
         }
-    var offsetIndex = Number(refIndex);// - cineFirstFrame;
+    var offsetIndex = Number(index);// - cineFirstFrame;
     cineLeftOpenCVComplete = false;
     cineRightOpenCVComplete = false;
     //alert("offset_index " + offsetIndex);
@@ -670,15 +666,40 @@ $("#cineRefIndex").change(function () {
         updateCineDisplayImage(cinePathRight,offsetIndex,1);
     if(cinePathMiddle!="undefined")
         updateCineDisplayImage(cinePathMiddle,offsetIndex,2);
-    //if($("#binaryAutoUpdateCheck")[0].checked)
-    //    callOpenCVServerExec();
+}
+
+
+// reload the left and right cine image if the ref index is changed
+$("#cineRefIndex").change(function () {
+    // filename left and right
+    var refIndex = $("#cineRefIndex").val();
+    $("#frameScroller").val(refIndex);
+    $("#cineCurrentPreviewSpan").text(refIndex);
+    reload_cine_images(refIndex);
+//    // check that the ref index is valid
+//    if(cinePathLeft!="undefined"||cinePathRight!="undefined"||cinePathMiddle!="undefined")
+//        if(refIndex < Number($("#cineStartPreviewSpan").text()) || refIndex > Number($("#cineEndPreviewSpan").text())){
+//            alert("invalid reference index");
+//            return;
+//        }
+//    var offsetIndex = Number(refIndex);// - cineFirstFrame;
+//    cineLeftOpenCVComplete = false;
+//    cineRightOpenCVComplete = false;
+//    //alert("offset_index " + offsetIndex);
+//    if(cinePathLeft!="undefined")
+//        updateCineDisplayImage(cinePathLeft,offsetIndex,0);
+//    if(cinePathRight!="undefined")
+//        updateCineDisplayImage(cinePathRight,offsetIndex,1);
+//    if(cinePathMiddle!="undefined")
+//        updateCineDisplayImage(cinePathMiddle,offsetIndex,2);
 });
 
 $("#frameScroller").on('input', function () {
         $("#cineCurrentPreviewSpan").text($(this).val());
     }).change(function(){
-        $("#cineRefIndex").val($(this).val());
-        $("#cineRefIndex").trigger("change");
+        reload_cine_images($(this).val());
+//        $("#cineRefIndex").val($(this).val());
+//        $("#cineRefIndex").trigger("change");
 //        if(typeof arrowCausedEvent === 'undefined'){
 //            deleteHiddenFiles('keypoints',function(){$("#cineRefIndex").trigger("change");});
 //        }else{
@@ -704,7 +725,8 @@ $(".update-tracklib-preview").keypress(function(event) {
 }); 
 
 $("#segPreviewCheck").change(function () {
-    $("#cineRefIndex").trigger("change");
+    reload_cine_images($("#cineCurrentPreviewSpan").text());
+    //$("#cineRefIndex").trigger("change");
     if($("#segPreviewCheck")[0].checked){
         $("#threshPreviewCheck").removeAttr("disabled");
         $("#trajectoryPreviewCheck").removeAttr("disabled");
@@ -716,10 +738,12 @@ $("#segPreviewCheck").change(function () {
 }); 
 
 $("#threshPreviewCheck").change(function () {
-    $("#cineRefIndex").trigger("change");
+    reload_cine_images($("#cineCurrentPreviewSpan").text());
+    //$("#cineRefIndex").trigger("change");
 }); 
 $("#trajectoryPreviewCheck").change(function () {
-    $("#cineRefIndex").trigger("change");
+    reload_cine_images($("#cineCurrentPreviewSpan").text());
+    //$("#cineRefIndex").trigger("change");
 }); 
 
 $("#rightRefInput").on("click",function () {

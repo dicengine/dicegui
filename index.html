@@ -537,6 +537,7 @@
                   <p><input id="segPreviewCheck" type="checkbox" class="update-tracklib-preview"> preview segmentation</p>
                   <p><input id="threshPreviewCheck" type="checkbox" class="update-tracklib-preview" disabled> show threshold</p>
                   <p><input id="trajectoryPreviewCheck" type="checkbox" class="update-tracklib-preview" disabled> show trajectory</p>
+                  <p><input id="invertColorsCheck" type="checkbox" class="update-tracklib-preview"> invert colors</p>
                   <p>threshold method</p>
                   <select id="threshModeSelect" class="update-tracklib-preview">
                     <option value="gaussian">gaussian</option>
@@ -548,6 +549,14 @@
                   <input type="text" class="update-tracklib-preview" id="threshAdaptiveConstant" name="threshAdaptiveConstant" value="50.0" style="width: 50%; margin-bottom:10px;">
                   <p>num background frames</p>
                   <input type="text" clas="update-tracklib-preview" id="numBackgroundFrames" name="numBackgroundFrames" value="25" style="width: 50%;">
+                  <p>bin size theta (hough)</p>
+                  <input type="text" clas="update-tracklib-preview" id="bucketSizeTheta" name="bucketSizeTheta" value="0.05" style="width: 50%;">
+                  <p>bin size r (hough)</p>
+                  <input type="text" clas="update-tracklib-preview" id="bucketSizeR" name="bucketSizeR" value="10.0" style="width: 50%;">
+                  <p>neighbor rad sq (hough)</p>
+                  <input type="text" clas="update-tracklib-preview" id="neighRadSq" name="neighRadSq" value="40000.0" style="width: 50%;">
+                  <p>cross epi tol</p>
+                  <input type="text" clas="update-tracklib-preview" id="crossEpiTol" name="crossEpiTol" value="5.0" style="width: 50%;">
                 </p>
               </div>
               <div id="subsetParams" class="param-options full-field">
