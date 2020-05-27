@@ -1254,7 +1254,8 @@ function writeInputFile() {
         content += '<Parameter name="skip_image_index" type="int" value="'+$("#skipIndex").val()+'" />\n';
         content += '<Parameter name="num_file_suffix_digits" type="int" value="'+$("#numDigits").val()+'" />\n';
         if(localStorage.getItem("showStereoPane")==0){ // add the pose estimation index for 2d
-            content += '<Parameter name="pose_estimation_index" type="int" value="'+$("#imagePoseIndex").val()+'" />\n';
+            pose_index = Number($("#imagePoseIndex").val()) - Number($("#startIndex").val());
+            content += '<Parameter name="pose_estimation_index" type="int" value="'+pose_index+'" />\n';
         }
     }
     
