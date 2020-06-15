@@ -69,11 +69,12 @@ function getOffset( el ) {
 
 function zoomToFitLeft(){
     $("#panzoomLeft").panzoom("resetDimensions");
-    var windowHeight = $("#viewWindowLeft").outerHeight();
-    var imageHeight = refImageHeightLeft;
     var e = getOffset( document.getElementById('viewWindowLeft') );
-    if(imageHeight>0){
-        var scale = (windowHeight-10) / imageHeight;
+    if(refImageHeightLeft > 0 && refImageWidthLeft > 0){
+        var scaleH = ($("#viewWindowLeft").outerWidth()-10) / refImageWidthLeft;
+        var scaleW = ($("#viewWindowLeft").outerHeight()-10) / refImageHeightLeft;
+        var scale = scaleW;
+        if(scaleH<scaleW) scale = scaleH;
         $("#panzoomLeft").panzoom("setMatrix", [ 1, 0, 0, 1, 0, 0 ]);
         $("#panzoomLeft").panzoom("zoom",scale,{focal: e });
     }
@@ -81,11 +82,12 @@ function zoomToFitLeft(){
 
 function zoomToFitRight(){
     $("#panzoomRight").panzoom("resetDimensions");
-    var windowHeight = $("#viewWindowRight").outerHeight();
-    var imageHeight = refImageHeightRight;
     var e = getOffset( document.getElementById('viewWindowRight') );
-    if(imageHeight>0){
-        var scale = (windowHeight-10) / imageHeight;
+    if(refImageHeightRight > 0 && refImageWidthRight > 0){
+        var scaleH = ($("#viewWindowRight").outerWidth()-10) / refImageWidthRight;
+        var scaleW = ($("#viewWindowRight").outerHeight()-10) / refImageHeightRight;
+        var scale = scaleW;
+        if(scaleH<scaleW) scale = scaleH;
         $("#panzoomRight").panzoom("setMatrix", [ 1, 0, 0, 1, 0, 0 ]);
         $("#panzoomRight").panzoom("zoom",scale,{focal: e });
     }
