@@ -673,6 +673,7 @@ function show2DViewer(){
     $("#stereoParams").hide();
     $('#x1x2').text('x 1');
     deactivateEpipolar();
+    $(".tracklib-tools").hide();
 }
 
 function showTrinocViewer(){
