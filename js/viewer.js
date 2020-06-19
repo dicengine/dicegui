@@ -720,6 +720,19 @@ $("#frameScroller").on('keydown', function(event) {
     } 
 }); 
 
+$("#cineGoToIndex").keypress(function(event) { 
+    if (event.keyCode === 13) { 
+        if($(this).val() < Number($("#cineStartPreviewSpan").text()) || $(this).val() > Number($("#cineEndPreviewSpan").text())){
+            alert("invalid index");
+            return;
+        }
+        $("#frameScroller").val($(this).val());
+        reload_cine_images($(this).val());
+        $("#cineCurrentPreviewSpan").text($(this).val());
+    } 
+}); 
+
+
 $(".update-tracklib-preview").keypress(function(event) { 
     if (event.keyCode === 13) { 
         $("#cineRefIndex").trigger("change");

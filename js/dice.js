@@ -480,6 +480,7 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
                              $("#cineStartPreviewSpan").text(stats[1]);
                              $("#cineCurrentPreviewSpan").text(stats[1]);
                              $("#cineEndPreviewSpan").text(stats[2]);
+                             $("#cineGoToIndex").val(stats[1]);
                              if(mode==0){
                                  $("#cineRefIndex").val(stats[1]);
                                  $("#cineStartIndex").val(stats[1]);
@@ -584,7 +585,7 @@ function applyFilterToImages(fileName, mode){
     // push the arguments to opencvserver
     args.push('filter:tracklib');
     args.push('frame_number');
-    args.push($("#cineRefIndex").val());
+    args.push($("#cineCurrentPreviewSpan").text());
     args.push('show_threshold');
     if($("#threshPreviewCheck")[0].checked)
         args.push('true');
@@ -708,7 +709,7 @@ function drawEpipolarLine(isLeft,dot_x,dot_y,reset=false) {
         args.push(rightNameEpipolar);
         args.push('filter:epipolar_line');
         args.push('frame_number');
-        args.push($("#cineRefIndex").val());
+        args.push($("#cineCurrentPreviewSpan").text());
         args.push('epipolar_is_left');
         if(isLeft)
             args.push('true');
