@@ -949,7 +949,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
         content += '<Parameter name="num_file_suffix_digits" type="int" value="'+$("#numDigits").val()+'" />\n';
         content += '<Parameter name="image_file_extension" type="string" value="'+$("#imageExtension").val()+'" />\n';
         content += '<Parameter name="image_file_prefix" type="string" value="'+$("#imagePrefix").val()+'" />\n';
-        if((showStereoPane==1||showStereoPane==2)&&$("#analysisModeSelect").val()!="subset"){
+        if((showStereoPane==1||showStereoPane==2)){
             content += '<Parameter name="stereo_left_suffix" type="string" value="'+$("#stereoLeftSuffix").val()+'"/>\n';
             content += '<Parameter name="stereo_right_suffix" type="string" value="'+$("#stereoRightSuffix").val()+'" />\n';
         }
@@ -961,7 +961,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
         content += '<Parameter name="cine_start_index" type="int" value="'+$("#cineStartIndex").val()+'" />\n';
         content += '<Parameter name="cine_skip_index" type="int" value="'+$("#cineSkipIndex").val()+'" />\n';
         content += '<Parameter name="cine_end_index" type="int" value="'+$("#cineEndIndex").val()+'" />\n';
-        if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs&&$("#analysisModeSelect").val()!="subset"){
+        if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs){
             content += '<Parameter name="stereo_cine_file" type="string" value="'+cinePathRight+'" />\n';
         }
     }
