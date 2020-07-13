@@ -246,6 +246,7 @@ $("#changeWorkingDirLi").click(function(){
     if(path){
         workingDirectory = path[0];
         updateWorkingDirLabel();
+        createHiddenDir();
         var fileName = fullPath('','input.xml');
         fs.stat(fileName, function(err, stat) {
             if(err == null) {
