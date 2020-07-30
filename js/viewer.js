@@ -735,12 +735,14 @@ $("#cineGoToIndex").keypress(function(event) {
 
 $(".update-tracklib-preview").keypress(function(event) { 
     if (event.keyCode === 13) { 
-        $("#cineRefIndex").trigger("change");
+        reload_cine_images($("#frameScroller").val());//$("#cineCurrentPreviewSpan").text());
+//        reload_cine_images($("#cineCurrentPreviewSpan").text());
+//        $("#cineRefIndex").trigger("change");
     } 
 }); 
 
 $("#segPreviewCheck").change(function () {
-    reload_cine_images($("#cineCurrentPreviewSpan").text());
+    reload_cine_images($("#frameScroller").val());//$("#cineCurrentPreviewSpan").text());
     //$("#cineRefIndex").trigger("change");
     if($("#segPreviewCheck")[0].checked){
         $("#threshPreviewCheck").removeAttr("disabled");
@@ -751,15 +753,15 @@ $("#segPreviewCheck").change(function () {
         $("#trajectoryPreviewCheck").attr("disabled", true);
     }
 }); 
-
-$("#threshPreviewCheck").change(function () {
-    reload_cine_images($("#cineCurrentPreviewSpan").text());
-    //$("#cineRefIndex").trigger("change");
-}); 
-$("#trajectoryPreviewCheck").change(function () {
-    reload_cine_images($("#cineCurrentPreviewSpan").text());
-    //$("#cineRefIndex").trigger("change");
-}); 
+//
+//$("#threshPreviewCheck").change(function () {
+//    reload_cine_images($("#cineCurrentPreviewSpan").text());
+//    //$("#cineRefIndex").trigger("change");
+//}); 
+//$("#trajectoryPreviewCheck").change(function () {
+//    reload_cine_images($("#cineCurrentPreviewSpan").text());
+//    //$("#cineRefIndex").trigger("change");
+//}); 
 
 $("#rightRefInput").on("click",function () {
     this.value = null;

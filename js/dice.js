@@ -586,45 +586,65 @@ function applyFilterToImages(fileName, mode){
     args.push('filter:tracklib');
     args.push('frame_number');
     args.push($("#cineCurrentPreviewSpan").text());
-    args.push('show_threshold');
-    if($("#threshPreviewCheck")[0].checked)
-        args.push('true');
-    else
-        args.push('false');
-    args.push('show_trajectory');
-    if($("#trajectoryPreviewCheck")[0].checked)
-        args.push('true');
-    else
-        args.push('false');
-    args.push('invert_colors');
-    if($("#invertColorsCheck")[0].checked)
-        args.push('true');
-    else
-        args.push('false');
     args.push('is_left');
     if(mode==0)
         args.push('true');
     else
         args.push('false');
-    // thresholding method
-    args.push('threshold_mode');
-    if($("#threshModeSelect").val()=="mean"){
-        args.push('MEAN');
+    args.push('thresh_left');
+    args.push(parseInt($("#threshLeft").val()));
+    args.push('thresh_right');
+    args.push(parseInt($("#threshRight").val()));
+    args.push('min_area');
+    args.push(parseInt($("#minArea").val()));
+    args.push('max_area');
+    args.push(parseInt($("#maxArea").val()));
+    args.push('max_pt_density'); // needs to be a double value
+    if($("#maxPtDensity").val().includes('.')){
+        args.push($("#maxPtDensity").val());
     }else{
-        args.push('GAUSSIAN');
+        args.push($("#maxPtDensity").val()  +'.0');
     }
-    // block size
-    args.push('block_size');
-    var blockSize = parseInt($("#threshBlockSize").val());
-    if(blockSize %2 ==0) blockSize++;
-    args.push(blockSize);
-    // adaptive constant
-    args.push('binary_constant'); // needs to be a double value
-    if($("#threshAdaptiveConstant").val().includes('.')){
-        args.push($("#threshAdaptiveConstant").val());
+    args.push('colocation_tol'); // needs to be a double value
+    if($("#colocationTol").val().includes('.')){
+        args.push($("#colocationTol").val());
     }else{
-        args.push($("#threshAdaptiveConstant").val()  +'.0');
+        args.push($("#colocationTol").val()  +'.0');
     }
+//    args.push('show_threshold');
+//    if($("#threshPreviewCheck")[0].checked)
+//        args.push('true');
+//    else
+//        args.push('false');
+//    args.push('show_trajectory');
+//    if($("#trajectoryPreviewCheck")[0].checked)
+//        args.push('true');
+//    else
+//        args.push('false');
+//    args.push('invert_colors');
+//    if($("#invertColorsCheck")[0].checked)
+//        args.push('true');
+//    else
+//        args.push('false');
+//    // thresholding method
+//    args.push('threshold_mode');
+//    if($("#threshModeSelect").val()=="mean"){
+//        args.push('MEAN');
+//    }else{
+//        args.push('GAUSSIAN');
+//    }
+//    // block size
+//    args.push('block_size');
+//    var blockSize = parseInt($("#threshBlockSize").val());
+//    if(blockSize %2 ==0) blockSize++;
+//    args.push(blockSize);
+//    // adaptive constant
+//    args.push('binary_constant'); // needs to be a double value
+//    if($("#threshAdaptiveConstant").val().includes('.')){
+//        args.push($("#threshAdaptiveConstant").val());
+//    }else{
+//        args.push($("#threshAdaptiveConstant").val()  +'.0');
+//    }
     console.log(args);
     var child_process = require('child_process');
     var readline      = require('readline');
@@ -1065,51 +1085,91 @@ function writeParamsFile(only_write,resolution,ss_locs) {
         content += '<Parameter name="estimate_resolution_error_amplitude_step" type="double" value="1.0" />\n';
     }
     if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1){ // signifies tracklib
-        content += '<Parameter name="block_size" type="int" value="' + parseInt($("#threshBlockSize").val()) +'" />\n';
-        content += '<Parameter name="binary_constant" type="double" value="';
-        if($("#threshAdaptiveConstant").val().includes('.')){
-            content += $("#threshAdaptiveConstant").val();
+        content += '<Parameter name="thresh_left" type="int" value="' + parseInt($("#threshLeft").val()) +'" />\n';
+        content += '<Parameter name="thresh_right" type="int" value="' + parseInt($("#threshRight").val()) +'" />\n';
+        content += '<Parameter name="min_area" type="int" value="' + parseInt($("#minArea").val()) +'" />\n';
+        content += '<Parameter name="max_area" type="int" value="' + parseInt($("#maxArea").val()) +'" />\n';
+        content += '<Parameter name="min_pts_per_track" type="int" value="' + parseInt($("#minPtsPerTrack").val()) +'" />\n';
+        content += '<Parameter name="max_pt_density" type="double" value="';
+        if($("#maxPtDensity").val().includes('.')){
+            content += $("#maxPtDensity").val();
         }else{
-            content += $("#threshAdaptiveConstant").val()  +'.0';
+            content += $("#maxPtDensity").val()  +'.0';
         }
         content += '" />\n';
-        content += '<Parameter name="bucket_size_theta" type="double" value="';
-        if($("#bucketSizeTheta").val().includes('.')){
-            content += $("#bucketSizeTheta").val();
+        content += '<Parameter name="colocation_tol" type="double" value="';
+        if($("#colocationTol").val().includes('.')){
+            content += $("#colocationTol").val();
         }else{
-            content += $("#bucketSizeTheta").val()  +'.0';
+            content += $("#colocationTol").val()  +'.0';
         }
         content += '" />\n';
-        content += '<Parameter name="bucket_size_r" type="double" value="';
-        if($("#bucketSizeR").val().includes('.')){
-            content += $("#bucketSizeR").val();
+        content += '<Parameter name="match_tol" type="double" value="';
+        if($("#matchTol").val().includes('.')){
+            content += $("#matchTol").val();
         }else{
-            content += $("#bucketSizeR").val()  +'.0';
+            content += $("#matchTol").val()  +'.0';
         }
         content += '" />\n';
-        content += '<Parameter name="cross_epi_tol" type="double" value="';
-        if($("#crossEpiTol").val().includes('.')){
-            content += $("#crossEpiTol").val();
+        content += '<Parameter name="cross_match_tol" type="double" value="';
+        if($("#crossMatchTol").val().includes('.')){
+            content += $("#crossMatchTol").val();
         }else{
-            content += $("#crossEpiTol").val()  +'.0';
+            content += $("#crossMatchTol").val()  +'.0';
         }
         content += '" />\n';
-        content += '<Parameter name="frag_neigh_radius_sq" type="double" value="';
-        if($("#neighRadSq").val().includes('.')){
-            content += $("#neighRadSq").val();
+        content += '<Parameter name="neighbor_radius" type="double" value="';
+        if($("#neighborRadius").val().includes('.')){
+            content += $("#neighborRadius").val();
         }else{
-            content += $("#neighRadSq").val()  +'.0';
+            content += $("#neighborRadius").val()  +'.0';
         }
         content += '" />\n';
-        if($("#invertColorsCheck")[0].checked)
-            content += '<Parameter name="invert_colors" type="bool" value="true" />\n';
-        content += '<Parameter name="threshold_mode" type="string" value="';
-        if($("#threshModeSelect").val()=="mean"){
-            content += 'mean';
-        }else{
-            content += 'gaussian';
-        }
-        content += '" />\n';
+//        content += '<Parameter name="block_size" type="int" value="' + parseInt($("#threshBlockSize").val()) +'" />\n';
+//        content += '<Parameter name="binary_constant" type="double" value="';
+//        if($("#threshAdaptiveConstant").val().includes('.')){
+//            content += $("#threshAdaptiveConstant").val();
+//        }else{
+//            content += $("#threshAdaptiveConstant").val()  +'.0';
+//        }
+//        content += '" />\n';
+//        content += '<Parameter name="bucket_size_theta" type="double" value="';
+//        if($("#bucketSizeTheta").val().includes('.')){
+//            content += $("#bucketSizeTheta").val();
+//        }else{
+//            content += $("#bucketSizeTheta").val()  +'.0';
+//        }
+//        content += '" />\n';
+//        content += '<Parameter name="bucket_size_r" type="double" value="';
+//        if($("#bucketSizeR").val().includes('.')){
+//            content += $("#bucketSizeR").val();
+//        }else{
+//            content += $("#bucketSizeR").val()  +'.0';
+//        }
+//        content += '" />\n';
+//        content += '<Parameter name="cross_epi_tol" type="double" value="';
+//        if($("#crossEpiTol").val().includes('.')){
+//            content += $("#crossEpiTol").val();
+//        }else{
+//            content += $("#crossEpiTol").val()  +'.0';
+//        }
+//        content += '" />\n';
+//        content += '<Parameter name="frag_neigh_radius_sq" type="double" value="';
+//        if($("#neighRadSq").val().includes('.')){
+//            content += $("#neighRadSq").val();
+//        }else{
+//            content += $("#neighRadSq").val()  +'.0';
+//        }
+//        content += '" />\n';
+//        if($("#invertColorsCheck")[0].checked)
+//            content += '<Parameter name="invert_colors" type="bool" value="true" />\n';
+//        content += '<Parameter name="threshold_mode" type="string" value="';
+//        if($("#threshModeSelect").val()=="mean"){
+//            content += 'mean';
+//        }else{
+//            content += 'gaussian';
+//        }
+//        content += '" />\n';
         var numBackgroundFrames = parseInt($("#numBackgroundFrames").val());
         if(numBackgroundFrames<0||numBackgroundFrames > ($("#cineEndIndex").val()-$("#cineStartIndex").val())){
             alert('warning: invalid num background frames (needs to be an integer value between 0 and the total num frames in the cine file)\nSetting num background frames to 0');

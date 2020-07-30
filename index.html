@@ -536,7 +536,30 @@
               <div id="tracklibParams" class="param-options tracklib-tools">
                 <p>
                   <p><input id="segPreviewCheck" type="checkbox" class="update-tracklib-preview"> preview segmentation</p>
-                  <p><input id="threshPreviewCheck" type="checkbox" class="update-tracklib-preview" disabled> show threshold</p>
+                  <!--<p><input id="threshPreviewCheck" type="checkbox" class="update-tracklib-preview" disabled> show threshold</p>-->
+                  <p>num background frames</p>
+                  <input type="text" class="update-tracklib-preview" id="numBackgroundFrames" name="numBackgroundFrames" value="25" style="width: 50%;">
+                  <p>thresh left</p>
+                  <input type="text" class="update-tracklib-preview" id="threshLeft" name="threshLeft" value="10" style="width: 50%;">
+                  <p>thresh right</p>
+                  <input type="text" class="update-tracklib-preview" id="threshRight" name="threshRight" value="10" style="width: 50%;">
+                  <p>max pt density (pt/px^2)</p>
+                  <input type="text" class="update-tracklib-preview" id="maxPtDensity" name="maxPtDensity" value="0.0063662" style="width: 50%;">
+                  <p>min area (px)</p>
+                  <input type="text" class="update-tracklib-preview" id="minArea" name="minArea" value="1" style="width: 50%;">
+                  <p>max area (px)</p>
+                  <input type="text" class="update-tracklib-preview" id="maxArea" name="maxArea" value="500" style="width: 50%;">
+                  <p>colocation tol</p>
+                  <input type="text" class="update-tracklib-preview" id="colocationTol" name="colocationTol" value="0.2" style="width: 50%;">
+                  <p>match tol</p>
+                  <input type="text" class="update-tracklib-preview" id="matchTol" name="matchTol" value="0.1" style="width: 50%;">
+                  <p>cross match tol</p>
+                  <input type="text" class="update-tracklib-preview" id="crossMatchTol" name="crossMatchTol" value="2.0" style="width: 50%;">
+                  <p>neighbor radius (px)</p>
+                  <input type="text" class="update-tracklib-preview" id="neighborRadius" name="neighborRadius" value="7.0" style="width: 50%;">
+                  <p>min pts per track</p>
+                  <input type="text" class="update-tracklib-preview" id="minPtsPerTrack" name="minPtsPerTrack" value="3" style="width: 50%;">
+                  <!-- 
                   <p><input id="trajectoryPreviewCheck" type="checkbox" class="update-tracklib-preview" disabled> show trajectory</p>
                   <p><input id="invertColorsCheck" type="checkbox" class="update-tracklib-preview"> invert colors</p>
                   <p>threshold method</p>
@@ -549,15 +572,15 @@
                   <p>threshold constant</p>
                   <input type="text" class="update-tracklib-preview" id="threshAdaptiveConstant" name="threshAdaptiveConstant" value="50.0" style="width: 50%; margin-bottom:10px;">
                   <p>num background frames</p>
-                  <input type="text" clas="update-tracklib-preview" id="numBackgroundFrames" name="numBackgroundFrames" value="25" style="width: 50%;">
+                  <input type="text" class="update-tracklib-preview" id="numBackgroundFrames" name="numBackgroundFrames" value="25" style="width: 50%;">
                   <p>bin size theta (hough)</p>
-                  <input type="text" clas="update-tracklib-preview" id="bucketSizeTheta" name="bucketSizeTheta" value="0.05" style="width: 50%;">
+                  <input type="text" class="update-tracklib-preview" id="bucketSizeTheta" name="bucketSizeTheta" value="0.05" style="width: 50%;">
                   <p>bin size r (hough)</p>
-                  <input type="text" clas="update-tracklib-preview" id="bucketSizeR" name="bucketSizeR" value="10.0" style="width: 50%;">
+                  <input type="text" class="update-tracklib-preview" id="bucketSizeR" name="bucketSizeR" value="10.0" style="width: 50%;">
                   <p>neighbor rad sq (hough)</p>
-                  <input type="text" clas="update-tracklib-preview" id="neighRadSq" name="neighRadSq" value="40000.0" style="width: 50%;">
+                  <input type="text" class="update-tracklib-preview" id="neighRadSq" name="neighRadSq" value="40000.0" style="width: 50%;">
                   <p>cross epi tol</p>
-                  <input type="text" clas="update-tracklib-preview" id="crossEpiTol" name="crossEpiTol" value="5.0" style="width: 50%;">
+                  <input type="text" class="update-tracklib-preview" id="crossEpiTol" name="crossEpiTol" value="5.0" style="width: 50%;"> -->
                 </p>
               </div>
               <div id="subsetParams" class="param-options full-field">
