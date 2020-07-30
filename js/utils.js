@@ -219,6 +219,31 @@ function testForDebugMsg() {
                 console.log(`DICe test for tracklib exited with code ${code}`);
                 if (code == 0) {
                     console.log("tracklib is on");
+                    alert("Copyright 2020 National Technology & Engineering Solutions of Sandia, LLC (NTESS).\n"
+                     +"Under the terms of Contract DE-NA0003525 with NTESS, there is a non-exclusive license\n"
+                     +"for use of this work by or on behalf of the U.S. Government. Export of this data may\n"
+                     +"require a license from the United States Government.\n"
+                     +"For five (5) years from 6/11/2020, the United States Government is granted for itself\n"
+                     +"and others acting on its behalf a paid-up, nonexclusive, irrevocable worldwide license\n"
+                     +"in this data to reproduce, prepare derivative works, and perform publicly and display\n"
+                     +"publicly, by or on behalf of the Government. There is provision for the possible\n"
+                     +"extension of the term of this license. Subsequent to that period or any extension\n"
+                     +"granted, the United States Government is granted for itself and others acting on its\n"
+                     +"behalf a paid-up, nonexclusive, irrevocable worldwide license in this data to reproduce,\n"
+                     +"prepare derivative works, distribute copies to the public, perform publicly and display\n"
+                     +"publicly, and to permit others to do so. The specific term of the license can be\n"
+                     +"identified by inquiry made to National Technology and Engineering Solutions of\n"
+                     +"Sandia, LLC or DOE.\n"
+                     +"NEITHER THE UNITED STATES GOVERNMENT, NOR THE UNITED STATES DEPARTMENT OF ENERGY,\n"
+                     +"NOR NATIONAL TECHNOLOGY AND ENGINEERING SOLUTIONS OF SANDIA, LLC, NOR ANY OF THEIR\n"
+                     +"EMPLOYEES, MAKES ANY WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LEGAL\n"
+                     +"RESPONSIBILITY FOR THE ACCURACY, COMPLETENESS, OR USEFULNESS OF ANY INFORMATION,\n"
+                     +"APPARATUS, PRODUCT, OR PROCESS DISCLOSED, OR REPRESENTS THAT ITS USE WOULD NOT\n"
+                     +"INFRINGE PRIVATELY OWNED RIGHTS.\n"
+                     +"Any licensee of DICe::Tracklib has the obligation and responsibility to abide\n"
+                     +"by the applicable export control laws, regulations, and general prohibitions\n"
+                     +"relating to the export of technical data. Failure to obtain an export control license\n"
+                     +"or other authority from the Government may result in criminal liability under U.S. laws.");
                     diceTrackLibOn = true;
                     if (showStereoPaneState == 1 && $("#analysisModeSelect").val() == 'tracking') {
                         $(".non-tracklib-tools").hide();
