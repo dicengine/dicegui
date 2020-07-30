@@ -505,6 +505,51 @@ function impl_params_xml_file(xml){
         $("#regularizationConstant").val(reg_constant);
         $("#regularizationConstantLabel").text(reg_constant);
     }
+    // tracking parameters
+    thresh_left = xml_get(xml,"thresh_left");
+    console.log('thresh_left: ' + thresh_left);
+    if(thresh_left)
+        $("#threshLeft").val(thresh_left);
+    thresh_right = xml_get(xml,"thresh_right");
+    console.log('thresh_right: ' + thresh_right);
+    if(thresh_right)
+        $("#threshRight").val(thresh_right);
+    max_pt_density = xml_get(xml,"max_pt_density");
+    console.log('max_pt_density: ' + max_pt_density);
+    if(max_pt_density)
+        $("#maxPtDensity").val(max_pt_density);
+    min_area = xml_get(xml,"min_area");
+    console.log('min_area: ' + min_area);
+    if(min_area)
+        $("#minArea").val(min_area);
+    max_area = xml_get(xml,"max_area");
+    console.log('max_area: ' + max_area);
+    if(max_area)
+        $("#maxArea").val(max_area);
+    colocation_tol = xml_get(xml,"colocation_tol");
+    console.log('colocation_tol: ' + colocation_tol);
+    if(colocation_tol)
+        $("#colocationTol").val(colocation_tol);
+    match_tol = xml_get(xml,"match_tol");
+    console.log('match_tol: ' + match_tol);
+    if(match_tol)
+        $("#matchTol").val(match_tol);
+    cross_match_tol = xml_get(xml,"cross_match_tol");
+    console.log('cross_match_tol: ' + cross_match_tol);
+    if(cross_match_tol)
+        $("#crossMatchTol").val(cross_match_tol);
+    neighbor_radius = xml_get(xml,"neighbor_radius");
+    console.log('neighbor_radius: ' + neighbor_radius);
+    if(neighbor_radius)
+        $("#neighborRadius").val(neighbor_radius);
+    min_pts_per_track = xml_get(xml,"min_pts_per_track");
+    console.log('min_pts_per_track: ' + min_pts_per_track);
+    if(min_pts_per_track)
+        $("#minPtsPerTrack").val(min_pts_per_track);
+    num_background = xml_get(xml,"num_background_frames");
+    console.log('num_background_frames: ' + num_background);
+    if(num_background)
+        $("#numBackgroundFrames").val(num_background);
 
     checkValidInput();
 }
