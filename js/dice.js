@@ -395,7 +395,7 @@ function updateCineDisplayImage(fileName,index,mode,reset_ref_ROIs){
                  alert('DICe .cine file conversion to .tiff failed');
             }
             else{
-                if(diceTrackLibOn && showStereoPane==1 && $("#segPreviewCheck")[0].checked){
+                if(diceTrackLibOn && showStereoPane==1 && ($("#segPreviewCheck")[0].checked || $("#showTracksCheck")[0].checked)){
                     applyFilterToImages(tiffImageName, mode);
                 }else{
                     if(mode==0){
@@ -611,6 +611,16 @@ function applyFilterToImages(fileName, mode){
     }else{
         args.push($("#colocationTol").val()  +'.0');
     }
+    args.push('show_tracks');
+    if($("#showTracksCheck")[0].checked)
+        args.push('true');
+    else
+        args.push('false');
+    args.push('show_segmentation');
+    if($("#segPreviewCheck")[0].checked)
+        args.push('true');
+    else
+        args.push('false');
 //    args.push('show_threshold');
 //    if($("#threshPreviewCheck")[0].checked)
 //        args.push('true');
@@ -717,12 +727,12 @@ function drawEpipolarLine(isLeft,dot_x,dot_y,reset=false) {
             });
             return;
         }
-        if($("#segPreviewCheck")[0].checked)
+        if($("#segPreviewCheck")[0].checked || $("#showTracksCheck")[0].checked)
             args.push(leftNameFilter);
         else
             args.push(leftName);
         args.push(leftNameEpipolar);
-        if($("#segPreviewCheck")[0].checked)
+        if($("#segPreviewCheck")[0].checked || $("#showTracksCheck")[0].checked)
             args.push(rightNameFilter);
         else
             args.push(rightName);

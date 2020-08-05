@@ -741,17 +741,21 @@ $(".update-tracklib-preview").keypress(function(event) {
     } 
 }); 
 
+$("#showTracksCheck").change(function () {
+    reload_cine_images($("#frameScroller").val());//$("#cineCurrentPreviewSpan").text());
+});
+
 $("#segPreviewCheck").change(function () {
     reload_cine_images($("#frameScroller").val());//$("#cineCurrentPreviewSpan").text());
     //$("#cineRefIndex").trigger("change");
-    if($("#segPreviewCheck")[0].checked){
-        $("#threshPreviewCheck").removeAttr("disabled");
-        $("#trajectoryPreviewCheck").removeAttr("disabled");
-    }
-    else{
-        $("#threshPreviewCheck").attr("disabled", true);
-        $("#trajectoryPreviewCheck").attr("disabled", true);
-    }
+//    if($("#segPreviewCheck")[0].checked){
+//        $("#threshPreviewCheck").removeAttr("disabled");
+//        $("#trajectoryPreviewCheck").removeAttr("disabled");
+//    }
+//    else{
+//        $("#threshPreviewCheck").attr("disabled", true);
+//        $("#trajectoryPreviewCheck").attr("disabled", true);
+//    }
 }); 
 //
 //$("#threshPreviewCheck").change(function () {
