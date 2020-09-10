@@ -205,6 +205,7 @@
             <input class="nav-item" type="text" id="cineSkipIndex" name="cineSkipIndex" value="1"
               style="width: 95%;"
             >
+            <div class="nav-item">frame rate <span id="cineFrameRatePreviewSpan" style="display: block; float: right; width: 33%;"></span></div>
           </div>
           <!-- end cine input -->
         </div>
@@ -537,6 +538,7 @@
                 <p>
                   <p><input id="segPreviewCheck" type="checkbox" class="update-tracklib-preview"> preview segmentation</p>
                   <p><input id="showTracksCheck" type="checkbox" class="update-tracklib-preview"> show tracks</p>
+                  <p><input id="showOnlyActiveCheck" type="checkbox" class="update-tracklib-preview"> show only active</p>
                   <!--<p><input id="threshPreviewCheck" type="checkbox" class="update-tracklib-preview" disabled> show threshold</p>-->
                   <p>num background frames</p>
                   <input type="text" class="update-tracklib-preview" id="numBackgroundFrames" name="numBackgroundFrames" value="25" style="width: 50%;">

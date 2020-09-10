@@ -481,6 +481,7 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
                              $("#cineCurrentPreviewSpan").text(stats[1]);
                              $("#cineEndPreviewSpan").text(stats[2]);
                              $("#cineGoToIndex").val(stats[1]);
+                             $("#cineFrameRatePreviewSpan").text(stats[3]);
                              if(mode==0){
                                  $("#cineRefIndex").val(stats[1]);
                                  $("#cineStartIndex").val(stats[1]);
@@ -613,6 +614,11 @@ function applyFilterToImages(fileName, mode){
     }
     args.push('show_tracks');
     if($("#showTracksCheck")[0].checked)
+        args.push('true');
+    else
+        args.push('false');
+    args.push('show_only_active');
+    if($("#showOnlyActiveCheck")[0].checked)
         args.push('true');
     else
         args.push('false');
