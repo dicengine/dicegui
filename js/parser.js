@@ -546,6 +546,10 @@ function impl_params_xml_file(xml){
     console.log('min_pts_per_track: ' + min_pts_per_track);
     if(min_pts_per_track)
         $("#minPtsPerTrack").val(min_pts_per_track);
+    max_track_gap = xml_get(xml,"max_track_gap");
+    console.log('max_track_gap: ' + max_track_gap);
+    if(max_track_gap)
+        $("#maxTrackGap").val(max_track_gap);
     num_background = xml_get(xml,"num_background_frames");
     console.log('num_background_frames: ' + num_background);
     if(num_background)

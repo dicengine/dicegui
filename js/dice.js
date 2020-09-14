@@ -1105,7 +1105,18 @@ function writeParamsFile(only_write,resolution,ss_locs) {
         content += '<Parameter name="thresh_right" type="int" value="' + parseInt($("#threshRight").val()) +'" />\n';
         content += '<Parameter name="min_area" type="int" value="' + parseInt($("#minArea").val()) +'" />\n';
         content += '<Parameter name="max_area" type="int" value="' + parseInt($("#maxArea").val()) +'" />\n';
+        if(parseInt($("#minPtsPerTrack").val())<2){
+            alert('min pts per track must be 2 or larger');
+            endProgress(false);
+            return;
+        }
         content += '<Parameter name="min_pts_per_track" type="int" value="' + parseInt($("#minPtsPerTrack").val()) +'" />\n';
+        if(parseInt($("#maxTrackGap").val())<1){
+            alert('max track gap must be 1 or larger');
+            endProgress(false);
+            return;
+        }
+        content += '<Parameter name="max_track_gap" type="int" value="' + parseInt($("#maxTrackGap").val()) +'" />\n';
         content += '<Parameter name="max_pt_density" type="double" value="';
         if($("#maxPtDensity").val().includes('.')){
             content += $("#maxPtDensity").val();
