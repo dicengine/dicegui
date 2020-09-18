@@ -35,6 +35,8 @@ function impl_input_xml_file(xml){
         }); // end stat subset file
     }  // end has subset_file
 
+    is_subset_or_global = false;
+    
     // set the step size
     step_size = xml_get(xml,"step_size");
     console.log('step_size: ' + step_size);
@@ -50,6 +52,7 @@ function impl_input_xml_file(xml){
         $("#subsetSizeLabel").text(subset_size);
     }
     if(step_size || subset_size){
+        is_subset_or_global = true;
         // override the method if there is a step size or subset size
         $("#analysisModeSelect").val("subset").change();
     }
@@ -62,8 +65,14 @@ function impl_input_xml_file(xml){
         $("#meshSizeLabel").text(mesh_size);
     }
     if(mesh_size){
+        is_subset_or_global = true;
         // override the method if there is a step size or subset size
         $("#analysisModeSelect").val("global").change();
+    }
+
+    if(!is_subset_or_global){
+        // override the method if there is a step size or subset size
+        $("#analysisModeSelect").val("tracking").change();
     }
     
     // no text output files produced
@@ -130,7 +139,7 @@ function impl_input_xml_file(xml){
                         defImagePathsLeft.sort(function(a, b) {
                             return (a.name > b.name) - (a.name < b.name);
                         });
-                    });        
+                    });
                 });
             }
             // load the stereo ref image
@@ -159,7 +168,7 @@ function impl_input_xml_file(xml){
                         defImagePathsRight.sort(function(a, b) {
                             return (a.name > b.name) - (a.name < b.name);
                         });
-                    });        
+                    });
                 });
             }
         }
@@ -198,7 +207,7 @@ function impl_input_xml_file(xml){
             load_image_sequence(false);
         }
     }
-
+    
     // see if there is a "best_fit_plane.dat" file in the folder
     var bestFitFileName = fullPath('','best_fit_plane.dat');
     fs.stat(bestFitFileName, function(err, stat) {

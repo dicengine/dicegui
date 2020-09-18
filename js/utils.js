@@ -248,6 +248,7 @@ function testForDebugMsg() {
                     if (showStereoPaneState == 1 && $("#analysisModeSelect").val() == 'tracking') {
                         $(".non-tracklib-tools").hide();
                         $(".tracklib-tools").show();
+                        showStereoViewer();
                     }
                 }
             });
@@ -477,7 +478,7 @@ $(".pane-closer").click(function(){
     $(".pane-closer").each(function( index ) {
         heights.push($(this).parent().parent('div').parent('div').parent('div').outerHeight());
         widths.push($(this).parent().parent('div').parent('div').parent('div').outerWidth());
-        console.log('column height ' + heights[heights.length-1] + ' width ' + widths[widths.length - 1]);        
+        console.log('column height ' + heights[heights.length-1] + ' width ' + widths[widths.length - 1]);
     });
 
     // hide this pannel
@@ -555,7 +556,9 @@ function resizeFullDivs(targetDiv){
     // total height of all divs in the targetDiv
     var sumHeight = 0;
     $(targetDiv + '> div').each(function() {
-        sumHeight += $(this).outerHeight(true);
+        if($(this).is(":visible")){
+            sumHeight += $(this).outerHeight(true);
+        }
     });
     var currentFillHeight = $(targetDiv).find('.fill-div').outerHeight();
     sumHeight -= currentFillHeight;
@@ -622,7 +625,7 @@ function resizeViewerFillDivs(){
                 $(this).css('width','100%');
                 $(this).css('height',newHeight);
             }
-        });        
+        });
     }else{
         // each inactive view is 32 pixels wide
         var newWidth = Math.floor((totalWidth - numMinimized*32-1)/numActiveDivs);
@@ -657,7 +660,7 @@ function stackViews(){
     });
     viewersStacked = true;
     resizeViewerFillDivs();
-    resizeAll();    
+    resizeAll();
 }
 function unstackViews(){
     $('#stackIcon').css('transform','rotate(0deg)');
