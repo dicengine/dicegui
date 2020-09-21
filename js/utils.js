@@ -528,7 +528,7 @@ function resizeView(toggler) {
 function defaultConsole(){
     var bannerH = $("#consoleToggle").parent().parent('div').outerHeight();
     if(showConsole){
-        $("#consoleToggle").parent().parent('div').parent('div').outerHeight("auto");
+        $("#consoleToggle").parent().parent('div').parent('div').outerHeight("40%");
         $("#consoleToggle").parent().parent('div').css('border-radius','5px 5px 0px 0px');
     }else{
         $("#consoleToggle").parent().parent('div').parent('div').outerHeight(bannerH + "px");
