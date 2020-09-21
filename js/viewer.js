@@ -553,6 +553,27 @@ function load_image_sequence(reset_ref_ROIs){
     });    
 }
 
+$("#consoleButton").on("click",function () {
+    if(!$(this).hasClass('action-li')) return;
+    $("#resultsButton").addClass('action-li');
+    $("#resultsButton").addClass('toggle-title');
+    $(this).removeClass('action-li');
+    $(this).addClass('toggle-title-bold');
+    $("#consoleWinodw").show();
+    $("#resultsWindow").hide();
+});
+
+$("#resultsButton").on("click",function () {
+    if(!$(this).hasClass('action-li')) return;
+    $("#consoleButton").addClass('action-li');
+    $("#consoleButton").addClass('toggle-title');
+    $(this).removeClass('action-li');
+    $(this).addClass('toggle-title-bold');
+    $("#consoleWinodw").hide();
+    $("#resultsWindow").show();
+});
+
+
 $("#loadSubsetFileInput").on("click",function () {
     this.value = null;
 });

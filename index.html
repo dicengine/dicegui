@@ -492,14 +492,18 @@
 
           <div class="toggle-div console-toggle-div">
             <div class="toggle-div-banner">
-              <span class="toggle-title">CONSOLE</span> <span class="toggle-icon action-li">
-                <i id="clearConsoleIcon" class="material-icons md-dark action-li"
-                title="clear console"
-              >block</i> <i id="consoleToggle" class="material-icons md-dark toggler">swap_vertical_circle</i>
+              <span class="toggle-title-bold" id="consoleButton">CONSOLE</span>
+              <span class="toggle-title" style="padding-left:10px; padding-right:10px;">|</span>
+              <span class="toggle-title action-li" id="resultsButton">RESULTS</span>
+              <span class="toggle-icon action-li">
+                <i id="clearConsoleIcon" class="material-icons md-dark action-li" title="clear console">block</i>
+                <i id="consoleToggle" class="material-icons md-dark toggler">swap_vertical_circle</i>
               </span>
             </div>
             <!-- end toggle div banner -->
             <div class="toggle-div-body" style="height:auto;">
+              <div id="resultsWindow" class="console" style="display:none;">
+              </div>
               <div id="consoleWindow" class="console">
                 Console output: <br /> <br />
               </div>
