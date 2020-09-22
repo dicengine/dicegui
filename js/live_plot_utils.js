@@ -15,18 +15,18 @@ function fileToDataObj(file,dataObjs) {
         console.log("reading file " + file);
         var obj = {fileName:file,roi_id:-1,headings:[],data:[],initialized:false}
         var ext = file.split('.').pop();
-        // split up the name into components:                                                                                                                    
-	var trimName = file.substr(0,file.length - ext.length - 1);                                              
-	//console.log('trim name: ' + trimName);                                                                                                                 
+        // split up the name into components:
+	var trimName = file.substr(0,file.length - ext.length - 1);
+	//console.log('trim name: ' + trimName);
         var subset_id = trimName.split('_').pop();
         //console.log('susbset id ' + subset_id);
         //alert('file ' + file + ' subset_id ' + subset_id);
         obj.roi_id = subset_id;
         fs.stat(file, function(err, stat) {
-            if(err == null) {                                     
-                fs.readFile(file, 'utf8', function (err,dataS) {                                       
-                    if (err) {                                                                                    
-                        return console.log(err);                                                                  
+            if(err == null) {
+                fs.readFile(file, 'utf8', function (err,dataS) {
+                    if (err) {
+                        return console.log(err);
                     }
                     var resDataLines = dataS.toString().split(/\r?\n/);
                     var foundHeaders = false;

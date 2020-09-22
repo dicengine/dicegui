@@ -1,5 +1,5 @@
 google.charts.load('current', {'packages':['corechart','line']});
-google.charts.setOnLoadCallback(livePlotRepeat);
+//google.charts.setOnLoadCallback(livePlotRepeat);
 
 var nIntervId;
 var firstPlot = true;
@@ -11,7 +11,10 @@ var chartOptions = {
     vAxis: {title:'Value'},
     legend: 'right',
     explorer: {},
-};    
+};
+
+
+//    chartArea: {width: '90%'},
 
 function livePlotRepeat() {
 
@@ -33,15 +36,17 @@ function livePlotRepeat() {
     console.log('livePlot point filenames' + fileNames);
     console.log('livePlot line filename' + lineFile);
     livePlot(fileNames);
-    nIntervId = setInterval(function(){livePlot(fileNames);}, 5000);
+    nIntervId = setInterval(function(){
+        livePlot(fileNames);
+        if(!$("#runLoader").hasClass('loader')){
+            clearInterval(nIntervId);
+        }
+    }, 5000);
 }
 
-function stopLivePlot() {
-  clearInterval(nIntervId);
-}
 
-$("#livePlotUL").on('click', 'li', function() {
-    currentTable = Number($(this).attr('id').split("_").pop());
+$("#livePlotFieldSelect").on('change',function() {
+    currentTable = Number($("#livePlotFieldSelect option:selected").val().split("_").pop());
     plotDataTable();
 });
 
@@ -64,7 +69,8 @@ function livePlot(fileNames){
             for(i=0;i<dataTables.length;++i){
                 var liID = "li_livePlot_" + i;
                 var liTitle = dataObjs[firstValidIndex].headings[i];
-                $("#livePlotUL").append('<li id="' + liID + '" class="action-li plot_li"><span>' + liTitle + '</span></li>');
+                $("#livePlotFieldSelect").append(new Option(liTitle, liID));
+                //$("#livePlotUL").append('<li id="' + liID + '" class="action-li plot_li"><span>' + liTitle + '</span></li>');
             }
             firstPlot = false;
         }
@@ -76,7 +82,7 @@ function livePlot(fileNames){
 
 function plotDataTable(){
     // clear the divs and clear the plots
-    $('#livePlots').empty();    
+    $('#livePlots').empty();
     // create a div on the page:
     var divID = "div_livePlot_" + currentTable;
     $("#livePlots").append('<div id="' + divID + '" class="plot_div" style="height:100%; width:100%; float:left;" ></div>');

@@ -35,34 +35,6 @@ document.getElementById("runLi").onclick = function() {
     });
 };
 
-//document.getElementById("resolutionLi").onclick = function() {
-//    // check if there are existing results
-//    var fileName = fullPath('synthetic_results','spatial_resolution.txt');
-//    fs.stat(fileName, function(err, stat) {
-//        if(err == null) {            
-//            if (confirm('existing results found, click "OK" to plot these results or "Cancel" to recompute')) {
-//                localStorage.setItem("workingDirectory",workingDirectory);
-//                var win = new BrowserWindow({ width: 850, height: 1000 });
-//                win.on('closed', () => {
-//                    win = null
-//                })
-//                win.loadURL('file://' + __dirname + '/resolution.html');                
-//            }else{
-//                fs.unlink(fileName, (err) => {
-//                    if (err) throw err;
-//                    console.log('successfully deleted '+fileName);
-//                    startProgress();
-//                    writeInputFile(false,true);
-//                }) // end unlink                
-//            } // end else confirm
-//        } // end null
-//        else{ // files don't exist to run the analysis
-//            startProgress();
-//            writeInputFile(false,true);
-//        }
-//    }); // end stat
-//};
-
 document.getElementById("sssigPreview").onclick = function() {
     if(refImagePathLeft=="undefined") return;
     //if(subsetLocationsFile!=''){
@@ -83,9 +55,10 @@ function integerLength(integer) {
 }
 
 // global variable to see if there is already a live plot visible
-var livePlotWin = null;
-var livePlotLineWin = null;
+//var livePlotWin = null;
+//var livePlotLineWin = null;
 function showLivePlots(){
+    $("#resultsButton").trigger( "click" );
     var online = navigator.onLine;
     // disable live plots when working offline
     if(!online){
@@ -115,20 +88,7 @@ function showLivePlots(){
                 livePlotFiles += ' ';
         }
         localStorage.setItem("livePlotFiles", livePlotFiles);
-        //alert('live plot win is ' + livePlotWin);
-        if(livePlotWin !== null && typeof livePlotWin === 'object'){
-            //livePlotWin.close();
-        }else{
-            livePlotWin = new BrowserWindow({
-                webPreferences: {
-		    nodeIntegration: true
-		},
-                width: 1155, height: 800 });
-        }
-        livePlotWin.on('closed', () => {
-            livePlotWin = null;
-        })
-        livePlotWin.loadURL('file://' + __dirname + '/live_plot.html');
+        livePlotRepeat();
         return;
     }
     if(livePlotPtsX.length <=0 && !addLivePlotLineActive) return;
@@ -142,34 +102,10 @@ function showLivePlots(){
                 livePlotFiles += ' ';
         }
         localStorage.setItem("livePlotFiles", livePlotFiles);
-        //alert('live plot win is ' + livePlotWin);
-        if(livePlotWin !== null && typeof livePlotWin === 'object'){
-            //livePlotWin.close();
-        }else{
-            livePlotWin = new BrowserWindow({ 
-                webPreferences: {
-		    nodeIntegration: true
-		},
-                width: 1155, height: 800 });
-        }
-        livePlotWin.on('closed', () => {
-            livePlotWin = null;
-        })
-        livePlotWin.loadURL('file://' + __dirname + '/live_plot.html');
+        livePlotRepeat();
     }
     if(addLivePlotLineActive){
-        if(livePlotLineWin !== null && typeof livePlotLineWin === 'object'){
-        }else{
-            livePlotLineWin = new BrowserWindow({ 
-                webPreferences: {
-		    nodeIntegration: true
-		},
-                width: 1155, height: 800 });
-        }
-        livePlotLineWin.on('closed', () => {
-            livePlotLineWin = null;
-        })
-        livePlotLineWin.loadURL('file://' + __dirname + '/live_plot_line.html');
+        livePlotLineRepeat();
     }
 }
 
@@ -876,7 +812,7 @@ function postExecTasks(){
 function startProgress (){
     $("#runLoader").removeClass('post-loader-success');
     $("#runLoader").removeClass('post-loader-fail');
-    $("#runLoader").addClass('loader');    
+    $("#runLoader").addClass('loader');
 }
 function endProgress (success){
     $("#runLoader").removeClass('loader');
@@ -1034,7 +970,7 @@ function writeBestFitFile() {
 }
 
 function writeLivePlotsFile() {
-    if((livePlotPtsX.length >0 || addLivePlotLineActive)&&($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global")){        
+    if((livePlotPtsX.length >0 || addLivePlotLineActive)&&($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global")){
         var livePlotFile = fullPath('','live_plot.dat');
         consoleMsg('writing live plot data file ' + livePlotFile);
         var LPcontent = '';
@@ -1043,7 +979,7 @@ function writeLivePlotsFile() {
             LPcontent += livePlotPtsX[i] + ' ' + livePlotPtsY[i] + '\n'
         }
         if(addLivePlotLineActive){
-            LPcontent += livePlotLineXOrigin + ' ' + livePlotLineYOrigin + ' ' + livePlotLineXAxis + ' ' + livePlotLineYAxis + '\n'            
+            LPcontent += livePlotLineXOrigin + ' ' + livePlotLineYOrigin + ' ' + livePlotLineXAxis + ' ' + livePlotLineYAxis + '\n'
         }
         fs.writeFile(livePlotFile, LPcontent, function (err) {
             if(err){

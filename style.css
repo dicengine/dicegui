@@ -62,10 +62,10 @@ body {
 }
 
 .suboption {
-    margin-left: 20px;    
+    margin-left: 20px;
 }
 .subsuboption {
-    margin-left: 40px;    
+    margin-left: 40px;
 }
 
 /* Rules for sizing the icon. */
@@ -410,6 +410,7 @@ h4 {
 .console {
     width: 100%;
     height: 35vh;
+    min-height: 35vh;
     font-size: 12px;
     overflow-y: scroll;
     padding-right: 0;
@@ -417,9 +418,15 @@ h4 {
 .results-window {
     width: 100%;
     height: 35vh;
+    min-height: 35vh;
     font-size: 12px;
     overflow-y: scroll;
     padding-right: 0;
+}
+.results-sub-window {
+    width: 50%;
+    height: 100%;
+    float: left;
 }
 .def-image-list-container {
     width: 100%;

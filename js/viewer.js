@@ -559,7 +559,7 @@ $("#consoleButton").on("click",function () {
     $("#resultsButton").addClass('toggle-title');
     $(this).removeClass('action-li');
     $(this).addClass('toggle-title-bold');
-    $("#consoleWinodw").show();
+    $("#consoleWindow").show();
     $("#resultsWindow").hide();
 });
 
@@ -569,7 +569,7 @@ $("#resultsButton").on("click",function () {
     $("#consoleButton").addClass('toggle-title');
     $(this).removeClass('action-li');
     $(this).addClass('toggle-title-bold');
-    $("#consoleWinodw").hide();
+    $("#consoleWindow").hide();
     $("#resultsWindow").show();
 });
 

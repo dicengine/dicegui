@@ -1,36 +1,39 @@
 google.charts.load('current', {'packages':['corechart','line']});
-google.charts.setOnLoadCallback(livePlotLineRepeat);
+//google.charts.setOnLoadCallback(livePlotLineRepeat);
 
-var nIntervId;
-var firstPlot = true;
-var dataTables = [];
-var dataObjs = [];
-var currentTable = 0;
-var plottingPaused = false;
+var nIntervIdLine;
+var firstPlotLine = true;
+var dataTablesLine = [];
+var dataObjsLine = [];
+var currentTableLine = 0;
+var plottingPausedLine = false;
 var currentVAxisMax = 0;
 var currentVAxisMin = 0;
-var chartOptions = {
+var chartOptionsLine = {
     hAxis: {title:'Arc-length'},
     vAxis: {title:'Value'},
     legend: 'right',
     explorer: {},
-};    
+};
 
 function livePlotLineRepeat() {
     livePlotLine();
-    nIntervId = setInterval(function(){livePlotLine();}, 5000);
+        nIntervIdLine = setInterval(function(){
+            livePlotLine();
+            if(!$("#runLoader").hasClass('loader')){
+                clearInterval(nIntervIdLine);
+            }
+        }, 5000);
 }
 
-$("#livePlotLineUL").on('click', 'li', function() {
-    currentTable = Number($(this).attr('id').split("_").pop());
+$("#livePlotLineFieldSelect").on('change',function() {
+    currentTableLine = Number($("#livePlotLineFieldSelect option:selected").val().split("_").pop());
     plotLineDataTable();
 });
 
-// clearInterval(nIntervID);
-
 $( "#stepSelect" ).change(function() {
     var workingDir = localStorage.getItem("workingDirectory");
-    plottingPaused = true;
+    plottingPausedLine = true;
     var lineFile;
     if(os.platform()=='win32'){
         lineFile = workingDir + '\\'; 
@@ -67,9 +70,9 @@ function livePlotLine(){
     $('#stepSelect').empty();
     var steps = [];
     fs.readdirSync(workingDir).forEach(file => {
-        // check if the file matches the syntax                                                                   
+        // check if the file matches the syntax
         if(file.indexOf('live_plot_line_step_') !== -1){
-            // grab the index of the file                                                                         
+            // grab the index of the file
             var suffixAndExt = file.split("_").pop();
             var suffix = suffixAndExt.substr(0, suffixAndExt.indexOf('.'));
             var stepID = Number(suffix);
@@ -84,7 +87,7 @@ function livePlotLine(){
       selectOptions.push('<option value="'+ steps[i] +'">'+ steps[i] +'</option>');
     $('#stepSelect').html(selectOptions.join(''));
     $('#stepSelect').val(currentStep);
-    if(plottingPaused) return;
+    if(plottingPausedLine) return;
     if(currentStep!=latestLineFileIndex)
         $('#stepSelect').val(latestLineFileIndex);
     lineFile += 'live_plot_line_step_' + latestLineFileIndex + '.txt';
@@ -93,22 +96,22 @@ function livePlotLine(){
 }
 
 function plotLine(lineFile){
-    dataObjs = [];
-    var promise = fileToDataObj(lineFile,dataObjs);
+    dataObjsLine = [];
+    var promise = fileToDataObj(lineFile,dataObjsLine);
     promise.then(function(response) {
 	if(response[0]=="file read failed!"||response=="file read failed!"){
 	    console.log('failed to load live_plot_line files');
 	    return;
 	}
         console.log("fileToDataObj succeeded!", response);
-        dataObjsToLineDataTables(dataObjs,dataTables);
-        if(firstPlot){
-            for(i=0;i<dataTables.length;++i){
+        dataObjsToLineDataTables(dataObjsLine,dataTablesLine);
+        if(firstPlotLine){
+            for(i=0;i<dataTablesLine.length;++i){
                 var liID = "li_livePlotLine_" + i;
-                var liTitle = dataObjs[0].headings[i];
-                $("#livePlotLineUL").append('<li id="' + liID + '" class="action-li plot_li"><span>' + liTitle + '</span></li>');
+                var liTitle = dataObjsLine[0].headings[i];
+                $("#livePlotLineFieldSelect").append(new Option(liTitle, liID));
             }
-            firstPlot = false;
+            firstPlotLine = false;
         }
         plotLineDataTable();
     },function(error) {
@@ -119,45 +122,45 @@ function plotLine(lineFile){
 
 function plotLineDataTable(){
     // clear the divs and clear the plots
-    $('#livePlotLine').empty();    
+    $('#livePlotLine').empty();
     // create a div on the page:
-    var divID = "div_livePlotLine_" + currentTable;
+    var divID = "div_livePlotLine_" + currentTableLine;
     $("#livePlotLine").append('<div id="' + divID + '" class="plot_div" style="height:100%; width:100%; float:left;" ></div>');
-    var liID = "li_livePlotLine_" + currentTable;
-    var liTitle = dataObjs[0].headings[currentTable];
+    var liID = "li_livePlotLine_" + currentTableLine;
+    var liTitle = dataObjsLine[0].headings[currentTableLine];
 
-    //chartOptions.hAxis.title = 'Arc-length';
-    //chartOptions.vAxis.title = liTitle;
-    //var view = new google.visualization.DataView(dataTables[currentTable]);
+    //chartOptionsLine.hAxis.title = 'Arc-length';
+    //chartOptionsLine.vAxis.title = liTitle;
+    //var view = new google.visualization.DataView(dataTablesLine[currentTableLine]);
     //var wrapper = new google.visualization.ChartWrapper({
     //    chartType: 'LineChart',
     //    containerId: divID,
-    //    options: chartOptions,
+    //    options: chartOptionsLine,
     //    dataTable: view
     //});
     //google.visualization.events.addListener(wrapper, 'ready', function(){
-    //    //alert("minvalue " + chartOptions.vAxis.minValue);
+    //    //alert("minvalue " + chartOptionsLine.vAxis.minValue);
     //   alert('Min ViewWindow: ' + wrapper.getOption('vAxis.viewWindow.min') + ', Max: ' + wrapper.getOption('vAxis.viewWindow.max'));
     //});     
     //wrapper.draw();
     
     var chart = new google.visualization.LineChart(document.getElementById(divID));
-    chartOptions.hAxis.title = 'Arc-length';
-    chartOptions.vAxis.title = liTitle;
-    //chartOptions.vAxis.viewWindow.max = 'auto';
-    //chartOptions.vAxis.viewWindow.min = 'auto';
+    chartOptionsLine.hAxis.title = 'Arc-length';
+    chartOptionsLine.vAxis.title = liTitle;
+    //chartOptionsLine.vAxis.viewWindow.max = 'auto';
+    //chartOptionsLine.vAxis.viewWindow.min = 'auto';
 
     if($("#fixAxisCheck")[0].checked&&!(currentVAxisMax==0&&currentVAxisMin==0)){
-        //chartOptions.vAxis.maxValue = currentVAxisMax;
-        //chartOptions.vAxis.minValue = currentVAxisMin;
-        chartOptions.vAxis.viewWindow = {max:currentVAxisMax, min:currentVAxisMin};
+        //chartOptionsLine.vAxis.maxValue = currentVAxisMax;
+        //chartOptionsLine.vAxis.minValue = currentVAxisMin;
+        chartOptionsLine.vAxis.viewWindow = {max:currentVAxisMax, min:currentVAxisMin};
     }
     else{
-        chartOptions.vAxis.viewWindow = {max:'auto', min:'auto'};
+        chartOptionsLine.vAxis.viewWindow = {max:'auto', min:'auto'};
     }
-    var view = new google.visualization.DataView(dataTables[currentTable]);
+    var view = new google.visualization.DataView(dataTablesLine[currentTableLine]);
     google.visualization.events.addListener(chart, 'ready', function(){
-        //alert("minvalue " + chartOptions.vAxis.minValue);
+        //alert("minvalue " + chartOptionsLine.vAxis.minValue);
         //alert('Min ViewWindow: ' + chart.getChart().getOption('vAxis.viewWindow.min') + ', Max: ' + chart.getChart().getOption('vAxis.viewWindow.max'));
         if(!$("#fixAxisCheck")[0].checked){
             var top = chart.getChartLayoutInterface().getChartAreaBoundingBox().top;
@@ -166,6 +169,6 @@ function plotLineDataTable(){
             currentVAxisMin = chart.getChartLayoutInterface().getVAxisValue(bottom);
         }
     }); 
-    chart.draw(view, chartOptions);
-    //chart.draw(dataTables[currentTable],chartOptions);
+    chart.draw(view, chartOptionsLine);
+    //chart.draw(dataTablesLine[currentTableLine],chartOptionsLine);
 }
