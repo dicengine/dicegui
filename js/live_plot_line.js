@@ -1,10 +1,13 @@
 google.charts.load('current', {'packages':['corechart','line']});
 //google.charts.setOnLoadCallback(livePlotLineRepeat);
 
+//window.addEventListener('resize', livePlotLine());
+
 var nIntervIdLine;
 var firstPlotLine = true;
 var dataTablesLine = [];
 var dataObjsLine = [];
+var plotlyDataObjsLine = [];
 var currentTableLine = 0;
 var plottingPausedLine = false;
 var currentVAxisMax = 0;
@@ -28,7 +31,7 @@ function livePlotLineRepeat() {
 
 $("#livePlotLineFieldSelect").on('change',function() {
     currentTableLine = Number($("#livePlotLineFieldSelect option:selected").val().split("_").pop());
-    plotLineDataTable();
+    plotPlotlyLineDataTable();
 });
 
 $( "#stepSelect" ).change(function() {
@@ -96,29 +99,91 @@ function livePlotLine(){
 }
 
 function plotLine(lineFile){
-    dataObjsLine = [];
-    var promise = fileToDataObj(lineFile,dataObjsLine);
-    promise.then(function(response) {
-	if(response[0]=="file read failed!"||response=="file read failed!"){
-	    console.log('failed to load live_plot_line files');
-	    return;
-	}
-        console.log("fileToDataObj succeeded!", response);
-        dataObjsToLineDataTables(dataObjsLine,dataTablesLine);
+    plotlyDataObjsLine = [];
+    var promisePlotly = fileToPlotlyDataObj(lineFile,plotlyDataObjsLine);
+    promisePlotly.then(function(response) {
+    if(response[0]=="plotly file read failed!"||response=="plotly file read failed!"){
+        console.log('plotly failed to load live_plot_line files');
+        return;
+    }
+        console.log("fileToPlotlyDataObj succeeded!", response);
+//        dataObjsToLineDataTables(dataObjsLine,dataTablesLine);
         if(firstPlotLine){
-            for(i=0;i<dataTablesLine.length;++i){
+            for(i=0;i<plotlyDataObjsLine[0].headings.length;++i){
                 var liID = "li_livePlotLine_" + i;
-                var liTitle = dataObjsLine[0].headings[i];
+                var liTitle = plotlyDataObjsLine[0].headings[i];
+                console.log('liID is ' + liID + ' liTitle is ' + liTitle);
                 $("#livePlotLineFieldSelect").append(new Option(liTitle, liID));
             }
             firstPlotLine = false;
         }
-        plotLineDataTable();
+        plotPlotlyLineDataTable();
     },function(error) {
-        console.error("fileToDataObj failed!", error);
-    });    
+        console.error("fileToPlotlyDataObj failed!", error);
+    });
+    
+    
+
+//    dataObjsLine = [];
+//    var promise = fileToDataObj(lineFile,dataObjsLine);
+//    promise.then(function(response) {
+//        if(response[0]=="file read failed!"||response=="file read failed!"){
+//            console.log('failed to load live_plot_line files');
+//            return;
+//        }
+//        console.log("fileToDataObj succeeded!", response);
+//        dataObjsToLineDataTables(dataObjsLine,dataTablesLine);
+//        if(firstPlotLine){
+//            for(i=0;i<dataTablesLine.length;++i){
+//                var liID = "li_livePlotLine_" + i;
+//                var liTitle = dataObjsLine[0].headings[i];
+//                $("#livePlotLineFieldSelect").append(new Option(liTitle, liID));
+//            }
+//            firstPlotLine = false;
+//        }
+//        plotLineDataTable();
+//    },function(error) {
+//        console.error("fileToDataObj failed!", error);
+//    });    
 }
 
+function plotPlotlyLineDataTable(){
+    // clear the divs and clear the plots
+    $('#livePlotLine').empty();
+    // create a div on the page:
+    var divID = "div_livePlotLine_" + currentTableLine;
+    
+    $("#livePlotLine").append('<div id="' + divID + '" class="plot_div" style="height:100%; width:100%; float:left;" ></div>');
+    var liID = "li_livePlotLine_" + currentTableLine;
+    var liTitle = plotlyDataObjsLine[0].headings[currentTableLine];
+    
+    var layout = {
+            xaxis: {
+                title: {
+                    text: 'Arc-length along line (px)',
+                },
+            },
+            yaxis: {
+                title: {
+                    text: liTitle,
+                }
+            },
+            margin: {
+                l: 60,
+                r: 50,
+                b: 40,
+                t: 10,
+                pad: 4,
+            },
+    };
+    
+    
+    
+    var plotlyData = {x:[],y:[],type:'scatter'};
+    plotlyData.x = plotlyDataObjsLine[0].data[0];
+    plotlyData.y = plotlyDataObjsLine[0].data[currentTableLine];
+    Plotly.plot(document.getElementById(divID),[plotlyData],layout);
+}
 
 function plotLineDataTable(){
     // clear the divs and clear the plots
