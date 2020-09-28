@@ -1,23 +1,9 @@
-google.charts.load('current', {'packages':['corechart','line']});
-//google.charts.setOnLoadCallback(livePlotRepeat);
-
 var nIntervId;
 var firstPlot = true;
-var dataTables = [];
 var dataObjs = [];
 var currentTable = 0;
-var chartOptions = {
-    hAxis: {title:'Step'},
-    vAxis: {title:'Value'},
-    legend: 'right',
-    explorer: {},
-};
-
-
-//    chartArea: {width: '90%'},
 
 function livePlotRepeat() {
-
     var workingDir = localStorage.getItem("workingDirectory");
     var fileNameStr = localStorage.getItem("livePlotFiles"); 
     var fileNames = fileNameStr.split(/[ ,]+/);
@@ -27,14 +13,14 @@ function livePlotRepeat() {
         }else{
             fileNames[i] = workingDir + '/' +fileNames[i]; 
         }
-    var lineFile = localStorage.getItem("livePlotLineFile");
-    if(os.platform()=='win32'){
-        lineFile = workingDir + '\\' + lineFile; 
-    }else{
-        lineFile = workingDir + '/' + lineFile; 
-    }
+//    var lineFile = localStorage.getItem("livePlotLineFile");
+//    if(os.platform()=='win32'){
+//        lineFile = workingDir + '\\' + lineFile; 
+//    }else{
+//        lineFile = workingDir + '/' + lineFile; 
+//    }
     console.log('livePlot point filenames' + fileNames);
-    console.log('livePlot line filename' + lineFile);
+//    console.log('livePlot line filename' + lineFile);
     livePlot(fileNames);
     nIntervId = setInterval(function(){
         livePlot(fileNames);
@@ -43,7 +29,6 @@ function livePlotRepeat() {
         }
     }, 5000);
 }
-
 
 $("#livePlotFieldSelect").on('change',function() {
     currentTable = Number($("#livePlotFieldSelect option:selected").val().split("_").pop());
@@ -63,15 +48,15 @@ function livePlot(fileNames){
             return;
         }
         console.log("fileToDataObj succeeded!", response);
-        dataObjsToDataTables(dataObjs,dataTables);
         var firstValidIndex = getFirstValidIndex(dataObjs);
         if(firstPlot){
-            for(i=0;i<dataTables.length;++i){
+            for(i=0;i<dataObjs[firstValidIndex].headings.length;++i){
                 var liID = "li_livePlot_" + i;
                 var liTitle = dataObjs[firstValidIndex].headings[i];
                 $("#livePlotFieldSelect").append(new Option(liTitle, liID));
-                //$("#livePlotUL").append('<li id="' + liID + '" class="action-li plot_li"><span>' + liTitle + '</span></li>');
             }
+            $('#livePlotFieldSelect :nth-child(2)').prop('selected', true); // To select via index
+            currentTable = Number($("#livePlotFieldSelect option:selected").val().split("_").pop());
             firstPlot = false;
         }
         plotDataTable();
@@ -89,20 +74,32 @@ function plotDataTable(){
     var liID = "li_livePlot_" + currentTable;
     var firstValidIndex = getFirstValidIndex(dataObjs);
     var liTitle = dataObjs[firstValidIndex].headings[currentTable];
-    var chart = new google.visualization.LineChart(document.getElementById(divID));
-    chartOptions.hAxis.title = 'Step';
-    chartOptions.vAxis.title = liTitle;
-    // turn off the empty columns
-    var view = new google.visualization.DataView(dataTables[currentTable]);
-    var hideCols = [];
+    var layout = {
+            xaxis: {
+                title: {
+                    text: 'Frame',
+                },
+            },
+            yaxis: {
+                title: {
+                    text: liTitle,
+                }
+            },
+            margin: {
+                l: 60,
+                r: 50,
+                b: 40,
+                t: 10,
+                pad: 4,
+            },
+    };
+    var plotlyData = [];
     for(i=0;i<dataObjs.length;++i){
-        if(dataObjs[i].initialized) continue;
-        var suffixAndExt = dataObjs[i].fileName.split("_").pop();
-        var suffix = suffixAndExt.substr(0, suffixAndExt.indexOf('.'));
-        var col = Number(suffix) + 1;
-        hideCols.push(col);
+        var tmp_data = {x:[],y:[],name:'pt_',type:'scatter'};
+        tmp_data.x = dataObjs[i].data[0];
+        tmp_data.y = dataObjs[i].data[currentTable];
+        tmp_data.name = tmp_data.name + String(i);
+        plotlyData.push(tmp_data);
     }
-    view.hideColumns(hideCols); //here you set the columns you want to display
-    chart.draw(view, chartOptions);
-    //chart.draw(dataTables[currentTable],chartOptions);
+    Plotly.plot(document.getElementById(divID),plotlyData,layout);
 }
