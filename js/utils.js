@@ -766,6 +766,7 @@ $("#analysisModeSelect").on('change',function() {
         $(".full-field-and-tracking").show();
         $(".global").hide();
         $(".non-tracklib-tools").show();
+        $(".live-plot-line").show();
         $(".tracklib-tools").hide();
         $(".tracking").hide();
         //$("#subsetParams").show();
@@ -780,6 +781,7 @@ $("#analysisModeSelect").on('change',function() {
         $(".tracking").show();
         // force 2D
         resetLivePlots();
+        $(".live-plot-line").hide();
         if(!diceTrackLibOn){
             show2DViewer();
             $(".non-tracklib-tools").show();

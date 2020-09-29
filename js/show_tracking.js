@@ -20,7 +20,7 @@ $("#showDeformedCheck").change(function() {
 	var startIndex = $("#cineStartIndex").val();
 	$("#frameScroller").val(startIndex);
         $('#cineRefIndex').val(startIndex);
-	$("#cineCurrentPreviewSpan").text(startIndex);         
+	$("#cineCurrentPreviewSpan").text(startIndex);
         drawROIs();
     }
 });
@@ -57,7 +57,10 @@ function loadResultsFiles(){
     var promises = [];
     resultsDataObjs = [];
     for(fileIt=0;fileIt<fileNames.length;++fileIt){
-        var promise = fileToDataObj(fileNames[fileIt],resultsDataObjs);;
+        resultsDataObjs.push({fileName:fileNames[fileIt],roi_id:-1,headings:[],data:[],initialized:false});
+    }
+    for(fileIt=0;fileIt<fileNames.length;++fileIt){
+        var promise = fileToDataObj(resultsDataObjs,fileIt);;
         promises.push(promise);
     }
     Promise.all(promises).then(function(response) {
@@ -108,45 +111,45 @@ function updateDeformedCoords(){
 
     for(roi=0;roi<num_files;++roi){
         var headers = resultsDataObjs[roi].headings;
-        var frameColID=-1;
-        var coordsXColID=-1;
-        var coordsYColID=-1;
-        var dispXColID=-1;
-        var dispYColID=-1;
-        var rotationColID=-1;
-        var sigmaColID=-1;
+        var frameRowID=-1;
+        var coordsXID=-1;
+        var coordsYID=-1;
+        var dispXID=-1;
+        var dispYID=-1;
+        var rotationID=-1;
+        var sigmaID=-1;
         for(i=0;i<headers.length;++i){
-	    if(headers[i]=="FRAME")frameColID=i;
-	    if(headers[i]=="COORDINATE_X")coordsXColID=i;
-	    if(headers[i]=="COORDINATE_Y")coordsYColID=i;
-	    if(headers[i]=="DISPLACEMENT_X")dispXColID=i;
-	    if(headers[i]=="DISPLACEMENT_Y")dispYColID=i;
-	    if(headers[i]=="ROTATION_Z")rotationColID=i;        
-	    if(headers[i]=="SIGMA")sigmaColID=i;        
+	    if(headers[i]=="FRAME")frameRowID=i;
+	    if(headers[i]=="COORDINATE_X")coordsXID=i;
+	    if(headers[i]=="COORDINATE_Y")coordsYID=i;
+	    if(headers[i]=="DISPLACEMENT_X")dispXID=i;
+	    if(headers[i]=="DISPLACEMENT_Y")dispYID=i;
+	    if(headers[i]=="ROTATION_Z")rotationID=i;
+	    if(headers[i]=="SIGMA")sigmaID=i;
         }
-        //console.log('FrameColID ' + frameColID);
-        //console.log('CoordsXColID ' + coordsXColID);
-        //console.log('CoordsYColID ' + coordsYColID);
-        //console.log('DispXColID ' + dispXColID);
-        //console.log('DispYColID ' + dispYColID);
-        //console.log('RotationColID ' + rotationColID);
-        if(frameColID<0||coordsXColID<0||coordsYColID<0||dispXColID<0||dispYColID<0||rotationColID<0||sigmaColID<0)return;    
+        //console.log('FrameID ' + frameID);
+        //console.log('CoordsXID ' + coordsXID);
+        //console.log('CoordsYID ' + coordsYID);
+        //console.log('DispXID ' + dispXID);
+        //console.log('DispYID ' + dispYID);
+        //console.log('RotationID ' + rotationID);
+        if(frameRowID<0||coordsXID<0||coordsYID<0||dispXID<0||dispYID<0||rotationID<0||sigmaID<0)return;
 
         // test that the frame number is valid
-        var frameRow = -1;
-        for(i=0;i<resultsDataObjs[roi].data.length;++i){
-            if(resultsDataObjs[roi].data[i][frameColID]==frame)frameRow = i;
+        var frameCol = -1;
+        for(i=0;i<resultsDataObjs[roi].data[frameRowID].length;++i){
+            if(resultsDataObjs[roi].data[frameRowID][i]==frame)frameCol = i;
         }
         //console.log(resultsDataObjs[roi].data[frameRow]);
-        console.log('frame was found in this index ' + frameRow);
-        if(frameRow<0)return;
+        console.log('frame col ' + frameCol);
+        if(frameCol<0)return;
 
-        var cx    = resultsDataObjs[roi].data[frameRow][coordsXColID];
-        var cy    = resultsDataObjs[roi].data[frameRow][coordsYColID];
-        var u     = resultsDataObjs[roi].data[frameRow][dispXColID];
-        var v     = resultsDataObjs[roi].data[frameRow][dispYColID];
-        var theta = resultsDataObjs[roi].data[frameRow][rotationColID];
-        var sigma = resultsDataObjs[roi].data[frameRow][sigmaColID];
+        var cx    = resultsDataObjs[roi].data[coordsXID][frameCol];
+        var cy    = resultsDataObjs[roi].data[coordsYID][frameCol];
+        var u     = resultsDataObjs[roi].data[dispXID][frameCol];
+        var v     = resultsDataObjs[roi].data[dispYID][frameCol];
+        var theta = resultsDataObjs[roi].data[rotationID][frameCol];
+        var sigma = resultsDataObjs[roi].data[sigmaID][frameCol];
         var cost = Math.cos(theta);
         var sint = Math.sin(theta);
         // note the data objs may not have been loaded in order (asynch) so check the subset id
@@ -232,7 +235,7 @@ function drawDeformedROIs(deformedROIDefsX,deformedROIDefsY,deformedExcludedDefs
 	    }
 	}
     }
-    //console.log(coordsString);                                                                                                                
+    //console.log(coordsString);
     if(coordsString!=' M '){
 	hasExcluded = true;
 	if(hasROI){
@@ -240,7 +243,7 @@ function drawDeformedROIs(deformedROIDefsX,deformedROIDefsY,deformedExcludedDefs
 	}
 	var outline = draw.path(coordsString).attr({ 'fill-opacity':'0', stroke: '#f06', 'stroke-opacity': '1','stroke-width': '2', 'stroke-linecap':'round' });
     }
-    // mask the included ROI with the excluded region                                                                                               
+    // mask the included ROI with the excluded region
     if(hasExcluded && hasROI){
         var backMask = draw.rect(refImageWidthLeft,refImageHeightLeft).attr({fill: 'white'});
         var mask = draw.mask().add(backMask).add(excluded);
