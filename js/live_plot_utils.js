@@ -36,11 +36,12 @@ function transpose(a) {
     return t;
   }
 
-function fileToDataObj(file,dataObjs) {
+function fileToDataObj(dataObjs,fileIt) {
     // Return a new promise.
     return new Promise(function(resolve, reject) {
+        var file = dataObjs[fileIt].fileName;
         console.log("reading file " + file);
-        var obj = {fileName:file,roi_id:-1,headings:[],data:[],initialized:false}
+//        var obj = {fileName:file,roi_id:-1,headings:[],data:[],initialized:false}
         var ext = file.split('.').pop();
         // split up the name into components:
         var trimName = file.substr(0,file.length - ext.length - 1);
@@ -48,7 +49,7 @@ function fileToDataObj(file,dataObjs) {
         var subset_id = trimName.split('_').pop();
         //console.log('susbset id ' + subset_id);
         //alert('file ' + file + ' subset_id ' + subset_id);
-        obj.roi_id = subset_id;
+        dataObjs[fileIt].roi_id = subset_id;
         fs.stat(file, function(err, stat) {
             if(err == null) {
                 fs.readFile(file, 'utf8', function (err,dataS) {
@@ -69,30 +70,30 @@ function fileToDataObj(file,dataObjs) {
                             continue;
                         }
                         else if(foundHeaders) // if the header row has already been found read a line of data
-                            obj.data.push(thisLineSplit.map(Number));
+                            dataObjs[fileIt].data.push(thisLineSplit.map(Number));
                             //obj.data.push(resDataLines[i].split(/[ ,]+/).map(Number)); 
                         else{ // read the previous line as the header and decrement i
                             foundHeaders = true;
                             if(i>=1){
                                 //console.log('prevLine ' + prevLine);
-                                obj.headings = prevLine;
+                                dataObjs[fileIt].headings = prevLine;
                                 //obj.headings = resDataLines[i-1].split(/[ ,]+/);
                             }
                             i--;
                         }
                         prevLine = thisLineSplit;
                     }
-                    obj.initialized = true;
+                    dataObjs[fileIt].initialized = true;
                     console.log('file read was successful ' + file);
-                    obj.data = transpose(obj.data);
+                    dataObjs[fileIt].data = transpose(dataObjs[fileIt].data);
 //                    obj.data.map((_, colIndex) => obj.data.map(row => row[colIndex]));
 //                    console.log(obj);
-                    dataObjs.push(obj);
+//                    dataObjs.push(obj);
                     resolve('file read success!');
                 });
             }// end null
             else{ // always resolve ...
-                dataObjs.push(obj);
+//                dataObjs.push(obj);
                 console.log('file read failed ' + file);
                 console.log(err);
                 resolve('file read failed!');

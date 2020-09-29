@@ -37,12 +37,14 @@ $( "#stepSelect" ).change(function() {
 });
 
 $('#stepForward').click(function() {
-    $('#stepSelect option:selected').next().attr('selected', 'selected');
+    nextStep = Number($("#stepSelect option:selected").val()) + 2;
+    $('#stepSelect :nth-child(' + nextStep +')').prop('selected', true); // To select via index
     $('#stepSelect').trigger('change');
 });
 
 $('#stepBackward').click(function() {
-    $('#stepSelect option:selected').prev().attr('selected', 'selected');
+    prevStep = Number($("#stepSelect option:selected").val());
+    $('#stepSelect :nth-child(' + prevStep +')').prop('selected', true); // To select via index
     $('#stepSelect').trigger('change');
 });
 
@@ -88,7 +90,8 @@ function livePlotLine(){
 
 function plotLine(lineFile){
     dataObjsLine = [];
-    var promise = fileToDataObj(lineFile,dataObjsLine);
+    dataObjsLine.push({fileName:lineFile,roi_id:-1,headings:[],data:[],initialized:false});
+    var promise = fileToDataObj(dataObjsLine,0); // should only be one line plot file
     promise.then(function(response) {
     if(response[0]=="file read failed!"||response=="file read failed!"){
         console.log('failed to load live_plot_line files');
@@ -121,14 +124,6 @@ function plotLineDataTable(){
     var liID = "li_livePlotLine_" + currentTableLine;
     var liTitle = dataObjsLine[0].headings[currentTableLine];
     
-    // TODO implement fix axis
-    //     if($("#fixAxisCheck")[0].checked&&!(currentVAxisMax==0&&currentVAxisMin==0)){
-    //       set the max and min to the saved currentVAxisMax, currentVAxisMin values 
-    //     }else{
-    //       set the values of currentVAxisMax and min to the current values
-    //     }
-    
-    
     var layout = {
             xaxis: {
                 title: {
@@ -136,6 +131,8 @@ function plotLineDataTable(){
                 },
             },
             yaxis: {
+//                autorange: 'true',
+//                fixedrange: 'false',
                 title: {
                     text: liTitle,
                 }
@@ -148,6 +145,10 @@ function plotLineDataTable(){
                 pad: 4,
             },
     };
+//    if($("#fixAxisCheck")[0].checked){
+////        layout.yaxis.fixedrange = 'true';
+//        layout.yaxis.autorange = 'false';
+//    }
     var plotlyData = {x:[],y:[],type:'scatter'};
     plotlyData.x = dataObjsLine[0].data[0];
     plotlyData.y = dataObjsLine[0].data[currentTableLine];

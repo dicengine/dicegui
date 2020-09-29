@@ -37,9 +37,12 @@ $("#livePlotFieldSelect").on('change',function() {
 
 function livePlot(fileNames){
     dataObjs = [];
+    for(fileIt=0;fileIt<fileNames.length;++fileIt){
+        dataObjs.push({fileName:fileNames[fileIt],roi_id:-1,headings:[],data:[],initialized:false});
+    }
     var promises = [];
     for(fileIt=0;fileIt<fileNames.length;++fileIt){
-        var promise = fileToDataObj(fileNames[fileIt],dataObjs);
+        var promise = fileToDataObj(dataObjs,fileIt);
         promises.push(promise);
     }
     Promise.all(promises).then(function(response) {
@@ -96,10 +99,12 @@ function plotDataTable(){
     var plotlyData = [];
     for(i=0;i<dataObjs.length;++i){
         var tmp_data = {x:[],y:[],name:'pt_',type:'scatter'};
-        tmp_data.x = dataObjs[i].data[0];
-        tmp_data.y = dataObjs[i].data[currentTable];
-        tmp_data.name = tmp_data.name + String(i);
         plotlyData.push(tmp_data);
+    }
+    for(i=0;i<dataObjs.length;++i){
+        plotlyData[i].x = dataObjs[i].data[0];
+        plotlyData[i].y = dataObjs[i].data[currentTable];
+        plotlyData[i].name = plotlyData[i].name + String(i);
     }
     Plotly.plot(document.getElementById(divID),plotlyData,layout);
 }

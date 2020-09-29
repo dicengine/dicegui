@@ -58,7 +58,6 @@ function integerLength(integer) {
 //var livePlotWin = null;
 //var livePlotLineWin = null;
 function showLivePlots(){
-    $("#resultsButton").trigger( "click" );
     var online = navigator.onLine;
     // disable live plots when working offline
     if(!online){
@@ -88,6 +87,7 @@ function showLivePlots(){
                 livePlotFiles += ' ';
         }
         localStorage.setItem("livePlotFiles", livePlotFiles);
+        $("#resultsButton").trigger( "click" );
         livePlotRepeat();
         return;
     }
@@ -102,9 +102,11 @@ function showLivePlots(){
                 livePlotFiles += ' ';
         }
         localStorage.setItem("livePlotFiles", livePlotFiles);
+        $("#resultsButton").trigger( "click" );
         livePlotRepeat();
     }
     if(addLivePlotLineActive){
+        $("#resultsButton").trigger( "click" );
         livePlotLineRepeat();
     }
 }
