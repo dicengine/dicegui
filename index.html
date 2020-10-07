@@ -31,6 +31,7 @@
 <script src="./js/live_plot_utils.js" defer></script>
 <script src="./js/live_plot.js" defer></script>
 <script src="./js/live_plot_line.js" defer></script>
+<script src="./js/live_plot_tracklib.js" defer></script>
 <script src="./js/show_tracking.js" defer></script>
 <!-- SVG -->
 <script src="./js/svg.js" defer></script>
@@ -507,16 +508,26 @@
             <!-- end toggle div banner -->
             <div class="toggle-div-body" style="height:auto;">
               <div id="resultsWindow" class="results-window" style="display:none;">
-                <div id="resultsWindowLeft" class="results-sub-window">
+                <div id="resultsWindowLeft" class="results-sub-window results-left">
                   <div id="livePlots" style="width:100%; height: 93%; float: left; overflow: hidden; padding-bottom:10px;"></div>
-                  <select id="livePlotFieldSelect" style="padding-left:10px; width:40%;"></select>
+                  <select class="update-tracklib-plots" id="livePlotFieldSelect" style="padding-left:10px; width:30%;"></select>
+                  <span class="tracklib-tools" style="padding-left:10px; padding-right:5px;">ID:</span>
+                  <input type="text" class="tracklib-tools update-tracklib-plots" id="trackID" name="trackID" value="0" style="width: 10%;">
+                  <select id="idTypeSelect" class="tracklib-tools update-tracklib-plots">
+                    <option value="leftID">left ID</option>
+                    <option value="rightID">right ID</option>
+                    <option value="globalID">global stereo ID</option>
+                  </select>
+
                 </div>
-                <div id="resultsWindowRight" class="results-sub-window live-plot-line">
-                  <div id="livePlotLine" style="width:100%; height: 93%; float: left; overflow: hidden; padding-bottom:10px;"></div>
-                  <select id="livePlotLineFieldSelect" style="padding-left:10px; width:40%;"></select>
-                  <span style="padding-left:5px; padding-right:5px;">step</span><select id="stepSelect"></select> <!-- <input id="fixAxisCheck" type="checkbox" style="margin-left: 10px;"><span> fix y-axis</span> -->
-                  <span id="stepBackward" class="action-li" style="padding-left:5px;">previous</span>
-                  <span id="stepForward" class="action-li" style="padding-left:5px;">next</span>
+                <div id="resultsWindowRight" class="results-sub-window results-right">
+                  <div class="non-tracklib-tools" id="livePlotLine" style="width:100%; height: 93%; float: left; overflow: hidden; padding-bottom:10px;"></div>
+                  <select class="non-tracklib-tools" id="livePlotLineFieldSelect" style="padding-left:10px; width:40%;"></select>
+                  <span   class="non-tracklib-tools" style="padding-left:5px; padding-right:5px;">step</span>
+                  <select class="non-tracklib-tools" id="stepSelect"></select> <!-- <input id="fixAxisCheck" type="checkbox" style="margin-left: 10px;"><span> fix y-axis</span> -->
+                  <span   class="non-tracklib-tools" id="stepBackward" class="action-li" style="padding-left:5px;">previous</span>
+                  <span   class="non-tracklib-tools" id="stepForward" class="action-li" style="padding-left:5px;">next</span>
+                  <div    class="tracklib-tools" id="livePlot3D" style="width:100%; height: 100%; float: left; overflow: hidden; padding-bottom:10px;"></div>
                 </div>
               </div>
               <div id="consoleWindow" class="console">

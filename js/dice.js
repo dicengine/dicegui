@@ -58,37 +58,40 @@ function integerLength(integer) {
 //var livePlotWin = null;
 //var livePlotLineWin = null;
 function showLivePlots(){
-    var online = navigator.onLine;
+    //var online = navigator.onLine;
     // disable live plots when working offline
-    if(!online){
-	alert('Live plots are disabled when working offline');
-        return;
-    }
-
+    //if(!online){
+	//alert('Live plots are disabled when working offline');
+    //    return;
+    //}
     localStorage.clear();
     localStorage.setItem("workingDirectory",workingDirectory);
     if($("#analysisModeSelect").val()=="tracking"){
-        var livePlotFiles = '';
-        var numDigitsTotal = integerLength(ROIDefsX.length);
-        // set up the files to read
-        for(i=0;i<ROIDefsX.length;++i){
-            if(os.platform()=='win32'){
-                livePlotFiles += 'results\\';
-            }else{
-                livePlotFiles += 'results/';
+        if(diceTrackLibOn && showStereoPane==1){
+            livePlotTracklibRepeat();
+        }else{
+            var livePlotFiles = '';
+            var numDigitsTotal = integerLength(ROIDefsX.length);
+            // set up the files to read
+            for(i=0;i<ROIDefsX.length;++i){
+                if(os.platform()=='win32'){
+                    livePlotFiles += 'results\\';
+                }else{
+                    livePlotFiles += 'results/';
+                }
+                var currentDigits = integerLength(i);
+                var numZeros = Number(numDigitsTotal) - Number(currentDigits);
+                livePlotFiles += 'DICe_solution_';
+                for(j=0;j<numZeros;++j)
+                    livePlotFiles += '0';
+                livePlotFiles += i + '.txt';
+                if(i<ROIDefsX.length-1)
+                    livePlotFiles += ' ';
             }
-            var currentDigits = integerLength(i);
-            var numZeros = Number(numDigitsTotal) - Number(currentDigits);
-            livePlotFiles += 'DICe_solution_';
-            for(j=0;j<numZeros;++j)
-                livePlotFiles += '0';
-            livePlotFiles += i + '.txt';
-            if(i<ROIDefsX.length-1)
-                livePlotFiles += ' ';
+            localStorage.setItem("livePlotFiles", livePlotFiles);
+            $("#resultsButton").trigger( "click" );
+            livePlotRepeat();
         }
-        localStorage.setItem("livePlotFiles", livePlotFiles);
-        $("#resultsButton").trigger( "click" );
-        livePlotRepeat();
         return;
     }
     if(livePlotPtsX.length <=0 && !addLivePlotLineActive) return;
@@ -204,9 +207,9 @@ document.getElementById("clearCross").onclick = function() {
 function callDICeExec(resolution,ss_locs) {
 
     // load the live plot viewer if there are any live plots:
-    if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1){ // signifies tracklib
-    }else
-        showLivePlots();
+//    if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1){ // signifies tracklib
+//    }else
+    showLivePlots();
     
     // nuke the old line plot and point live plot files
     fs.readdirSync(workingDirectory).forEach(file => {
@@ -513,10 +516,10 @@ function applyFilterToImages(fileName, mode){
         args.push('background_num_frames');
         var numBackgroundFrames = parseInt($("#numBackgroundFrames").val());
         //console.log('num background frames --- ' + numBackgroundFrames);
-        if(numBackgroundFrames<0||numBackgroundFrames > ($("#cineEndIndex").val()-$("#cineStartIndex").val())){
-            alert('warning: invalid num background frames (needs to be an integer value between 0 and the total num frames in the cine file)\nSetting num background frames to 0');
-            numBackgroundFrames = 0;
-            $("#numBackgroundFrames").val(0);
+        if(numBackgroundFrames<1||numBackgroundFrames > ($("#cineEndIndex").val()-$("#cineStartIndex").val())){
+            alert('warning: invalid num background frames (needs to be an integer value between 1 and the total num frames in the cine file)\nSetting num background frames to 1');
+            numBackgroundFrames = 1;
+            $("#numBackgroundFrames").val(1);
         }
         args.push(numBackgroundFrames); // TODO make this a user parameter in the GUI eventually
     }

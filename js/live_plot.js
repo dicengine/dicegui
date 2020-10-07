@@ -32,7 +32,11 @@ function livePlotRepeat() {
 
 $("#livePlotFieldSelect").on('change',function() {
     currentTable = Number($("#livePlotFieldSelect option:selected").val().split("_").pop());
-    plotDataTable();
+    
+    if($("#analysisModeSelect").val()=="tracking" && diceTrackLibOn && showStereoPane==1)
+        plotTracklibDataTable();
+    else
+        plotDataTable();
 });
 
 function livePlot(fileNames){

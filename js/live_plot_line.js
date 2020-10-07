@@ -1,11 +1,8 @@
 var nIntervIdLine;
 var firstPlotLine = true;
-var dataTablesLine = [];
 var dataObjsLine = [];
 var currentTableLine = 0;
 var plottingPausedLine = false;
-var currentVAxisMax = 0;
-var currentVAxisMin = 0;
 
 function livePlotLineRepeat() {
     livePlotLine();

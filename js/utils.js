@@ -573,13 +573,14 @@ function resizeFullDivs(targetDiv){
 // toggle boxes up and down
 $("#stereoButton").click(function(){
     // if tracking mode is selected button is disabled:
-    if($("#analysisModeSelect").val()=='tracking'&&!diceTrackLibOn) return;
+    if($("#analysisModeSelect").val()=='tracking'&&!diceTrackLibOn)return;
     if($("#analysisModeSelect").val()=='global') return;
     
     // get the current state of stereo on or off:
     var oldText = $('#runLi span').text();
     if(oldText=='run 2d'){
         showStereoViewer();
+        $(".results-right").show();
         if($("#analysisModeSelect").val()=='tracking'&&showStereoPane==1){
             $(".non-tracklib-tools").hide();
             $(".tracklib-tools").show();
@@ -593,6 +594,8 @@ $("#stereoButton").click(function(){
 //        checkValidInput();        
     }else{
         show2DViewer();
+        if($("#analysisModeSelect").val()=='tracking')
+            $(".results-right").hide();
         $(".non-tracklib-tools").show();
         $(".tracklib-tools").hide();
         checkValidInput();
@@ -766,7 +769,7 @@ $("#analysisModeSelect").on('change',function() {
         $(".full-field-and-tracking").show();
         $(".global").hide();
         $(".non-tracklib-tools").show();
-        $(".live-plot-line").show();
+        $(".results-right").show();
         $(".tracklib-tools").hide();
         $(".tracking").hide();
         //$("#subsetParams").show();
@@ -781,18 +784,19 @@ $("#analysisModeSelect").on('change',function() {
         $(".tracking").show();
         // force 2D
         resetLivePlots();
-        $(".live-plot-line").hide();
         if(!diceTrackLibOn){
             show2DViewer();
             $(".non-tracklib-tools").show();
             $(".tracklib-tools").hide();
         }else{
             if(showStereoPane==1){
+                $(".results-right").show();
                 $(".non-tracklib-tools").hide();
                 $(".tracklib-tools").show();
                 $("#fileSelectMode").val("cine").change()
             }
             else{
+                $(".results-right").hide();
                 $(".non-tracklib-tools").show();
                 $(".tracklib-tools").hide();
             }
