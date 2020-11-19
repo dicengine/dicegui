@@ -788,6 +788,7 @@ $("#analysisModeSelect").on('change',function() {
             show2DViewer();
             $(".non-tracklib-tools").show();
             $(".tracklib-tools").hide();
+            $(".results-right").hide();
         }else{
             if(showStereoPane==1){
                 $(".results-right").show();

@@ -157,7 +157,7 @@ function updateDeformedCoords(){
         if(sigma < 0.0){
             statusVec[roi_id] = false;
 	}
-        //alert('file ' + resultsDataObjs[roi].fileName + ' roi_id ' + roi_id);
+//        alert('file ' + resultsDataObjs[roi].fileName + ' roi_id ' + roi_id);
 
         for(pt=0;pt<deformedROIDefsX[roi_id].length;++pt){
 	    var ptx = deformedROIDefsX[roi_id][pt];

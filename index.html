@@ -499,7 +499,8 @@
             <div class="toggle-div-banner">
               <span class="toggle-title-bold" id="consoleButton">CONSOLE</span>
               <span class="toggle-title" style="padding-left:10px; padding-right:10px;">|</span>
-              <span class="toggle-title action-li" id="resultsButton">RESULTS</span>
+              <span class="toggle-title action-li" id="resultsButton">PLOTS</span>
+              <!--<span class="toggle-title full-field-global" style="padding-left:10px; padding-right:10px;">|</span>-->
               <span class="toggle-icon action-li">
                 <i id="clearConsoleIcon" class="material-icons md-dark action-li" title="clear console">block</i>
                 <i id="consoleToggle" class="material-icons md-dark toggler">swap_vertical_circle</i>
@@ -507,10 +508,10 @@
             </div>
             <!-- end toggle div banner -->
             <div class="toggle-div-body" style="height:auto;">
-              <div id="resultsWindow" class="results-window" style="display:none;">
+              <div id="resultsWindow" class="results-window" style="display:none; overflow:scroll;">
                 <div id="resultsWindowLeft" class="results-sub-window results-left">
                   <div id="livePlots" style="width:100%; height: 93%; float: left; overflow: hidden; padding-bottom:10px;"></div>
-                  <select class="update-tracklib-plots" id="livePlotFieldSelect" style="padding-left:10px; width:30%;"></select>
+                  <select id="livePlotFieldSelect" style="padding-left:10px; width:30%;"></select>
                   <span class="tracklib-tools" style="padding-left:10px; padding-right:5px;">ID:</span>
                   <input type="text" class="tracklib-tools update-tracklib-plots" id="trackID" name="trackID" value="0" style="width: 10%;">
                   <select id="idTypeSelect" class="tracklib-tools update-tracklib-plots">
@@ -518,7 +519,6 @@
                     <option value="rightID">right ID</option>
                     <option value="globalID">global stereo ID</option>
                   </select>
-
                 </div>
                 <div id="resultsWindowRight" class="results-sub-window results-right">
                   <div class="non-tracklib-tools" id="livePlotLine" style="width:100%; height: 93%; float: left; overflow: hidden; padding-bottom:10px;"></div>

@@ -46,7 +46,7 @@ function fileToDataObj(dataObjs,fileIt) {
         // split up the name into components:
         var trimName = file.substr(0,file.length - ext.length - 1);
         //console.log('trim name: ' + trimName);
-        var subset_id = trimName.split('_').pop();
+        var subset_id = Number(trimName.split('_').pop());
         //console.log('susbset id ' + subset_id);
         //alert('file ' + file + ' subset_id ' + subset_id);
         dataObjs[fileIt].roi_id = subset_id;

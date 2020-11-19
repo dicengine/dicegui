@@ -129,31 +129,36 @@ function plotTracklibDataTable(){
     var divID3D = "div_livePlot3d";
     $("#livePlot3D").append('<div id="' + divID3D + '" class="plot_div" style="height:100%; width:100%; float:left;" ></div>');
     var layout3D = {
-            xaxis: {
-                title: {
-                    text: 'X',
+            scene : {
+                aspectmode: 'data',
+                xaxis: {
+                    title: {
+                        text: 'X',
+                    },
                 },
-            },
-            yaxis: {
-                title: {
-                    text: 'Y',
-                }
-            },
-            zaxis: {
-                title: {
-                    text: 'Z',
-                }
-            },
-            margin: {
-                l: 0,
-                r: 0,
-                b: 0,
-                t: 0,
-                pad: 4,
-            },
-            showlegend: false
+                yaxis: {
+                    scaleanchor: 'x',
+                    title: {
+                        text: 'Y',
+                    }
+                },
+                zaxis: {
+                    scaleanchor: 'x',
+                    title: {
+                        text: 'Z',
+                    }
+                },
+                margin: {
+                    l: 0,
+                    r: 0,
+                    b: 0,
+                    t: 0,
+                    pad: 4,
+                },
+                showlegend: false
+            }
     };
-//    var plotlyData3D = {x:[],y:[],z:[],type:'scatter',gid:-1};
+//  var plotlyData3D = {x:[],y:[],z:[],type:'scatter',gid:-1};
 //    for(i=0;i<dataObjsTracklib[0].data[5].length;++i){ // 5 is global id
 //        if(dataObjsTracklib[0].data[5][i]>=0){
 //            plotlyData3D.x.push(dataObjsTracklib[0].data[10][i]);

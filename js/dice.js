@@ -94,6 +94,7 @@ function showLivePlots(){
         }
         return;
     }
+    livePlotContourRepeat();
     if(livePlotPtsX.length <=0 && !addLivePlotLineActive) return;
     if(livePlotPtsX.length >0){
         var livePlotFiles = ""

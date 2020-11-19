@@ -573,7 +573,6 @@ $("#resultsButton").on("click",function () {
     $("#resultsWindow").show();
 });
 
-
 $("#loadSubsetFileInput").on("click",function () {
     this.value = null;
 });
@@ -855,7 +854,7 @@ $("#leftDefInput").change(function (evt) {
         defImagePathsLeft = [];
         for(var i = 0, l = files.length; i < l; i++) {
             var filePath = files[i].path;
-            var fileName = files[i].name;                           
+            var fileName = files[i].name;
             $("#defImageListLeft").append("<li class='defListLi' id='defListLi_"+i+"'>" + fileName + "</li>");
             defImagePathsLeft.push(files[i]);//filePath);
         }
