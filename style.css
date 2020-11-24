@@ -463,3 +463,10 @@ h4 {
     border-bottom: 10px solid transparent;
     border-right:10px solid #666666;
 }
+.plotly-viewer {
+    float: left;
+    background-color: rgb(0,0,0);
+    width: 100%;
+    height: 100%;
+}
+

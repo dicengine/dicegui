@@ -841,6 +841,7 @@ $("#leftRefInput").change(function (evt) {
     $("#refImageText span").text(file.name);
     //loadImage(file,"#panzoomLeft","auto","auto",1,false,true,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
     loadImage(file,"#panzoomLeft","auto","auto",1,false,true,"","",true);
+    updatePreview(file);
 });
 
 $("#leftDefInput").on("click",function () {
