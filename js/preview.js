@@ -48,6 +48,13 @@ function updatePreview(file_obj){
     });
 }
 
+
+// test to print out the shapes in the image every 10 sec
+window.setInterval(function(){
+    var divID = "plotlyDiv";
+    console.log(document.getElementById(divID).layout.shapes);
+}, 10000);
+
 function updateImage(imageSpec){
     console.log('updateImage(): image path ' + imageSpec.displayPath);
     var layout = {
@@ -65,6 +72,7 @@ function updateImage(imageSpec){
                 showline: false,
             },
             margin: {l: 40,r: 5,b: 20,t: 30},
+            newshape: {line: {color: 'cyan'},fillcolor:'cyan',opacity:0.4},
             images: [
                 {
                     source: imageSpec.displayPath,
@@ -78,14 +86,20 @@ function updateImage(imageSpec){
                 }],
     };
     var config = {
-            modeBarButtonsToAdd: ['drawline',
-                'drawopenpath',
+            displaylogo: false,
+            scrollZoom: true,
+            responsive: true,
+            modeBarButtonsToRemove: [
+                'autoScale2d'
+                ],
+            modeBarButtonsToAdd: [//'drawline',
+                //'drawopenpath',
                 'drawclosedpath',
-                'drawcircle',
-                'drawrect',
+                //'drawcircle',
+                //'drawrect',
                 'eraseshape']
     }
-    var divID = "divPlotly";
+    var divID = "plotlyDiv";
     if( $('#plotlyViewerLeft').is(':empty') ) {
         $("#plotlyViewerLeft").append('<div id="' + divID + '" class="plot_div" style="height:100%; width:100%; float:left;" ></div>');
     }
