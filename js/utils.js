@@ -424,14 +424,12 @@ function showParams(){
     $('#innerFluidRightCol').css('display','inline-block');
     $('#innerFluidRightCol').css('width','25%');
     $('#innerFluidLeftCol').css('width','75%');
-    resizeViewerFillDivs();
     resizeAll();
     showPrefPane = true;
 }
 function hideParams(){
     $('#innerFluidRightCol').css('display','none');
     $('#innerFluidLeftCol').css('width','100%');
-    resizeViewerFillDivs();
     resizeAll();
     showPrefPane = false;
 }
@@ -467,7 +465,6 @@ $(".pane-opener").click(function(){
     }
     // hide this element
     $(this).parent().parent().parent().hide();
-    resizeViewerFillDivs();
     resizeAll();
 });
 
@@ -493,7 +490,6 @@ $(".pane-closer").click(function(){
         $("#middleMinimized").show();
     }
     
-    resizeViewerFillDivs();
     resizeAll();
 })
 
@@ -519,7 +515,6 @@ function resizeView(toggler) {
 
     // the console tag should call the resize method here
     if($(toggler).attr('id')=='consoleToggle'){
-        resizeViewerFillDivs();
         resizeAll();
         showConsole = !showConsole;
     }
@@ -540,6 +535,8 @@ function defaultConsole(){
 
 // resize all columns and inner-columns to make fill-divs fill the column
 function resizeAll(){
+    resizeViewerFillDivs();
+
     resizeFullDivs("#innerFluidLeftCol");
     resizeFullDivs("#innerFluidRightCol");
     resizeFullDivs("#subFillDivLeft");
@@ -549,6 +546,7 @@ function resizeAll(){
     $("#panzoomLeft").panzoom("resetDimensions");
     $("#panzoomRight").panzoom("resetDimensions");
     $("#panzoomMiddle").panzoom("resetDimensions");
+    resizePreview();
 }
 
 // resize the elements within the target div
@@ -619,8 +617,7 @@ function resizeViewerFillDivs(){
             }
         }
     });
-    var numMinimized = numTotalDivs - numActiveDivs;
-    
+    var numMinimized = numTotalDivs - numActiveDivs;    
     if(viewersStacked){
         var newHeight = Math.floor((totalHeight - numMinimized*32-1)/numActiveDivs);
         $("#viewerFillDiv" + '> div').each(function() {
@@ -662,7 +659,6 @@ function stackViews(){
         }
     });
     viewersStacked = true;
-    resizeViewerFillDivs();
     resizeAll();
 }
 function unstackViews(){
@@ -677,7 +673,6 @@ function unstackViews(){
         }
     });
     viewersStacked = false;
-    resizeViewerFillDivs();
     resizeAll();
 }
 
