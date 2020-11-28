@@ -118,10 +118,8 @@ function showLivePlots(){
 function resetWorkingDirectory(){
         $("#refImageText span").text('');
         $("#refImageTextRight span").text('');
-        $("#refImageTextMiddle span").text('');
         $("#defImageListLeft").empty();
         $("#defImageListRight").empty();
-        $("#defImageListMiddle").empty();
 
         $("#imageFolderSpan").text('');
         $("#imageSequencePreviewSpan").text('');
@@ -133,12 +131,10 @@ function resetWorkingDirectory(){
         $("#numDigits").val(1);
         $("#stereoLeftSuffix").val('_0');
         $("#stereoRightSuffix").val('_1');
-        $("#stereoMiddleSuffix").val('_2');
         $("#imageExtension").val('');
 
         $("#cineLeftPreviewSpan").text('');
         $("#cineRightPreviewSpan").text('');
-        $("#cineMiddlePreviewSpan").text('');
         $("#cineStartPreviewSpan").text('');
         $("#cineEndPreviewSpan").text('');
         $("#cineRefIndex").val(0);
@@ -157,17 +153,14 @@ function resetWorkingDirectory(){
 
         $("#panzoomLeft").html('');
         $("#panzoomRight").html('');
-        $("#panzoomMiddle").html('');
 
         $("#previewCross").hide();
         $("#initCross").hide();
 
         refImagePathLeft = "undefined";
         refImagePathRight = "undefined";
-        refImagePathMiddle = "undefined";
         cinePathLeft = "undefined";
         cinePathRight = "undefined";
-        cinePathMiddle = "undefined";
         calPath = "undefined";
 
         deleteDisplayImageFiles(0);
@@ -318,8 +311,6 @@ function updateCineDisplayImage(fileName,index,mode,reset_ref_ROIs){
         tiffImageName += 'left.tif';
     else if(mode==1)
         tiffImageName += 'right.tif';
-    else
-        tiffImageName += 'middle.tif';
     consoleMsg("converting file " + fileName + " index " + index + " to .tif for display");
     var procConv = child_process.spawn(execCineToTiffPath, [fileName,index,index,tiffImageName],{cwd:workingDirectory});//,maxBuffer:1024*1024})
         readline.createInterface({
@@ -349,11 +340,6 @@ function updateCineDisplayImage(fileName,index,mode,reset_ref_ROIs){
                         getFileObject(tiffImageName, function (fileObject) {
                             //loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true,function(){if(tracklibPreview) callOpenCVServerExec();});
                             loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true);
-                        });
-                    }else{
-                        getFileObject(tiffImageName, function (fileObject) {
-                            //loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",true,function(){if(tracklibPreview) callOpenCVServerExec();});
-                            loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",true);
                         });
                     }
                 }
@@ -440,9 +426,6 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
                              }else if(mode==1){
                                  cinePathRight = file.path;
                                  $("#cineRightPreview span").text(file.name);
-                             }else if(mode==2){
-                                 cinePathMiddle = file.path;
-                                 $("#cineMiddlePreview span").text(file.name);
                              }
                              deleteHiddenFiles('keypoints');
                              deleteDisplayImageFiles(mode,function(){updateCineDisplayImage(fileName,stats[1],mode,reset_ref_ROIs);});
@@ -480,12 +463,6 @@ function applyFilterToImages(fileName, mode){
             outName ='.dice\\.display_image_right_filter.png';
         }else{
             outName ='.dice/.display_image_right_filter.png';
-        }
-    }else{
-        if(os.platform()=='win32'){
-            outName ='.dice\\.display_image_middle_filter.png';
-        }else{
-            outName ='.dice/.display_image_middle_filter.png';
         }
     }
     args.push(outName);
@@ -646,7 +623,7 @@ function applyFilterToImages(fileName, mode){
 function drawEpipolarLine(isLeft,dot_x,dot_y,reset=false) {
     //if($("#analysisModeSelect").val()!="tracking") return;
     // check to see that there is at least one image selected:
-    if(refImagePathLeft=='undefined'&&refImagePathRight=='undefined'&&refImagePathMiddle=='undefined') return;
+    if(refImagePathLeft=='undefined'&&refImagePathRight=='undefined') return;
     // generate the command line
     args = [];
     leftName = '';

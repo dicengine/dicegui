@@ -40,7 +40,6 @@ function initialize_gui(load_existing){
     // hide the minimized bars for closed views
     $("#leftMinimized").hide();
     $("#rightMinimized").hide();
-    $("#middleMinimized").hide();
 
     fs.stat(fileName, function(err, stat) {
         if(err == null) {
@@ -310,7 +309,7 @@ function updateSequenceLabels(stats){
     updateImageSequencePreview(true);
 }
 
-$("#imagePrefix,#refIndex,#numDigits,#imageExtension,#stereoLeftSuffix,#stereoRightSuffix,#stereoMiddleSuffix").on('keyup',function(){
+$("#imagePrefix,#refIndex,#numDigits,#imageExtension,#stereoLeftSuffix,#stereoRightSuffix").on('keyup',function(){
     updateImageSequencePreview(false);
 });
 
@@ -342,8 +341,6 @@ function concatImageSequenceName(stereoImageFlag){
         fullImageName += $("#stereoLeftSuffix").val();
     }else if((showStereoPane==1||showStereoPane==2)&&stereoImageFlag==1){
         fullImageName += $("#stereoRightSuffix").val();
-    }else if((showStereoPane==1||showStereoPane==2)&&stereoImageFlag==2){
-        fullImageName += $("#stereoMiddleSuffix").val();
     }
     fullImageName += $("#imageExtension").val();
     return fullImageName;
@@ -460,8 +457,6 @@ $(".pane-opener").click(function(){
         $("#subFillDivLeft").show();
     }else if(myId=="rightMinimized"){
         $("#subFillDivRight").show();
-    }else if(myId=="middleMinimized"){
-        $("#subFillDivMiddle").show();
     }
     // hide this element
     $(this).parent().parent().parent().hide();
@@ -486,8 +481,6 @@ $(".pane-closer").click(function(){
         $("#leftMinimized").show();
     }else if(parentId=="subFillDivRight"){    
         $("#rightMinimized").show();
-    }else if(parentId=="subFillDivMiddle"){    
-        $("#middleMinimized").show();
     }
     
     resizeAll();
@@ -541,11 +534,9 @@ function resizeAll(){
     resizeFullDivs("#innerFluidRightCol");
     resizeFullDivs("#subFillDivLeft");
     resizeFullDivs("#subFillDivRight");
-    resizeFullDivs("#subFillDivMiddle");
     //resizeFullDivs("#leftMinimized");
     $("#panzoomLeft").panzoom("resetDimensions");
     $("#panzoomRight").panzoom("resetDimensions");
-    $("#panzoomMiddle").panzoom("resetDimensions");
     resizePreview();
 }
 
@@ -679,9 +670,7 @@ function unstackViews(){
 function show2DViewer(){
     $('#subFillDivLeft').css('display','inline-block');
     $('#subFillDivRight').css('display','none');
-    $('#subFillDivMiddle').css('display','none');
     $("#rightMinimized").hide();
-    $("#middleMinimized").hide();
     $("#leftMinimized").hide();
     $("#leftPaneToggle").hide();
     $('#subFillDivLeft').css('width','100%');
@@ -705,14 +694,11 @@ function show2DViewer(){
 
 function showTrinocViewer(){
     $('#subFillDivLeft').css('display','inline-block');
-    $('#subFillDivMiddle').css('display','inline-block');
     $('#subFillDivRight').css('display','inline-block');
     $("#rightMinimized").hide();
-    $("#middleMinimized").hide();
     $("#leftMinimized").hide();
     $("#leftPaneToggle").show();
     $('#subFillDivRight').css('width','33%');
-    $('#subFillDivMiddle').css('width','34%');
     $('#subFillDivLeft').css('width','33%');
     $(".nav-two-cam").css('display','block');
     $(".nav-three-cam").css('display','block');
@@ -731,7 +717,6 @@ function showTrinocViewer(){
 }
 
 function showStereoViewer(){
-    $('#subFillDivMiddle').css('display','none');
     $('#subFillDivLeft').css('display','inline-block');
     $('#subFillDivRight').css('display','inline-block');
     $('#subFillDivRight').css('width','50%');
@@ -739,7 +724,6 @@ function showStereoViewer(){
     $(".nav-one-cam").hide();
     $(".cal-options").show();
     $("#rightMinimized").hide();
-    $("#middleMinimized").hide();
     $("#leftMinimized").hide();
     $("#leftPaneToggle").show();
     $(".nav-two-cam").css('display','block');

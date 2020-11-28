@@ -34,13 +34,10 @@ var diceTrackLibOn = false;
 // image sets
 var refImagePathLeft = "undefined";
 var refImagePathRight = "undefined";
-var refImagePathMiddle = "undefined";
 var defImagePathsLeft = new Array();
 var defImagePathsRight = new Array();
-var defImagePathsMiddle = new Array();
 var cinePathLeft = "undefined";
 var cinePathRight = "undefined";
-var cinePathMiddle = "undefined";
 var cineFirstFrame = 0;
 var calPath = "undefined";
 
@@ -49,8 +46,6 @@ var refImageWidthLeft = 0;
 var refImageHeightLeft = 0;
 var refImageWidthRight = 0;
 var refImageHeightRight = 0;
-var refImageWidthMiddle = 0;
-var refImageHeightMiddle = 0;
 
 // best fit plane locations
 var bestFitXOrigin = 0;

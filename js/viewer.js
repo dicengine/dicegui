@@ -46,15 +46,6 @@ $("#panzoomRight").panzoom({
     minScale: 0.05,
     cursor: "pointer"
 });
-$("#panzoomMiddle").panzoom({
-    $zoomIn: $(".zoom-in-middle"),
-    $zoomOut: $(".zoom-out-middle"),
-    $zoomRange: $(".zoom-range-middle"),
-    $reset: $(".reset-middle"),
-    which: 2,
-    minScale: 0.05,
-    cursor: "pointer"
-});
 
 function getOffset( el ) {
     var _x = 0;
@@ -93,21 +84,9 @@ function zoomToFitRight(){
     }
 }
 
-function zoomToFitMiddle(){
-    $("#panzoomMiddle").panzoom("resetDimensions");
-    var windowHeight = $("#viewWindowMiddle").outerHeight();
-    var imageHeight = refImageHeightMiddle;
-    var e = getOffset( document.getElementById('viewWindowMiddle') );
-    if(imageHeight>0){
-        var scale = (windowHeight-10) / imageHeight;
-        $("#panzoomMiddle").panzoom("setMatrix", [ 1, 0, 0, 1, 0, 0 ]);
-        $("#panzoomMiddle").panzoom("zoom",scale,{focal: e });
-    }
-}
 
 $("#zoomToFitLeft").click(function(){zoomToFitLeft();});
 $("#zoomToFitRight").click(function(){zoomToFitRight();});
-$("#zoomToFitMiddle").click(function(){zoomToFitMiddle();});
 
 // compute the image coordiates of the mouse in the left viewer
 $("#panzoomLeft").mousemove(function( event ) {
@@ -133,17 +112,6 @@ $("#panzoomRight").mousemove(function( event ) {
     }
 });
 
-// compute the image coordiates of the mouse in the right viewer
-$("#panzoomMiddle").mousemove(function( event ) {
-    var scale = $("#panzoomMiddle").panzoom("getMatrix")[0];
-    var viewX = event.pageX - $(this).offset().left;
-    var viewY = event.pageY - $(this).offset().top;
-    var imgX = Math.round(viewX / scale);
-    var imgY = Math.round(viewY / scale);
-    if(imgX>=0&&imgX<refImageWidthMiddle&&imgY>=0&&imgY<refImageHeightMiddle){
-        $("#middlePos").text("x:" + imgX + " y:" + imgY);
-    }
-});
 
 // zoom on focal point from mousewheel    
 $("#panzoomLeft").parent().on('mousewheel.focal', function( e ) {
@@ -169,17 +137,6 @@ $("#panzoomRight").parent().on('mousewheel.focal', function( e ) {
     });
 });
 
-// zoom on focal point from mousewheel    
-$("#panzoomMiddle").parent().on('mousewheel.focal', function( e ) {
-    e.preventDefault();
-    var delta = e.delta || e.originalEvent.wheelDelta;
-    var zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
-    $("#panzoomMiddle").panzoom('zoom', zoomOut, {
-        increment: 0.1,
-        animate: false,
-        focal: e
-    });
-});
 
 function deleteDisplayImageFiles(lrm,cb){
     var cbCalled = false;
@@ -189,8 +146,6 @@ function deleteDisplayImageFiles(lrm,cb){
         nameToCheck += 'left';
     }else if(lrm==1){
         nameToCheck += 'right';
-    }else{
-        nameToCheck += 'middle';
     }
     hiddenDir = fullPath('.dice','');
     console.log('removing any existing display image files with name base ' + nameToCheck + ' from ' + hiddenDir);
@@ -323,10 +278,6 @@ function loadImage(file,viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCla
             localFileName += 'left.';
             lrm = 0;
             copyRequired = true;
-        }else if(viewer=="#panzoomMiddle"){
-            localFileName += 'middle.';
-            lrm = 2;
-            copyRequired = true;
         }else if(viewer=="#panzoomRight"){
             localFileName += 'right.';
             lrm = 1;
@@ -390,12 +341,6 @@ function loadImage(file,viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCla
                     if(recordPath) refImagePathRight = file.path;
                     updateDimsLabels();
                     checkValidInput();
-                }else if(viewer=="#panzoomMiddle"){
-                    refImageWidthMiddle = tiff.width();
-                    refImageHeightMiddle = tiff.height();
-                    if(recordPath) refImagePathMiddle = file.path;
-                    updateDimsLabels();
-                    checkValidInput();
                 }
                 if(addBorder){
                     $(tiffCanvas).css({border: '5px solid #666666'});
@@ -432,12 +377,6 @@ function loadImage(file,viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addCla
                         refImageWidthRight = imgWidth;
                         refImageHeightRight = imgHeight;
                         if(recordPath) refImagePathRight = file.path;
-                        updateDimsLabels();
-                        checkValidInput();
-                    }else if(viewer=="#panzoomMiddle"){
-                        refImageWidthMiddle = imgWidth;
-                        refImageHeightMiddle = imgHeight;
-                        if(recordPath) refImagePathMiddle = file.path;
                         updateDimsLabels();
                         checkValidInput();
                     }
@@ -528,19 +467,6 @@ function load_image_sequence(reset_ref_ROIs){
                     });
                     flagSequenceImages();
                 });
-                if(showStereoPane==2){
-                    fs.stat(fullTrinocImageName, function(err, stat) {
-                        if(err != null) {
-                            alert("Invalid trinoc image file name: " + fullTrinocImageName);
-                            return;
-                        }
-                        getFileObject(fullTrinocImageName, function (fileObject) {
-                            //loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
-                            loadImage(fileObject,"#panzoomMiddle","auto","auto",1,false,false,"","",true);
-                        });
-                        flagSequenceImages();
-                    });
-                }
             }
             else{
                  getFileObject(fullImageName, function (fileObject) {
@@ -620,8 +546,8 @@ $("#leftCineInput").change(function (evt) {
     if(file){
         // if a right cine file is alread loaded ask the user if it should be unloaded to
         // to avoid frame range mismatch
-        if((cinePathRight!="undefined"||cinePathMiddle!="undefined")&&cinePathLeft!="undefined"){
-            if (confirm('unload right (and trinoc) cine file (this is necessary if the frame ranges are different between right and left cine)')){
+        if(cinePathRight!="undefined"){
+            if (confirm('unload right cine file (this is necessary if the frame ranges are different between right and left cine)')){
                 deleteDisplayImageFiles(0);
                 deleteDisplayImageFiles(1);
                 deleteDisplayImageFiles(2);
@@ -631,9 +557,6 @@ $("#leftCineInput").change(function (evt) {
                 $("#cineStartPreviewSpan").text("");
                 $("#cineEndPreview span").text("");
                 $("#panzoomRight").html('');
-                cinePathMiddle = "undefined";
-                $("#cineMiddlePreviewSpan").text("");
-                $("#panzoomMiddle").html('');
                 // create a tiff image of the selected reference frame
                 callCineStatExec(file,0,true);
             }
@@ -658,22 +581,9 @@ $("#rightCineInput").change(function (evt) {
     }
 });
 
-$("#middleCineInput").on("click",function () {
-    this.value = null;
-});
-$("#middleCineInput").change(function (evt) {
-    var tgt = evt.target || window.event.srcElement,
-        file = tgt.files[0];
-    if(file){
-        // create a tiff image of the selected reference frame
-        callCineStatExec(file,2,false);
-    }
-});
-
-
 function reload_cine_images(index){
     // check that the ref index is valid
-    if(cinePathLeft!="undefined"||cinePathRight!="undefined"||cinePathMiddle!="undefined")
+    if(cinePathLeft!="undefined"||cinePathRight!="undefined")
         if(index < Number($("#cineStartPreviewSpan").text()) || index > Number($("#cineEndPreviewSpan").text())){
             alert("invalid index");
             return;
@@ -686,8 +596,6 @@ function reload_cine_images(index){
         updateCineDisplayImage(cinePathLeft,offsetIndex,0);
     if(cinePathRight!="undefined")
         updateCineDisplayImage(cinePathRight,offsetIndex,1);
-    if(cinePathMiddle!="undefined")
-        updateCineDisplayImage(cinePathMiddle,offsetIndex,2);
 }
 
 
@@ -699,7 +607,7 @@ $("#cineRefIndex").change(function () {
     $("#cineCurrentPreviewSpan").text(refIndex);
     reload_cine_images(refIndex);
 //    // check that the ref index is valid
-//    if(cinePathLeft!="undefined"||cinePathRight!="undefined"||cinePathMiddle!="undefined")
+//    if(cinePathLeft!="undefined"||cinePathRight!="undefined")
 //        if(refIndex < Number($("#cineStartPreviewSpan").text()) || refIndex > Number($("#cineEndPreviewSpan").text())){
 //            alert("invalid reference index");
 //            return;
@@ -712,8 +620,6 @@ $("#cineRefIndex").change(function () {
 //        updateCineDisplayImage(cinePathLeft,offsetIndex,0);
 //    if(cinePathRight!="undefined")
 //        updateCineDisplayImage(cinePathRight,offsetIndex,1);
-//    if(cinePathMiddle!="undefined")
-//        updateCineDisplayImage(cinePathMiddle,offsetIndex,2);
 });
 
 $("#frameScroller").on('input', function () {
@@ -793,17 +699,6 @@ $("#rightRefInput").change(function (evt) {
     $("#refImageTextRight span").text(file.name);
     //loadImage(file,"#panzoomRight","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
     loadImage(file,"#panzoomRight","auto","auto",1,false,false,"","",true);
-});
-
-$("#middleRefInput").on("click",function () {
-    this.value = null;
-});
-$("#middleRefInput").change(function (evt) {
-    var tgt = evt.target || window.event.srcElement,
-        file = tgt.files[0];
-    $("#refImageTextMiddle span").text(file.name);
-    //loadImage(file,"#panzoomMiddle","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].) callOpenCVServerExec();});
-    loadImage(file,"#panzoomMiddle","auto","auto",1,false,false,"","",true);
 });
 
 $("#calInput").on("click",function () {
@@ -899,8 +794,6 @@ function createPreview(index,loc,event){
         loadImage(defImagePathsLeft[index],"#previewDiv","auto","300px",4,true,false,"","",false);
     }else if(loc==1){
         loadImage(defImagePathsRight[index],"#previewDiv","auto","300px",4,true,false,"","",false);
-    }else if(loc==2){
-        loadImage(defImagePathsMiddle[index],"#previewDiv","auto","300px",4,true,false,"","",false);
     }
 }
 
@@ -935,15 +828,6 @@ $("#defImageListRight").on("mouseout", ".defListLi",function(){
     removePreview();
 });
 
-$("#defImageListMiddle").on("mouseover", ".defListLi" ,function(event){
-    var index = $(this).index();
-    createPreview(index,2,event);
-});
-
-$("#defImageListMiddle").on("mouseout", ".defListLi",function(){
-    removePreview();
-});
-
 $("#rightDefInput").on("click",function () {
     this.value = null;
 });
@@ -963,29 +847,9 @@ $("#rightDefInput").change(function (evt) {
     checkValidInput();
 });
 
-$("#middleDefInput").on("click",function () {
-    this.value = null;
-});
-$("#middleDefInput").change(function (evt) {
-    var tgt = evt.target || window.event.srcElement,
-    files = tgt.files;
-    if(files){
-        $("#defImageListMiddle").empty();
-        defImagePathsRight = [];
-        for(var i = 0, l = files.length; i < l; i++) {
-            var filePath = files[i].path;
-            var fileName = files[i].name;
-            $("#defImageListMiddle").append("<li class='defListLi' id='defListLi_"+i+"'>" + fileName + "</li>");
-            defImagePathsMiddle.push(files[i]);//filePath);
-        }
-    }
-    checkValidInput();
-});
-
 function updateDimsLabels (){
     $("#leftDims").text("w:" + refImageWidthLeft  + " h:" + refImageHeightLeft);
     $("#rightDims").text("w:" + refImageWidthRight  + " h:" + refImageHeightRight);
-    $("#middleDims").text("w:" + refImageWidthMiddle  + " h:" + refImageHeightMiddle);
 }
 
 $("#drawEpipolar").click(function(){

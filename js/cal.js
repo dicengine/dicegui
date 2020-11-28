@@ -66,11 +66,6 @@ $(window).load(function(){
         minScale: 0.05,
         cursor: "pointer" 
     });
-    $("#panzoomMiddleCal").panzoom({
-        which: 2,
-        minScale: 0.05,
-        cursor: "pointer"
-    });
     deleteCalDisplayImageFiles();
     
     // see if there is a cal_target.xml file in the working directory, if so, load it:
@@ -100,7 +95,6 @@ fs.watch(hiddenDir, (eventType, filename) => {
         refreshCalDisplayImages();
         $("#leftPreviewBody").css('border', '');
         $("#rightPreviewBody").css('border', '');
-        $("#middlePreviewBody").css('border', '');
     }
 })
 
@@ -320,16 +314,6 @@ $("#panzoomRightCal").parent().on('mousewheel.focal', function( e ) {
         focal: e
     });
 });
-$("#panzoomMiddleCal").parent().on('mousewheel.focal', function( e ) {
-    e.preventDefault();
-    var delta = e.delta || e.originalEvent.wheelDelta;
-    var zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
-    $("#panzoomMiddleCal").panzoom('zoom', zoomOut, {
-        increment: 0.1,
-        animate: false,
-        focal: e
-    });
-});
 
 $( "#selectable").selectable();
 
@@ -366,19 +350,6 @@ function refreshCalDisplayImages(){
                 // get the current width of the parent viewer
                 var vwidth = $("#viewWindowRightCal").outerWidth();
                 loadImage(fileObject,"#panzoomRightCal",vwidth,"auto",1,false,false,"","",false,function(){$("#viewWindowRightCal").css('height',$("#viewWindowRightCal img").outerHeight()+'px')});
-            });
-        }
-	else{
-            // no-op if the file isn't there
-        }
-    });
-    var middleName = fullPath('.dice','.cal_middle.png');
-    fs.stat(middleName, function(err, stat) {
-        if(err == null) {
-            getFileObject(middleName, function (fileObject) {
-                // get the current width of the parent viewer
-                var vwidth = $("#viewWindowMiddleCal").outerWidth();
-                loadImage(fileObject,"#panzoomMiddleCal",vwidth,"auto",1,false,false,"","",false,function(){$("#viewWindowMiddleCal").css('height',$("#viewWindowMiddleCal img").outerHeight()+'px')});
             });
         }
 	else{
@@ -567,22 +538,19 @@ function previewCalImages(first_load=false){
     // create the list of files:
     leftName="";
     rightName="";
-    middleName="";
     console.log('previewCalImages called');
     
     if($("#calFileSelectMode").val()=="cine"){
         if(os.platform()=='win32'){
             leftName=".dice\\.cal_left.tif";
             rightName=".dice\\.cal_right.tif";
-            middleName=".dice\\.cal_middle.tif";
         }else{
             leftName=".dice/.cal_left.tif";
             rightName=".dice/.cal_right.tif";
-            middleName=".dice/.cal_middle.tif";
         }
-        updateCalCinePreviewImages(function(){previewCalImagesImpl(first_load,leftName,rightName,middleName)});
+        updateCalCinePreviewImages(function(){previewCalImagesImpl(first_load,leftName,rightName)});
         $("#calibrateButton").prop("disabled",false);
-        //generateCineCalImages(function(){previewCalImagesImpl(first_load,leftName,rightName,middleName)});
+        //generateCineCalImages(function(){previewCalImagesImpl(first_load,leftName,rightName)});
     }else{
         if(localStorage.getItem("showStereoPane")==0)
             leftName = concatImageSequenceName($("#calFrameScroller").val(),3); // use mode 3 to avoid the stereo suffix
@@ -593,15 +561,11 @@ function previewCalImages(first_load=false){
             rightName = concatImageSequenceName($("#calFrameScroller").val(),1);
             console.log('rightName ' + rightName);
         }
-        if(localStorage.getItem("showStereoPane")==2){
-            middleName = concatImageSequenceName($("#calFrameScroller").val(),2);
-            console.log('middleName ' + middleName);
-        }
-        previewCalImagesImpl(first_load,leftName,rightName,middleName);
+        previewCalImagesImpl(first_load,leftName,rightName);
     }
 }
 
-function previewCalImagesImpl(first_load, leftName,rightName,middleName){
+function previewCalImagesImpl(first_load, leftName,rightName){
     // set up the arguments for the OpenCVServer
     var args = [];
     // create the list of files:
@@ -617,14 +581,6 @@ function previewCalImagesImpl(first_load, leftName,rightName,middleName){
             args.push('.dice\\.cal_right.png');
         }else{
             args.push('.dice/.cal_right.png');
-        }
-    }
-    if(localStorage.getItem("showStereoPane")==2){
-        args.push(middleName);
-        if(os.platform()=='win32'){
-            args.push('.dice\\.cal_middle.png');
-        }else{
-            args.push('.dice/.cal_middle.png');
         }
     }
     if(first_load){
@@ -732,16 +688,13 @@ function previewCalImagesImpl(first_load, leftName,rightName,middleName){
             if(first_load){
                 $("#leftPreviewBody").css('border', '');
                 $("#rightPreviewBody").css('border', '');
-                $("#middlePreviewBody").css('border', '');
             }
             else{
                 $("#leftPreviewBody").css('border', '3px solid #00cc00');
                 $("#rightPreviewBody").css('border', '3px solid #00cc00');
-                $("#middlePreviewBody").css('border', '3px solid #00cc00');
             }
             $("#previewLeftSpan").text("");
             $("#previewRightSpan").text("");
-            $("#previewMiddleSpan").text("");
         }else{
             //if(code>=2&&code<=8){
 //                refreshCalDisplayImages();
@@ -800,33 +753,25 @@ function previewCalImagesImpl(first_load, leftName,rightName,middleName){
                 // remove border on preview windows
                 $("#leftPreviewBody").css('border', '3px solid red');
                 $("#rightPreviewBody").css('border', '3px solid red');
-                $("#middlePreviewBody").css('border', '3px solid red');
                 $("#previewLeftSpan").text("");
                 $("#previewRightSpan").text("");
-                $("#previewMiddleSpan").text("");
                 // clear the preview images
                 $("#panzoomLeftCal").html('');
                 $("#panzoomRightCal").html('');
-                $("#panzoomMiddleCal").html('');
                 $("#previewLeftSpan").text("marker location failed");
                 $("#previewRightSpan").text("marker location failed");
-                $("#previewMiddleSpan").text("marker location failed");
             }else if(code==4){
                 endProgress(false);
                 // remove border on preview windows
                 $("#leftPreviewBody").css('border', '3px solid red');
                 $("#rightPreviewBody").css('border', '3px solid red');
-                $("#middlePreviewBody").css('border', '3px solid red');
                 $("#previewLeftSpan").text("");
                 $("#previewRightSpan").text("");
-                $("#previewMiddleSpan").text("");
                 // clear the preview images
                 $("#panzoomLeftCal").html('');
                 $("#panzoomRightCal").html('');
-                $("#panzoomMiddleCal").html('');
                 $("#previewLeftSpan").text("image load failure");
                 $("#previewRightSpan").text("image load failure");
-                $("#previewMiddleSpan").text("image load failure");
             }else{
                 endProgress(false);
                 refreshCalDisplayImages();
@@ -834,17 +779,13 @@ function previewCalImagesImpl(first_load, leftName,rightName,middleName){
                 // remove border on preview windows
                 $("#leftPreviewBody").css('border', '3px solid red');
                 $("#rightPreviewBody").css('border', '3px solid red');
-                $("#middlePreviewBody").css('border', '3px solid red');
                 $("#previewLeftSpan").text("");
                 $("#previewRightSpan").text("");
-                $("#previewMiddleSpan").text("");
                 // clear the preview images
                 $("#panzoomLeftCal").html('');
                 $("#panzoomRightCal").html('');
-                $("#panzoomMiddleCal").html('');
                 $("#previewLeftSpan").text("preview failure (try adjusting threshold)");
                 $("#previewRightSpan").text("preview failure (try adjusting threshold)");
-                $("#previewMiddleSpan").text("preview failure (try adjusting threshold)");
             }
         }
     });
@@ -1032,8 +973,6 @@ function concatImageSequenceName(frame,mode){
             fullImageName += $("#stereoLeftSuffix").val();
         else if(mode==1)
             fullImageName += $("#stereoRightSuffix").val();
-        else
-            fullImageName += $("#stereoMiddleSuffix").val();
     }
     fullImageName += $("#imageExtension").val();
     return fullImageName;
@@ -1483,8 +1422,6 @@ function deleteCalDisplayImageFiles(cb){
     filesToRemove = [];
     filesToRemove.push('.cal_left.png');
     filesToRemove.push('.cal_left.tif');
-    filesToRemove.push('.cal_middle.png');
-    filesToRemove.push('.cal_middle.tif');
     filesToRemove.push('.cal_right.png');
     filesToRemove.push('.cal_right.tif');
     filesToRemove.push('cal.log');
