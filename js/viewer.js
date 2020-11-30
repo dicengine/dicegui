@@ -885,29 +885,6 @@ $("#drawEpipolar").click(function(){
     });
 });
 
-$("#initCross").click(function () {
-    localStorage.setItem("rightFileName",refImagePathRight);
-    localStorage.setItem("leftFileName",refImagePathLeft);
-    localStorage.setItem("rightWidth",refImageWidthRight);
-    localStorage.setItem("rightHeight",refImageHeightRight);
-    localStorage.setItem("leftWidth",refImageWidthLeft);
-    localStorage.setItem("leftHeight",refImageHeightLeft);
-    localStorage.setItem("workingDirectory",workingDirectory);
-    var win = new BrowserWindow({
-            webPreferences: {
-		nodeIntegration: true
-	    },
-            width: 1200, height: 1000 });
-    win.on('closed', () => {
-        win = null
-        $("#crossCorrInit").show();
-        updateResultsFilesList();
-    })
-    win.loadURL('file://' + __dirname + '/cross_init.html');
-    $("#crossCorrInit").hide();
-    //win.webContents.openDevTools()
-});
-
 $("#performCal").click(function () {
     localStorage.setItem("workingDirectory",workingDirectory);
     localStorage.setItem("calFileName","");

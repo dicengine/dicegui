@@ -182,22 +182,6 @@ document.getElementById("clearLi").onclick = function() {
 document.getElementById("previewCross").onclick = function() {
     callCrossInitExec();
 }
-document.getElementById("clearCross").onclick = function() {
-    var fileName = fullPath('','projection_points.dat');
-    fs.stat(fileName, function(err, stat) {
-        if(err == null) {
-            if (confirm('delete nonlinear warp seed file ' + fileName +'?')) {
-                fs.unlink(fileName, (err) => {
-                    if (err) throw err;
-                    console.log('successfully deleted '+fileName);
-                });
-                updateResultsFilesList();
-            }else{
-                return false;
-            }
-        }
-    });
-}
 function callDICeExec(resolution,ss_locs) {
 
     // load the live plot viewer if there are any live plots:
