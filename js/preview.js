@@ -7,7 +7,7 @@ function resizePreview(){
     Plotly.Plots.resize(document.getElementById("plotlyViewerRight"));
 }
 
-function getPreviewConfig(){
+function getPreviewConfig(dest){
     var _layout = {};
     var _config = {};
     if($("#analysisModeSelect").val()=="subset"){
@@ -33,10 +33,11 @@ function getPreviewConfig(){
                 modeBarButtonsToRemove: [
                     'autoScale2d'
                     ],
-                    modeBarButtonsToAdd: [
-                        'drawclosedpath',
-                        'eraseshape']
         }
+        if(dest=='left')
+            _config.modeBarButtonsToAdd = [
+                'drawclosedpath',
+                'eraseshape'];
     }else{
         alert("error invalid configuration");
     }
@@ -52,21 +53,22 @@ function updatePreview(file,dest){
         console.log('error: invalid destination ' + dest);
         return;
     }
-    imageSpec = [];
-    imageSpec.fileObj = file;
+    var spec = [];
+    spec.fileObj = file;
     if(dest=='left'){
-        imageSpec.displayPath = fullPath('.dice','.preview_left.png');
-        imageSpec.parentDiv = "plotlyViewerLeft";
+        spec.displayPath = fullPath('.dice','.preview_left.png');
+        spec.parentDiv = "plotlyViewerLeft";
     }
     else{
-        imageSpec.displayPath = fullPath('.dice','.preview_right.png');
-        imageSpec.parentDiv = "plotlyViewerRight";
+        spec.displayPath = fullPath('.dice','.preview_right.png');
+        spec.parentDiv = "plotlyViewerRight";
     }
+    spec.dest = dest;
     // set up the arguments to call the DICe opencv server which will convert whatever the input image
     // is to png so that it can be displayed in the viewer
     args = [];
-    args.push(imageSpec.fileObj.path);
-    args.push(imageSpec.displayPath);
+    args.push(spec.fileObj.path);
+    args.push(spec.displayPath);
     args.push('filter:none');
     console.log(args);
     
@@ -79,10 +81,10 @@ function updatePreview(file,dest){
     proc.on('close', (code) => {
         console.log(`OpenCVServer exited with code ${code}`);
         if(code==0){
-            console.log("updatePreview(): image path " + imageSpec.fileObj.path);
-            fs.stat(imageSpec.displayPath, function(err, stat) {
+            console.log("updatePreview(): image path " + spec.fileObj.path);
+            fs.stat(spec.displayPath, function(err, stat) {
                 if(err == null) {
-                    updateImage(imageSpec);
+                    updateImage(spec);
                 }
             });
         }else{
@@ -99,28 +101,28 @@ function updatePreview(file,dest){
         // converting the image to .png format
         if(line.includes("BUFFER_OUT")&&line.includes("IMAGE_WIDTH")){
             console.log('setting image width to ' + line.split(' ').pop());
-            imageSpec.width = Number(line.split(' ').pop());
+            spec.width = Number(line.split(' ').pop());
         }
         if(line.includes("BUFFER_OUT")&&line.includes("IMAGE_HEIGHT")){
             console.log('setting image height to ' + line.split(' ').pop());
-            imageSpec.height = Number(line.split(' ').pop());
+            spec.height = Number(line.split(' ').pop());
         }
     });
 }
 
-function updateImage(imageSpec){
-    console.log('updateImage(): image path ' + imageSpec.displayPath + ' in div '  + imageSpec.parentDiv);
-    var obj = getPreviewConfig();
-    obj.layout.xaxis.range = [0,imageSpec.width];
-    obj.layout.yaxis.range = [imageSpec.height,0];
+function updateImage(spec){
+    console.log('updateImage(): path ' + spec.displayPath + ' in div '  + spec.parentDiv);
+    var obj = getPreviewConfig(spec.dest);
+    obj.layout.xaxis.range = [0,spec.width];
+    obj.layout.yaxis.range = [spec.height,0];
     obj.layout.images = [{
-        source: imageSpec.displayPath,
+        source: spec.displayPath,
         xref: 'x',
         yref: 'y',
         x: 0,
         y: 0,
-        sizex: imageSpec.width,
-        sizey: imageSpec.height,
+        sizex: spec.width,
+        sizey: spec.height,
         layer: 'below',
     }],
 //    var data = [ {
@@ -134,5 +136,5 @@ function updateImage(imageSpec){
 //        autocontour: true,
 //      }];
     // TODO call restyle or relayout instead of newPlot each time?
-    Plotly.newPlot(document.getElementById(imageSpec.parentDiv),[],obj.layout,obj.config);
+    Plotly.newPlot(document.getElementById(spec.parentDiv),[],obj.layout,obj.config);
 }

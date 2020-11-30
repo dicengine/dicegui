@@ -335,11 +335,13 @@ function updateCineDisplayImage(fileName,index,mode,reset_ref_ROIs){
                         getFileObject(tiffImageName, function (fileObject) {
                             //loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true,function(){if(tracklibPreview) callOpenCVServerExec();});
                             loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true);
+                            updatePreview(fileObject,'left');
                         });
                     }else if(mode==1){
                         getFileObject(tiffImageName, function (fileObject) {
                             //loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true,function(){if(tracklibPreview) callOpenCVServerExec();});
                             loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true);
+                            updatePreview(fileObject,'right');
                         });
                     }
                 }

@@ -141,7 +141,7 @@ $("#panzoomRight").parent().on('mousewheel.focal', function( e ) {
 function deleteDisplayImageFiles(lrm,cb){
     var cbCalled = false;
     cb = cb || $.noop;
-    var nameToCheck = '.display_image_';
+    var nameToCheck = '.preview_';
     if(lrm==0){
         nameToCheck += 'left';
     }else if(lrm==1){
@@ -460,10 +460,14 @@ function load_image_sequence(reset_ref_ROIs){
                     getFileObject(fullImageName, function (fileObject) {
                         //loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
                         loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true);
+                        alert('i am here ' );
+                        console.log(fileObject);
+                        updatePreview(fileObject,'left');
                     });
-                    getFileObject(fullStereoImageName, function (fileObject) {
+                    getFileObject(fullStereoImageName, function (stereoFileObject) {
                         //loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
-                        loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true);
+                        loadImage(stereoFileObject,"#panzoomRight","auto","auto",1,false,false,"","",true);
+                        updatePreview(stereoFileObject,'right');
                     });
                     flagSequenceImages();
                 });
@@ -472,6 +476,7 @@ function load_image_sequence(reset_ref_ROIs){
                  getFileObject(fullImageName, function (fileObject) {
                      //loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
                      loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true);
+                     updatePreview(fileObject,'left');
                  });
                  flagSequenceImages();
             }
@@ -699,6 +704,7 @@ $("#rightRefInput").change(function (evt) {
     $("#refImageTextRight span").text(file.name);
     //loadImage(file,"#panzoomRight","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
     loadImage(file,"#panzoomRight","auto","auto",1,false,false,"","",true);
+    updatePreview(file,'right');
 });
 
 $("#calInput").on("click",function () {
