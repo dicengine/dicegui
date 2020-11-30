@@ -23,7 +23,6 @@ function initialize_gui(load_existing){
     $("#runLi").hide();
     $("#abortLi").hide();
     $("#writeLi").hide();
-    $("#resolutionLi").hide();
     // hide the stereo utilities
     $("#previewCross").hide();
     $("#initCross").hide();
