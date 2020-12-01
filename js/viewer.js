@@ -28,24 +28,24 @@ var getFileObject = function(filePathOrUrl, cb) {
 };
 //////////////////////////////////////////////////
 // initialize panzooms
-$("#panzoomLeft").panzoom({
-    $zoomIn: $(".zoom-in-left"),
-    $zoomOut: $(".zoom-out-left"),
-    $zoomRange: $(".zoom-range-left"),
-    $reset: $(".reset-left"),
-    which: 2,
-    minScale: 0.05,
-    cursor: "pointer"
-});
-$("#panzoomRight").panzoom({
-    $zoomIn: $(".zoom-in-right"),
-    $zoomOut: $(".zoom-out-right"),
-    $zoomRange: $(".zoom-range-right"),
-    $reset: $(".reset-right"),
-    which: 2,
-    minScale: 0.05,
-    cursor: "pointer"
-});
+//$("#panzoomLeft").panzoom({
+//    $zoomIn: $(".zoom-in-left"),
+//    $zoomOut: $(".zoom-out-left"),
+//    $zoomRange: $(".zoom-range-left"),
+//    $reset: $(".reset-left"),
+//    which: 2,
+//    minScale: 0.05,
+//    cursor: "pointer"
+//});
+//$("#panzoomRight").panzoom({
+//    $zoomIn: $(".zoom-in-right"),
+//    $zoomOut: $(".zoom-out-right"),
+//    $zoomRange: $(".zoom-range-right"),
+//    $reset: $(".reset-right"),
+//    which: 2,
+//    minScale: 0.05,
+//    cursor: "pointer"
+//});
 
 function getOffset( el ) {
     var _x = 0;
@@ -174,10 +174,12 @@ function deleteDisplayImageFiles(lrm,cb){
                         if(err == null) {
                             fs.unlink(fullFilePath, (err) => {
                                 numExistingFiles--;
-                                if (err) throw err;
-                                console.log('successfully deleted '+fullFilePath+' '+i);
-                                if(numExistingFiles==0) {
-                                    cb();
+                                if (err) {}//throw err;}
+                                else{
+                                    console.log('successfully deleted '+fullFilePath+' '+i);
+                                    if(numExistingFiles==0) {
+                                        cb();
+                                    }
                                 }
 	                    });
                         }else{
@@ -451,33 +453,34 @@ function load_image_sequence(reset_ref_ROIs){
             return;
         }
         else{
+            updatePreview(fullImageName,'left');
             if(showStereoPane==1||showStereoPane==2){
                 fs.stat(fullStereoImageName, function(err, stat) {
                     if(err != null) {
                       alert("Invalid stereo image file name: " + fullStereoImageName);
                       return;
                     }
-                    getFileObject(fullImageName, function (fileObject) {
-                        //loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
-                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true);
-                        alert('i am here ' );
-                        console.log(fileObject);
-                        updatePreview(fileObject,'left');
-                    });
-                    getFileObject(fullStereoImageName, function (stereoFileObject) {
-                        //loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
-                        loadImage(stereoFileObject,"#panzoomRight","auto","auto",1,false,false,"","",true);
-                        updatePreview(stereoFileObject,'right');
-                    });
+                    updatePreview(fullStereoImageName,'right');
+//                    getFileObject(fullImageName, function (fileObject) {
+//                        //loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+//                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true);
+//                        console.log(fileObject);
+//                        updatePreview(fileObject,'left');
+//                    });
+//                    getFileObject(fullStereoImageName, function (stereoFileObject) {
+//                        //loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+//                        loadImage(stereoFileObject,"#panzoomRight","auto","auto",1,false,false,"","",true);
+//                        updatePreview(stereoFileObject,'right');
+//                    });
                     flagSequenceImages();
                 });
             }
             else{
-                 getFileObject(fullImageName, function (fileObject) {
-                     //loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
-                     loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true);
-                     updatePreview(fileObject,'left');
-                 });
+//                 getFileObject(fullImageName, function (fileObject) {
+//                     //loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
+//                     loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true);
+//                     updatePreview(fileObject,'left');
+//                 });
                  flagSequenceImages();
             }
         }
@@ -551,26 +554,26 @@ $("#leftCineInput").change(function (evt) {
     if(file){
         // if a right cine file is alread loaded ask the user if it should be unloaded to
         // to avoid frame range mismatch
-        if(cinePathRight!="undefined"){
-            if (confirm('unload right cine file (this is necessary if the frame ranges are different between right and left cine)')){
-                deleteDisplayImageFiles(0);
-                deleteDisplayImageFiles(1);
-                deleteDisplayImageFiles(2);
-                deleteHiddenFiles('background');
-                cinePathRight = "undefined";
-                $("#cineRightPreviewSpan").text("");
-                $("#cineStartPreviewSpan").text("");
-                $("#cineEndPreview span").text("");
-                $("#panzoomRight").html('');
-                // create a tiff image of the selected reference frame
-                callCineStatExec(file,0,true);
-            }
-            else{
-            }
-        } // end a right cine file exists
-        else{
+//        if(cinePathRight!="undefined"){
+//            if (confirm('unload right cine file (this is necessary if the frame ranges are different between right and left cine)')){
+//                deleteDisplayImageFiles(0);
+//                deleteDisplayImageFiles(1);
+//                deleteDisplayImageFiles(2);
+//                deleteHiddenFiles('background');
+//                cinePathRight = "undefined";
+//                $("#cineRightPreviewSpan").text("");
+//                $("#cineStartPreviewSpan").text("");
+//                $("#cineEndPreview span").text("");
+//                $("#panzoomRight").html('');
+//                // create a tiff image of the selected reference frame
+//                callCineStatExec(file,0,true);
+//            }
+//            else{
+//            }
+//        } // end a right cine file exists
+//        else{
             callCineStatExec(file,0,true);
-        }
+//        }
     }
 });
 
@@ -598,9 +601,9 @@ function reload_cine_images(index){
     cineRightOpenCVComplete = false;
     //alert("offset_index " + offsetIndex);
     if(cinePathLeft!="undefined")
-        updateCineDisplayImage(cinePathLeft,offsetIndex,0);
+        updateCineDisplayImage(cinePathLeft,offsetIndex,'left');
     if(cinePathRight!="undefined")
-        updateCineDisplayImage(cinePathRight,offsetIndex,1);
+        updateCineDisplayImage(cinePathRight,offsetIndex,'right');
 }
 
 
@@ -703,8 +706,8 @@ $("#rightRefInput").change(function (evt) {
         file = tgt.files[0];
     $("#refImageTextRight span").text(file.name);
     //loadImage(file,"#panzoomRight","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
-    loadImage(file,"#panzoomRight","auto","auto",1,false,false,"","",true);
-    updatePreview(file,'right');
+    //loadImage(file,"#panzoomRight","auto","auto",1,false,false,"","",true);
+    updatePreview(file.path,'right');
 });
 
 $("#calInput").on("click",function () {
@@ -741,8 +744,8 @@ $("#leftRefInput").change(function (evt) {
         file = tgt.files[0];
     $("#refImageText span").text(file.name);
     //loadImage(file,"#panzoomLeft","auto","auto",1,false,true,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
-    loadImage(file,"#panzoomLeft","auto","auto",1,false,true,"","",true);
-    updatePreview(file,'left');
+    //loadImage(file,"#panzoomLeft","auto","auto",1,false,true,"","",true);
+    updatePreview(file.path,'left');
 });
 
 $("#leftDefInput").on("click",function () {
@@ -890,7 +893,6 @@ $("#performCal").click(function () {
     localStorage.setItem("calFileName","");
     localStorage.setItem("execCalPath",execCalPath);
     localStorage.setItem("execOpenCVServerPath",execOpenCVServerPath);
-    localStorage.setItem("execCineToTiffPath",execCineToTiffPath);
     localStorage.setItem("execCineStatPath",execCineStatPath);
     localStorage.setItem("showStereoPane",showStereoPane);
     

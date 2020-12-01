@@ -11,7 +11,6 @@ var win_path = 'C:\\Program Files (x86)\\Digital Image Correlation Engine\\';
 var execPath;
 var execCrossInitPath;
 var execCineStatPath;
-var execCineToTiffPath;
 var execCalPath;
 var execOpenCVServerPath;
 var execTrackingMoviePath;
@@ -97,7 +96,6 @@ function setExecPaths(path){
     execPath =  path + 'dice.exe';
     execCrossInitPath = path + 'DICe_CrossInit.exe';
     execCineStatPath = path + 'DICe_CineStat.exe';
-    execCineToTiffPath = path + 'DICe_CineToTiff.exe';
     execCalPath = path + 'DICe_Cal.exe';
     execOpenCVServerPath = path + 'DICe_OpenCVServer.exe';
     execTrackingMoviePath = path + 'DICe_TrackingMovieMaker.exe';
@@ -105,7 +103,6 @@ function setExecPaths(path){
     execPath = path + 'dice';
     execCrossInitPath = path + 'DICe_CrossInit';
     execCineStatPath = path + 'DICe_CineStat';
-    execCineToTiffPath = path + 'DICe_CineToTiff';
     execCalPath = path + 'DICe_Cal';
     execOpenCVServerPath = path + 'DICe_OpenCVServer';
     execTrackingMoviePath = path + 'DICe_TrackingMovieMaker';    

@@ -14,9 +14,7 @@ $(window).load(function(){
     execCalPath = localStorage.getItem("execCalPath");
     execCineStatPath = localStorage.getItem("execCineStatPath");
     execOpenCVServerPath = localStorage.getItem("execOpenCVServerPath");
-    execCineToTiffPath = localStorage.getItem("execCineToTiffPath");
     console.log('using cal exec: ' + execCalPath);
-    console.log('using cineToTiff exec: ' + execCineToTiffPath);
     $("#calibrateButton").prop("disabled",true);
     $("#acceptButton").prop("disabled",true);
     $("#cancelButton").hide();
@@ -48,24 +46,7 @@ $(window).load(function(){
     $(".adaptive-thresh").hide();
     $("#calUseAdaptiveThreshP").hide();
     $(".cine-input").hide();
-    // .load the images if they exist
-    //refreshCalDisplayImages();
 
-    // detect a change to any of the image files and update display
-    //fs.watchFile(fullPath('','.cal_left.png'), (curr, prev) => {
-    //    refreshCalDisplayImages();
-    //});
-    // initialize panzooms
-    $("#panzoomLeftCal").panzoom({
-        which: 2,
-        minScale: 0.05,
-        cursor: "pointer"
-    });
-    $("#panzoomRightCal").panzoom({
-        which: 2,
-        minScale: 0.05,
-        cursor: "pointer" 
-    });
     deleteCalDisplayImageFiles();
     
     // see if there is a cal_target.xml file in the working directory, if so, load it:
@@ -85,15 +66,14 @@ if(os.platform()=='win32'){
 }
 
 fs.watch(hiddenDir, (eventType, filename) => {
-    //console.log(eventType);
-    // could be either 'rename' or 'change'. new file event and delete
-    // also generally emit 'rename'
-    //console.log(workingDirectory);
     if($("#cancelButton").is(":hidden"))
         return;
-    if(filename==".cal_left.png"||filename==".cal_right.png"){
-        refreshCalDisplayImages();
+    if(filename==".preview_cal_left.png"){
+        updatePreview(filename,'cal_left');
         $("#leftPreviewBody").css('border', '');
+    }
+    if(filename==".preview_cal_right.png"){
+        updatePreview(filename,'cal_right');
         $("#rightPreviewBody").css('border', '');
     }
 })
@@ -249,13 +229,13 @@ $("#leftCalCineInput").change(function (evt) {
         fs.stat(file.path, function(err, stat) {
             if(err == null) {
                 if(localStorage.getItem("showStereoPane")!=0) {// stereo?
-                    fs.stat($("#cineCalRightPreview span").text(), function(err2, stat) {
+                    fs.stat($("#cineCalRightPreview span").text(), function(err2, stat) { // only update the preview if both cine files are defined
                         if(err2 == null) {
-                            callCalCineStatExec(file.path,function(){updateSelectableList();previewCalImages(true)});
+                            callCalCineStatExec(file.path,function(){updateSelectableList();updateCalPreview(true)});
                         }
                     });
                 }else{
-                    callCalCineStatExec(file.path,function(){updateSelectableList();previewCalImages(true)});
+                    callCalCineStatExec(file.path,function(){updateSelectableList();updateCalPreview(true)});
                 }
             }
         });
@@ -274,7 +254,7 @@ $("#rightCalCineInput").change(function (evt) {
             if(err == null) {
                 fs.stat($("#cineCalLeftPreview span").text(), function(err2, stat) {
                     if(err2 == null) {
-                        callCalCineStatExec(file.path,function(){updateSelectableList();previewCalImages(true)});
+                        callCalCineStatExec(file.path,function(){updateSelectableList();updateCalPreview(true)});
                     }
                 });
             }
@@ -293,69 +273,18 @@ $("#calBlockSize").on('input',function(){
     $("#calBlockSizeLabel").text($(this).val());
 });
 
-// zoom on focal point from mousewheel 
-$("#panzoomLeftCal").parent().on('mousewheel.focal', function( e ) {
-    e.preventDefault();
-    var delta = e.delta || e.originalEvent.wheelDelta;
-    var zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
-    $("#panzoomLeftCal").panzoom('zoom', zoomOut, {
-        increment: 0.1,
-        animate: false,
-        focal: e
-    });
-});
-$("#panzoomRightCal").parent().on('mousewheel.focal', function( e ) {
-    e.preventDefault();
-    var delta = e.delta || e.originalEvent.wheelDelta;
-    var zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
-    $("#panzoomRightCal").panzoom('zoom', zoomOut, {
-        increment: 0.1,
-        animate: false,
-        focal: e
-    });
-});
-
 $( "#selectable").selectable();
 
 $("#calFrameScroller").on('input', function () {
         $("#frameCurrentPreviewSpan").text($(this).val());
     }).change(function(){
     $("#frameCurrentPreviewSpan").text($(this).val());
-    previewCalImages();
+    updateCalPreview();
 });
 
 function calConsoleMsg(string){
     $("#calConsoleWindow").append(string + '</br>');
     $("#calConsoleWindow").scrollTop($("#calConsoleWindow").get(0).scrollHeight);
-}
-
-function refreshCalDisplayImages(){
-    var leftName = fullPath('.dice','.cal_left.png');
-    fs.stat(leftName, function(err, stat) {
-        if(err == null) {
-            getFileObject(leftName, function (fileObject) {
-                // get the current width of the parent viewer
-                var vwidth = $("#viewWindowLeftCal").outerWidth();
-                loadImage(fileObject,"#panzoomLeftCal",vwidth,"auto",1,false,false,"","",false,function(){$("#viewWindowLeftCal").css('height',$("#viewWindowLeftCal img").outerHeight()+'px')});
-            });
-        }
-	else{
-            // no-op if the file isn't there
-        }
-    });
-    var rightName = fullPath('.dice','.cal_right.png');
-    fs.stat(rightName, function(err, stat) {
-        if(err == null) {
-            getFileObject(rightName, function (fileObject) {
-                // get the current width of the parent viewer
-                var vwidth = $("#viewWindowRightCal").outerWidth();
-                loadImage(fileObject,"#panzoomRightCal",vwidth,"auto",1,false,false,"","",false,function(){$("#viewWindowRightCal").css('height',$("#viewWindowRightCal img").outerHeight()+'px')});
-            });
-        }
-	else{
-            // no-op if the file isn't there
-        }
-    });
 }
 
 function startProgress (){
@@ -399,64 +328,6 @@ $("#calMode").on('change',function (){
         $('.board-size-dots').show();
     }
 });
-
-function updateCalCinePreviewImages(cb){
-    console.log('updateCalCinePreviewImages');
-    cine_left = $("#cineCalLeftPreview span").text();
-    cine_right = $("#cineCalRightPreview span").text();
-    child_process = require('child_process');
-    readline      = require('readline');
-    tifLeft  = fullPath('.dice','.cal_') + 'left.tif';
-    tifRight = fullPath('.dice','.cal_') + 'right.tif';
-    index = $("#calFrameScroller").val();
-    console.log("updateCalCinePreviewImages: converting file " + cine_left + " index " + index + " to .tif for display");
-    var procConv = child_process.spawn(execCineToTiffPath, [cine_left,index,index,tifLeft],{cwd:workingDirectory});//,maxBuffer:1024*1024})
-    readline.createInterface({
-        input     : procConv.stdout,
-        terminal  : false
-    }).on('line', function(line) {
-        console.log(line);
-    });
-    procConv.on('error', function(){
-        alert('DICe .cine file converstion to .tiff failed: invalid executable: ' + execCineToTiffPath);
-    });
-    procConv.on('close', (code) => {
-        console.log(`child process exited with code ${code}`);
-        if(code!=0){
-            //alert('DICe .cine file conversion to .tiff failed');
-        }
-        else{
-            if(localStorage.getItem("showStereoPane")==0){
-                cb = cb || $.noop;
-                cb();
-            }else{
-                console.log("updateCalCinePreviewImages: converting (right file) file " + cine_right + " index " + index + " to .tif for display");
-                var procConvRight = child_process.spawn(execCineToTiffPath, [cine_right,index,index,tifRight],{cwd:workingDirectory});//,maxBuffer:1024*1024})
-                readline.createInterface({
-                    input     : procConvRight.stdout,
-                    terminal  : false
-                }).on('line', function(line) {
-                    console.log(line);
-                });
-                procConvRight.on('error', function(){
-                    alert('DICe .cine file right converstion to .tiff failed: invalid executable: ' + execCineToTiffPath);
-                });
-                procConvRight.on('close', (code) => {
-                    console.log(`child process exited with code ${code}`);
-                    if(code!=0){
-                        //alert('DICe .cine file conversion to .tiff failed');
-                    }
-                    else{
-                        cb = cb || $.noop;
-                        cb();
-                    }
-                });
-            }
-            
-        }
-    });
-
-}
 
 function callCalCineStatExec(file,callback) {
     var child_process = require('child_process');
@@ -528,62 +399,12 @@ function callCalCineStatExec(file,callback) {
     }); // end fileName fs.stat
 }
 
-//function generateCineCalImages(cb){
-//    cine_file = $("#cineCalLeftPreview span").text();
-//    console.log('generateCineCalImages: ' + cine_file);
-//    callCalCineStatExec(cine_file,function(){updateCalCinePreviewImages(cb)});
-//}
+function updateCalPreview(firstLoad=false){
+    console.log('updateCalPreview() called');
 
-function previewCalImages(first_load=false){
-    // create the list of files:
-    leftName="";
-    rightName="";
-    console.log('previewCalImages called');
-    
-    if($("#calFileSelectMode").val()=="cine"){
-        if(os.platform()=='win32'){
-            leftName=".dice\\.cal_left.tif";
-            rightName=".dice\\.cal_right.tif";
-        }else{
-            leftName=".dice/.cal_left.tif";
-            rightName=".dice/.cal_right.tif";
-        }
-        updateCalCinePreviewImages(function(){previewCalImagesImpl(first_load,leftName,rightName)});
-        $("#calibrateButton").prop("disabled",false);
-        //generateCineCalImages(function(){previewCalImagesImpl(first_load,leftName,rightName)});
-    }else{
-        if(localStorage.getItem("showStereoPane")==0)
-            leftName = concatImageSequenceName($("#calFrameScroller").val(),3); // use mode 3 to avoid the stereo suffix
-        else
-            leftName = concatImageSequenceName($("#calFrameScroller").val(),0);
-        console.log('leftName ' + leftName);
-        if(localStorage.getItem("showStereoPane")==1){
-            rightName = concatImageSequenceName($("#calFrameScroller").val(),1);
-            console.log('rightName ' + rightName);
-        }
-        previewCalImagesImpl(first_load,leftName,rightName);
-    }
-}
-
-function previewCalImagesImpl(first_load, leftName,rightName){
-    // set up the arguments for the OpenCVServer
+    // get the calibration preview arguments to pass to the openCVServer
     var args = [];
-    // create the list of files:
-    args.push(leftName);
-    if(os.platform()=='win32'){
-        args.push('.dice\\.cal_left.png');
-    }else{
-        args.push('.dice/.cal_left.png');
-    }
-    if(localStorage.getItem("showStereoPane")==1){
-        args.push(rightName);
-        if(os.platform()=='win32'){
-            args.push('.dice\\.cal_right.png');
-        }else{
-            args.push('.dice/.cal_right.png');
-        }
-    }
-    if(first_load){
+    if(firstLoad){
         args.push('filter:none');
     }
     else if($("#calMode").val()=="checkerboard"){
@@ -639,162 +460,83 @@ function previewCalImagesImpl(first_load, leftName,rightName){
                 args.push($("#calThreshConstant").val());
             }
         }
-        //args.push('dot_tol'); // TODO enable user to set these (default is 0.25)
-        //args.push('filter_mode'); // default is 1 
-        //args.push('block_size'); // default is 3
+    } // end dot target
+
+    var decObj = decorateFileNames();
+    if($("#calFileSelectMode").val()=="cine"){
+        $("#calibrateButton").prop("disabled",false);
     }
-//    var thresh = 0;
-//    if($("#adaptiveThreshCheck")[0].checked){
-//        args.push('Filter:AdaptiveThreshold');
-//        thresh = $("#calAdaptiveThreshConstant").val();
-//    }
-//    else{
-//        thresh = $("#calThreshConstant").val();
-//    }
-//    args.push('Filter:PatternSpacing');
-//    args.push($("#targetSpacingSize").val());
-//    args.push('Filter:BinaryThreshold');
-//    args.push(1); // 0 is gaussian 1 is mean
-//    args.push(75); // block size
-//    args.push(thresh); // threshold constant
-//    args.push('Filter:Blob');
-//    args.push(0); // use area filter
-//    args.push(50); // min area
-//    args.push(200); // max area
-//    args.push(0); // use circularity
-//    args.push(0.75); // circ min
-//    args.push(1.0); // circ max
-//    args.push(0); // eccentricity filter
-//    args.push(0.0); // ecc min
-//    args.push(1.0); // ecc max
-//    args.push(0); // convexity
-//    args.push(0.0); // convexity min
-//    args.push(1.0); // convexity max
-    // call the filter exec
-    var child_process = require('child_process');
-    var readline      = require('readline');
-    //alert('opencv server: ' + execOpenCVServerPath);
+    console.log("updateCalPreview: left file " + decObj.decoratedLeft);
+    console.log("updateCalPreview: right file " + decObj.decoratedRight);
     startProgress();
-    var proc = child_process.spawn(execOpenCVServerPath,args,{cwd:workingDirectory});//,maxBuffer:1024*1024});
-    proc.on('error', function(){
-        alert('DICe OpenCVServer failed: invalid executable: ' + execOpenCVServerPath);
-    });
-    setTimeout(function(){ if($("#calMode").val()=="checkerboard"){proc.kill()}}, 10000);
-    proc.on('close', (code) => {
-        console.log(`OpenCVServer exited with code ${code}`);
-        if(code==0){
-            endProgress(true);
-            refreshCalDisplayImages();
-            if(first_load){
-                $("#leftPreviewBody").css('border', '');
-                $("#rightPreviewBody").css('border', '');
-            }
-            else{
-                $("#leftPreviewBody").css('border', '3px solid #00cc00');
-                $("#rightPreviewBody").css('border', '3px solid #00cc00');
-            }
-            $("#previewLeftSpan").text("");
-            $("#previewRightSpan").text("");
-        }else{
-            //if(code>=2&&code<=8){
-//                refreshCalDisplayImages();
-//                if(code==2||code==4||code==6||code==8){
-//                    $("#leftPreviewBody").css('border', '3px solid red');
-//                    $("#previewLeftSpan").text("error finding cal dots");
-//                }
-//                if(code==3||code==5||code==7){
-//                    $("#leftPreviewBody").css('border', '3px solid #00cc00');
-//                    $("#previewLeftSpan").text("");
-//                }
-//                if(code==3||code==4||code==7||code==8){
-//                    $("#rightPreviewBody").css('border', '3px solid red');
-//                    $("#previewRightSpan").text("error finding cal dots");
-//                }
-//                if(code==2||code==5||code==6){
-//                    $("#rightPreviewBody").css('border', '3px solid #00cc00');
-//                    $("#previewRightSpan").text("");
-//                }
-//                if(code==5||code==6||code==7||code==8){
-//                    $("#middlePreviewBody").css('border', '3px solid red');
-//                    $("#previewMiddleSpan").text("error finding cal dots");
-//                }
-//                if(code==2||code==3||code==4){
-//                    $("#middlePreviewBody").css('border', '3px solid #00cc00');
-//                    $("#previewMiddleSpan").text("");
-//                }
-                //if(code==9||code==11||code==13||code==15){
-                //    $("#leftPreviewBody").css('border', '3px solid red');
-                //    $("#previewLeftSpan").text("invalid num cal dots");
-                //}
-                //if(code==10||code==12||code==14){
-                //    $("#leftPreviewBody").css('border', '3px solid #00cc00');
-                //    $("#previewLeftSpan").text("");
-                //}
-                //if(code==10||code==11||code==14||code==15){
-                //    $("#rightPreviewBody").css('border', '3px solid red');
-                //    $("#previewRightSpan").text("invalid num cal dots");
-                //}
-                //if(code==9||code==12||code==13){
-                //    $("#rightPreviewBody").css('border', '3px solid #00cc00');
-                //    $("#previewRightSpan").text("");
-                //}
-                //if(code==12||code==13||code==14||code==15){
-                //    $("#middlePreviewBody").css('border', '3px solid red');
-                //    $("#previewMiddleSpan").text("invalid num cal dots");
-                //}
-                //if(code==9||code==10||code==11){
-                //    $("#middlePreviewBody").css('border', '3px solid #00cc00');
-                //    $("#previewMiddleSpan").text("");
-                //}
-            //}
-            if(code==1||code==2||code==3){
-                refreshCalDisplayImages();
-                endProgress(false);
-                // remove border on preview windows
-                $("#leftPreviewBody").css('border', '3px solid red');
-                $("#rightPreviewBody").css('border', '3px solid red');
-                $("#previewLeftSpan").text("");
-                $("#previewRightSpan").text("");
-                // clear the preview images
-                $("#panzoomLeftCal").html('');
-                $("#panzoomRightCal").html('');
-                $("#previewLeftSpan").text("marker location failed");
-                $("#previewRightSpan").text("marker location failed");
-            }else if(code==4){
-                endProgress(false);
-                // remove border on preview windows
-                $("#leftPreviewBody").css('border', '3px solid red');
-                $("#rightPreviewBody").css('border', '3px solid red');
-                $("#previewLeftSpan").text("");
-                $("#previewRightSpan").text("");
-                // clear the preview images
-                $("#panzoomLeftCal").html('');
-                $("#panzoomRightCal").html('');
-                $("#previewLeftSpan").text("image load failure");
-                $("#previewRightSpan").text("image load failure");
-            }else{
-                endProgress(false);
-                refreshCalDisplayImages();
-                //alert('OpenCVServer failed');
-                // remove border on preview windows
-                $("#leftPreviewBody").css('border', '3px solid red');
-                $("#rightPreviewBody").css('border', '3px solid red');
-                $("#previewLeftSpan").text("");
-                $("#previewRightSpan").text("");
-                // clear the preview images
-                $("#panzoomLeftCal").html('');
-                $("#panzoomRightCal").html('');
-                $("#previewLeftSpan").text("preview failure (try adjusting threshold)");
-                $("#previewRightSpan").text("preview failure (try adjusting threshold)");
-            }
+    updatePreview(decObj.decoratedLeft,'cal_left',args,"#calConsoleWindow",function (code) {respondToOpenCVErrorCode(code);});
+    updatePreview(decObj.decoratedRight,'cal_right',args,"#calConsoleWindow",function (code) {respondToOpenCVErrorCode(code);});
+}
+
+function decorateFileNames(){
+    var obj = {};
+    obj.decoratedLeft = "";
+    obj.decoratedRight = "";
+    if($("#calFileSelectMode").val()=="cine"){
+        var cineLeft = $("#cineCalLeftPreview span").text();
+        var cineRight = $("#cineCalRightPreview span").text();
+        var index = $("#calFrameScroller").val();
+        obj.decoratedLeft = cineLeft.replace('.'+cineLeft.split('.').pop(),'_'+index+'.cine');
+        obj.decoratedRight = cineRight.replace('.'+cineRight.split('.').pop(),'_'+index+'.cine');
+        // enable the cal execute button since it wasn't enabled when the list of images was created
+    }else{
+        if(localStorage.getItem("showStereoPane")==0)
+            obj.decoratedLeft = concatImageSequenceName($("#calFrameScroller").val(),3); // use mode 3 to avoid the stereo suffix
+        else
+            obj.decoratedLeft = concatImageSequenceName($("#calFrameScroller").val(),0);
+        if(localStorage.getItem("showStereoPane")==1){
+            obj.decoratedRight = concatImageSequenceName($("#calFrameScroller").val(),1);
         }
-    });
-    readline.createInterface({
-        input     : proc.stdout,
-        terminal  : false
-    }).on('line', function(line) {
-        calConsoleMsg(line);
-    });
+    }
+    return obj;
+}
+
+function respondToOpenCVErrorCode(code){
+    if(code==0){
+        endProgress(true);
+//        if(firstLoad){
+//            $("#leftPreviewBody").css('border', '');
+//            $("#rightPreviewBody").css('border', '');
+//        }
+//        else{
+            $("#leftPreviewBody").css('border', '3px solid #00cc00');
+            $("#rightPreviewBody").css('border', '3px solid #00cc00');
+//        }
+        $("#previewLeftSpan").text("");
+        $("#previewRightSpan").text("");
+    }else{
+        $("#leftPreviewBody").css('border', '3px solid red');
+        $("#rightPreviewBody").css('border', '3px solid red');
+        $("#previewLeftSpan").text("");
+        $("#previewRightSpan").text("");
+        endProgress(false);
+        var decObj = decorateFileNames();
+        if(code==1||code==2||code==3){
+            // remove border on preview windows
+            // clear the preview images
+            updatePreview(decObj.decoratedLeft,'cal_left');
+            updatePreview(decObj.decoratedRight,'cal_right');
+            $("#previewLeftSpan").text("marker location failed");
+            $("#previewRightSpan").text("marker location failed");
+        }else if(code==4){
+            // clear the preview images
+            updatePreview('','cal_left');
+            updatePreview('','cal_right');
+            $("#previewLeftSpan").text("image load failure");
+            $("#previewRightSpan").text("image load failure");
+        }else{
+            // clear the preview images
+            updatePreview(decObj.decoratedLeft,'cal_left');
+            updatePreview(decObj.decoratedRight,'cal_right');
+            $("#previewLeftSpan").text("preview failure (try adjusting threshold)");
+            $("#previewRightSpan").text("preview failure (try adjusting threshold)");
+        }
+    }
 }
 
 function updateCalSequenceLabels(stats){
@@ -805,8 +547,6 @@ function updateCalSequenceLabels(stats){
             return;
         }
     }
-    
-    
     $("#imagePrefix").val(stats.prefix);
     $("#startIndex").val(stats.startIndex);
     $("#imagePoseIndex").val(stats.startIndex);
@@ -860,7 +600,7 @@ function updateCalSequenceLabels(stats){
 
     updateSelectableList();
 
-    previewCalImages(true);
+    updateCalPreview(true);
 }
 
 $("#changeImageFolder").on("click",function () {
@@ -868,7 +608,7 @@ $("#changeImageFolder").on("click",function () {
 });
 
 $("#previewCal").on("click",function () {
-    previewCalImages();
+    updateCalPreview();
 });
 
 
@@ -908,13 +648,13 @@ function updateFrameScroller(){
 
 $("#startIndex,#endIndex,#skipIndex").on('focusout',function(e){
     updateFrameScroller();
-    updateImageSequencePreview(function(){updateSelectableList;previewCalImages(true)});
+    updateImageSequencePreview(function(){updateSelectableList;updateCalPreview(true)});
 });
 
 $("#imagePrefix,#startIndex,#endIndex,#skipIndex,#numDigits,#imageExtension,#stereoLeftSuffix,#stereoRightSuffix").keypress(function(e){
     if(e.which!=13) return;
     updateFrameScroller();
-    updateImageSequencePreview(function(){updateSelectableList;previewCalImages(true)});
+    updateImageSequencePreview(function(){updateSelectableList;updateCalPreview(true)});
 });
 
 $("#binaryThresh").on('input',function(){
@@ -1420,10 +1160,8 @@ function deleteCalDisplayImageFiles(cb){
     var cbCalled = false;
     cb = cb || $.noop;
     filesToRemove = [];
-    filesToRemove.push('.cal_left.png');
-    filesToRemove.push('.cal_left.tif');
-    filesToRemove.push('.cal_right.png');
-    filesToRemove.push('.cal_right.tif');
+    filesToRemove.push('.preview_cal_left.png');
+    filesToRemove.push('.preview_cal_right.png');
     filesToRemove.push('cal.log');
     filesToRemove.push('cal_errors.txt');
     filesToRemove.push('.cine_stats.dat');

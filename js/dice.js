@@ -166,6 +166,9 @@ function resetWorkingDirectory(){
         deleteDisplayImageFiles(0);
         deleteDisplayImageFiles(1);
         deleteDisplayImageFiles(2);
+        
+        updatePreview('','left');
+        updatePreview('','right');
 
         deleteHiddenFiles('keypoints');
         deleteHiddenFiles('background');
@@ -287,52 +290,15 @@ function callDICeExec(resolution,ss_locs) {
 //        
 }
 
-function updateCineDisplayImage(fileName,index,mode,reset_ref_ROIs){
-    var child_process = require('child_process');
-    var readline      = require('readline');
-    var tiffImageName = fullPath('.dice','.display_image_');
-    if(mode==0)
-        tiffImageName += 'left.tif';
-    else if(mode==1)
-        tiffImageName += 'right.tif';
-    consoleMsg("converting file " + fileName + " index " + index + " to .tif for display");
-    var procConv = child_process.spawn(execCineToTiffPath, [fileName,index,index,tiffImageName],{cwd:workingDirectory});//,maxBuffer:1024*1024})
-        readline.createInterface({
-            input     : procConv.stdout,
-            terminal  : false
-        }).on('line', function(line) {
-            consoleMsg(line);
-        });
-        procConv.on('error', function(){
-            alert('DICe .cine file converstion to .tiff failed: invalid executable: ' + execCineToTiffPath);
-        });
-        procConv.on('close', (code) => {
-            console.log(`child process exited with code ${code}`);
-            if(code!=0){
-                 alert('DICe .cine file conversion to .tiff failed');
-            }
-            else{
-                if(diceTrackLibOn && showStereoPane==1 && ($("#segPreviewCheck")[0].checked || $("#showTracksCheck")[0].checked)){
-                    applyFilterToImages(tiffImageName, mode);
-                }else{
-                    if(mode==0){
-                        getFileObject(tiffImageName, function (fileObject) {
-                            //loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true,function(){if(tracklibPreview) callOpenCVServerExec();});
-                            loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true);
-                            updatePreview(fileObject,'left');
-                        });
-                    }else if(mode==1){
-                        getFileObject(tiffImageName, function (fileObject) {
-                            //loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true,function(){if(tracklibPreview) callOpenCVServerExec();});
-                            loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true);
-                            updatePreview(fileObject,'right');
-                        });
-                    }
-                }
-            }
-        });
+//function updateCineDisplayImage(fileName,index,mode,reset_ref_ROIs){
+function updateCineDisplayImage(fileName,index,dest){
+    // construct the file name with the indes
+    // this assumes that fileName is not alredy decorated
+    var decoratedFile = fileName.replace('.'+fileName.split('.').pop(),'_'+index+'.cine');
+    console.log('updating cine display image: ' + decoratedFile);
+    // TODO TODO TODO add a filter for the tracklib preview if needed and pass along a args argument
+    updatePreview(decoratedFile,dest);
 }
-
 
 function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
 
@@ -355,7 +321,7 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
             input     : proc.stdout,
             terminal  : false
         }).on('line', function(line) {
-            consoleMsg(line);
+            console.log(line);
         });
         proc.on('error', function(){
             alert('DICe .cine file stat failed: invalid executable: ' + execCineStatPath);
@@ -409,12 +375,14 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
                              if(mode==0){
                                  cinePathLeft = file.path;
                                  $("#cineLeftPreview span").text(file.name);
+                                 updateCineDisplayImage(fileName,stats[1],'left');
                              }else if(mode==1){
                                  cinePathRight = file.path;
                                  $("#cineRightPreview span").text(file.name);
+                                 updateCineDisplayImage(fileName,stats[1],'right');
                              }
                              deleteHiddenFiles('keypoints');
-                             deleteDisplayImageFiles(mode,function(){updateCineDisplayImage(fileName,stats[1],mode,reset_ref_ROIs);});
+//                             deleteDisplayImageFiles(mode,function(){updateCineDisplayImage(fileName,stats[1],mode,reset_ref_ROIs);});
                              callback = callback || $.noop;
                              callback();
                              return true;
