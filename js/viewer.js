@@ -26,26 +26,6 @@ var getFileObject = function(filePathOrUrl, cb) {
         cb(blobToFile(blob, filePathOrUrl));
     });
 };
-//////////////////////////////////////////////////
-// initialize panzooms
-//$("#panzoomLeft").panzoom({
-//    $zoomIn: $(".zoom-in-left"),
-//    $zoomOut: $(".zoom-out-left"),
-//    $zoomRange: $(".zoom-range-left"),
-//    $reset: $(".reset-left"),
-//    which: 2,
-//    minScale: 0.05,
-//    cursor: "pointer"
-//});
-//$("#panzoomRight").panzoom({
-//    $zoomIn: $(".zoom-in-right"),
-//    $zoomOut: $(".zoom-out-right"),
-//    $zoomRange: $(".zoom-range-right"),
-//    $reset: $(".reset-right"),
-//    which: 2,
-//    minScale: 0.05,
-//    cursor: "pointer"
-//});
 
 function getOffset( el ) {
     var _x = 0;
@@ -589,70 +569,40 @@ $("#rightCineInput").change(function (evt) {
     }
 });
 
-function reload_cine_images(index){
+function reloadCineImages(index){
     // check that the ref index is valid
     if(cinePathLeft!="undefined"||cinePathRight!="undefined")
         if(index < Number($("#cineStartPreviewSpan").text()) || index > Number($("#cineEndPreviewSpan").text())){
             alert("invalid index");
             return;
         }
-    var offsetIndex = Number(index);// - cineFirstFrame;
-    cineLeftOpenCVComplete = false;
-    cineRightOpenCVComplete = false;
+    var offsetIndex = Number(index);
+//    cineLeftOpenCVComplete = false;
+//    cineRightOpenCVComplete = false;
     //alert("offset_index " + offsetIndex);
-    if(cinePathLeft!="undefined")
-        updateCineDisplayImage(cinePathLeft,offsetIndex,'left');
-    if(cinePathRight!="undefined")
-        updateCineDisplayImage(cinePathRight,offsetIndex,'right');
+    
+    // for tracklib special filters can be applied over the images
+    if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1&&$("#segPreviewCheck")[0].checked){ // signifies tracklib
+        updateTracklibDisplayImages(offsetIndex);
+    }else{    // otherwise just diplay the raw frame
+        if(cinePathLeft!="undefined")
+            updateCineDisplayImage(cinePathLeft,offsetIndex,'left');
+        if(cinePathRight!="undefined")
+            updateCineDisplayImage(cinePathRight,offsetIndex,'right');
+    }
 }
 
 
 // reload the left and right cine image if the ref index is changed
 $("#cineRefIndex").change(function () {
-    // filename left and right
     var refIndex = $("#cineRefIndex").val();
-    $("#frameScroller").val(refIndex);
-    $("#cineCurrentPreviewSpan").text(refIndex);
-    reload_cine_images(refIndex);
-//    // check that the ref index is valid
-//    if(cinePathLeft!="undefined"||cinePathRight!="undefined")
-//        if(refIndex < Number($("#cineStartPreviewSpan").text()) || refIndex > Number($("#cineEndPreviewSpan").text())){
-//            alert("invalid reference index");
-//            return;
-//        }
-//    var offsetIndex = Number(refIndex);// - cineFirstFrame;
-//    cineLeftOpenCVComplete = false;
-//    cineRightOpenCVComplete = false;
-//    //alert("offset_index " + offsetIndex);
-//    if(cinePathLeft!="undefined")
-//        updateCineDisplayImage(cinePathLeft,offsetIndex,0);
-//    if(cinePathRight!="undefined")
-//        updateCineDisplayImage(cinePathRight,offsetIndex,1);
 });
 
 $("#frameScroller").on('input', function () {
-        $("#cineCurrentPreviewSpan").text($(this).val());
-    }).change(function(){
-        reload_cine_images($(this).val());
-//        $("#cineRefIndex").val($(this).val());
-//        $("#cineRefIndex").trigger("change");
-//        if(typeof arrowCausedEvent === 'undefined'){
-//            deleteHiddenFiles('keypoints',function(){$("#cineRefIndex").trigger("change");});
-//        }else{
-//            if(arrowCausedEvent){
-//                $("#cineRefIndex").trigger("change");
-//            }
-//            else
-//                deleteHiddenFiles('keypoints',function(){$("#cineRefIndex").trigger("change");});
-//        }
-        arrowCausedEvent = false;
-    });
-
-$("#frameScroller").on('keydown', function(event) {
-    if (event.keyCode === 37 || event.keyCode === 39) { 
-        arrowCausedEvent = true;
-    } 
-}); 
+    $("#cineCurrentPreviewSpan").text($(this).val());
+}).change(function(){
+    reloadCineImages($(this).val());
+});
 
 $("#cineGoToIndex").keypress(function(event) { 
     if (event.keyCode === 13) { 
@@ -661,42 +611,21 @@ $("#cineGoToIndex").keypress(function(event) {
             return;
         }
         $("#frameScroller").val($(this).val());
-        reload_cine_images($(this).val());
         $("#cineCurrentPreviewSpan").text($(this).val());
+        reloadCineImages($(this).val());
     } 
 }); 
 
-
 $(".update-tracklib-preview").keypress(function(event) { 
     if (event.keyCode === 13) { 
-        reload_cine_images($("#frameScroller").val());//$("#cineCurrentPreviewSpan").text());
-//        reload_cine_images($("#cineCurrentPreviewSpan").text());
-//        $("#cineRefIndex").trigger("change");
+        reloadCineImages($("#frameScroller").val());//$("#cineCurrentPreviewSpan").text());
     } 
 }); 
 
 
 $(".update-tracklib-preview").change(function () {
-    reload_cine_images($("#frameScroller").val());//$("#cineCurrentPreviewSpan").text());
+    reloadCineImages($("#frameScroller").val());//$("#cineCurrentPreviewSpan").text());
 });
-
-//$("#showTracksCheck").change(function () {
-//    reload_cine_images($("#frameScroller").val());//$("#cineCurrentPreviewSpan").text());
-//});
-//
-//$("#segPreviewCheck").change(function () {
-//    reload_cine_images($("#frameScroller").val());//$("#cineCurrentPreviewSpan").text());
-//}); 
-
-//
-//$("#threshPreviewCheck").change(function () {
-//    reload_cine_images($("#cineCurrentPreviewSpan").text());
-//    //$("#cineRefIndex").trigger("change");
-//}); 
-//$("#trajectoryPreviewCheck").change(function () {
-//    reload_cine_images($("#cineCurrentPreviewSpan").text());
-//    //$("#cineRefIndex").trigger("change");
-//}); 
 
 $("#rightRefInput").on("click",function () {
     this.value = null;

@@ -32,10 +32,16 @@ function getPreviewConfig(dest){
     };
     if($("#analysisModeSelect").val()=="subset"){
         _layout.newshape = {line: {color: 'cyan'},fillcolor:'cyan',opacity:0.4};
-        if(dest=='left')
+        if(dest=='left'){
+            console.log('setting the mode bar buttons');
             _config.modeBarButtonsToAdd = [
                 'drawclosedpath',
                 'eraseshape'];
+        }
+    }
+    if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1){ // signifies tracklib enabled and in stereo tracking
+        _config.modeBarButtonsToRemove.push('drawclosedpath');
+        _config.modeBarButtonsToRemove.push('eraseshape');
     }
     var obj = {
             layout : _layout,
@@ -106,6 +112,8 @@ function updatePreview(filePath,dest,argsIn,debugConsoleDivId,cb){
             fs.stat(spec.destPath, function(err, stat) {
                 if(err == null) {
                     updateImage(spec);
+                    if(dest=='left'||dest=='right')
+                        checkValidInput();
                 }
             });
         }else{

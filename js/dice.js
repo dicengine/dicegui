@@ -400,6 +400,169 @@ function deactivateEpipolar(){
     drawEpipolarLine(false,0,0,true);
 }
 
+function updateTracklibDisplayImages(index){
+    if(cinePathLeft=="undefined"||cinePathRight=="undefined"){
+        alert('cannot update tracklib image preview since the paths are not defined');
+        console.log('left path ' + cinePathLeft + ' right path ' + cinePathRight);
+        return;
+    }
+    if(calPath=="undefined"){
+        alert('calibration file must be set to preview');
+        return;
+    }
+    
+    // set up the arguments for the OpenCVServer
+    args = [];
+    
+    // push the arguments to opencvserver
+    args.push('tracklib');
+
+    var displayLeft = "";
+    if(os.platform()=='win32'){
+        displayLeft = '.dice\\.preview_left.png';
+    }else{
+        displayLeft = '.dice/.preview_left.png';
+    }
+    var displayRight = "";
+    if(os.platform()=='win32'){
+        displayRight = '.dice\\.preview_right.png';
+    }else{
+        displayRight = '.dice/.preview_right.png';
+    }
+
+    args.push('display_file_left');
+    args.push(displayLeft);
+    args.push('display_file_right');
+    args.push(displayRight);
+    
+    args.push('cine_file');
+    args.push(cinePathLeft);
+    args.push('stereo_cine_file');
+    args.push(cinePathRight);
+
+    args.push('cine_ref_index');
+    args.push($("#cineRefIndex").val());
+    
+    args.push('cine_start_index');
+    // overload the start frame as the current frame since the preview begins
+    // with the current frame
+//    args.push($("#cineStartIndex").val());
+    args.push($("#cineCurrentPreviewSpan").text());
+    
+    // the end frame is the current frame plus num_frames skips
+    args.push('cine_end_index');
+    var endFrame = Number($("#cineCurrentPreviewSpan").text()) + ($("#numPreviewFrames").val()-1)*$("#cineSkipIndex").val();
+    if(endFrame > Number($("#cineEndPreviewSpan").text()))
+        endFrame = Number($("#cineEndPreviewSpan").text());
+    args.push(endFrame);
+    
+    args.push('cine_skip_index');
+    args.push($("#cineSkipIndex").val());
+    
+    args.push('camera_system_file');
+    args.push(calPath);
+    
+    args.push('thresh_left');
+    args.push(parseInt($("#threshLeft").val()));
+
+    args.push('thresh_right');
+    args.push(parseInt($("#threshRight").val()));
+    
+    args.push('min_area');
+    args.push(parseInt($("#minArea").val()));
+    
+    args.push('max_area');
+    args.push(parseInt($("#maxArea").val()));
+    
+    args.push('max_pt_density'); // needs to be a double value
+    if($("#maxPtDensity").val().includes('.')){
+        args.push($("#maxPtDensity").val());
+    }else{
+        args.push($("#maxPtDensity").val()  +'.0');
+    }
+    
+    args.push('colocation_tol'); // needs to be a double value
+    if($("#colocationTol").val().includes('.')){
+        args.push($("#colocationTol").val());
+    }else{
+        args.push($("#colocationTol").val()  +'.0');
+    }
+    
+    args.push('match_tol');
+    if($("#matchTol").val().includes('.')){
+        args.push($("#matchTol").val());
+    }else{
+        args.push($("#matchTol").val()  +'.0');
+    }
+    
+    args.push('cross_match_tol');
+    if($("#crossMatchTol").val().includes('.')){
+        args.push($("#crossMatchTol").val());
+    }else{
+        args.push($("#crossMatchTol").val()  +'.0');
+    }
+    
+    args.push('neighbor_radius');
+    if($("#neighborRadius").val().includes('.')){
+        args.push($("#neighborRadius").val());
+    }else{
+        args.push($("#neighborRadius").val()  +'.0');
+    }
+
+    args.push('min_pts_per_track');
+    args.push(parseInt($("#minPtsPerTrack").val()));
+
+    args.push('max_track_gap');
+    if(parseInt($("#maxTrackGap").val())>=1){
+        args.push(parseInt($("#minPtsPerTrack").val()));
+    }else{
+        args.push('1');
+    }
+
+    args.push('num_background_frames');
+    var numBackgroundFrames = parseInt($("#numBackgroundFrames").val());
+    if(numBackgroundFrames<1||numBackgroundFrames > ($("#cineEndIndex").val()-$("#cineStartIndex").val())){
+        numBackgroundFrames = 1;
+        $("#numBackgroundFrames").val(1);
+    }
+    args.push(numBackgroundFrames);
+    
+    console.log(args);
+    var child_process = require('child_process');
+    var readline      = require('readline');
+    var proc = child_process.spawn(execOpenCVServerPath,args,{cwd:workingDirectory});//,maxBuffer:1024*1024});
+    proc.on('error', function(){
+        alert('DICe OpenCVServer failed: invalid executable: ' + execOpenCVServerPath);
+    });
+    //setTimeout( proc.kill(), 40000);
+    proc.on('close', (code) => {
+        console.log(`OpenCVServer exited with code ${code}`);
+        if(code==0){
+            fs.stat(fullPath('',displayLeft), function(err, stat) {
+                if(err == null) {
+                    updatePreview(fullPath('',displayLeft),'left');
+                }else{
+                }
+            });
+            fs.stat(fullPath('',displayRight), function(err, stat) {
+                if(err == null) {
+                    updatePreview(fullPath('',displayRight),'right');
+                }else{
+                }
+            });
+        }else{
+            console.log('error ocurred while applying filter: ' + code);
+        }
+    });
+    readline.createInterface({
+        input     : proc.stdout,
+        terminal  : false
+    }).on('line', function(line) {
+        consoleMsg(line);
+    });
+    
+}
+
 function applyFilterToImages(fileName, mode){
     // set up the arguments for the OpenCVServer
     args = [];
