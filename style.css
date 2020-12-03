@@ -415,6 +415,11 @@ h4 {
     overflow-y: scroll;
     padding-right: 0;
 }
+.cal-console {
+    font-size: 12px;
+    overflow-y: scroll;
+    padding-right: 0;
+}
 .results-window {
     width: 100%;
     height: 35vh;

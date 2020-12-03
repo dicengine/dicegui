@@ -70,11 +70,11 @@ fs.watch(hiddenDir, (eventType, filename) => {
         return;
     if(filename==".preview_cal_left.png"){
         updatePreview(filename,'cal_left');
-        $("#leftPreviewBody").css('border', '');
+//        $("#leftPreviewBody").css('border', '');
     }
     if(filename==".preview_cal_right.png"){
         updatePreview(filename,'cal_right');
-        $("#rightPreviewBody").css('border', '');
+//        $("#rightPreviewBody").css('border', '');
     }
 })
 
@@ -504,23 +504,21 @@ function respondToOpenCVErrorCode(code){
 //            $("#rightPreviewBody").css('border', '');
 //        }
 //        else{
-            $("#leftPreviewBody").css('border', '3px solid #00cc00');
-            $("#rightPreviewBody").css('border', '3px solid #00cc00');
+//            $("#leftPreviewBody").css('border', '3px solid #00cc00');
+//            $("#rightPreviewBody").css('border', '3px solid #00cc00');
 //        }
         $("#previewLeftSpan").text("");
         $("#previewRightSpan").text("");
     }else{
-        $("#leftPreviewBody").css('border', '3px solid red');
-        $("#rightPreviewBody").css('border', '3px solid red');
+//        $("#leftPreviewBody").css('border', '3px solid red');
+//        $("#rightPreviewBody").css('border', '3px solid red');
         $("#previewLeftSpan").text("");
         $("#previewRightSpan").text("");
         endProgress(false);
-        var decObj = decorateFileNames();
         if(code==1||code==2||code==3){
             // remove border on preview windows
-            // clear the preview images
-            updatePreview(decObj.decoratedLeft,'cal_left');
-            updatePreview(decObj.decoratedRight,'cal_right');
+//            updatePreview(decObj.decoratedLeft,'cal_left');
+//            updatePreview(decObj.decoratedRight,'cal_right');
             $("#previewLeftSpan").text("marker location failed");
             $("#previewRightSpan").text("marker location failed");
         }else if(code==4){
@@ -530,7 +528,8 @@ function respondToOpenCVErrorCode(code){
             $("#previewLeftSpan").text("image load failure");
             $("#previewRightSpan").text("image load failure");
         }else{
-            // clear the preview images
+            // reset the preview images
+            var decObj = decorateFileNames();
             updatePreview(decObj.decoratedLeft,'cal_left');
             updatePreview(decObj.decoratedRight,'cal_right');
             $("#previewLeftSpan").text("preview failure (try adjusting threshold)");

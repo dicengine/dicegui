@@ -108,7 +108,7 @@ function updatePreview(filePath,dest,data=[],argsIn,debugConsoleDivId,cb){
         console.log(`OpenCVServer exited with code ${code}`);
         // execute call back with error code
         cb(code);
-        if(code==0){
+        if(code>=0&&code<4){
             console.log("updatePreview(): src path " + spec.srcPath);
             console.log("updatePreview(): dest path " + spec.destPath);
             fs.stat(spec.destPath, function(err, stat) {
