@@ -204,7 +204,7 @@ function impl_input_xml_file(xml){
             if(image_prefix) $("#imagePrefix").val(image_prefix);
             image_ext = xml_get(xml,"image_file_extension");
             if(image_ext) $("#imageExtension").val(image_ext);
-            load_image_sequence(false);
+            loadImageSequence(false);
         }
     }
     

@@ -355,7 +355,7 @@ function updateImageSequencePreview(loadImage){
         if(err == null) {
             $("#imageSequencePreview").css({color:"#009933"})
             if(loadImage)
-                load_image_sequence(false);
+                loadImageSequence(false);
         }
         else{
             $("#imageSequencePreview").css({color:"#ff0000"})

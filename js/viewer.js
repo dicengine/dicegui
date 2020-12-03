@@ -421,7 +421,7 @@ function flagSequenceImages(){
     defImagePathsRight = ["sequence"];
 }
 
-function load_image_sequence(reset_ref_ROIs){
+function loadImageSequence(reset_ref_ROIs){
     var fullImageName = concatImageSequenceName(0);
     var fullStereoImageName = concatImageSequenceName(1);
     var fullTrinocImageName = concatImageSequenceName(2);
@@ -522,7 +522,7 @@ $("#loadSubsetFileInput").change(function (evt) {
 });
 
 $("#loadRef").click(function (){
-    load_image_sequence(true);
+    loadImageSequence(true);
 });
 
 $("#leftCineInput").on("click",function () {
@@ -532,7 +532,7 @@ $("#leftCineInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
     if(file){
-        // if a right cine file is alread loaded ask the user if it should be unloaded to
+        // TODO if a right cine file is alread loaded ask the user if it should be unloaded to
         // to avoid frame range mismatch
 //        if(cinePathRight!="undefined"){
 //            if (confirm('unload right cine file (this is necessary if the frame ranges are different between right and left cine)')){
@@ -577,10 +577,6 @@ function reloadCineImages(index){
             return;
         }
     var offsetIndex = Number(index);
-//    cineLeftOpenCVComplete = false;
-//    cineRightOpenCVComplete = false;
-    //alert("offset_index " + offsetIndex);
-    
     // for tracklib special filters can be applied over the images
     if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1&&$("#segPreviewCheck")[0].checked){ // signifies tracklib
         updateTracklibDisplayImages(offsetIndex);

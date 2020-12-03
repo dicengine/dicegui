@@ -469,8 +469,8 @@ function updateCalPreview(firstLoad=false){
     console.log("updateCalPreview: left file " + decObj.decoratedLeft);
     console.log("updateCalPreview: right file " + decObj.decoratedRight);
     startProgress();
-    updatePreview(decObj.decoratedLeft,'cal_left',args,"#calConsoleWindow",function (code) {respondToOpenCVErrorCode(code);});
-    updatePreview(decObj.decoratedRight,'cal_right',args,"#calConsoleWindow",function (code) {respondToOpenCVErrorCode(code);});
+    updatePreview(decObj.decoratedLeft,'cal_left',[],args,"#calConsoleWindow",function (code) {respondToOpenCVErrorCode(code);});
+    updatePreview(decObj.decoratedRight,'cal_right',[],args,"#calConsoleWindow",function (code) {respondToOpenCVErrorCode(code);});
 }
 
 function decorateFileNames(){

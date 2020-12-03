@@ -280,23 +280,13 @@ function callDICeExec(resolution,ss_locs) {
             }
         }
     });
-    
-//    var readline      = require('readline');
-//    var proc;
-//    if(ss_locs)
-//        proc = child_process.execFile(execPath, ['-i',inputFile,'-v','-t','--ss_locs'],{cwd:workingDirectory,maxBuffer:1024*1024});
-//    else
-//        proc = child_process.execFile(execPath, ['-i',inputFile,'-v','-t'],{cwd:workingDirectory,maxBuffer:1024*1024});
-//        
 }
 
-//function updateCineDisplayImage(fileName,index,mode,reset_ref_ROIs){
 function updateCineDisplayImage(fileName,index,dest){
     // construct the file name with the indes
     // this assumes that fileName is not alredy decorated
     var decoratedFile = fileName.replace('.'+fileName.split('.').pop(),'_'+index+'.cine');
     console.log('updating cine display image: ' + decoratedFile);
-    // TODO TODO TODO add a filter for the tracklib preview if needed and pass along a args argument
     updatePreview(decoratedFile,dest);
 }
 
@@ -444,17 +434,22 @@ function updateTracklibDisplayImages(index){
     args.push($("#cineRefIndex").val());
     
     args.push('cine_start_index');
+    var startFrame = Number($("#cineCurrentPreviewSpan").text()) - ($("#numPreviewFrames").val()-1)*$("#cineSkipIndex").val();
+    if(startFrame < Number($("#cineStartPreviewSpan").text()))
+        startFrame = Number($("#cineStartPreviewSpan").text());
+    args.push(startFrame);
     // overload the start frame as the current frame since the preview begins
     // with the current frame
 //    args.push($("#cineStartIndex").val());
-    args.push($("#cineCurrentPreviewSpan").text());
+//    args.push($("#cineCurrentPreviewSpan").text());
     
-    // the end frame is the current frame plus num_frames skips
+    // the end frame is the start frame plus num_frames * skips
     args.push('cine_end_index');
-    var endFrame = Number($("#cineCurrentPreviewSpan").text()) + ($("#numPreviewFrames").val()-1)*$("#cineSkipIndex").val();
-    if(endFrame > Number($("#cineEndPreviewSpan").text()))
-        endFrame = Number($("#cineEndPreviewSpan").text());
-    args.push(endFrame);
+    args.push($("#cineCurrentPreviewSpan").text());
+//    var endFrame = Number($("#cineCurrentPreviewSpan").text()) + ($("#numPreviewFrames").val()-1)*$("#cineSkipIndex").val();
+//    if(endFrame > Number($("#cineEndPreviewSpan").text()))
+//        endFrame = Number($("#cineEndPreviewSpan").text());
+//    args.push(endFrame);
     
     args.push('cine_skip_index');
     args.push($("#cineSkipIndex").val());
@@ -540,13 +535,26 @@ function updateTracklibDisplayImages(index){
         if(code==0){
             fs.stat(fullPath('',displayLeft), function(err, stat) {
                 if(err == null) {
-                    updatePreview(fullPath('',displayLeft),'left');
+                    Plotly.d3.json(fullPath('.dice','.preview_left.json'), function(jsonErr, fig) {
+                        if(jsonErr==null){
+                            updatePreview(fullPath('',displayLeft),'left',fig.data);
+//                            Plotly.addTraces(document.getElementById("plotlyViewerLeft"),fig.data);
+                        }else{
+                            alert('error: reading json file failed');
+                        }
+                      });
                 }else{
                 }
             });
             fs.stat(fullPath('',displayRight), function(err, stat) {
                 if(err == null) {
-                    updatePreview(fullPath('',displayRight),'right');
+                    Plotly.d3.json(fullPath('.dice','.preview_right.json'), function(jsonErr, fig) {
+                        if(jsonErr==null){
+                            updatePreview(fullPath('',displayRight),'right',fig.data);
+                        }else{
+                            alert('error: reading json file failed');
+                        }
+                      });
                 }else{
                 }
             });

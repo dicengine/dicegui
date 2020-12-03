@@ -16,11 +16,13 @@ function getPreviewConfig(dest){
                 showline: false,
             },
             yaxis: {
+                scaleanchor: 'x',
                 showgrid: false,
                 zeroline: false,
                 showline: false,
             },
             margin: {l: 40,r: 5,b: 20,t: 30},
+            hovermode: 'closest',
     };
     var _config = {
             displaylogo: false,
@@ -52,7 +54,7 @@ function getPreviewConfig(dest){
     return obj;
 }
 
-function updatePreview(filePath,dest,argsIn,debugConsoleDivId,cb){
+function updatePreview(filePath,dest,data=[],argsIn,debugConsoleDivId,cb){
     cb = cb || $.noop;
     if(dest!='left'&&dest!='right'&&dest!='cal_left'&&dest!='cal_right'){
         console.log('error: invalid destination ' + dest);
@@ -79,7 +81,7 @@ function updatePreview(filePath,dest,argsIn,debugConsoleDivId,cb){
     spec.dest = dest;
     if(0 === spec.srcPath.length){
         console.log('clearing the display image for dest ' + dest);
-        updateImage(spec);
+        updateImage(spec,[]);
         return;
     }
     
@@ -111,7 +113,7 @@ function updatePreview(filePath,dest,argsIn,debugConsoleDivId,cb){
             console.log("updatePreview(): dest path " + spec.destPath);
             fs.stat(spec.destPath, function(err, stat) {
                 if(err == null) {
-                    updateImage(spec);
+                    updateImage(spec,data);
                     if(dest=='left'||dest=='right')
                         checkValidInput();
                 }
@@ -147,7 +149,7 @@ function updatePreview(filePath,dest,argsIn,debugConsoleDivId,cb){
     });
 }
 
-function updateImage(spec){
+function updateImage(spec,data){
     console.log('updateImage(): path ' + spec.destPath + ' in div '  + spec.destDivId);
     var obj = getPreviewConfig(spec.dest);
     obj.layout.xaxis.range = [0,spec.width];
@@ -175,5 +177,5 @@ function updateImage(spec){
 //        autocontour: true,
 //      }];
     // TODO call restyle or relayout instead of newPlot each time?
-    Plotly.newPlot(document.getElementById(spec.destDivId),[],obj.layout,obj.config);
+    Plotly.newPlot(document.getElementById(spec.destDivId),data,obj.layout,obj.config);
 }
