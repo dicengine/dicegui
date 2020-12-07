@@ -41,6 +41,8 @@ var cineFirstFrame = 0;
 var calPath = "undefined";
 
 // reference image dimensions
+var refImageWidth = 0;
+var refImageHeight = 0;
 var refImageWidthLeft = 0;
 var refImageHeightLeft = 0;
 var refImageWidthRight = 0;

@@ -16,7 +16,8 @@ function parse_input_xml_file(filename){
     }); // end stat
 }
 
-function impl_input_xml_file(xml){
+
+function parseSubsetFile(xml){
     // read the subset file if it exists:
     // check if a subset file is used to define ROIs
     subset_file = xml_get(xml,"subset_file");
@@ -27,13 +28,16 @@ function impl_input_xml_file(xml){
                 fs.readFile(subset_file,'utf8',function(err,data){
                     if(err){
                     }else{
-                        read_subset_file(data);
+                        readSubsetFile(data);
                     }
                 }); // end readfile
             }else{ // file doesn't exist
             }
         }); // end stat subset file
     }  // end has subset_file
+}
+
+function impl_input_xml_file(xml){
 
     is_subset_or_global = false;
     
@@ -95,7 +99,7 @@ function impl_input_xml_file(xml){
         full_name = image_folder + cine_file;
         getFileObject(full_name, function (fileObject) {
             $("#panzoomLeft").html('');
-            callCineStatExec(fileObject,0,false,function(){update_cine_indices(xml)});
+            callCineStatExec(fileObject,0,false,function(){update_cine_indices(xml); parseSubsetFile(xml);});
         });
         if(stereo_cine_file){
             console.log('reading stereo cine file: ' + image_folder + stereo_cine_file);
@@ -119,9 +123,10 @@ function impl_input_xml_file(xml){
             full_name = image_folder + ref_image;
             name_splits = full_name.split(/[\\\/]/);
             $("#refImageText span").text(name_splits[name_splits.length-1]);
-            getFileObject(full_name, function (fileObject) {
-                loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",true);
-            });
+            updatePreview(full_name,'left',[],[],"",function(){parseSubsetFile(xml);});
+//            getFileObject(full_name, function (fileObject) {
+//                loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",true);
+//            });
             // load the deformed image list
             deformed_list = $(xml).find('ParameterList[name="deformed_images"]');
             if(deformed_list){
@@ -147,9 +152,10 @@ function impl_input_xml_file(xml){
                 stereo_full_name = image_folder + stereo_ref_image;
                 stereo_name_splits = stereo_full_name.split(/[\\\/]/);
                 $("#refImageTextRight span").text(stereo_name_splits[stereo_name_splits.length-1]);
-                getFileObject(stereo_full_name, function (fileObject) {
-                    loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true);
-                });
+                updatePreview(stereo_full_name,'right');
+//                getFileObject(stereo_full_name, function (fileObject) {
+//                    loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true);
+//                });
             }
             // load the stereo deformed image list
             stereo_deformed_list = $(xml).find('ParameterList[name="stereo_deformed_images"]');
@@ -204,7 +210,7 @@ function impl_input_xml_file(xml){
             if(image_prefix) $("#imagePrefix").val(image_prefix);
             image_ext = xml_get(xml,"image_file_extension");
             if(image_ext) $("#imageExtension").val(image_ext);
-            loadImageSequence(false);
+            loadImageSequence(false,function(){parseSubsetFile(xml);});
         }
     }
     
@@ -221,7 +227,7 @@ function impl_input_xml_file(xml){
                     for(var line = 0; line < lines.length; line++){
                         if(lines[line].charAt(0)=='#') continue;
                         var tokens = lines[line].split(/\s+/g).map(Number);
-                        for(i=0;i<tokens.length;++i){
+                        for(var i=0;i<tokens.length;++i){
                             if(!isNaN(tokens[i])&&tokens[i]!=0) coord_data.push(tokens[i]);
                         }
                     }
@@ -306,11 +312,14 @@ function impl_input_xml_file(xml){
 // subsets are always saved in order from 0 to n.
 // note: obstructed regions are copied in all subsets, as such only the
 // obstructed regions from the first subeset are loaded
-function read_subset_file(data){
+function readSubsetFile(data){
     hierarchy = [];
     clearROIs();
     clearExcluded();
     clearObstructed();
+    var currentROI = 0;
+    var shapes = [];
+    var subsetLocations = {x:[],y:[]};
     var max_vertices = 500;
     var lines = data.toString().split('\n');
     for(line = 0;line < lines.length; line++){
@@ -325,8 +334,9 @@ function read_subset_file(data){
                         num_line = lines[line+1+vertex].match(/\S+/g).map(Number);
                         if(isNaN(num_line[0])) break;
                         vertex++;
-                        subsetCoordinatesX.push(num_line[0]);
-                        subsetCoordinatesY.push(num_line[1]);
+                        // if this is a tracking analysis, this could potentially be skipped since this info is stored in the shape centroids
+                        subsetLocations.x.push(num_line[0]);
+                        subsetLocations.y.push(num_line[1]);
                     }
                     line+=vertex;
                 }
@@ -347,42 +357,28 @@ function read_subset_file(data){
                     line+=vertex;
                     console.log('vertex x: ' + vertex_x);
                     console.log('vertex y: ' + vertex_y);
+                    var points = {x:vertex_x,y:vertex_y};
                     if(hierarchy[hierarchy.length-3].toUpperCase()=='BOUNDARY'){
-                        //console.log('ciurrent ROI index is ' + currentROIIndex);
-                        //console.log(ROIDefsX);
-                        if(currentROIIndex!=0){
-                            ROIDefsX.push([]);
-                            ROIDefsY.push([]);
-                        }
-                        for(i=0;i<vertex_x.length;i++){
-                            ROIDefsX[ROIDefsX.length-1].push(vertex_x[i]);
-                            ROIDefsY[ROIDefsY.length-1].push(vertex_y[i]);
-                        }
-                        currentROIIndex += 1;
+                        var shape = pointsToPathShape(points,'ROI');
+                        shapes.push(shape);
+                        currentROI += 1;
                     }
                     else if(hierarchy[hierarchy.length-3].toUpperCase()=='EXCLUDED'){
-                        if(currentExcludedIndex!=0){
-                            excludedDefsX.push([]);
-                            excludedDefsY.push([]);
-                        }
-                        for(i=0;i<vertex_x.length;i++){
-                            excludedDefsX[excludedDefsX.length-1].push(vertex_x[i]);
-                            excludedDefsY[excludedDefsY.length-1].push(vertex_y[i]);
-                        }
-                        excludedAssignments.push(currentROIIndex-1);
-                        currentExcludedIndex += 1;
+                        var excludedId = currentROI - 1;
+                        var shape = pointsToPathShape(points,'excluded_' + excludedId.toString());
+                        shapes.push(shape);
                     }
-                    else if((hierarchy[hierarchy.length-3].toUpperCase()=='OBSTRUCTED')&&currentROIIndex==1){
-                        if(currentObstructedIndex!=0){
-                            obstructedDefsX.push([]);
-                            obstructedDefsY.push([]);
-                        }
-                        for(i=0;i<vertex_x.length;i++){
-                            obstructedDefsX[obstructedDefsX.length-1].push(vertex_x[i]);
-                            obstructedDefsY[obstructedDefsY.length-1].push(vertex_y[i]);
-                        }
-                        currentObstructedIndex += 1;
-                    }
+//                    else if((hierarchy[hierarchy.length-3].toUpperCase()=='OBSTRUCTED')&&currentROIIndex==1){
+//                        if(currentObstructedIndex!=0){
+//                            obstructedDefsX.push([]);
+//                            obstructedDefsY.push([]);
+//                        }
+//                        for(var i=0;i<vertex_x.length;i++){
+//                            obstructedDefsX[obstructedDefsX.length-1].push(vertex_x[i]);
+//                            obstructedDefsY[obstructedDefsY.length-1].push(vertex_y[i]);
+//                        }
+//                        currentObstructedIndex += 1;
+//                    }
                 }
             }
             else if(split_line[0]=='end' && hierarchy.length > 0){
@@ -390,24 +386,12 @@ function read_subset_file(data){
             }
         } // end split_line
     } // end lines
-    console.log('subsetCoordinatesX');
-    console.log(subsetCoordinatesX);
-    console.log('subsetCoordinatesY');
-    console.log(subsetCoordinatesY);
-    console.log('ROIDefsX:');
-    console.log(ROIDefsX);
-    console.log('ROIDefsY:');
-    console.log(ROIDefsY);
-    console.log('ExcludedDefsX:');
-    console.log(excludedDefsX);
-    console.log('ExcludedDefsY:');
-    console.log(excludedDefsY);
-    console.log('excludedAssignments');
-    console.log(excludedAssignments);
-    console.log('obstructedDefsX:');
-    console.log(obstructedDefsX);
-    console.log('obstructedDefsY:');
-    console.log(obstructedDefsY);
+    
+    // assuming here that the plotly div already exists
+    var update = {shapes: shapes};
+    Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
+    console.log(pointsToSubsetLocationTrace(subsetLocations));
+    Plotly.addTraces(document.getElementById("plotlyViewerLeft"),pointsToSubsetLocationTrace(subsetLocations));
     drawROIs();
 }
 
@@ -569,6 +553,108 @@ function impl_params_xml_file(xml){
 
 function xml_get(xml,param_name){
     return $(xml).find('Parameter[name="'+param_name+'"]').attr("value");
+}
+
+function shapesToCentroids(shapes){
+    var centroids = {x:[],y:[]};
+    if(shapes.length==0) return;
+    // iterate the shapes and for each path shape, compute the centroid
+    for(var i=0;i<shapes.length;++i){
+        if(shapes[i].type!='path') continue;
+        var points = pathShapeToPoints(shapes[i]);
+        var j = 0;
+        var det = 0.0;
+        var cx = 0.0; var cy = 0.0;
+        for (var ii = 0; ii < points.x.length; ii++){
+            // closed polygon
+            if (ii + 1 == points.x.length)
+                j = 0;
+            else
+                j = ii + 1;
+            // compute the determinant
+            var tempDet = points.x[ii] * points.y[j] - points.x[j]*points.y[ii];
+            det += tempDet;
+            cx += (points.x[ii] + points.x[j])*tempDet;
+            cy += (points.y[ii] + points.y[j])*tempDet;
+        }
+        // divide by the total mass of the polygon
+        cx /= 3.0*det;
+        cy /= 3.0*det;
+        centroids.x.push(Math.floor(cx));
+        centroids.y.push(Math.floor(cy));
+    }
+    return centroids;
+}
+
+function pointsToPathShape(points,name){
+    var shape = {};
+    shape.type = 'path';
+    if(points.x.length!=points.y.length){
+        alert('invalid points array');
+        return '';
+    }
+    var path = 'M';
+    for(var i=0;i<points.x.length;++i){
+        path+= points.x[i] + ',' + points.y[i];
+        if(i<points.x.length-1)
+            path +='L';
+    }
+    path += 'Z';
+    shape.path = path;
+    // color the shape:
+    if($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global"){
+        shape.line = {color: 'cyan', width:4}
+        shape.fillcolor = 'cyan'
+        shape.opacity = 0.4;
+    }
+    else{
+        shape.line = {color: 'purple', width:4}
+        shape.fillcolor = 'green';
+        shape.opacity =0.4;
+    }
+    shape.editable = true;
+    if(name){
+        shape.name = name;
+        if(name.includes('excluded')){
+            shape.line = {color: 'red'};
+            shape.fillcolor = 'red';
+            shape.opacity = 0.2;
+        }
+    }
+    return shape;
+}
+
+function pathShapeToPoints(shape){
+    if(shape.type!='path'){
+        alert('invalid shape (non-path)');
+        return;
+    }
+    var pathString = shape.path;
+    var points = {x:[],y:[]};
+    var array = pathString.split(/(?:[A-Z,])/g);
+    array.shift(); // get rid of the empty elements at the start and end of the array
+    array.pop();
+    for(var i=0;i<array.length;i++){
+        points.x.push(parseInt(array[i++]));
+        points.y.push(parseInt(array[i]));
+    }
+    return points;
+}
+
+function pointsToSubsetLocationTrace(points){
+    var visible = false;
+    var scatterTrace = {
+            name: 'subsetCoordinates',
+            visible: false,
+            type:'scatter',
+            x:points.x,
+            y:points.y,
+            mode:'markers',
+            marker: {
+                color: '#F6F926'
+            },
+    };
+    return scatterTrace;
 }
 
 //function xml_has(xml,param_name){

@@ -332,7 +332,7 @@ function concatImageSequenceName(stereoImageFlag){
     }
     var digits = Number($("#numDigits").val());
     if(digits > 1)
-        for(j=0;j<digits - defDig;++j){
+        for(var j=0;j<digits - defDig;++j){
             fullImageName += "0";
         }
     fullImageName += $("#refIndex").val();

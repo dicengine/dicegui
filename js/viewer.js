@@ -421,7 +421,8 @@ function flagSequenceImages(){
     defImagePathsRight = ["sequence"];
 }
 
-function loadImageSequence(reset_ref_ROIs){
+function loadImageSequence(reset_ref_ROIs,cb){
+    cb = cb || $.noop;
     var fullImageName = concatImageSequenceName(0);
     var fullStereoImageName = concatImageSequenceName(1);
     var fullTrinocImageName = concatImageSequenceName(2);
@@ -433,7 +434,7 @@ function loadImageSequence(reset_ref_ROIs){
             return;
         }
         else{
-            updatePreview(fullImageName,'left');
+            updatePreview(fullImageName,'left',[],[],"",cb);
             if(showStereoPane==1||showStereoPane==2){
                 fs.stat(fullStereoImageName, function(err, stat) {
                     if(err != null) {

@@ -73,7 +73,7 @@ function showLivePlots(){
             var livePlotFiles = '';
             var numDigitsTotal = integerLength(ROIDefsX.length);
             // set up the files to read
-            for(i=0;i<ROIDefsX.length;++i){
+            for(var i=0;i<ROIDefsX.length;++i){
                 if(os.platform()=='win32'){
                     livePlotFiles += 'results\\';
                 }else{
@@ -82,7 +82,7 @@ function showLivePlots(){
                 var currentDigits = integerLength(i);
                 var numZeros = Number(numDigitsTotal) - Number(currentDigits);
                 livePlotFiles += 'DICe_solution_';
-                for(j=0;j<numZeros;++j)
+                for(var j=0;j<numZeros;++j)
                     livePlotFiles += '0';
                 livePlotFiles += i + '.txt';
                 if(i<ROIDefsX.length-1)
@@ -100,7 +100,7 @@ function showLivePlots(){
         var livePlotFiles = ""
         // TODO set up the files to read
         //livePlotFiles = "DICe_solution_0.txt DICe_solution_1.txt DICe_solution_2.txt DICe_solution_3.txt DICe_solution_4.txt DICe_solution_5.txt DICe_solution_6.txt";
-        for(i=0;i<livePlotPtsX.length;++i){
+        for(var i=0;i<livePlotPtsX.length;++i){
             livePlotFiles += 'live_plot_pt_' + i + '.txt';
             if(i<livePlotPtsX.length-1)
                 livePlotFiles += ' ';
@@ -282,16 +282,18 @@ function callDICeExec(resolution,ss_locs) {
     });
 }
 
-function updateCineDisplayImage(fileName,index,dest){
+function updateCineDisplayImage(fileName,index,dest,cb){
+    cb = cb || $.noop;
     // construct the file name with the indes
     // this assumes that fileName is not alredy decorated
     var decoratedFile = fileName.replace('.'+fileName.split('.').pop(),'_'+index+'.cine');
     console.log('updating cine display image: ' + decoratedFile);
-    updatePreview(decoratedFile,dest);
+    updatePreview(decoratedFile,dest,[],[],"",cb);
 }
 
 function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
 
+    callback = callback || $.noop;
     var child_process = require('child_process');
     var readline      = require('readline');
     var proc;
@@ -365,7 +367,7 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
                              if(mode==0){
                                  cinePathLeft = file.path;
                                  $("#cineLeftPreview span").text(file.name);
-                                 updateCineDisplayImage(fileName,stats[1],'left');
+                                 updateCineDisplayImage(fileName,stats[1],'left',callback); // only execute the callback after the left image is updated
                              }else if(mode==1){
                                  cinePathRight = file.path;
                                  $("#cineRightPreview span").text(file.name);
@@ -373,8 +375,8 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
                              }
                              deleteHiddenFiles('keypoints');
 //                             deleteDisplayImageFiles(mode,function(){updateCineDisplayImage(fileName,stats[1],mode,reset_ref_ROIs);});
-                             callback = callback || $.noop;
-                             callback();
+//                             callback = callback || $.noop;
+//                             callback();
                              return true;
                          }); // end else
                     }
@@ -932,6 +934,7 @@ function endProgress (success){
     }
 }
 
+
 function writeInputFile(only_write,resolution=false,ss_locs=false) {
     fileName     = fullPath('','input.xml');
     outputFolder = fullPath('results','');
@@ -943,32 +946,43 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
     content += '<ParameterList>\n';
     content += '<Parameter name="output_folder" type="string" value="' + outputFolder + '" /> \n';
     content += '<Parameter name="correlation_parameters_file" type="string" value="' + paramsFile + '" />\n';
+
+    var ROIShapes = getPlotlyPathShapes('ROI');
+    var numROIs = ROIShapes.length;
+    //  for global if no ROI has been defined, define a default one
+    if(numROIs==0&&$("#analysisModeSelect").val()=="global"){
+        // if no ROIs are defined for global, define one large ROI
+        var points = {x:[20,refImageWidth-20,refImageWidth-20,20],
+                y:[20,20,refImageHeight,refImageHeight]};
+        var shape = pointsToPathShape(points,'ROI');
+        ROIShapes.push(shape);
+        var update = {shapes: ROIShapes};
+        Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
+//        plotlyDivLeft.layout.shapes.push(shape);
+        numROIs++;
+    }
+    console.log('writeInputFile(): numROIs ' + numROIs);
+    var subsetCoordinates = getSubsetCoordinatesTrace();
+    var numSubsets = 0;
+    if(subsetCoordinates.x)
+        numSubsets = subsetCoordinates.x.length;
+    console.log('writeInputFile(): numSubsets ' + numSubsets);
     
     // check that some ROIs have been defined if this is the tracking mode
-    if($("#analysisModeSelect").val()=="tracking" && showStereoPane==0 && ROIDefsX[0].length==0 && !only_write){
+    if($("#analysisModeSelect").val()=="tracking" && showStereoPane==0 && numROIs==0 && !only_write){
         alert('ROIs must be defined');
         endProgress(false);
         $("#abortLi").hide();
         $("#sssigPreview").show();
         return;
     }
-    if(ROIDefsX[0].length>=3||subsetCoordinatesX.length>0){
+    if(numROIs>0||numSubsets>0){
         content += '<Parameter name="subset_file" type="string" value="' + subsetFile + '" />\n';
-    }else if(ROIDefsX[0].length==0&&$("#analysisModeSelect").val()=="global"){
-        content += '<Parameter name="subset_file" type="string" value="' + subsetFile + '" />\n';
-        // if no ROIs are defined for global, define one large ROI
-        ROIDefsX[0].push(20);
-        ROIDefsY[0].push(20);
-        ROIDefsX[0].push(refImageWidthLeft-20);
-        ROIDefsY[0].push(20);
-        ROIDefsX[0].push(refImageWidthLeft-20);
-        ROIDefsY[0].push(refImageHeightLeft-20);
-        ROIDefsX[0].push(20);
-        ROIDefsY[0].push(refImageHeightLeft-20);
     }
+    
     if($("#analysisModeSelect").val()=="subset"){
         content += '<Parameter name="subset_size" type="int" value="'+$("#subsetSize").val()+'" />\n';
-        if(subsetCoordinatesX.length==0)
+        if(numSubsets==0)
             content += '<Parameter name="step_size" type="int" value="'+$("#stepSize").val()+'" />\n';
         content += '<Parameter name="separate_output_file_for_each_subset" type="bool" value="false" />\n';
     }else if($("#analysisModeSelect").val()=="tracking"){
@@ -1083,7 +1097,7 @@ function writeLivePlotsFile() {
         consoleMsg('writing live plot data file ' + livePlotFile);
         var LPcontent = '';
         LPcontent += '# two numbers is a point four numbers is a line\n';
-        for(i=0;i<livePlotPtsX.length;++i){
+        for(var i=0;i<livePlotPtsX.length;++i){
             LPcontent += livePlotPtsX[i] + ' ' + livePlotPtsY[i] + '\n'
         }
         if(addLivePlotLineActive){
@@ -1196,51 +1210,6 @@ function writeParamsFile(only_write,resolution,ss_locs) {
             content += $("#neighborRadius").val()  +'.0';
         }
         content += '" />\n';
-//        content += '<Parameter name="block_size" type="int" value="' + parseInt($("#threshBlockSize").val()) +'" />\n';
-//        content += '<Parameter name="binary_constant" type="double" value="';
-//        if($("#threshAdaptiveConstant").val().includes('.')){
-//            content += $("#threshAdaptiveConstant").val();
-//        }else{
-//            content += $("#threshAdaptiveConstant").val()  +'.0';
-//        }
-//        content += '" />\n';
-//        content += '<Parameter name="bucket_size_theta" type="double" value="';
-//        if($("#bucketSizeTheta").val().includes('.')){
-//            content += $("#bucketSizeTheta").val();
-//        }else{
-//            content += $("#bucketSizeTheta").val()  +'.0';
-//        }
-//        content += '" />\n';
-//        content += '<Parameter name="bucket_size_r" type="double" value="';
-//        if($("#bucketSizeR").val().includes('.')){
-//            content += $("#bucketSizeR").val();
-//        }else{
-//            content += $("#bucketSizeR").val()  +'.0';
-//        }
-//        content += '" />\n';
-//        content += '<Parameter name="cross_epi_tol" type="double" value="';
-//        if($("#crossEpiTol").val().includes('.')){
-//            content += $("#crossEpiTol").val();
-//        }else{
-//            content += $("#crossEpiTol").val()  +'.0';
-//        }
-//        content += '" />\n';
-//        content += '<Parameter name="frag_neigh_radius_sq" type="double" value="';
-//        if($("#neighRadSq").val().includes('.')){
-//            content += $("#neighRadSq").val();
-//        }else{
-//            content += $("#neighRadSq").val()  +'.0';
-//        }
-//        content += '" />\n';
-//        if($("#invertColorsCheck")[0].checked)
-//            content += '<Parameter name="invert_colors" type="bool" value="true" />\n';
-//        content += '<Parameter name="threshold_mode" type="string" value="';
-//        if($("#threshModeSelect").val()=="mean"){
-//            content += 'mean';
-//        }else{
-//            content += 'gaussian';
-//        }
-//        content += '" />\n';
         var numBackgroundFrames = parseInt($("#numBackgroundFrames").val());
         if(numBackgroundFrames<0||numBackgroundFrames > ($("#cineEndIndex").val()-$("#cineStartIndex").val())){
             alert('warning: invalid num background frames (needs to be an integer value between 0 and the total num frames in the cine file)\nSetting num background frames to 0');
@@ -1371,147 +1340,124 @@ function writeParamsFile(only_write,resolution,ss_locs) {
 
 function writeSubsetFile(only_write,resolution,ss_locs){
 
+    if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1){ // for tracklib, no subset file needs to be written
+        callDICeExec(resolution,ss_locs);
+        return;
+    }
+    
     var subsetFile = fullPath('','subset_defs.txt');
     consoleMsg('writing subset file ' + subsetFile);
+
+    var pathShapes = getPlotlyPathShapes('ROI');
+    var numROIs = pathShapes.length;
+    var excludedShapes = getPlotlyPathShapes('excluded');
+    var numExcluded = excludedShapes.length;
+    
     var content = '';
     content += '# Auto generated subset file from DICe GUI\n';
-    
-    if(subsetCoordinatesX.length>0){
-        // cannot have ROIs defined and subset coordinates for full field subset method
+
+    var subsetCoordinates = getSubsetCoordinatesTrace();
+    var numSubsets = 0;
+    if(subsetCoordinates.x)
+        numSubsets = subsetCoordinates.x.length;
+    if(numSubsets>0){
         if($("#analysisModeSelect").val()=="global"){
-            alert('Custom subset locations cannot be defined for global method. ROIs must be cleared then redrawn.');
-            endProgress(false);
-            return;
-        }
-        if($("#analysisModeSelect").val()=="subset"&&ROIDefsX[0].length > 2&&subsetCoordinatesX.length>0){
-            alert('Custom subset coordinates and ROIs cannot be defined at the same time. ROIs must be cleared (to remove custom subset locations) then redrawn.');
-            endProgress(false);
-            return;
+          alert('Custom subset locations cannot be defined for global method.');
+          endProgress(false);
+          return;
         }
         content += 'begin subset_coordinates\n';
-        for(i = 0, l = subsetCoordinatesX.length; i < l; i++) {
-            content += subsetCoordinatesX[i] + ' ' + subsetCoordinatesY[i] + '\n';
+        for(i = 0; i < numSubsets; i++) {
+            content += subsetCoordinates.x[i] + ' ' + subsetCoordinates.y[i] + '\n';
         }
         content += 'end subset_coordinates\n';
     }
-    if(($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global")&&ROIDefsX[0].length>=3){
-        if(ROIDefsX[0].length != ROIDefsY[0].length){
-            alert('Error: subset file creation failed, invalid vertices for region of interest');
-            endProgress(false);
-            return false;
-        }
-        
+
+    if(($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global")&&numROIs>0){
+        // in this case the pathshapes define an ROI, not conformal subsets
         content += 'begin region_of_interest\n';
         content += '  begin boundary\n';
-        // write all the boundary shapes
-        for(i = 0, l = ROIDefsX.length; i < l; i++) {
-            var ROIx = ROIDefsX[i];
-            var ROIy = ROIDefsY[i];
+        for(var i=0;i<numROIs;++i){
             content += '    begin polygon\n';
             content += '      begin vertices\n';
-            for(var j = 0, jl = ROIx.length; j < jl; j++) {
-                content += '        ' +  ROIx[j] + ' ' + ROIy[j] + '\n';
+            var points = pathShapeToPoints(pathShapes[i]);
+            for(var j=0;j<points.x.length;j++){
+                content += '        ' +  points.x[j] + ' ' + points.y[j] + '\n';
             }
             content += '      end vertices\n';
             content += '    end polygon\n';
         }
         content += '  end boundary\n';
-        if(excludedDefsX.length>0){
-            if(excludedDefsX[0].length > 2){
-                content += '  begin excluded\n';
-                for(i = 0, l = excludedDefsX.length; i < l; i++) {
-                    var ROIx = excludedDefsX[i];
-                    var ROIy = excludedDefsY[i];
-                    content += '    begin polygon\n';
-                    content += '      begin vertices\n';
-                    for(var j = 0, jl = ROIx.length; j < jl; j++) {
-                        content += '        ' + ROIx[j] + ' ' + ROIy[j] + '\n';
-                    }
-                    content += '      end vertices\n';
-                    content += '    end polygon\n';
+        
+        // TODO deal with obstructued (if we decide to continue supporting this
+
+        if(numExcluded>0){
+            content += '  begin excluded\n';
+            for(var i = 0; i < numExcluded; i++) {
+                content += '    begin polygon\n';
+                content += '      begin vertices\n';
+                var points = pathShapeToPoints(excludedShapes[i]);
+                for(var j=0;j<points.x.length;j++){
+                    content += '        ' +  points.x[j] + ' ' + points.y[j] + '\n';
                 }
-                content += '  end excluded\n';
-            } // excluded[0].length > 2
-        } // excluded defs > 0
-        content += 'end region_of_interest\n';
-    }else if($("#analysisModeSelect").val()=="tracking"&&ROIDefsX[0].length>=3){ // tracking mode
-        if(ROIDefsX[0].length != ROIDefsY[0].length){
-            alert('Error: subset file creation failed, invalid vertices for region of interest');
-            endProgress(false);
-            return false;
+                content += '      end vertices\n';
+                content += '    end polygon\n';
+            }
+            content += '  end excluded\n';
         }
-//        content += 'begin subset_coordinates\n';
-//        // use the centroid of each shape as the frame of reference origin
-//        for(var i = 0, l = ROIDefsX.length; i < l; i++) {
-//            var centroid = centroidOfPolygon(ROIDefsX[i],ROIDefsY[i]);
-//            content += centroid.x + ' ' + centroid.y + '\n';
-//        }
-//        content += 'end subset_coordinates\n';
+        content += 'end region_of_interest\n';
+        
+    }else if($("#analysisModeSelect").val()=="tracking"&&numROIs>0){ // tracking mode
 
         // add a polygon for each ROI
-        for(i = 0, l = ROIDefsX.length; i < l; i++) {
+        for(var i = 0; i < numROIs; i++) {
             content += 'begin conformal_subset\n';
             content += '  subset_id ' + i + '\n';
             content += '  begin boundary\n';
             content += '    begin polygon\n'; 
             content += '      begin vertices\n';
-            var ROIx = ROIDefsX[i];
-            var ROIy = ROIDefsY[i];
-            for(j = 0, jl = ROIx.length; j < jl; j++) {
-                content += '        ' +  ROIx[j] + ' ' + ROIy[j] + '\n';
+            var points = pathShapeToPoints(pathShapes[i]);
+            for(var j=0;j<points.x.length;j++){
+                content += '        ' +  points.x[j] + ' ' + points.y[j] + '\n';
             }
             content += '      end vertices\n';
             content += '    end polygon\n';
             content += '  end boundary\n';
+            
+            // TODO deal with obstructed
+            
             // excluded
-            var has_excluded = false;
-            for(j = 0, jl = excludedAssignments.length; j < jl; j++) {
-                if(excludedAssignments[j]==i)
-                    has_excluded = true;
+            var hasExcluded = false;
+            for(var j = 0; j < numExcluded; j++) {
+                var excludedId = parseInt(excludedShapes[j].name.split('_').pop());
+                if(excludedId == i)
+                    hasExcluded = true;
             }
-            if(has_excluded){
+            if(hasExcluded){
                 content += '  begin excluded\n';
             }
-            for(j = 0, jl = excludedAssignments.length; j < jl; j++) {
-                if(excludedAssignments[j]==i){
+            for(var j = 0; j < numExcluded; j++) {
+                var excludedId = parseInt(excludedShapes[j].name.split('_').pop());
+                if(excludedId == i){
                     content += '    begin polygon\n'; 
                     content += '      begin vertices\n';
-                    var ROIx = excludedDefsX[j];
-                    var ROIy = excludedDefsY[j];
-                    for(k = 0, kl = ROIx.length; k < kl; k++) {
-                        content += '        ' +  ROIx[k] + ' ' + ROIy[k] + '\n';
+                    var points = pathShapeToPoints(excludedShapes[j]);
+                    for(var k=0;k<points.x.length;k++){
+                        content += '        ' +  points.x[k] + ' ' + points.y[k] + '\n';
                     }
                     content += '      end vertices\n';
                     content += '    end polygon\n';
                 }
             }
-            if(has_excluded){
+            if(hasExcluded){
                 content += '  end excluded\n';
             }
-            // obstructed
-            if(obstructedDefsX.length > 0){
-                if(obstructedDefsX[0].length >= 3){
-                    content += '  begin obstructed\n';
-                    for(j = 0, jl = obstructedDefsX.length; j < jl; j++) {
-                        content += '    begin polygon\n'; 
-                        content += '      begin vertices\n';
-                        var ROIx = obstructedDefsX[j];
-                        var ROIy = obstructedDefsY[j];
-                        for(k = 0, kl = ROIx.length; k < kl; k++) {
-                            content += '        ' +  ROIx[k] + ' ' + ROIy[k] + '\n';
-                        }
-                        content += '      end vertices\n';
-                        content += '    end polygon\n';
-                    }
-                    content += '  end obstructed\n';
-                }
-                content += 'end conformal_subset\n';
-            }
+            content += 'end conformal_subset\n';
         }
         // for each ROI add the excluded regions with the excludedAssignment = to the ROI id
         // add all obstructions to all ROIs
     }
-    if(ROIDefsX[0].length>=3||subsetCoordinatesX.length>0){
+    if(numROIs>0||subsetCoordinates.x){
         fs.writeFile(subsetFile, content, function (err) {
             if(err){
                 alert("Error: an error ocurred creating the file "+ err.message)
