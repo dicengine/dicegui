@@ -312,7 +312,8 @@ function readSubsetFile(data){
     //clearExcluded();
     //clearObstructed();
     var currentROI = 0;
-    var shapes = [];
+    // if a representative subset shape exists, keep it
+    var shapes = getPlotlyPathShapes('representativeSubset');
     var subsetLocations = {x:[],y:[]};
     var max_vertices = 500;
     var lines = data.toString().split('\n');

@@ -741,6 +741,7 @@ function showStereoViewer(){
 }
 
 $("#analysisModeSelect").on('change',function() {
+    undrawRepresentativeSubset();
     if($(this).val()=="subset"){
         $(".full-field").show();
         $(".full-field-global").show();
@@ -750,6 +751,7 @@ $("#analysisModeSelect").on('change',function() {
         $(".results-right").show();
         $(".tracklib-tools").hide();
         $(".tracking").hide();
+        drawRepresentativeSubset();
         //$("#subsetParams").show();
         //$("#trackingParams").hide();
         //$("#sssigPreview").show();
@@ -798,7 +800,6 @@ $("#analysisModeSelect").on('change',function() {
         show2DViewer();
     }
     removeAllPlotlyShapesAndTraces();
-    //drawROIs();
     resizeAll();
 });
 
@@ -833,9 +834,7 @@ $("#initSelect").on('change',function (){
 $("#subsetSize").on('input',function(){
     var ss_size =  $(this).val();
     $("#subsetSizeLabel").text(ss_size);
-    if(SVG.get('subsetBox'))
-        SVG.get('subsetBox').size(ss_size,ss_size);
-    //drawROIs();
+    drawRepresentativeSubset();
 });
 
 $("#sssigThresh").on('input',function(){

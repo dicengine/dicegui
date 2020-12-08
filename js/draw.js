@@ -27,15 +27,15 @@ $("#addLivePlotLine").click(function(){
         addLivePlotLineActive = false;
         $("#addLivePlotLine").css('color','rgba(0, 0, 0, 0.5)');
     }
-    drawROIs();
+//    drawROIs();
 });
 
 $("#resetLivePlotPts").click(function(){
     if (confirm('reset all live plots?')) {
         resetLivePlots();
-        // clear the drawn ROIs
-        clearDrawnROIs();
-        drawROIs();
+//        // clear the drawn ROIs
+//        clearDrawnROIs();
+//        drawROIs();
     } else {
         // Do nothing!
     }
@@ -53,7 +53,7 @@ function clearLivePlotPts () {
     livePlotPtsX = [];
     livePlotPtsY = [];
     livePlotLineXOrigin = refImageWidth / 2;
-    livePlotLineYOrigin = 0.75*refImageHeigh / 2;
+    livePlotLineYOrigin = 0.75*refImageHeight / 2;
     livePlotLineXAxis = 1.5*refImageWidth / 2;
     livePlotLineYAxis = 0.75*refImageHeight / 2;
 }

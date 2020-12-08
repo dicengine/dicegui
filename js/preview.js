@@ -259,6 +259,9 @@ function updateImage(spec,data){
 //      }];
     // TODO call restyle or relayout instead of newPlot each time?
     Plotly.newPlot(div,data,obj.layout,obj.config);
+    if(spec.dest=='left'&&$("#analysisModeSelect").val()=="subset")
+        drawRepresentativeSubset();
+    
 }
 
 function removeSubsetPreview(){
@@ -317,16 +320,18 @@ function getSubsetCoordinatesTrace(){
 function getPlotlyPathShapes(name){
     var pathShapes = [];
     var plotlyDivLeft = document.getElementById("plotlyViewerLeft");
-    if(plotlyDivLeft.layout.shapes){
-        var shapes = plotlyDivLeft.layout.shapes;
-        for(var i=0;i<shapes.length;++i){
-            if(shapes[i].type=='path')
-                if(name){
-                    if(shapes[i].name.includes(name))
+    if(plotlyDivLeft.layout){
+        if(plotlyDivLeft.layout.shapes){
+            var shapes = plotlyDivLeft.layout.shapes;
+            for(var i=0;i<shapes.length;++i){
+                if(shapes[i].type=='path')
+                    if(name){
+                        if(shapes[i].name.includes(name))
+                            pathShapes.push(shapes[i]);
+                    }else{
                         pathShapes.push(shapes[i]);
-                }else{
-                    pathShapes.push(shapes[i]);
-                }
+                    }
+            }
         }
     }
     return pathShapes;
@@ -403,6 +408,68 @@ function angle2d(x1,y1,x2,y2){
         dtheta += 2.0*Math.PI;
     return(dtheta);
 }
+
+function drawRepresentativeSubset(){
+    if(!$("#analysisModeSelect").val()=="subset") return;
+    if(!document.getElementById("plotlyViewerLeft").layout) return;
+    
+    var cx = refImageWidth/2;
+    var cy = refImageHeight/2;
+
+    // check if representative subset already exists and get it's points
+    var existingBox = getPlotlyPathShapes('representativeSubset');
+    if(existingBox.length>0){
+        var boxPoints = pathShapeToPoints(existingBox[0]);
+        cx = (boxPoints.x[0] + boxPoints.x[1])/2;
+        cy = (boxPoints.y[0] + boxPoints.y[3])/2;
+        undrawRepresentativeSubset();
+    }
+    var subsetSize = $("#subsetSize").val();
+    var shape = {};
+    shape.type = 'path';
+    var points = {x:[cx-subsetSize/2,cx+subsetSize/2,cx+subsetSize/2,cx-subsetSize/2],
+                  y:[cy-subsetSize/2,cy-subsetSize/2,cy+subsetSize/2,cy+subsetSize/2]};
+    var path = 'M';
+    for(var i=0;i<points.x.length;++i){
+        path+= points.x[i] + ',' + points.y[i];
+        if(i<points.x.length-1)
+            path +='L';
+    }
+    path += 'Z';
+    shape.path = path;
+    shape.line = {color: 'yellow', width:2}
+    shape.opacity = 1.0;
+    shape.editable = true;
+    shape.name = 'representativeSubset';
+
+    var existingShapes = [];
+    if(document.getElementById("plotlyViewerLeft").layout.shapes){
+        existingShapes = document.getElementById("plotlyViewerLeft").layout.shapes;
+    }
+    existingShapes.push(shape);
+    var update = {
+            'shapes' : existingShapes,
+    }
+    Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
+}
+function undrawRepresentativeSubset(){
+    if(!document.getElementById("plotlyViewerLeft").layout)return;
+    var shapes = [];
+    if(document.getElementById("plotlyViewerLeft").layout.shapes){
+        shapes = document.getElementById("plotlyViewerLeft").layout.shapes;
+    }
+    for(var i=0;i<shapes.length;++i){
+        if(shapes[i].name=='representativeSubset'){
+            shapes.splice(i,1);
+            break;
+        }
+    }
+    var update = {
+            'shapes' : shapes,
+    }
+    Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
+}
+
 
 function checkForInternalShapes(){
     var shapes = getPlotlyPathShapes(); // get all shapes, not just ROIs
