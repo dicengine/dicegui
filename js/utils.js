@@ -588,7 +588,7 @@ $("#stereoButton").click(function(){
         $(".tracklib-tools").hide();
         checkValidInput();
     }
-    drawROIs();
+    //drawROIs();
     resizeAll();
 });
 
@@ -687,7 +687,7 @@ function show2DViewer(){
     $('#runLi span').text('run 2d');
     $("#stereoParams").hide();
     $('#x1x2').text('x 1');
-    deactivateEpipolar();
+    //deactivateEpipolar();
     $(".tracklib-tools").hide();
 }
 
@@ -797,7 +797,8 @@ $("#analysisModeSelect").on('change',function() {
         //resetLivePlots();
         show2DViewer();
     }
-    drawROIs();
+    removeAllPlotlyShapesAndTraces();
+    //drawROIs();
     resizeAll();
 });
 
@@ -818,6 +819,7 @@ $("#fileSelectMode").on('change',function (){
         $(".nav-cine").css('display','block');
     }
     resetWorkingDirectory();
+    checkValidInput();
 });
 
 $("#initSelect").on('change',function (){

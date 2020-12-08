@@ -123,10 +123,7 @@ function impl_input_xml_file(xml){
             full_name = image_folder + ref_image;
             name_splits = full_name.split(/[\\\/]/);
             $("#refImageText span").text(name_splits[name_splits.length-1]);
-            updatePreview(full_name,'left',[],[],"",function(){parseSubsetFile(xml);});
-//            getFileObject(full_name, function (fileObject) {
-//                loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",true);
-//            });
+            updatePreview(full_name,'left',[],[],"",function(){parseSubsetFile(xml); refImagePathLeft = full_name;});
             // load the deformed image list
             deformed_list = $(xml).find('ParameterList[name="deformed_images"]');
             if(deformed_list){
@@ -153,9 +150,6 @@ function impl_input_xml_file(xml){
                 stereo_name_splits = stereo_full_name.split(/[\\\/]/);
                 $("#refImageTextRight span").text(stereo_name_splits[stereo_name_splits.length-1]);
                 updatePreview(stereo_full_name,'right');
-//                getFileObject(stereo_full_name, function (fileObject) {
-//                    loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true);
-//                });
             }
             // load the stereo deformed image list
             stereo_deformed_list = $(xml).find('ParameterList[name="stereo_deformed_images"]');
@@ -242,7 +236,7 @@ function impl_input_xml_file(xml){
                     if(data.toString().includes("YAXIS")){
                         $("#bestFitYAxisCheck")[0].checked = true;
                     }
-                    drawROIs();
+                    //drawROIs();
                 }
             }); // end readfile
         }else{
@@ -279,7 +273,7 @@ function impl_input_xml_file(xml){
                         }
                     }
                     // set the coordinates
-                    drawROIs();
+                    //drawROIs();
                 }
             }); // end readfile
         }
@@ -390,9 +384,9 @@ function readSubsetFile(data){
     // assuming here that the plotly div already exists
     var update = {shapes: shapes};
     Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
-    console.log(pointsToSubsetLocationTrace(subsetLocations));
-    Plotly.addTraces(document.getElementById("plotlyViewerLeft"),pointsToSubsetLocationTrace(subsetLocations));
-    drawROIs();
+    //console.log(pointsToSubsetLocationTrace(subsetLocations));
+    if(subsetLocations.x.length>0)
+        Plotly.addTraces(document.getElementById("plotlyViewerLeft"),pointsToSubsetLocationTrace(subsetLocations));
 }
 
 function update_cine_indices(xml){

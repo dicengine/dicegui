@@ -241,179 +241,6 @@ function copyFile(source, target, cb) {
     }
 }
 
-function loadImage(file,viewer,vwidth,vheight,zIndex,addBorder,updateROIs,addClass,addID,recordPath,callBack) {
-    callBack = callBack || $.noop;
-    var fileTypesOther = ['jpg', 'jpeg', 'png','JPG','PNG'];  //acceptable file types
-    var fileTypesBMP = ['bmp','BMP'];  //acceptable file types
-    var fileTypesTiff = ['tiff','tif','TIFF','TIF'];  //acceptable file types
-    //var tgt = evt.target || window.event.srcElement,
-    //    files = tgt.files;
-    console.log('loading image: ' + file.name + ' path: ' + file.path);
-
-    if (FileReader && file){   
-        var fr = new FileReader();
-        var extension = file.name.split('.').pop().toLowerCase();
-        var localFileName = '.display_image_';
-        var lrm =   0;
-        var copyRequired = false;
-        if(viewer=="#panzoomLeft"){
-            localFileName += 'left.';
-            lrm = 0;
-            copyRequired = true;
-        }else if(viewer=="#panzoomRight"){
-            localFileName += 'right.';
-            lrm = 1;
-            copyRequired = true;
-        }
-        localFileName = fullPath('.dice',localFileName);
-        localFileName += extension;
-        if(!file.name.includes('display_image_')&&copyRequired){
-            // copy the image file to the working directory as the display image
-            deleteDisplayImageFiles(lrm,function(){copyFile(file.path,localFileName);});
-        }
-        fr.onload = function(e) {
-            if (fileTypesTiff.indexOf(extension) > -1) {
-                //Using tiff.min.js library - https://github.com/seikichi/tiff.js/tree/master
-                console.log('parsing TIFF image ' + file.path + ' ...');
-                //initialize with 100MB for large files
-                Tiff.initialize({
-                    TOTAL_MEMORY: 1000000000
-                });
-                var tiff = new Tiff({
-                    buffer: e.target.result
-                });
-                var tiffCanvas = tiff.toCanvas();
-                $(tiffCanvas).css({
-                    "width": vwidth,
-                    "height": vheight,
-                    "overflow": "hidden",
-                    "display": "block",
-                    "padding": "0px",
-                    "z-index" : zIndex,
-                    "position" : "absolute",
-                    "image-rendering" : "pixelated"
-                });
-                if(addClass!=""){
-                    $(tiffCanvas).addClass(addClass);
-                }
-                if(addID!=""){
-                    $(tiffCanvas).attr('id',addID);
-                }
-                tiffCanvas.getContext("2d").mozImageSmoothingEnabled = false;
-                tiffCanvas.getContext("2d").msImageSmoothingEnabled = false;
-                tiffCanvas.getContext("2d").imageSmoothingEnabled = false;
-                $(viewer).html(tiffCanvas);
-                if(viewer=="#panzoomLeft"){
-                    refImageWidthLeft = tiff.width();
-                    refImageHeightLeft = tiff.height();
-                    if(bestFitXOrigin==0) bestFitXOrigin = refImageWidthLeft / 2;
-                    if(bestFitYOrigin==0) bestFitYOrigin = refImageHeightLeft / 2;
-                    if(bestFitXAxis==0) bestFitXAxis = 1.25*refImageWidthLeft / 2;
-                    if(bestFitYAxis==0) bestFitYAxis = refImageHeightLeft / 2;
-                    if(livePlotLineXOrigin==0) livePlotLineXOrigin = refImageWidthLeft / 2;
-                    if(livePlotLineYOrigin==0) livePlotLineYOrigin = 0.75*refImageHeightLeft / 2;
-                    if(livePlotLineXAxis==0) livePlotLineXAxis = 1.5*refImageWidthLeft / 2;
-                    if(livePlotLineYAxis==0) livePlotLineYAxis = 0.75*refImageHeightLeft / 2;
-                    if(recordPath) refImagePathLeft = file.path;
-                    updateDimsLabels();
-                    checkValidInput();
-                }else if(viewer=="#panzoomRight"){
-                    refImageWidthRight = tiff.width();
-                    refImageHeightRight = tiff.height();
-                    if(recordPath) refImagePathRight = file.path;
-                    updateDimsLabels();
-                    checkValidInput();
-                }
-                if(addBorder){
-                    $(tiffCanvas).css({border: '5px solid #666666'});
-                }
-            }
-            else if(fileTypesOther.indexOf(extension) > -1||fileTypesBMP.indexOf(extension) > -1){
-                console.log('parsing jpg or png image ' + file.path + ' ...');
-                if(addBorder){
-                    $(viewer).html('<img src="' + file.path + '" width='+vwidth+' height='+vheight+' style="z-index:'+zIndex+'; position: absolute; border: 5px solid #666666"/>');
-                }else{
-                    $(viewer).html('<img src="' + file.path + '" width='+vwidth+' height='+vheight+' style="z-index:'+zIndex+'; position: absolute;"/>');
-                }
-                if(addID!=""){
-                    $(viewer).attr('id',addID);
-                }
-                function findHHandWW() {
-                    var imgHeight = this.height;
-                    var imgWidth = this.width;
-                    if(viewer=="#panzoomLeft"){
-                        refImageWidthLeft = imgWidth;
-                        refImageHeightLeft = imgHeight;
-                        if(bestFitXOrigin==0) bestFitXOrigin = refImageWidthLeft / 2;
-                        if(bestFitYOrigin==0) bestFitYOrigin = refImageHeightLeft / 2;
-                        if(bestFitXAxis==0) bestFitXAxis = 1.25*refImageWidthLeft / 2;
-                        if(bestFitYAxis==0) bestFitYAxis = refImageHeightLeft / 2;
-                        if(recordPath) refImagePathLeft = file.path;
-                        if(livePlotLineXOrigin==0) livePlotLineXOrigin = refImageWidthLeft / 2;
-                        if(livePlotLineYOrigin==0) livePlotLineYOrigin = 1.5*refImageHeightLeft / 2;
-                        if(livePlotLineXAxis==0) livePlotLineXAxis = 1.5*refImageWidthLeft / 2;
-                        if(livePlotLineYAxis==0) livePlotLiveYAxis = 1.5*refImageHeightLeft / 2 + 50;
-                        updateDimsLabels();
-                        checkValidInput();
-                    }else if(viewer=="#panzoomRight"){
-                        refImageWidthRight = imgWidth;
-                        refImageHeightRight = imgHeight;
-                        if(recordPath) refImagePathRight = file.path;
-                        updateDimsLabels();
-                        checkValidInput();
-                    }
-                    $(viewer).css({width:vwidth,height:vheight})
-                    if(updateROIs){
-                        // clear the ROIs drawn on the canvas already
-                        clearROIs();
-                        clearExcluded();
-                        // clear the drawn ROIs
-                        clearDrawnROIs();
-                    }
-                    if(typeof $("#showDeformedCheck")[0] != "undefined")
-                        if($("#showDeformedCheck")[0].checked){
-                            updateDeformedCoords();
-                        }else{
-                            if(typeof drawROIs === "function")
-                                drawROIs();
-                        }
-                    callBack();
-                    return true;
-                }
-                var myImage  = new Image();
-                myImage.name = file.path;
-                myImage.onload = findHHandWW;
-                myImage.src = file.path;
-            }
-            else{ // load FAILURE
-                console.log('image load FAILURE: invalid file type, ' + file.name);
-                return;
-            }
-        }
-        fr.onloadend = function(e) {
-            console.log('reference image load complete');
-            if(updateROIs){
-                // clear the ROIs drawn on the canvas already
-                clearROIs();
-                clearExcluded();
-                // clear the drawn ROIs
-                clearDrawnROIs();
-            }
-            if(typeof $("#showDeformedCheck")[0] != "undefined")
-                if($("#showDeformedCheck")[0].checked){
-                    updateDeformedCoords();
-                }else{
-                    if(typeof drawROIs === "function")
-                        drawROIs();
-                }
-            callBack();
-            //if($("#binaryAutoUpdateCheck")[0].checked)
-            //    callOpenCVServerExec();
-        }
-        fr.readAsArrayBuffer(file);
-    }
-}
-
 function flagSequenceImages(){
     refImagePathLeft = "sequence";
     refImagePathRight = "sequence";
@@ -438,34 +265,18 @@ function loadImageSequence(reset_ref_ROIs,cb){
             if(showStereoPane==1||showStereoPane==2){
                 fs.stat(fullStereoImageName, function(err, stat) {
                     if(err != null) {
-                      alert("Invalid stereo image file name: " + fullStereoImageName);
-                      return;
+                        alert("Invalid stereo image file name: " + fullStereoImageName);
+                        return;
                     }
                     updatePreview(fullStereoImageName,'right');
-//                    getFileObject(fullImageName, function (fileObject) {
-//                        //loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
-//                        loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true);
-//                        console.log(fileObject);
-//                        updatePreview(fileObject,'left');
-//                    });
-//                    getFileObject(fullStereoImageName, function (stereoFileObject) {
-//                        //loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
-//                        loadImage(stereoFileObject,"#panzoomRight","auto","auto",1,false,false,"","",true);
-//                        updatePreview(stereoFileObject,'right');
-//                    });
                     flagSequenceImages();
                 });
             }
             else{
-//                 getFileObject(fullImageName, function (fileObject) {
-//                     //loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
-//                     loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,reset_ref_ROIs,"","",true);
-//                     updatePreview(fileObject,'left');
-//                 });
-                 flagSequenceImages();
+                flagSequenceImages();
             }
         }
-    });    
+    });
 }
 
 $("#consoleButton").on("click",function () {
@@ -512,7 +323,7 @@ $("#loadSubsetFileInput").change(function (evt) {
                 if(err){
                 }else{
                     read_subset_file(data);
-                    drawROIs();
+                    //drawROIs();
                     drawDotsAndBoxesForSubsets(file.path);
                 }
             }); // end readfile
@@ -631,9 +442,7 @@ $("#rightRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
     $("#refImageTextRight span").text(file.name);
-    //loadImage(file,"#panzoomRight","auto","auto",1,false,false,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
-    //loadImage(file,"#panzoomRight","auto","auto",1,false,false,"","",true);
-    updatePreview(file.path,'right');
+    updatePreview(file.path,'right',[],[],"",function(){refImagePathRight = file.path;});
 });
 
 $("#calInput").on("click",function () {
@@ -669,9 +478,7 @@ $("#leftRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
     $("#refImageText span").text(file.name);
-    //loadImage(file,"#panzoomLeft","auto","auto",1,false,true,"","",true,function(){if($("#binaryAutoUpdateCheck")[0].checked) callOpenCVServerExec();});
-    //loadImage(file,"#panzoomLeft","auto","auto",1,false,true,"","",true);
-    updatePreview(file.path,'left');
+    updatePreview(file.path,'left',[],[],"",function(){refImagePathLeft = file.path;});
 });
 
 $("#leftDefInput").on("click",function () {
@@ -713,54 +520,12 @@ function removeCalPreview(){
     $("#previewCalDiv").remove();
 }
 
-function createPreview(index,loc,event){
-    // create an absolute position div and add it to the body
-    div = $("<div />")
-    div.attr({id: 'previewDiv', class: 'preview'});
-    var topCoord = event.pageY - 100;
-    div.css({position: 'absolute', top: topCoord, left: '194px', 'z-index': 3, padding: '5px'});
-    divTri = $("<div />")
-    divTri.attr({id: 'previewDivTri', class: 'arrow-left'});
-    var topCoordTri = event.pageY - 68;
-    divTri.css({position: 'absolute', top: topCoordTri, left: '190px'});
-    $("#contentDiv").append(divTri);
-    $("#contentDiv").append(div);
-    if(loc==0){
-        loadImage(defImagePathsLeft[index],"#previewDiv","auto","300px",4,true,false,"","",false);
-    }else if(loc==1){
-        loadImage(defImagePathsRight[index],"#previewDiv","auto","300px",4,true,false,"","",false);
-    }
-}
-
-function removePreview(){
-    $("#previewDiv").remove();
-    $("#previewDivTri").remove();
-}
-
 $("#calList").on("click", ".calListLi" ,function(event){
     createCalPreview(event);
 });
 
-//$("#calList").on("mouseout", ".calListLi",function(){
-//    removeCalPreview();
-//});
-
-$("#defImageListLeft").on("mouseover", ".defListLi" ,function(event){
-    var index = $(this).index();
-    createPreview(index,0,event);
-});
-
-$("#defImageListLeft").on("mouseout", ".defListLi",function(){
-    removePreview();
-});
-
-$("#defImageListRight").on("mouseover", ".defListLi" ,function(event){
-    var index = $(this).index();
-    createPreview(index,1,event);
-});
-
-$("#defImageListRight").on("mouseout", ".defListLi",function(){
-    removePreview();
+$("#calList").on("mouseout", ".calListLi",function(){
+    removeCalPreview();
 });
 
 $("#rightDefInput").on("click",function () {
@@ -787,32 +552,32 @@ function updateDimsLabels (){
     $("#rightDims").text("w:" + refImageWidthRight  + " h:" + refImageHeightRight);
 }
 
-$("#drawEpipolar").click(function(){
-    // check if cal.xml file exists
-    fs.stat(calPath, function(err, stat) {
-        if(err == null) {
-            completeShape();
-            addROIsActive = false;
-            addExcludedActive = false;
-            addObstructedActive = false;
-            addLivePlotPtsActive = false;
-            $("#addExcludeds").css('color','rgba(0, 0, 0, 0.5)');
-            $("#addObstructed").css('color','rgba(0, 0, 0, 0.5)');
-            $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
-            $("#addROIs").css('color','rgba(0, 0, 0, 0.5)');
-            drawEpipolarActive = !drawEpipolarActive;
-            if(drawEpipolarActive){
-                $("#drawEpipolar").css('color','#33ccff');
-            }else{
-                //$("#drawEpipolar").css('color','rgba(0, 0, 0, 0.5)');
-                deactivateEpipolar();
-            }
-        }else {
-            alert('calibration file has not been set (this utility only works once a calibration has been performed)');
-            return;
-        }
-    });
-});
+//$("#drawEpipolar").click(function(){
+//    // check if cal.xml file exists
+//    fs.stat(calPath, function(err, stat) {
+//        if(err == null) {
+//            completeShape();
+//            addROIsActive = false;
+//            addExcludedActive = false;
+//            addObstructedActive = false;
+//            addLivePlotPtsActive = false;
+//            $("#addExcludeds").css('color','rgba(0, 0, 0, 0.5)');
+//            $("#addObstructed").css('color','rgba(0, 0, 0, 0.5)');
+//            $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
+//            $("#addROIs").css('color','rgba(0, 0, 0, 0.5)');
+//            drawEpipolarActive = !drawEpipolarActive;
+//            if(drawEpipolarActive){
+//                $("#drawEpipolar").css('color','#33ccff');
+//            }else{
+//                //$("#drawEpipolar").css('color','rgba(0, 0, 0, 0.5)');
+//                deactivateEpipolar();
+//            }
+//        }else {
+//            alert('calibration file has not been set (this utility only works once a calibration has been performed)');
+//            return;
+//        }
+//    });
+//});
 
 $("#performCal").click(function () {
     localStorage.setItem("workingDirectory",workingDirectory);

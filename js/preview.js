@@ -7,24 +7,7 @@ function resizePreview(){
     Plotly.Plots.resize(document.getElementById("plotlyViewerRight"));
 }
 
-function getPreviewConfig(dest){
-    // NOTE mode bar buttons are persistent so if the user
-    // changes the analysis type some buttons may need to be removed
-    
-    // include the show subset locations button // TODO hide this for tracklib
-    let dotsIcon = {
-            'width': 24,
-            'height': 24,
-            'path': "M7,11c1.657,0,3,1.343,3,3c0,1.656-1.343,3-3,3s-3-1.344-3-3C4,12.343,5.343,11,7,11z M11,3c1.656,0,3,1.343,3,3s-1.344,3-3,3C9.343,9,8,7.657,8,6S9.343,3,11,3z M16.6,14.6c1.657,0,3,1.344,3,3c0,1.657-1.343,3-3,3c-1.656,0-3-1.343-3-3C13.6,15.943,14.943,14.6,16.6,14.6z"
-            //'transform': 'matrix(0.75 0 0 -0.75 0 1000)'
-    }
-    var showSubsetLocationsButton = {
-            name: 'Show subset locations',
-            icon: dotsIcon,
-            click: () => { drawSubsetCoordinates(); }
-    }
-    
-    // possible destinations: left, right, cal_left, cal_right
+function getPreviewLayout(){
     var _layout = {
             xaxis: {
                 showgrid: false,
@@ -40,6 +23,28 @@ function getPreviewConfig(dest){
             margin: {l: 40,r: 5,b: 20,t: 30},
             hovermode: 'closest',
     };
+    if($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global"){
+        _layout.newshape = {line: {color: 'cyan'},fillcolor:'cyan',opacity:0.4};
+    }
+    if($("#analysisModeSelect").val()=="tracking"){
+        _layout.newshape = {line: {color: 'purple'},fillcolor:'green',opacity:0.4};
+    }
+    return _layout;
+}
+
+function getPreviewConfig(dest){
+    // include the show subset locations button // TODO hide this for tracklib
+    let dotsIcon = {
+            'width': 24,
+            'height': 24,
+            'path': "M7,11c1.657,0,3,1.343,3,3c0,1.656-1.343,3-3,3s-3-1.344-3-3C4,12.343,5.343,11,7,11z M11,3c1.656,0,3,1.343,3,3s-1.344,3-3,3C9.343,9,8,7.657,8,6S9.343,3,11,3z M16.6,14.6c1.657,0,3,1.344,3,3c0,1.657-1.343,3-3,3c-1.656,0-3-1.343-3-3C13.6,15.943,14.943,14.6,16.6,14.6z"
+            //'transform': 'matrix(0.75 0 0 -0.75 0 1000)'
+    }
+    var showSubsetLocationsButton = {
+            name: 'Show subset locations',
+            icon: dotsIcon,
+            click: () => { drawSubsetCoordinates(); }
+    }
     var _config = {
             displaylogo: false,
             scrollZoom: true,
@@ -49,7 +54,6 @@ function getPreviewConfig(dest){
                 ],
     };
     if($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global"){
-        _layout.newshape = {line: {color: 'cyan'},fillcolor:'cyan',opacity:0.4};
         if(dest=='left'){
             _config.modeBarButtonsToAdd = [
                 'drawclosedpath',
@@ -58,7 +62,6 @@ function getPreviewConfig(dest){
         }
     }
     if($("#analysisModeSelect").val()=="tracking"){
-        _layout.newshape = {line: {color: 'purple'},fillcolor:'green',opacity:0.4};
         if(showStereoPane==1){ // signifies tracklib (stereo tracking)
             _config.modeBarButtonsToRemove.push('drawclosedpath');
             _config.modeBarButtonsToRemove.push('eraseshape');
@@ -69,6 +72,16 @@ function getPreviewConfig(dest){
                 showSubsetLocationsButton];
         }
     }
+    return _config;
+}
+
+function getPreviewLayoutConfig(dest){
+    // NOTE mode bar buttons are persistent so if the user
+    // changes the analysis type some buttons may need to be removed
+    
+    // possible destinations: left, right, cal_left, cal_right
+    var _layout = getPreviewLayout();
+    var _config = getPreviewConfig(dest);
     var obj = {
             layout : _layout,
             config : _config
@@ -192,7 +205,7 @@ function updatePreview(filePath,dest,data=[],argsIn,debugConsoleDivId,cb){
 
 function updateImage(spec,data){
     console.log('updateImage(): path ' + spec.destPath + ' in div '  + spec.destDivId);
-    var obj = getPreviewConfig(spec.dest);
+    var obj = getPreviewLayoutConfig(spec.dest);
     // see if there is an existing plotly plot and if so keep the x and y axis ranges (same zoom)
     // also keep the shapes if they exist
     var div = document.getElementById(spec.destDivId);
@@ -241,10 +254,10 @@ function drawSubsetCoordinates(){
      return obj.name === "subsetCoordinates";
     });
     var newFlag = true;
-    if(result>=0)
+    if(result>=0){
         newFlag = !allTraces[result].visible;
-    //console.log(newFlag);
-    Plotly.restyle(document.getElementById("plotlyViewerLeft"), {"visible": newFlag}, [result]);
+        Plotly.restyle(document.getElementById("plotlyViewerLeft"), {"visible": newFlag}, [result]);
+    }
 }
 
 function getPlotlyData(){
@@ -283,6 +296,7 @@ $("#plotlyViewerLeft").on('plotly_relayout', function(){
     checkForInternalShapes();
     // update the subset coordinates trace
     var shapes = getPlotlyPathShapes('ROI');
+    if(shapes.length<=0)return;
     var centroids = shapesToCentroids(shapes);
     var text = [];
     if(centroids.x)
@@ -292,15 +306,19 @@ $("#plotlyViewerLeft").on('plotly_relayout', function(){
         return obj.name === "subsetCoordinates";
     });
     if(coordsTraceId>=0&&centroids.x){
-        var update = {
-                x: [centroids.x],
-                y: [centroids.y],
-                text: [text]
+        if(document.getElementById("plotlyViewerLeft").data[coordsTraceId].x.length>0){
+            var update = {
+                    x: [centroids.x],
+                    y: [centroids.y],
+                    text: [text]
+            }
+            Plotly.restyle(document.getElementById("plotlyViewerLeft"), update, coordsTraceId);
         }
-        Plotly.restyle(document.getElementById("plotlyViewerLeft"), update, coordsTraceId);
     }
-//    console.log('updated layout');
-//    console.log(document.getElementById("plotlyViewerLeft").layout);
+    // the subset coordinates trace may not exist, if not and the analsis mode is tracking add one
+    else if(centroids.x&&$("#analysisModeSelect").val()=="tracking"&&showStereoPane==0){
+        Plotly.addTraces(document.getElementById("plotlyViewerLeft"),pointsToSubsetLocationTrace(centroids));
+    }
 });
 
 function isInShape(cx,cy,shape){
@@ -334,7 +352,10 @@ function isInShape(cx,cy,shape){
 
 function checkForInternalShapes(){
     var shapes = getPlotlyPathShapes(); // get all shapes, not just ROIs
+    if(shapes.length<=0) return;
+    //console.log(shapes);
     var centroids = shapesToCentroids(shapes);
+    //console.log(centroids);
     var changesMade = false;
     for(var i=0;i<centroids.x.length;i++){
         if(shapes[i].name===undefined) shapes[i].name='ROI';
@@ -363,6 +384,30 @@ function checkForInternalShapes(){
     }
 }
 
+function removeAllPlotlyShapesAndTraces(){
+    if(!document.getElementById("plotlyViewerLeft").layout) return;
+    // remove the shapes
+    var lineColor = 'cyan';
+    var fillColor = 'cyan';
+    if($("#analysisModeSelect").val()=="tracking"){
+        lineColor =  'purple';
+        fillColor = 'green';
+    }
+    var update = {
+            'shapes' : [],
+            'newshape.fillcolor' : fillColor,
+            'newshape.line.color' : lineColor
+    }
+    Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
+    // remove any subset coordinates or conformal rois
+    var numTraces = 0;
+    if(document.getElementById("plotlyViewerLeft").data)
+        numTraces = document.getElementById("plotlyViewerLeft").data.length;
+    if(numTraces>0){
+        for(var i=0;i<numTraces;++i)
+            Plotly.deleteTraces(document.getElementById("plotlyViewerLeft"),i);
+    }
+}
 
 
 

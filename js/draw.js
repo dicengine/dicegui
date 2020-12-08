@@ -53,84 +53,84 @@ $("#panzoomLeft").mousemove(function(){
     }
 });
 
-$("#panzoomRight").mousedown(function(){
-    // add point to shapeon left click
-    scale = $("#panzoomRight").panzoom("getMatrix")[0];
-    viewX = event.pageX - $(this).offset().left;
-    viewY = event.pageY - $(this).offset().top;
-    imgX = Math.round(viewX / scale);
-    imgY = Math.round(viewY / scale);
-    if(event.button == 0 && drawEpipolarActive){
-        drawEpipolarLine(false,imgX,imgY)
-    }
-});
+//$("#panzoomRight").mousedown(function(){
+//    // add point to shapeon left click
+//    scale = $("#panzoomRight").panzoom("getMatrix")[0];
+//    viewX = event.pageX - $(this).offset().left;
+//    viewY = event.pageY - $(this).offset().top;
+//    imgX = Math.round(viewX / scale);
+//    imgY = Math.round(viewY / scale);
+////    if(event.button == 0 && drawEpipolarActive){
+////        drawEpipolarLine(false,imgX,imgY)
+////    }
+//});
 
-$("#panzoomLeft").mousedown(function(){
-    // add point to shapeon left click
-    scale = $("#panzoomLeft").panzoom("getMatrix")[0];
-    viewX = event.pageX - $(this).offset().left;
-    viewY = event.pageY - $(this).offset().top;
-    imgX = Math.round(viewX / scale);
-    imgY = Math.round(viewY / scale);
-    if(event.button == 0){
-        if(drawEpipolarActive){
-            drawEpipolarLine(true,imgX,imgY)
-        }
-        else if(addROIsActive){
-            if(shapeInProgress==false && currentROIIndex > 0){
-                ROIDefsX.push([]);
-                ROIDefsY.push([]);
-            }
-            shapeInProgress = true;
-            $("#ROIProgress").text("ROI in progress");
-            if(imgX>=0&&imgX<refImageWidthLeft&&imgY>=0&&imgY<refImageHeightLeft){
-                ROIDefsX[currentROIIndex].push(imgX);
-                ROIDefsY[currentROIIndex].push(imgY);
-                //printROIDefs();
-            }
-        }
-        if(addExcludedActive){
-            if(shapeInProgress==false && currentExcludedIndex > 0){
-                excludedDefsX.push([]);
-                excludedDefsY.push([]);
-                excludedAssignments.push(-1);
-            }
-            shapeInProgress = true;
-            $("#ROIProgress").text("exclusion in progress");
-            if(imgX>=0&&imgX<refImageWidthLeft&&imgY>=0&&imgY<refImageHeightLeft){
-                //var shapeIndex = 0;
-                excludedDefsX[currentExcludedIndex].push(imgX);
-                excludedDefsY[currentExcludedIndex].push(imgY);
-                //printExcludedDefs();
-            }
-        }
-        if(addObstructedActive){
-            if(shapeInProgress==false && currentObstructedIndex > 0){
-                obstructedDefsX.push([]);
-                obstructedDefsY.push([]);
-            }
-            shapeInProgress = true;
-            $("#ROIProgress").text("obstruction in progress");
-            if(imgX>=0&&imgX<refImageWidthLeft&&imgY>=0&&imgY<refImageHeightLeft){
-                //var shapeIndex = 0;
-                obstructedDefsX[currentObstructedIndex].push(imgX);
-                obstructedDefsY[currentObstructedIndex].push(imgY);
-                //printExcludedDefs();
-            }
-        }
-        if(addLivePlotPtsActive){
-            if(imgX>=0&&imgX<refImageWidthLeft&&imgY>=0&&imgY<refImageHeightLeft){
-                livePlotPtsX.push(imgX);
-                livePlotPtsY.push(imgY);
-            }
-            drawROIs();
-        }
-    }
-    // end shape if right click
-    else if(event.button == 2 && shapeInProgress){
-        completeShape();
-    }
-});
+//$("#panzoomLeft").mousedown(function(){
+//    // add point to shapeon left click
+//    scale = $("#panzoomLeft").panzoom("getMatrix")[0];
+//    viewX = event.pageX - $(this).offset().left;
+//    viewY = event.pageY - $(this).offset().top;
+//    imgX = Math.round(viewX / scale);
+//    imgY = Math.round(viewY / scale);
+//    if(event.button == 0){
+//        if(drawEpipolarActive){
+//            drawEpipolarLine(true,imgX,imgY)
+//        }
+//        else if(addROIsActive){
+//            if(shapeInProgress==false && currentROIIndex > 0){
+//                ROIDefsX.push([]);
+//                ROIDefsY.push([]);
+//            }
+//            shapeInProgress = true;
+//            $("#ROIProgress").text("ROI in progress");
+//            if(imgX>=0&&imgX<refImageWidthLeft&&imgY>=0&&imgY<refImageHeightLeft){
+//                ROIDefsX[currentROIIndex].push(imgX);
+//                ROIDefsY[currentROIIndex].push(imgY);
+//                //printROIDefs();
+//            }
+//        }
+//        if(addExcludedActive){
+//            if(shapeInProgress==false && currentExcludedIndex > 0){
+//                excludedDefsX.push([]);
+//                excludedDefsY.push([]);
+//                excludedAssignments.push(-1);
+//            }
+//            shapeInProgress = true;
+//            $("#ROIProgress").text("exclusion in progress");
+//            if(imgX>=0&&imgX<refImageWidthLeft&&imgY>=0&&imgY<refImageHeightLeft){
+//                //var shapeIndex = 0;
+//                excludedDefsX[currentExcludedIndex].push(imgX);
+//                excludedDefsY[currentExcludedIndex].push(imgY);
+//                //printExcludedDefs();
+//            }
+//        }
+//        if(addObstructedActive){
+//            if(shapeInProgress==false && currentObstructedIndex > 0){
+//                obstructedDefsX.push([]);
+//                obstructedDefsY.push([]);
+//            }
+//            shapeInProgress = true;
+//            $("#ROIProgress").text("obstruction in progress");
+//            if(imgX>=0&&imgX<refImageWidthLeft&&imgY>=0&&imgY<refImageHeightLeft){
+//                //var shapeIndex = 0;
+//                obstructedDefsX[currentObstructedIndex].push(imgX);
+//                obstructedDefsY[currentObstructedIndex].push(imgY);
+//                //printExcludedDefs();
+//            }
+//        }
+//        if(addLivePlotPtsActive){
+//            if(imgX>=0&&imgX<refImageWidthLeft&&imgY>=0&&imgY<refImageHeightLeft){
+//                livePlotPtsX.push(imgX);
+//                livePlotPtsY.push(imgY);
+//            }
+//            drawROIs();
+//        }
+//    }
+//    // end shape if right click
+//    else if(event.button == 2 && shapeInProgress){
+//        completeShape();
+//    }
+//});
 
 function completeShape(){
     if(shapeInProgress==false) return;
@@ -177,7 +177,7 @@ $("#addLivePlotPts").click(function(){
         $("#addROIs").css('color','rgba(0, 0, 0, 0.5)');
         $("#addExcludeds").css('color','rgba(0, 0, 0, 0.5)');
         $("#addObstructed").css('color','rgba(0, 0, 0, 0.5)');
-        deactivateEpipolar();
+        //deactivateEpipolar();
         //$("#drawEpipolar").css('color','rgba(0, 0, 0, 0.5)');
         // TODO abort any excluded shapes in progress
     }else{
@@ -222,7 +222,7 @@ $("#addROIs").click(function(){
         $("#addObstructed").css('color','rgba(0, 0, 0, 0.5)');
         $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
         //$("#drawEpipolar").css('color','rgba(0, 0, 0, 0.5)');
-        deactivateEpipolar();
+        //deactivateEpipolar();
         // TODO abort any excluded shapes in progress
     }else{
         //$("#addROIs").css('background-color','transparent');
@@ -244,7 +244,7 @@ $("#addObstructed").click(function(){
         $("#addExcludeds").css('color','rgba(0, 0, 0, 0.5)');
         $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
         //$("#drawEpipolar").css('color','rgba(0, 0, 0, 0.5)');
-        deactivateEpipolar();
+        //deactivateEpipolar();
         // TODO abort any ROI shapes in progress
     }else{
         $("#addObstructed").css('color','rgba(0, 0, 0, 0.5)');
@@ -266,7 +266,7 @@ $("#addExcludeds").click(function(){
         $("#addObstructed").css('color','rgba(0, 0, 0, 0.5)');
         $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
         //$("#drawEpipolar").css('color','rgba(0, 0, 0, 0.5)');
-        deactivateEpipolar();
+        //deactivateEpipolar();
         // TODO abort any ROI shapes in progress
     }else{
         //$("#addExcludeds").css('background-color','transparent');

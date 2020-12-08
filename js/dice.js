@@ -386,11 +386,11 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
     }); // end fileName fs.stat
 }
 
-function deactivateEpipolar(){
-    $("#drawEpipolar").css('color','rgba(0, 0, 0, 0.5)');
-    drawEpipolarActive = false;
-    drawEpipolarLine(false,0,0,true);
-}
+//function deactivateEpipolar(){
+//    $("#drawEpipolar").css('color','rgba(0, 0, 0, 0.5)');
+//    drawEpipolarActive = false;
+//    drawEpipolarLine(false,0,0,true);
+//}
 
 function updateTracklibDisplayImages(index){
     if(cinePathLeft=="undefined"||cinePathRight=="undefined"){
@@ -573,281 +573,105 @@ function updateTracklibDisplayImages(index){
     
 }
 
-function applyFilterToImages(fileName, mode){
-    // set up the arguments for the OpenCVServer
-    args = [];
-    // create the list of files:
-    args.push(fileName);
-    var outName = '';
-    if(mode==0){
-        if(os.platform()=='win32'){
-            outName = '.dice\\.display_image_left_filter.png';
-        }else{
-            outName = '.dice/.display_image_left_filter.png'
-        }
-    }else if(mode==1){
-        if(os.platform()=='win32'){
-            outName ='.dice\\.display_image_right_filter.png';
-        }else{
-            outName ='.dice/.display_image_right_filter.png';
-        }
-    }
-    args.push(outName);
-    
-    // for now always create a background to subtract (maybe later make this an option)
-    if(cinePathLeft!='undefined'&&cinePathRight!='undefined'){ // background substraction assumes a cine file
-        args.push('filter:background');
-        args.push('cine_file_name');
-        var background_out = '';
-        if(mode==0){
-            args.push(cinePathLeft);
-            if(os.platform()=='win32'){
-                background_out = '.dice\\.background_left.tif';
-            }else{
-                background_out = '.dice/.background_left.tif'
-            }
-        }else if(mode==1){
-            args.push(cinePathRight);
-            if(os.platform()=='win32'){
-                background_out ='.dice\\.background_right.tif';
-            }else{
-                background_out ='.dice/.background_right.tif';
-            }
-        }
-        args.push('background_file_name');
-        args.push(background_out);
-        args.push('background_ref_frame');
-        args.push($("#cineStartIndex").val());
-        args.push('background_num_frames');
-        var numBackgroundFrames = parseInt($("#numBackgroundFrames").val());
-        //console.log('num background frames --- ' + numBackgroundFrames);
-        if(numBackgroundFrames<1||numBackgroundFrames > ($("#cineEndIndex").val()-$("#cineStartIndex").val())){
-            alert('warning: invalid num background frames (needs to be an integer value between 1 and the total num frames in the cine file)\nSetting num background frames to 1');
-            numBackgroundFrames = 1;
-            $("#numBackgroundFrames").val(1);
-        }
-        args.push(numBackgroundFrames); // TODO make this a user parameter in the GUI eventually
-    }
-    
-    // push the arguments to opencvserver
-    args.push('filter:tracklib');
-    args.push('frame_number');
-    args.push($("#cineCurrentPreviewSpan").text());
-    args.push('is_left');
-    if(mode==0)
-        args.push('true');
-    else
-        args.push('false');
-    args.push('thresh_left');
-    args.push(parseInt($("#threshLeft").val()));
-    args.push('thresh_right');
-    args.push(parseInt($("#threshRight").val()));
-    args.push('min_area');
-    args.push(parseInt($("#minArea").val()));
-    args.push('max_area');
-    args.push(parseInt($("#maxArea").val()));
-    args.push('max_pt_density'); // needs to be a double value
-    if($("#maxPtDensity").val().includes('.')){
-        args.push($("#maxPtDensity").val());
-    }else{
-        args.push($("#maxPtDensity").val()  +'.0');
-    }
-    args.push('colocation_tol'); // needs to be a double value
-    if($("#colocationTol").val().includes('.')){
-        args.push($("#colocationTol").val());
-    }else{
-        args.push($("#colocationTol").val()  +'.0');
-    }
-    args.push('show_tracks');
-    if($("#showTracksCheck")[0].checked)
-        args.push('true');
-    else
-        args.push('false');
-    args.push('show_only_active');
-    if($("#showOnlyActiveCheck")[0].checked)
-        args.push('true');
-    else
-        args.push('false');
-    args.push('show_segmentation');
-    if($("#segPreviewCheck")[0].checked)
-        args.push('true');
-    else
-        args.push('false');
-//    args.push('show_threshold');
-//    if($("#threshPreviewCheck")[0].checked)
-//        args.push('true');
-//    else
-//        args.push('false');
-//    args.push('show_trajectory');
-//    if($("#trajectoryPreviewCheck")[0].checked)
-//        args.push('true');
-//    else
-//        args.push('false');
-//    args.push('invert_colors');
-//    if($("#invertColorsCheck")[0].checked)
-//        args.push('true');
-//    else
-//        args.push('false');
-//    // thresholding method
-//    args.push('threshold_mode');
-//    if($("#threshModeSelect").val()=="mean"){
-//        args.push('MEAN');
-//    }else{
-//        args.push('GAUSSIAN');
-//    }
-//    // block size
-//    args.push('block_size');
-//    var blockSize = parseInt($("#threshBlockSize").val());
-//    if(blockSize %2 ==0) blockSize++;
-//    args.push(blockSize);
-//    // adaptive constant
-//    args.push('binary_constant'); // needs to be a double value
-//    if($("#threshAdaptiveConstant").val().includes('.')){
-//        args.push($("#threshAdaptiveConstant").val());
-//    }else{
-//        args.push($("#threshAdaptiveConstant").val()  +'.0');
-//    }
-    console.log(args);
-    var child_process = require('child_process');
-    var readline      = require('readline');
-    var proc = child_process.spawn(execOpenCVServerPath,args,{cwd:workingDirectory});//,maxBuffer:1024*1024});
-    proc.on('error', function(){
-        alert('DICe OpenCVServer failed: invalid executable: ' + execOpenCVServerPath);
-    });
-    //setTimeout( proc.kill(), 40000);
-    proc.on('close', (code) => {
-        console.log(`OpenCVServer exited with code ${code}`);
-        if(code==0){
-            //console.log("loading tracklib filtered image: " + fullPath('',outName));
-            fs.stat(fullPath('',outName), function(err, stat) {
-                if(err == null) {
-                    getFileObject(fullPath('',outName), function (fileObject) {
-                        if(mode==0){
-                            cineLeftOpenCVComplete = true;
-                            loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
-                            console.log("loading image after applying tracklib filter " + cineLeftOpenCVComplete + " " + cineRightOpenCVComplete);
-                        }else{
-                            cineRightOpenCVComplete = true;
-                            loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
-                            console.log("loading image after applying tracklib filter " + cineLeftOpenCVComplete + " " + cineRightOpenCVComplete);
-                        }
-                    });
-                }else{
-                }
-            });
-        }else{
-            console.log('error ocurred while applying filter: ' + code);
-        }
-    });
-    readline.createInterface({
-        input     : proc.stdout,
-        terminal  : false
-    }).on('line', function(line) {
-        consoleMsg(line);
-    });
-}
-
-function drawEpipolarLine(isLeft,dot_x,dot_y,reset=false) {
-    //if($("#analysisModeSelect").val()!="tracking") return;
-    // check to see that there is at least one image selected:
-    if(refImagePathLeft=='undefined'&&refImagePathRight=='undefined') return;
-    // generate the command line
-    args = [];
-    leftName = '';
-    leftNameFilter = '';
-    rightName = '';
-    rightNameFilter = '';
-    hiddenDir = fullPath('.dice','');
-    fs.readdir(hiddenDir, (err,dir) => {
-        for(var i = 0; i < dir.length; i++) {
-            if(dir[i].includes('.display_image_left')&&!dir[i].includes('filter')&&!dir[i].includes('epipolar')){
-                leftName = fullPath('.dice',dir[i]);
-                leftNameFilter = fullPath('.dice',dir[i].replace('.'+dir[i].split('.').pop(),"_filter.png"));
-                leftNameEpipolar = fullPath('.dice',dir[i].replace('.'+dir[i].split('.').pop(),"_epipolar.png"));
-            }else if(dir[i].includes('.display_image_right')&&!dir[i].includes('filter')&&!dir[i].includes('epipolar')){
-                rightName = fullPath('.dice',dir[i]);
-                rightNameFilter = fullPath('.dice',dir[i].replace('.'+dir[i].split('.').pop(),"_filter.png"));
-                rightNameEpipolar = fullPath('.dice',dir[i].replace('.'+dir[i].split('.').pop(),"_epipolar.png"));
-            }
-        }
-        if(reset){
-            getFileObject(leftName, function (fileObject) {
-                loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
-            });
-            getFileObject(rightName, function (fileObject) {
-                loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
-            });
-            return;
-        }
-        if($("#segPreviewCheck")[0].checked || $("#showTracksCheck")[0].checked)
-            args.push(leftNameFilter);
-        else
-            args.push(leftName);
-        args.push(leftNameEpipolar);
-        if($("#segPreviewCheck")[0].checked || $("#showTracksCheck")[0].checked)
-            args.push(rightNameFilter);
-        else
-            args.push(rightName);
-        args.push(rightNameEpipolar);
-        args.push('filter:epipolar_line');
-        args.push('frame_number');
-        args.push($("#cineCurrentPreviewSpan").text());
-        args.push('epipolar_is_left');
-        if(isLeft)
-            args.push('true');
-        else
-            args.push('false');
-        args.push('epipolar_dot_x');
-        args.push(dot_x);
-        args.push('epipolar_dot_y');
-        args.push(dot_y);
-        args.push('cal_file');
-        args.push(fullPath('','cal.xml'));
-        consoleMsg('calling OpenCVServerExec with args ' + args);
-
-        // call the filter exec
-        var child_process = require('child_process');
-        var readline      = require('readline');
-        var proc = child_process.spawn(execOpenCVServerPath,args,{cwd:workingDirectory});//,maxBuffer:1024*1024});
-
-        proc.on('error', function(){
-            alert('DICe OpenCVServer failed for epipolar line: invalid executable: ' + execOpenCVServerPath);
-        });
-        proc.on('close', (code) => {
-            console.log(`OpenCVServer exited with code ${code}`);
-            if(code!=0){
-                alert('OpenCVServer failed');
-            }
-            else{
-                // load new preview images
-                fs.stat(fullPath('.dice','.display_image_left_epipolar.png'), function(err, stat) {
-                    if(err == null) {
-                        getFileObject(fullPath('.dice','.display_image_left_epipolar.png'), function (fileObject) {
-                            loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
-                        });
-                    }else{
-                    }
-                });
-                fs.stat(fullPath('.dice','.display_image_right_epipolar.png'), function(err, stat) {
-                    if(err == null) {
-                        getFileObject(fullPath('.dice','.display_image_right_epipolar.png'), function (fileObject) {
-                            loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
-                        });
-                    }else{
-                    }
-                });
-            }
-        });
-        readline.createInterface({
-            input     : proc.stdout,
-            terminal  : false
-        }).on('line', function(line) {
-            consoleMsg(line);
-        });
-    })
-}
-
-
+//function drawEpipolarLine(isLeft,dot_x,dot_y,reset=false) {
+//    //if($("#analysisModeSelect").val()!="tracking") return;
+//    // check to see that there is at least one image selected:
+//    if(refImagePathLeft=='undefined'&&refImagePathRight=='undefined') return;
+//    // generate the command line
+//    args = [];
+//    leftName = '';
+//    leftNameFilter = '';
+//    rightName = '';
+//    rightNameFilter = '';
+//    hiddenDir = fullPath('.dice','');
+//    fs.readdir(hiddenDir, (err,dir) => {
+//        for(var i = 0; i < dir.length; i++) {
+//            if(dir[i].includes('.display_image_left')&&!dir[i].includes('filter')&&!dir[i].includes('epipolar')){
+//                leftName = fullPath('.dice',dir[i]);
+//                leftNameFilter = fullPath('.dice',dir[i].replace('.'+dir[i].split('.').pop(),"_filter.png"));
+//                leftNameEpipolar = fullPath('.dice',dir[i].replace('.'+dir[i].split('.').pop(),"_epipolar.png"));
+//            }else if(dir[i].includes('.display_image_right')&&!dir[i].includes('filter')&&!dir[i].includes('epipolar')){
+//                rightName = fullPath('.dice',dir[i]);
+//                rightNameFilter = fullPath('.dice',dir[i].replace('.'+dir[i].split('.').pop(),"_filter.png"));
+//                rightNameEpipolar = fullPath('.dice',dir[i].replace('.'+dir[i].split('.').pop(),"_epipolar.png"));
+//            }
+//        }
+//        if(reset){
+//            getFileObject(leftName, function (fileObject) {
+//                loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
+//            });
+//            getFileObject(rightName, function (fileObject) {
+//                loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
+//            });
+//            return;
+//        }
+//        if($("#segPreviewCheck")[0].checked || $("#showTracksCheck")[0].checked)
+//            args.push(leftNameFilter);
+//        else
+//            args.push(leftName);
+//        args.push(leftNameEpipolar);
+//        if($("#segPreviewCheck")[0].checked || $("#showTracksCheck")[0].checked)
+//            args.push(rightNameFilter);
+//        else
+//            args.push(rightName);
+//        args.push(rightNameEpipolar);
+//        args.push('filter:epipolar_line');
+//        args.push('frame_number');
+//        args.push($("#cineCurrentPreviewSpan").text());
+//        args.push('epipolar_is_left');
+//        if(isLeft)
+//            args.push('true');
+//        else
+//            args.push('false');
+//        args.push('epipolar_dot_x');
+//        args.push(dot_x);
+//        args.push('epipolar_dot_y');
+//        args.push(dot_y);
+//        args.push('cal_file');
+//        args.push(fullPath('','cal.xml'));
+//        consoleMsg('calling OpenCVServerExec with args ' + args);
+//
+//        // call the filter exec
+//        var child_process = require('child_process');
+//        var readline      = require('readline');
+//        var proc = child_process.spawn(execOpenCVServerPath,args,{cwd:workingDirectory});//,maxBuffer:1024*1024});
+//
+//        proc.on('error', function(){
+//            alert('DICe OpenCVServer failed for epipolar line: invalid executable: ' + execOpenCVServerPath);
+//        });
+//        proc.on('close', (code) => {
+//            console.log(`OpenCVServer exited with code ${code}`);
+//            if(code!=0){
+//                alert('OpenCVServer failed');
+//            }
+//            else{
+//                // load new preview images
+//                fs.stat(fullPath('.dice','.display_image_left_epipolar.png'), function(err, stat) {
+//                    if(err == null) {
+//                        getFileObject(fullPath('.dice','.display_image_left_epipolar.png'), function (fileObject) {
+//                            loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
+//                        });
+//                    }else{
+//                    }
+//                });
+//                fs.stat(fullPath('.dice','.display_image_right_epipolar.png'), function(err, stat) {
+//                    if(err == null) {
+//                        getFileObject(fullPath('.dice','.display_image_right_epipolar.png'), function (fileObject) {
+//                            loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
+//                        });
+//                    }else{
+//                    }
+//                });
+//            }
+//        });
+//        readline.createInterface({
+//            input     : proc.stdout,
+//            terminal  : false
+//        }).on('line', function(line) {
+//            consoleMsg(line);
+//        });
+//    })
+//}
 
 function callCrossInitExec() {
 
@@ -961,12 +785,12 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
 //        plotlyDivLeft.layout.shapes.push(shape);
         numROIs++;
     }
-    console.log('writeInputFile(): numROIs ' + numROIs);
+    console.log('writeInputFile(): num ROIs ' + numROIs);
     var subsetCoordinates = getSubsetCoordinatesTrace();
     var numSubsets = 0;
     if(subsetCoordinates.x)
         numSubsets = subsetCoordinates.x.length;
-    console.log('writeInputFile(): numSubsets ' + numSubsets);
+    console.log('writeInputFile(): num custom(or conformal) subsets ' + numSubsets);
     
     // check that some ROIs have been defined if this is the tracking mode
     if($("#analysisModeSelect").val()=="tracking" && showStereoPane==0 && numROIs==0 && !only_write){
@@ -1070,25 +894,25 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
 }
 
 function writeBestFitFile() {
-            if($("#bestFitCheck")[0].checked&&$("#analysisModeSelect").val()=="subset"){
-                var bestFitFile = fullPath('','best_fit_plane.dat');
-                consoleMsg('writing best fit plane file ' + bestFitFile);
-                var BFcontent = '';
-                BFcontent += '# origin of the coordinate system\n';
-                BFcontent += bestFitXOrigin + ' ' + bestFitYOrigin + '\n'
-                BFcontent += '# point on the axis \n';
-                BFcontent += bestFitXAxis + ' ' + bestFitYAxis;
-                if($("#bestFitYAxisCheck")[0].checked){
-                    BFcontent += ' YAXIS ';
-                }
-                BFcontent += '\n';
-                fs.writeFile(bestFitFile, BFcontent, function (err) {
-                if(err){
-                    alert("Error: an error ocurred creating the file "+ err.message)
-                }
-                consoleMsg('best_fit_plane.dat file has been successfully saved');
-                });
+    if($("#bestFitCheck")[0].checked&&$("#analysisModeSelect").val()=="subset"){
+        var bestFitFile = fullPath('','best_fit_plane.dat');
+        consoleMsg('writing best fit plane file ' + bestFitFile);
+        var BFcontent = '';
+        BFcontent += '# origin of the coordinate system\n';
+        BFcontent += bestFitXOrigin + ' ' + bestFitYOrigin + '\n'
+        BFcontent += '# point on the axis \n';
+        BFcontent += bestFitXAxis + ' ' + bestFitYAxis;
+        if($("#bestFitYAxisCheck")[0].checked){
+            BFcontent += ' YAXIS ';
+        }
+        BFcontent += '\n';
+        fs.writeFile(bestFitFile, BFcontent, function (err) {
+            if(err){
+                alert("Error: an error ocurred creating the file "+ err.message)
             }
+            consoleMsg('best_fit_plane.dat file has been successfully saved');
+        });
+    }
 }
 
 function writeLivePlotsFile() {
@@ -1502,60 +1326,61 @@ function checkValidInput() {
         }
     }
     else{
-    // see if the left reference image is set:
-    if(refImagePathLeft=='undefined'||(refImagePathLeft=='sequence' && !isSequence)) {
-        consoleMsg('left reference image not set yet');
-        validInput = false;
-        enableCross = false;
-        //enableResolution = false;
-    }
-    // check that the image extensions all match
-    var refExtension = refImagePathLeft.split('.').pop().toLowerCase();
-    if(!defImagePathsLeft[0]){
-        consoleMsg('deformed images have not been defined yet');
-        validInput = false;
-    }
-    // check all the deformed images
-    if(!isSequence){
-      for(var i = 0, l = defImagePathsLeft.length; i < l; i++) {
-        var defExtension = defImagePathsLeft[i].name.split('.').pop().toLowerCase();
-        if(refExtension!=defExtension){
-            //consoleMsg('deformed image ' + defImagePathsLeft[i].name + ' extension does not match ref extension');
+        // see if the left reference image is set:
+        if(refImagePathLeft=='undefined'||(refImagePathLeft=='sequence' && !isSequence)) {
+            consoleMsg('left reference image not set yet');
+            validInput = false;
+            enableCross = false;
+            //enableResolution = false;
+        }
+        // check that the image extensions all match
+        var refExtension = refImagePathLeft.split('.').pop().toLowerCase();
+        if(!defImagePathsLeft[0]){
+            consoleMsg('deformed images have not been defined yet');
             validInput = false;
         }
-      }
-    }
+        // check all the deformed images
+        if(!isSequence){
+            for(var i = 0, l = defImagePathsLeft.length; i < l; i++) {
+                var defExtension = defImagePathsLeft[i].name.split('.').pop().toLowerCase();
+                if(refExtension!=defExtension){
+                    //consoleMsg('deformed image ' + defImagePathsLeft[i].name + ' extension does not match ref extension');
+                    validInput = false;
+                }
+            }
+        }
 
-    if(showStereoPane==1||showStereoPane==2||(showStereoPane==0&&$("#calibrationCheck")[0].checked)){
-      if(!calPath){
-          validInput = false;
-      }
-      if(!isSequence){
-        for(var i = 0, l = defImagePathsRight.length; i < l; i++) {
-          var defExtension = defImagePathsRight[i].name.split('.').pop().toLowerCase();
-          if(refExtension!=defExtension){
-              //consoleMsg('deformed image ' + defImagePathsRight[i].name + ' extension does not match ref extension');
-              validInput = false;
-          }
+        if(showStereoPane==1||showStereoPane==2||(showStereoPane==0&&$("#calibrationCheck")[0].checked)){
+            if(!calPath){
+                validInput = false;
+            }
+            if(!isSequence){
+                for(var i = 0, l = defImagePathsRight.length; i < l; i++) {
+                    var defExtension = defImagePathsRight[i].name.split('.').pop().toLowerCase();
+                    if(refExtension!=defExtension){
+                        //consoleMsg('deformed image ' + defImagePathsRight[i].name + ' extension does not match ref extension');
+                        validInput = false;
+                    }
+                }
+            }
         }
-      }
-    }
-    
-    // TODO check right images ...
-    // see if the right reference image is set:
-    if(refImagePathRight=='undefined'||(refImagePathRight=='sequence' && !isSequence)) {
-        consoleMsg('right reference image not set yet');
-        enableCross = false;
-        if(showStereoPane==1||showStereoPane==2)
-            validInput = false;
-    }
-    if(!isSequence&&defImagePathsRight.length<1)
-        if(showStereoPane==1||showStereoPane==2)
-          validInput = false;
+
+        // TODO check right images ...
+        // see if the right reference image is set:
+        if(refImagePathRight=='undefined'||(refImagePathRight=='sequence' && !isSequence)) {
+            enableCross = false;
+            if(showStereoPane==1||showStereoPane==2){
+                consoleMsg('right reference image not set yet');
+                validInput = false;
+            }
+        }
+        if(!isSequence&&defImagePathsRight.length<1)
+            if(showStereoPane==1||showStereoPane==2)
+                validInput = false;
     } // end else (not cine)
     // TODO see if the left and right ref have the same dimensions
     // TODO check the number of def images left and right
-    
+
     if(validInput){
         $("#runLi").show();
         $("#writeLi").show();
