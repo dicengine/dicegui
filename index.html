@@ -287,70 +287,15 @@
             <div id="subFillDivLeft" class="sub-fill-div">
               <div class="toggle-div">
                 <div class="toggle-div-banner">
-                  <span class="toggle-title">VIEW CONTROL</span>
-                  <i id="sssigPreview" class="material-icons md-dark action-li full-field" style="margin-left:20px;"
-                    title="preview sssig mask"
-                  >check_circle</i> <i class="material-icons md-dark action-li zoom-in-left"
-                    title="zoom in"
-                  >zoom_in</i> <i class="material-icons md-dark action-li zoom-out-left"
-                    title="zoom out"
-                  >zoom_out</i> <input type="range" class="zoom-range-left"> <i
-                    class="material-icons md-dark action-li reset-left" title="actual size"
-                  >aspect_ratio</i> <i class="material-icons md-dark action-li" id="zoomToFitLeft"
-                    title="zoom to fit"
-                  >zoom_out_map</i> <label id="leftDims"></label> <label id="leftPos"></label>
-                  <!--<span class="toggle-icon action-li"><iclass="material-icons md-dark toggler">swap_vertical_circle</i></span>-->
+                  <span class="toggle-title">IMAGE PREVIEW</span>
+                  <label id="rightDims"></label> <label id="rightPos"></label>
                   <span class="toggle-icon action-li" id="leftPaneToggle" title="hide this view"><i class="material-icons md-dark pane-closer" style="transform: rotate(270deg)">swap_vertical_circle</i></span>
+                 <label id="loadSubsetFileInputIcon" for="loadSubsetFileInput" title="import subset locations" class="custom-file-input action-li full-field-and-tracking"
+                    style="display: none;"></label>
+                 <input id="loadSubsetFileInput" type="file" accept=".txt">
                 </div>
                 <!-- end toggle div banner -->
                 <!-- <div class="toggle-div-body"> </div>  -->
-                <!-- end toggle div body -->
-              </div>
-              <!-- end toggle div -->
-              <div class="toggle-div non-tracklib-tools">
-                <div class="toggle-div-banner">
-                  <span class="toggle-title">REGIONS OF INTEREST</span>
-                  <i id="addROIs" class="material-icons md-dark action-li" style="margin-left:20px;" title="add ROI">add_circle</i>
-                  <i id="removeLastROI" class="material-icons md-dark action-li"
-                    title="remove last ROI"
-                  >remove_circle</i> <i id="addExcludeds" class="material-icons md-dark action-li"
-                    title="add exclusion"
-                  >add_circle_outline</i> <i id="removeLastExcluded"
-                    class="material-icons md-dark action-li" title="remove last exclusion"
-                  >remove_circle_outline</i> <i id="addObstructed"
-                    class="material-icons md-dark action-li tracking" title="add obstruction"
-                  >add_box</i> <i id="removeLastObstructed"
-                    class="material-icons md-dark action-li tracking"
-                    title="remove last obstruction"
-                  >indeterminate_check_box</i> <i id="resetROIs"
-                    class="material-icons md-dark action-li" title="reset ROIs"
-                  >block</i> <i id="addLivePlotPts"
-                    class="material-icons md-dark action-li full-field-global"
-                    title="add live plot pt" style="margin-left: 25px;"
-                  >gps_fixed</i> <i id="addLivePlotLine"
-                    class="material-icons md-dark action-li full-field-global"
-                    title="add live plot line"
-                  >location_disabled</i> <i id="resetLivePlotPts"
-                    class="material-icons md-dark action-li full-field-global"
-                    title="reset live plot pts"
-                  >block</i> 
-                  
-<!--                   <label id="loadSubsetFileInputIcon" for="loadSubsetFileInput" title="import subset locations" class="custom-file-input action-li full-field-and-tracking"
-                    style="display: inline-block; padding:0px; margin-left:25px;"
-                  ><i class="material-icons md-dark">select_all</i></label>
- -->              <label id="loadSubsetFileInputIcon" for="loadSubsetFileInput" title="import subset locations" class="custom-file-input action-li full-field-and-tracking"
-                    style="display: none;"
-                  ><i class="material-icons md-dark">select_all</i></label>
-                  <input
-                    id="loadSubsetFileInput" type="file" accept=".txt"
-                  >
-                  
-<!--                    <label id="ROIProgress"></label>
- -->                  
-                  <!-- <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span> -->
-                </div>
-                <!-- end toggle div banner -->
-                <!-- <div class="toggle-div-body"> </div> -->
                 <!-- end toggle div body -->
               </div>
               <!-- end toggle div -->
@@ -372,39 +317,14 @@
             <div id="subFillDivRight" class="sub-fill-div">
               <div class="toggle-div">
                 <div class="toggle-div-banner">
-                  <span class="toggle-title">VIEW CONTROL</span>
-                  <i class="material-icons md-dark action-li zoom-in-right" style="margin-left:20px;" title="zoom in">zoom_in</i>
-                  <i class="material-icons md-dark action-li zoom-out-right" title="zoom out">zoom_out</i>
-                  <input type="range" class="zoom-range-right"> <i
-                    class="material-icons md-dark action-li reset-right" title="actual size"
-                  >aspect_ratio</i> <i class="material-icons md-dark action-li" id="zoomToFitRight"
-                    title="zoom to fit"
-                  >zoom_out_map</i> 
-                  <i id="drawEpipolar"
-                    class="material-icons md-dark action-li" title="draw epipolar line"
-                  >launch</i>
+                  <span class="toggle-title">STEREO IMAGE PREVIEW</span>
                   <label id="rightDims"></label> <label id="rightPos"></label>
-                  <!-- <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span> -->
                   <span class="toggle-icon action-li" title="hide this view"><i
                     class="material-icons md-dark pane-closer" style="transform: rotate(270deg)"
                   >swap_vertical_circle</i></span>
                 </div>
                 <!-- end toggle div banner -->
                 <!--  <div class="toggle-div-body"> </div> -->
-                <!-- end toggle div body -->
-              </div>
-              <!-- end toggle div -->
-              <div class="toggle-div non-tracklib-tools">
-                <div class="toggle-div-banner">
-                  <span class="toggle-title">CROSS CORRELATION UTILS</span>
-                  <i id="previewCross" class="material-icons md-dark action-li" style="margin-left:20px;"
-                    title="preview cross initialization"
-                  >collections</i>
-                  <!-- <span class="toggle-icon action-li"><i class="material-icons md-dark toggler">swap_vertical_circle</i></span> -->
-                </div>
-                <!-- end toggle div banner -->
-                <!-- <div class="toggle-div-body" style="min-height: 30px;">
-                </div> -->
                 <!-- end toggle div body -->
               </div>
               <!-- end toggle div -->

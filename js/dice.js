@@ -35,17 +35,6 @@ document.getElementById("runLi").onclick = function() {
     });
 };
 
-document.getElementById("sssigPreview").onclick = function() {
-    if(refImagePathLeft=="undefined") return;
-    //if(subsetLocationsFile!=''){
-     //   drawDotsAndBoxesForSubsets(subsetLocationsFile);
-    //}
-    else{
-        startProgress();
-        writeInputFile(false,false,true);
-    }
-};
-
 document.getElementById("writeLi").onclick = function() {
     writeInputFile(true);
 };
@@ -182,9 +171,9 @@ document.getElementById("clearLi").onclick = function() {
     }
 };
 
-document.getElementById("previewCross").onclick = function() {
-    callCrossInitExec();
-}
+//document.getElementById("previewCross").onclick = function() {
+//    callCrossInitExec();
+//}
 function callDICeExec(resolution,ss_locs) {
 
     // load the live plot viewer if there are any live plots:
