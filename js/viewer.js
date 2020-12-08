@@ -27,96 +27,16 @@ var getFileObject = function(filePathOrUrl, cb) {
     });
 };
 
-function getOffset( el ) {
-    var _x = 0;
-    var _y = 0;
-    while( el && !isNaN( el.offsetLeft ) && !isNaN( el.offsetTop ) ) {
-        _x += el.offsetLeft - el.scrollLeft;
-        _y += el.offsetTop - el.scrollTop;
-        el = el.offsetParent;
-    }
-    return { clientX: _x, clientY: _y };
-}
-
-function zoomToFitLeft(){
-    $("#panzoomLeft").panzoom("resetDimensions");
-    var e = getOffset( document.getElementById('viewWindowLeft') );
-    if(refImageHeightLeft > 0 && refImageWidthLeft > 0){
-        var scaleH = ($("#viewWindowLeft").outerWidth()-10) / refImageWidthLeft;
-        var scaleW = ($("#viewWindowLeft").outerHeight()-10) / refImageHeightLeft;
-        var scale = scaleW;
-        if(scaleH<scaleW) scale = scaleH;
-        $("#panzoomLeft").panzoom("setMatrix", [ 1, 0, 0, 1, 0, 0 ]);
-        $("#panzoomLeft").panzoom("zoom",scale,{focal: e });
-    }
-}
-
-function zoomToFitRight(){
-    $("#panzoomRight").panzoom("resetDimensions");
-    var e = getOffset( document.getElementById('viewWindowRight') );
-    if(refImageHeightRight > 0 && refImageWidthRight > 0){
-        var scaleH = ($("#viewWindowRight").outerWidth()-10) / refImageWidthRight;
-        var scaleW = ($("#viewWindowRight").outerHeight()-10) / refImageHeightRight;
-        var scale = scaleW;
-        if(scaleH<scaleW) scale = scaleH;
-        $("#panzoomRight").panzoom("setMatrix", [ 1, 0, 0, 1, 0, 0 ]);
-        $("#panzoomRight").panzoom("zoom",scale,{focal: e });
-    }
-}
-
-
-$("#zoomToFitLeft").click(function(){zoomToFitLeft();});
-$("#zoomToFitRight").click(function(){zoomToFitRight();});
-
-// compute the image coordiates of the mouse in the left viewer
-$("#panzoomLeft").mousemove(function( event ) {
-    var scale = $("#panzoomLeft").panzoom("getMatrix")[0];
-    var viewX = event.pageX - $(this).offset().left;
-    var viewY = event.pageY - $(this).offset().top;
-    var imgX = Math.round(viewX / scale);
-    var imgY = Math.round(viewY / scale);
-    if(imgX>=0&&imgX<refImageWidthLeft&&imgY>=0&&imgY<refImageHeightLeft){
-        $("#leftPos").text("x:" + imgX + " y:" + imgY);
-    }
-});
-
-// compute the image coordiates of the mouse in the right viewer
-$("#panzoomRight").mousemove(function( event ) {
-    var scale = $("#panzoomRight").panzoom("getMatrix")[0];
-    var viewX = event.pageX - $(this).offset().left;
-    var viewY = event.pageY - $(this).offset().top;
-    var imgX = Math.round(viewX / scale);
-    var imgY = Math.round(viewY / scale);
-    if(imgX>=0&&imgX<refImageWidthRight&&imgY>=0&&imgY<refImageHeightRight){
-        $("#rightPos").text("x:" + imgX + " y:" + imgY);
-    }
-});
-
-
-// zoom on focal point from mousewheel    
-$("#panzoomLeft").parent().on('mousewheel.focal', function( e ) {
-    e.preventDefault();
-    var delta = e.delta || e.originalEvent.wheelDelta;
-    var zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
-    $("#panzoomLeft").panzoom('zoom', zoomOut, {
-        increment: 0.1,
-        animate: false,
-        focal: e
-    });
-});
-
-// zoom on focal point from mousewheel    
-$("#panzoomRight").parent().on('mousewheel.focal', function( e ) {
-    e.preventDefault();
-    var delta = e.delta || e.originalEvent.wheelDelta;
-    var zoomOut = delta ? delta < 0 : e.originalEvent.deltaY > 0;
-    $("#panzoomRight").panzoom('zoom', zoomOut, {
-        increment: 0.1,
-        animate: false,
-        focal: e
-    });
-});
-
+//function getOffset( el ) {
+//    var _x = 0;
+//    var _y = 0;
+//    while( el && !isNaN( el.offsetLeft ) && !isNaN( el.offsetTop ) ) {
+//        _x += el.offsetLeft - el.scrollLeft;
+//        _y += el.offsetTop - el.scrollTop;
+//        el = el.offsetParent;
+//    }
+//    return { clientX: _x, clientY: _y };
+//}
 
 function deleteDisplayImageFiles(lrm,cb){
     var cbCalled = false;
@@ -299,36 +219,28 @@ $("#resultsButton").on("click",function () {
     $("#resultsWindow").show();
 });
 
-$("#loadSubsetFileInput").on("click",function () {
-    this.value = null;
-});
+//$("#loadSubsetFileInput").on("click",function () {
+//    this.value = null;
+//});
+
 $("#loadSubsetFileInput").change(function (evt) {
     if (confirm('Importing a subset locations file will reset all ROIs. Continue loading?')) {
         var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
         if(file){
-            clearROIs();
-            clearExcluded();
-            clearObstructed();
-            clearDrawnROIs();
             addLivePlotPtsActive = false;
-            addROIsActive = false;
-            addObstructedActive = false;
-            addExcludedActive = false;
             $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
-            $("#addROIs").css('color','rgba(0, 0, 0, 0.5)');
-            $("#addExcludeds").css('color','rgba(0, 0, 0, 0.5)');
-            $("#addObstructed").css('color','rgba(0, 0, 0, 0.5)');
             fs.readFile(file.path,'utf8',function(err,data){
                 if(err){
                 }else{
-                    read_subset_file(data);
-                    //drawROIs();
-                    drawDotsAndBoxesForSubsets(file.path);
+                    readSubsetFile(data);
+                    $(this).prop("value", "");
+                    removeSubsetPreview(); 
                 }
             }); // end readfile
         }
     }else{
+        $(this).prop("value", "");
         return false;
     }
 });
@@ -546,11 +458,6 @@ $("#rightDefInput").change(function (evt) {
     }
     checkValidInput();
 });
-
-function updateDimsLabels (){
-    $("#leftDims").text("w:" + refImageWidthLeft  + " h:" + refImageHeightLeft);
-    $("#rightDims").text("w:" + refImageWidthRight  + " h:" + refImageHeightRight);
-}
 
 //$("#drawEpipolar").click(function(){
 //    // check if cal.xml file exists

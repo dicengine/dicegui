@@ -43,10 +43,6 @@ var calPath = "undefined";
 // reference image dimensions
 var refImageWidth = 0;
 var refImageHeight = 0;
-var refImageWidthLeft = 0;
-var refImageHeightLeft = 0;
-var refImageWidthRight = 0;
-var refImageHeightRight = 0;
 
 // best fit plane locations
 var bestFitXOrigin = 0;
@@ -55,26 +51,10 @@ var bestFitXAxis = 0;
 var bestFitYAxis = 0;
 
 // regions of interest
-var ROIDefsX = [[]];
-var ROIDefsY = [[]];
 var livePlotPtsX = [];
 var livePlotPtsY = [];
-var excludedDefsX = [[]];
-var excludedDefsY = [[]];
-var excludedAssignments = [];
-var obstructedDefsX = [[]];
-var obstructedDefsY = [[]];
-var subsetCoordinatesX = [];
-var subsetCoordinatesY = [];
-var firstClick = true;
-var shapeInProgress = false;
-var addROIsActive = false;
 var drawEpipolarActive = false;
-var addExcludedActive = false;
-var addObstructedActive = false;
-var currentROIIndex = 0;
-var currentExcludedIndex = 0;
-var currentObstructedIndex = 0;
+var ROIsChanged = false;
 var addLivePlotPtsActive = false;
 var addLivePlotLineActive = false;
 var livePlotLineXOrigin = 0;
@@ -91,7 +71,6 @@ var paraviewMsg = true;
 
 // state of the results files
 var resultsFresh = false;
-var ROIsChanged = false;
 
 function setExecPaths(path){
   if(os.platform()=='win32'){

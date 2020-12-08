@@ -308,9 +308,9 @@ function impl_input_xml_file(xml){
 // obstructed regions from the first subeset are loaded
 function readSubsetFile(data){
     hierarchy = [];
-    clearROIs();
-    clearExcluded();
-    clearObstructed();
+    //clearROIs();
+    //clearExcluded();
+    //clearObstructed();
     var currentROI = 0;
     var shapes = [];
     var subsetLocations = {x:[],y:[]};
@@ -319,7 +319,7 @@ function readSubsetFile(data){
     for(line = 0;line < lines.length; line++){
         var split_line = lines[line].match(/\S+/g);
         if(split_line){
-            //console.log('split line: ' + split_line);
+            console.log('split line: ' + split_line);
             if(split_line[0].toUpperCase()=='BEGIN'){
                 hierarchy.push(split_line[1]);
                 if(split_line[1].toUpperCase()=='SUBSET_COORDINATES'){
@@ -380,7 +380,6 @@ function readSubsetFile(data){
             }
         } // end split_line
     } // end lines
-    
     // assuming here that the plotly div already exists
     var update = {shapes: shapes};
     Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
@@ -635,10 +634,11 @@ function pathShapeToPoints(shape){
     return points;
 }
 
-function pointsToSubsetLocationTrace(points){
+function pointsToSubsetLocationTrace(points,name){
+    if(!name) name = 'subsetCoordinates';
     var visible = false;
     var scatterTrace = {
-            name: 'subsetCoordinates',
+            name: name,
             visible: false,
             type:'scatter',
             x:points.x,

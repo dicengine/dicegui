@@ -45,12 +45,24 @@ function getPreviewConfig(dest){
             icon: dotsIcon,
             click: () => { drawSubsetCoordinates(); }
     }
+    let importIcon = {
+            'width': 24,
+            'height': 24,
+            'path': "M12,16.5l4-4h-3v-9h-2v9H8L12,16.5z M21,3.5h-6v1.99h6V19.52H3V5.49h6V3.5H3c-1.1,0-2,0.9-2,2v14c0,1.1,0.9,2,2,2h18c1.1,0,2-0.9,2-2v-14C23,4.4,22.1,3.5,21,3.5z"
+    }
+    var importSubsetLocationsButton = {
+            name: 'Import subset file',
+            icon: importIcon,
+            click: () => {$('#loadSubsetFileInputIcon').click();}
+    }
     var _config = {
             displaylogo: false,
             scrollZoom: true,
             responsive: true,
             modeBarButtonsToRemove: [
-                'autoScale2d'
+                'autoScale2d',
+                'select2d',
+                'lasso2d'
                 ],
     };
     if($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global"){
@@ -58,7 +70,8 @@ function getPreviewConfig(dest){
             _config.modeBarButtonsToAdd = [
                 'drawclosedpath',
                 'eraseshape',
-                showSubsetLocationsButton];
+                showSubsetLocationsButton,
+                importSubsetLocationsButton];
         }
     }
     if($("#analysisModeSelect").val()=="tracking"){
@@ -69,7 +82,8 @@ function getPreviewConfig(dest){
             _config.modeBarButtonsToAdd = [
                 'drawclosedpath',
                 'eraseshape',
-                showSubsetLocationsButton];
+                showSubsetLocationsButton,
+                importSubsetLocationsButton];
         }
     }
     return _config;
@@ -247,6 +261,17 @@ function updateImage(spec,data){
     Plotly.newPlot(div,data,obj.layout,obj.config);
 }
 
+function removeSubsetPreview(){
+    var allTraces = document.getElementById("plotlyViewerLeft").data;
+    var previewResult = allTraces.findIndex(obj => { 
+        return obj.name === "subsetPreview";
+    });
+    if(previewResult>=0){
+        Plotly.deleteTraces(document.getElementById("plotlyViewerLeft"), previewResult);
+    }
+    return(previewResult>=0); // return value is true if the trace existed
+}
+
 // draw the subset coordinates or remove them if they exist
 function drawSubsetCoordinates(){
     var allTraces = document.getElementById("plotlyViewerLeft").data;
@@ -257,6 +282,21 @@ function drawSubsetCoordinates(){
     if(result>=0){
         newFlag = !allTraces[result].visible;
         Plotly.restyle(document.getElementById("plotlyViewerLeft"), {"visible": newFlag}, [result]);
+    }else if($("#analysisModeSelect").val()=="subset"){ // if doing subset analysis and custom coodinates are not defined, preview where the subsets will end up
+        // check if the subset preview exists, if so turn it off
+        var traceExisted = removeSubsetPreview();
+//        var previewResult = allTraces.findIndex(obj => { 
+//            return obj.name === "subsetPreview";
+//        });
+//        if(previewResult>=0){
+//            Plotly.deleteTraces(document.getElementById("plotlyViewerLeft"), previewResult);
+//            return;
+//        }
+        // if not rebuild it
+        if(!traceExisted){
+            startProgress();
+            writeInputFile(false,false,true);
+        }
     }
 }
 
@@ -340,7 +380,7 @@ function isInShape(cx,cy,shape){
       dy1 = verts_y[i] - cy;
       dx2 = verts_x[i+1] - cx;
       dy2 = verts_y[i+1] - cy;
-      angle += angle_2d(dx1,dy1,dx2,dy2);
+      angle += angle2d(dx1,dy1,dx2,dy2);
     }
     // if the angle is greater than 2PI, the point is in the polygon
     if(Math.abs(Math.abs(angle) - 2.0*Math.PI) < 1.0E-4){
@@ -348,6 +388,20 @@ function isInShape(cx,cy,shape){
     }else{
         return false;
     }
+}
+
+function angle2d(x1,y1,x2,y2){
+    var dtheta=0.0;
+    var theta1=0.0;
+    var theta2=0.0;
+    theta1 = Math.atan2(y1,x1);
+    theta2 = Math.atan2(y2,x2);
+    dtheta = theta2 - theta1;
+    while (dtheta > Math.PI)
+        dtheta -= 2.0*Math.PI;
+    while (dtheta < -1.0*Math.PI)
+        dtheta += 2.0*Math.PI;
+    return(dtheta);
 }
 
 function checkForInternalShapes(){
@@ -408,6 +462,34 @@ function removeAllPlotlyShapesAndTraces(){
             Plotly.deleteTraces(document.getElementById("plotlyViewerLeft"),i);
     }
 }
+
+function addSubsetSSSIGPreviewTrace(locsFile){
+    // expects a listing of all the subset locations x and y coordinates
+    fs.stat(locsFile, function(err, stat) {
+        if(err == null) {
+            fs.readFile(locsFile, 'utf8', function (err,dataS) {
+                if (err) {
+                    return console.log(err);
+                }
+                var coords = {x:[],y:[]};
+                var locsData = dataS.toString().split(/\s+/g).map(Number);
+                for(i=0;i<locsData.length-1;i++){
+                    if(isNaN(locsData[i])) continue;
+                    coords.x.push(locsData[i++]);
+                    coords.y.push(locsData[i]);
+                }
+                var previewTrace = pointsToSubsetLocationTrace(coords,'subsetPreview');
+                previewTrace.visible = true;
+                Plotly.addTraces(document.getElementById("plotlyViewerLeft"),previewTrace);
+            }); // end readFile
+        } // end null
+        else{
+            alert("failed to read " + locsFile);
+            return;
+        }
+    }); 
+}
+
 
 
 

@@ -94,7 +94,7 @@ function showLivePlots(){
         }
         return;
     }
-    livePlotContourRepeat();
+//    livePlotContourRepeat();
     if(livePlotPtsX.length <=0 && !addLivePlotLineActive) return;
     if(livePlotPtsX.length >0){
         var livePlotFiles = ""
@@ -143,10 +143,10 @@ function resetWorkingDirectory(){
         $("#cineSkipIndex").val(1);
         
         $("#calList").empty();
-        clearDrawnROIs();
-        clearROIs();
-        clearExcluded();
-        clearObstructed();
+        //clearDrawnROIs();
+        //clearROIs();
+        //clearExcluded();
+        //clearObstructed();
         $("#runLoader").removeClass('post-loader-success');
         $("#runLoader").removeClass('post-loader-fail');
         $("#runLoader").removeClass('loader');
@@ -190,7 +190,8 @@ function callDICeExec(resolution,ss_locs) {
     // load the live plot viewer if there are any live plots:
 //    if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1){ // signifies tracklib
 //    }else
-    showLivePlots();
+    if(!ss_locs)
+        showLivePlots();
     
     // nuke the old line plot and point live plot files
     fs.readdirSync(workingDirectory).forEach(file => {
@@ -274,7 +275,8 @@ function callDICeExec(resolution,ss_locs) {
                 win.loadURL('file://' + __dirname + '/resolution.html');
                 //win.webContents.openDevTools()
             }else if(ss_locs){
-                drawDotsAndBoxesForSubsets(fullPath('.dice','.subset_locs.txt'));
+                addSubsetSSSIGPreviewTrace(fullPath('.dice','.subset_locs.txt'));
+//                drawDotsAndBoxesForSubsets(fullPath('.dice','.subset_locs.txt'));
             }else{
                 postExecTasks();
             }
@@ -1044,6 +1046,7 @@ function writeParamsFile(only_write,resolution,ss_locs) {
     }else{
         content += '<Parameter name="interpolation_method" type="string" value="KEYS_FOURTH" />\n';
         if($("#analysisModeSelect").val()=="subset"){
+            var validShapeFunctions = false;
             content += '<Parameter name="sssig_threshold" type="double" value="'+$("#sssigThresh").val()+'" />\n';
             content += '<Parameter name="optimization_method" type="string" value="GRADIENT_BASED" />\n';
             var initMode = $("#initSelect").val();
@@ -1064,21 +1067,25 @@ function writeParamsFile(only_write,resolution,ss_locs) {
                 content += '<Parameter name="initialization_method" type="string" value="USE_NEIGHBOR_VALUES" />\n';
             }
             if($("#translationCheck")[0].checked){
+                validShapeFunctions = true;
                 content += '<Parameter name="enable_translation" type="bool" value="true" />\n';
             }else{
                 content += '<Parameter name="enable_translation" type="bool" value="false" />\n';
             }
             if($("#rotationCheck")[0].checked){
+                validShapeFunctions = true;
                 content += '<Parameter name="enable_rotation" type="bool" value="true" />\n';
             }else{
                 content += '<Parameter name="enable_rotation" type="bool" value="false" />\n';
             }
             if($("#normalStrainCheck")[0].checked){
+                validShapeFunctions = true;
                 content += '<Parameter name="enable_normal_strain" type="bool" value="true" />\n';
             }else{
                 content += '<Parameter name="enable_normal_strain" type="bool" value="false" />\n';
             }  
             if($("#shearStrainCheck")[0].checked){
+                validShapeFunctions = true;
                 content += '<Parameter name="enable_shear_strain" type="bool" value="true" />\n';
             }else{
                 content += '<Parameter name="enable_shear_strain" type="bool" value="false" />\n';
@@ -1087,6 +1094,10 @@ function writeParamsFile(only_write,resolution,ss_locs) {
                 content += '<ParameterList name="post_process_vsg_strain">\n';
                 content += '<Parameter name="strain_window_size_in_pixels" type="int" value="'+$("#strainGaugeSize").val()+'" />\n';
                 content += '</ParameterList>\n';
+            }
+            if(!validShapeFunctions){
+                alert('Error: no shape functions selected');
+                return;
             }
         }else if($("#analysisModeSelect").val()=="global"){
             content += '<Parameter name="max_solver_iterations_fast" type="int" value="500" />\n';
