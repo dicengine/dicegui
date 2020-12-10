@@ -59,10 +59,11 @@ function showLivePlots(){
         if(diceTrackLibOn && showStereoPane==1){
             livePlotTracklibRepeat();
         }else{
+            var numROI = numROIShapes();
             var livePlotFiles = '';
-            var numDigitsTotal = integerLength(ROIDefsX.length);
+            var numDigitsTotal = integerLength(numROI);
             // set up the files to read
-            for(var i=0;i<ROIDefsX.length;++i){
+            for(var i=0;i<numROI;++i){
                 if(os.platform()=='win32'){
                     livePlotFiles += 'results\\';
                 }else{
@@ -74,7 +75,7 @@ function showLivePlots(){
                 for(var j=0;j<numZeros;++j)
                     livePlotFiles += '0';
                 livePlotFiles += i + '.txt';
-                if(i<ROIDefsX.length-1)
+                if(i<numROI-1)
                     livePlotFiles += ' ';
             }
             localStorage.setItem("livePlotFiles", livePlotFiles);
@@ -132,10 +133,6 @@ function resetWorkingDirectory(){
         $("#cineSkipIndex").val(1);
         
         $("#calList").empty();
-        //clearDrawnROIs();
-        //clearROIs();
-        //clearExcluded();
-        //clearObstructed();
         $("#runLoader").removeClass('post-loader-success');
         $("#runLoader").removeClass('post-loader-fail');
         $("#runLoader").removeClass('loader');
@@ -250,7 +247,6 @@ function callDICeExec(resolution,ss_locs) {
         else{
             endProgress(true);
             resultsFresh = true;
-            ROIsChanged = false;
             if(resolution){
                 localStorage.setItem("workingDirectory",workingDirectory);
                 var win = new BrowserWindow({ 
@@ -282,7 +278,7 @@ function updateCineDisplayImage(fileName,index,dest,cb){
     updatePreview(decoratedFile,dest,[],[],"",cb);
 }
 
-function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
+function callCineStatExec(file,mode,callback) {
 
     callback = callback || $.noop;
     var child_process = require('child_process');
@@ -365,9 +361,6 @@ function callCineStatExec(file,mode,reset_ref_ROIs,callback) {
                                  updateCineDisplayImage(fileName,stats[1],'right');
                              }
                              deleteHiddenFiles('keypoints');
-//                             deleteDisplayImageFiles(mode,function(){updateCineDisplayImage(fileName,stats[1],mode,reset_ref_ROIs);});
-//                             callback = callback || $.noop;
-//                             callback();
                              return true;
                          }); // end else
                     }
@@ -732,6 +725,10 @@ function postExecTasks(){
         var child_process = require('child_process');
         var proc = child_process.spawn(execTrackingMoviePath,['input.xml'],{cwd:workingDirectory});
     }
+    // if this is a mono tracking run, load the results files into memory in case the user wants to view the tracked results
+    if($("#analysisModeSelect").val()=="tracking" && showStereoPane==0){
+        loadTrackingResultsIntoMemory();
+    }
 }
 
 function startProgress (){
@@ -769,7 +766,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
         // if no ROIs are defined for global, define one large ROI
         var points = {x:[20,refImageWidth-20,refImageWidth-20,20],
                 y:[20,20,refImageHeight,refImageHeight]};
-        var shape = pointsToPathShape(points,'ROI');
+        var shape = pointsToPathShape(points,'ROI_0');
         ROIShapes.push(shape);
         var update = {shapes: ROIShapes};
         Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);

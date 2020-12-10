@@ -100,8 +100,6 @@ function getPreviewLayoutConfig(dest){
             layout : _layout,
             config : _config
     }
-//    console.log('getPreviewConfig called');
-//    console.log(obj);
     return obj;
 }
 
@@ -317,7 +315,7 @@ function getSubsetCoordinatesTrace(){
         return {};
 }
 
-function getPlotlyPathShapes(name){
+function getPlotlyPathShapes(name,strict=false){
     var pathShapes = [];
     var plotlyDivLeft = document.getElementById("plotlyViewerLeft");
     if(plotlyDivLeft.layout){
@@ -326,7 +324,9 @@ function getPlotlyPathShapes(name){
             for(var i=0;i<shapes.length;++i){
                 if(shapes[i].type=='path')
                     if(name){
-                        if(shapes[i].name.includes(name))
+                        if(!strict&&shapes[i].name.includes(name))
+                            pathShapes.push(shapes[i]);
+                        else if(shapes[i].name==name)
                             pathShapes.push(shapes[i]);
                     }else{
                         pathShapes.push(shapes[i]);
@@ -338,6 +338,7 @@ function getPlotlyPathShapes(name){
 }
 
 $("#plotlyViewerLeft").on('plotly_relayout', function(){
+    assignShapeNames();
     checkForInternalShapes();
     // update the subset coordinates trace
     var shapes = getPlotlyPathShapes('ROI');
@@ -470,25 +471,48 @@ function undrawRepresentativeSubset(){
     Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
 }
 
+function numROIShapes(){
+    return getPlotlyPathShapes('ROI').length;
+}
+
+function deleteShape(index){
+    if(document.getElementById("plotlyViewerLeft").layout)
+        if(document.getElementById("plotlyViewerLeft").layout.shapes)
+            if(document.getElementById("plotlyViewerLeft").layout.shapes.length>index)
+                document.getElementById("plotlyViewerLeft").layout.shapes.splice(index,1);
+}
+
+function assignShapeNames(){
+    var shapes = getPlotlyPathShapes(); // get all shapes, not just ROIs
+    for(var i=0;i<shapes.length;i++){
+        if(shapes[i].name===undefined){
+            if($("#showDeformedCheck")[0].checked){
+                alert('cannot add ROIs while show tracked ROIs is active');
+                deleteShape(i);
+                continue;
+            }else
+                shapes[i].name='ROI_' + i.toString();
+        }
+    }
+}
 
 function checkForInternalShapes(){
     var shapes = getPlotlyPathShapes(); // get all shapes, not just ROIs
     if(shapes.length<=0) return;
-    //console.log(shapes);
     var centroids = shapesToCentroids(shapes);
-    //console.log(centroids);
     var changesMade = false;
+    // loop through the shapes to
     for(var i=0;i<centroids.x.length;i++){
-        if(shapes[i].name===undefined) shapes[i].name='ROI';
-        if(shapes[i].name!='ROI') continue;
+        if(!shapes[i].name.includes('ROI')) continue;
         var cx = centroids.x[i];
         var cy = centroids.y[i];
         // iterate the shapes backwards because the exclusions are always added after the base shape
         for(var j=shapes.length-1;j>=0;j--){
             if(j==i) continue;
-            if(shapes[j].name!='ROI')continue;
+            if(!shapes[j].name.includes('ROI'))continue;
+            var inShapeId = shapes[j].name.split('_').pop();
             if(isInShape(cx,cy,shapes[j])){
-                shapes[i].name = 'excluded_' + j;
+                shapes[i].name = 'excluded_' + inShapeId;
                 shapes[i].line = {color: 'red'};
                 shapes[i].fillcolor = 'red';
                 shapes[i].opacity = 0.2;

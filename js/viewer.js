@@ -168,7 +168,7 @@ function flagSequenceImages(){
     defImagePathsRight = ["sequence"];
 }
 
-function loadImageSequence(reset_ref_ROIs,cb){
+function loadImageSequence(cb){
     cb = cb || $.noop;
     var fullImageName = concatImageSequenceName(0);
     var fullStereoImageName = concatImageSequenceName(1);
@@ -246,7 +246,7 @@ $("#loadSubsetFileInput").change(function (evt) {
 });
 
 $("#loadRef").click(function (){
-    loadImageSequence(true);
+    loadImageSequence();
 });
 
 $("#leftCineInput").on("click",function () {
@@ -270,13 +270,13 @@ $("#leftCineInput").change(function (evt) {
 //                $("#cineEndPreview span").text("");
 //                $("#panzoomRight").html('');
 //                // create a tiff image of the selected reference frame
-//                callCineStatExec(file,0,true);
+//                callCineStatExec(file,0);
 //            }
 //            else{
 //            }
 //        } // end a right cine file exists
 //        else{
-            callCineStatExec(file,0,true);
+            callCineStatExec(file,0);
 //        }
     }
 });
@@ -289,7 +289,7 @@ $("#rightCineInput").change(function (evt) {
         file = tgt.files[0];
     if(file){
         // create a tiff image of the selected reference frame
-        callCineStatExec(file,1,false);
+        callCineStatExec(file,1);
     }
 });
 
@@ -306,7 +306,7 @@ function reloadCineImages(index){
         updateTracklibDisplayImages(offsetIndex);
     }else{    // otherwise just diplay the raw frame
         if(cinePathLeft!="undefined")
-            updateCineDisplayImage(cinePathLeft,offsetIndex,'left');
+            updateCineDisplayImage(cinePathLeft,offsetIndex,'left',function(){showDeformedROIs();});
         if(cinePathRight!="undefined")
             updateCineDisplayImage(cinePathRight,offsetIndex,'right');
     }

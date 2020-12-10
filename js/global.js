@@ -54,7 +54,6 @@ var bestFitYAxis = 0;
 var livePlotPtsX = [];
 var livePlotPtsY = [];
 var drawEpipolarActive = false;
-var ROIsChanged = false;
 var addLivePlotPtsActive = false;
 var addLivePlotLineActive = false;
 var livePlotLineXOrigin = 0;

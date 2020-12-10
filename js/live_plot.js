@@ -62,7 +62,7 @@ function livePlot(fileNames){
                 var liTitle = dataObjs[firstValidIndex].headings[i];
                 $("#livePlotFieldSelect").append(new Option(liTitle, liID));
             }
-            $('#livePlotFieldSelect :nth-child(2)').prop('selected', true); // To select via index
+            $('#livePlotFieldSelect :nth-child(4)').prop('selected', true); // To select via index
             currentTable = Number($("#livePlotFieldSelect option:selected").val().split("_").pop());
             firstPlot = false;
         }

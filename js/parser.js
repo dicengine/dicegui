@@ -99,14 +99,14 @@ function impl_input_xml_file(xml){
         full_name = image_folder + cine_file;
         getFileObject(full_name, function (fileObject) {
             $("#panzoomLeft").html('');
-            callCineStatExec(fileObject,0,false,function(){update_cine_indices(xml); parseSubsetFile(xml);});
+            callCineStatExec(fileObject,0,function(){update_cine_indices(xml); parseSubsetFile(xml);});
         });
         if(stereo_cine_file){
             console.log('reading stereo cine file: ' + image_folder + stereo_cine_file);
             stereo_full_name = image_folder + stereo_cine_file;
             getFileObject(stereo_full_name, function (fileObject) {
                 $("#panzoomRight").html('');
-                callCineStatExec(fileObject,1,false);
+                callCineStatExec(fileObject,1);
             });
         }
     }else{
@@ -204,7 +204,7 @@ function impl_input_xml_file(xml){
             if(image_prefix) $("#imagePrefix").val(image_prefix);
             image_ext = xml_get(xml,"image_file_extension");
             if(image_ext) $("#imageExtension").val(image_ext);
-            loadImageSequence(false,function(){parseSubsetFile(xml);});
+            loadImageSequence(function(){parseSubsetFile(xml);});
         }
     }
     
@@ -320,7 +320,7 @@ function readSubsetFile(data){
     for(line = 0;line < lines.length; line++){
         var split_line = lines[line].match(/\S+/g);
         if(split_line){
-            console.log('split line: ' + split_line);
+            //console.log('split line: ' + split_line);
             if(split_line[0].toUpperCase()=='BEGIN'){
                 hierarchy.push(split_line[1]);
                 if(split_line[1].toUpperCase()=='SUBSET_COORDINATES'){
@@ -354,7 +354,7 @@ function readSubsetFile(data){
                     console.log('vertex y: ' + vertex_y);
                     var points = {x:vertex_x,y:vertex_y};
                     if(hierarchy[hierarchy.length-3].toUpperCase()=='BOUNDARY'){
-                        var shape = pointsToPathShape(points,'ROI');
+                        var shape = pointsToPathShape(points,'ROI_' + currentROI.toString());
                         shapes.push(shape);
                         currentROI += 1;
                     }
@@ -547,6 +547,18 @@ function impl_params_xml_file(xml){
 
 function xml_get(xml,param_name){
     return $(xml).find('Parameter[name="'+param_name+'"]').attr("value");
+}
+
+function cloneShape(shape){
+    var newShape = {};
+    newShape.type = shape.type;
+    newShape.path = shape.path;
+    newShape.line = {color: shape.line.color, width: shape.line.width};
+    newShape.fillcolor = shape.fillcolor;
+    newShape.opacity = shape.opacity;
+    newShape.editable = shape.editable;
+    newShape.name = shape.name;
+    return newShape;
 }
 
 function shapesToCentroids(shapes){
