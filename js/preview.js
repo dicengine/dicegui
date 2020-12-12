@@ -215,6 +215,50 @@ function updatePreview(filePath,dest,data=[],argsIn,debugConsoleDivId,cb){
     });
 }
 
+function heatmapNeedsUpdate(width,height){
+    if(jQuery.isEmptyObject(coordsHeatmap)) return true;
+    if(!coordsHeatmap.x) return true;
+    if(!coordsHeatmap.y) return true;
+    if(coordsHeatmap.x.length!=width) return true;
+    if(coordsHeatmap.y.length!=height) return true;
+    return false;
+}
+
+
+function updateCoordsHeatmap(width,height){
+    if(!heatmapNeedsUpdate(width,height)) return;
+    console.log('updating the coords heatmap');
+    var hmX = [];
+    var hmY = [];
+    var hmZ = [];
+    for(var i = 0; i < height; i++){
+        hmY.push(i);
+        var temp = [];
+        for(var j = 0; j < width; j++)
+            temp.push(0);
+        hmZ.push(temp);
+    }
+    for(var j = 0; j < width; j++)
+        hmX.push(j);
+    coordsHeatmap = {
+            name: 'coordsHeatmap',
+            x: hmX,
+            y: hmY,
+            z: hmZ,
+            showlegend: false,
+            
+            opacity: 0.0,
+            type: 'heatmap',
+//            colorscale: [["0.0", "rgb(255, 255, 255, 0.5)"], ["1.0", "rgb(255, 255, 255, 0.5)"]],  
+            xgap: 1,
+            ygap: 1,
+            hoverinfo: 'none',
+            showscale: false
+    };
+}
+
+var coordsHeatmap = {};
+
 function updateImage(spec,data){
     console.log('updateImage(): path ' + spec.destPath + ' in div '  + spec.destDivId);
     var obj = getPreviewLayoutConfig(spec.dest);
@@ -245,21 +289,25 @@ function updateImage(spec,data){
             layer: 'below',
         }];
     }
-//    var data = [ {
-//        z: [0.65,0.6,0.7,0.6,0.72,0.72,1.0,0.7,0.5],
-//        x: [180,230,360,100,180,300,350,45,110],
-//        y: [510,100,515,300,760,600,900,810,80],
-//        type: 'contour',
-//        opacity: 0.6,
-//        colorscale: 'Jet',
-//        showscale: true,
-//        autocontour: true,
-//      }];
+    // add a heatmap 
+
+    updateCoordsHeatmap(spec.width,spec.height);
+    data.push(coordsHeatmap);
     // TODO call restyle or relayout instead of newPlot each time?
     Plotly.newPlot(div,data,obj.layout,obj.config);
     if(spec.dest=='left'&&$("#analysisModeSelect").val()=="subset")
         drawRepresentativeSubset();
+    var posDiv = document.getElementById('leftPos');
+    if(spec.dest=='right')
+        posDiv = document.getElementById('rightPos');
     
+    div.on('plotly_hover', function(data){
+        if(spec.dest!='left' && spec.dest!='right') return;
+        var infotext = data.points.map(function(d){
+            return ('['+d.x+','+d.y+']');
+        });
+        posDiv.innerText = infotext;
+    });
 }
 
 function removeSubsetPreview(){
@@ -581,7 +629,10 @@ function addSubsetSSSIGPreviewTrace(locsFile){
     }); 
 }
 
-
-
-
-
+//$("#plotlyViewerLeft").on('plotly_hover', function(data){
+//    console.log(data);
+////    var infotext = data.points.map(function(d){
+////        return ('['+d.x+','+d.y+']');
+////    });
+////    $('#rightPos').innerHTML = infotext;
+//})
