@@ -3,8 +3,13 @@ $(window).load(function(){
 
 function resizePreview(){
     console.log('resizing the plotly previews');
-    Plotly.Plots.resize(document.getElementById("plotlyViewerLeft"));
-    Plotly.Plots.resize(document.getElementById("plotlyViewerRight"));
+//    if(document.getElementById("plotlyViewerLeft").layout)
+//        if(document.getElementById("plotlyViewerLeft").layout.images)
+            Plotly.Plots.resize(document.getElementById("plotlyViewerLeft"));
+//    if(document.getElementById("plotlyViewerRight").layout)
+//        if(document.getElementById("plotlyViewerRight").layout.images)
+            Plotly.Plots.resize(document.getElementById("plotlyViewerRight"));
+            console.log('resizing complete');
 }
 
 function getPreviewLayout(){
@@ -135,7 +140,6 @@ function updatePreview(filePath,dest,data=[],argsIn,debugConsoleDivId,cb){
         //updateImage(spec,[]);
         return;
     }
-    
     // if there is already a data entry for the subset coordinates, automatically push that to the data array
     var div = document.getElementById(spec.destDivId);
     if(div.data)
@@ -311,6 +315,7 @@ function updateImage(spec,data){
 }
 
 function removeSubsetPreview(){
+    console.log('removeSubsetPreview()');
     var allTraces = document.getElementById("plotlyViewerLeft").data;
     var previewResult = allTraces.findIndex(obj => { 
         return obj.name === "subsetPreview";
@@ -323,6 +328,7 @@ function removeSubsetPreview(){
 
 // draw the subset coordinates or remove them if they exist
 function drawSubsetCoordinates(){
+    console.log('drawSubsetCoordinates()')
     var allTraces = document.getElementById("plotlyViewerLeft").data;
     var result = allTraces.findIndex(obj => { 
      return obj.name === "subsetCoordinates";
@@ -386,11 +392,15 @@ function getPlotlyPathShapes(name,strict=false){
 }
 
 $("#plotlyViewerLeft").on('plotly_relayout', function(){
+    console.log('plotly_relayout event begin');
     assignShapeNames();
     checkForInternalShapes();
     // update the subset coordinates trace
     var shapes = getPlotlyPathShapes('ROI');
-    if(shapes.length<=0)return;
+    if(shapes.length<=0){
+        checkValidInput();
+        return;
+    }
     var centroids = shapesToCentroids(shapes);
     var text = [];
     if(centroids.x)
@@ -413,6 +423,8 @@ $("#plotlyViewerLeft").on('plotly_relayout', function(){
     else if(centroids.x&&$("#analysisModeSelect").val()=="tracking"&&showStereoPane==0){
         Plotly.addTraces(document.getElementById("plotlyViewerLeft"),pointsToSubsetLocationTrace(centroids));
     }
+    checkValidInput();
+    console.log('plotly_relayout event end');
 });
 
 function isInShape(cx,cy,shape){
@@ -502,6 +514,7 @@ function drawRepresentativeSubset(){
     Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
 }
 function undrawRepresentativeSubset(){
+    console.log('undrawRepresentativeSubset()');
     if(!document.getElementById("plotlyViewerLeft").layout)return;
     var shapes = [];
     if(document.getElementById("plotlyViewerLeft").layout.shapes){
@@ -545,6 +558,7 @@ function assignShapeNames(){
 }
 
 function checkForInternalShapes(){
+    console.log('checkForInternalShapes');
     var shapes = getPlotlyPathShapes(); // get all shapes, not just ROIs
     if(shapes.length<=0) return;
     var centroids = shapesToCentroids(shapes);
@@ -578,6 +592,7 @@ function checkForInternalShapes(){
 }
 
 function removeAllPlotlyShapesAndTraces(){
+    console.log('removeAllPlotlyShapesAndTraces()');
     if(!document.getElementById("plotlyViewerLeft").layout) return;
     // remove the shapes
     var lineColor = 'cyan';
@@ -593,6 +608,7 @@ function removeAllPlotlyShapesAndTraces(){
     }
     Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
     // remove any subset coordinates or conformal rois
+
     var numTraces = 0;
     if(document.getElementById("plotlyViewerLeft").data)
         numTraces = document.getElementById("plotlyViewerLeft").data.length;
@@ -603,6 +619,7 @@ function removeAllPlotlyShapesAndTraces(){
 }
 
 function addSubsetSSSIGPreviewTrace(locsFile){
+    console.log('addSubsetSSSIGPreviewTrace()');
     // expects a listing of all the subset locations x and y coordinates
     fs.stat(locsFile, function(err, stat) {
         if(err == null) {

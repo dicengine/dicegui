@@ -155,7 +155,9 @@ function initialize_gui(load_existing){
         } else {
             consoleMsg('error occurred trying to load previous state');
         }
+        return;
     });
+    checkValidInput();
 };
 
 function createHiddenDir(){
@@ -697,6 +699,7 @@ function show2DViewer(){
     $('#x1x2').text('x 1');
     //deactivateEpipolar();
     $(".tracklib-tools").hide();
+    checkValidInput();
 }
 
 function showTrinocViewer(){
@@ -746,6 +749,7 @@ function showStereoViewer(){
     $("#stereoParams").show();
     $('#runLi span').text('run stereo');
     $('#x1x2').text('x 2');
+    checkValidInput();
 }
 
 function updateFrameScrollerRange(){
@@ -768,7 +772,7 @@ function updateFrameScrollerRange(){
 }
 
 $("#analysisModeSelect").on('change',function() {
-    undrawRepresentativeSubset();
+    removeAllPlotlyShapesAndTraces();
     if($(this).val()=="subset"){
         $(".full-field").show();
         $(".full-field-global").show();
@@ -801,7 +805,9 @@ $("#analysisModeSelect").on('change',function() {
                 $(".results-right").show();
                 $(".non-tracklib-tools").hide();
                 $(".tracklib-tools").show();
-                $("#fileSelectMode").val("cine").change()
+                if($("#fileSelectMode").val()!="cine"){
+                    $("#fileSelectMode").val("cine").change()
+                }
             }
             else{
                 $(".results-right").hide();
@@ -826,8 +832,8 @@ $("#analysisModeSelect").on('change',function() {
         //resetLivePlots();
         show2DViewer();
     }
-    removeAllPlotlyShapesAndTraces();
     resizeAll();
+    checkValidInput();
 });
 
 $("#fileSelectMode").on('change',function (){

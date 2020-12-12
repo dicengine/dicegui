@@ -136,18 +136,23 @@ function resetWorkingDirectory(){
     $("#cineStartIndex").val(0);
     $("#cineEndIndex").val(0);
     $("#cineSkipIndex").val(1);
+    $("#cineFrameRatePreviewSpan").text("");
+    $("#cineGoToIndex").val("");
 
     $("#calList").empty();
     $("#runLoader").removeClass('post-loader-success');
     $("#runLoader").removeClass('post-loader-fail');
     $("#runLoader").removeClass('loader');
 
-    $("#panzoomLeft").html('');
-    $("#panzoomRight").html('');
+//    $("#panzoomLeft").html('');
+//    $("#panzoomRight").html('');
 
     $("#previewCross").hide();
     $("#initCross").hide();
 
+    updatePreview('','left');
+    updatePreview('','right');
+    
     refImagePathLeft = "undefined";
     refImagePathRight = "undefined";
     cinePathLeft = "undefined";
@@ -156,15 +161,13 @@ function resetWorkingDirectory(){
     defImagePathsLeft = [];
     defImagePathsRight = [];
 
-    deleteDisplayImageFiles(0);
-    deleteDisplayImageFiles(1);
-    deleteDisplayImageFiles(2);
-
-    updatePreview('','left');
-    updatePreview('','right');
-
-    deleteHiddenFiles('keypoints');
-    deleteHiddenFiles('background');
+//    deleteDisplayImageFiles(0);
+//    deleteDisplayImageFiles(1);
+//    deleteDisplayImageFiles(2);
+//
+//    deleteHiddenFiles('keypoints');
+//    deleteHiddenFiles('background');
+    
 }
 
 document.getElementById("clearLi").onclick = function() {
@@ -384,6 +387,7 @@ function callCineStatExec(file,mode,callback) {
 //}
 
 function updateTracklibDisplayImages(index){
+    console.log('updateTracklibDisplayImages()');
     if(cinePathLeft=="undefined"||cinePathRight=="undefined"){
         alert('cannot update tracklib image preview since the paths are not defined');
         console.log('left path ' + cinePathLeft + ' right path ' + cinePathRight);
@@ -789,7 +793,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
     
     // check that some ROIs have been defined if this is the tracking mode
     if($("#analysisModeSelect").val()=="tracking" && showStereoPane==0 && numROIs==0 && !only_write){
-        alert('ROIs must be defined');
+        alert('tracking subsets must be defined');
         endProgress(false);
         $("#abortLi").hide();
         $("#sssigPreview").show();
@@ -1301,94 +1305,125 @@ function writeSubsetFile(only_write,resolution,ss_locs){
 }
 
 function checkValidInput() {
-    consoleMsg('checking if input requirements met to enable running DICe ...');
+//    consoleMsg('checking if input requirements met to enable running DICe ...');
     var validInput = true;
     var enableCross = true;
     //var enableResolution = true;
     var isSequence = $("#fileSelectMode").val()=='sequence';
     var isCine =  $("#fileSelectMode").val()=='cine';
-
+    var isList = $("#fileSelectMode").val()=='list';
+    var isStereo = showStereoPane==1||showStereoPane==2;
+    var calRequired = isStereo || $("#calibrationCheck")[0].checked;
+    
+    // clear the ul and add relevant items for this type of analysis
+    $("#taskList").empty();
+    if(isList){
+        $("#taskList").append('<li id=\"listLoadRefLi\" class=\"task-list-item\";>load ref image</li>');
+        $("#taskList").append('<li id=\"listLoadDefLi\" class=\"task-list-item\";>load def image(s)</li>');
+        if(isStereo){
+            $("#taskList").append('<li id=\"listLoadStereoRefLi\" class=\"task-list-item\";>load stereo ref image</li>');
+            $("#taskList").append('<li id=\"listLoadStereoDefLi\" class=\"task-list-item\";>load stereo def image(s)</li>');
+        }
+    }else if(isSequence){
+        $("#taskList").append('<li id=\"seqLoadLi\" class=\"task-list-item\";>load image sequence</li>');
+    }else if(isCine){
+        $("#taskList").append('<li id=\"cineLoadLi\" class=\"task-list-item\";>load cine</li>');
+        if(isStereo){
+            $("#taskList").append('<li id=\"cineLoadStereoLi\" class=\"task-list-item\";>load stereo cine</li>');
+        }
+    }
+    if(calRequired)
+        $("#taskList").append('<li id=\"loadCalLi\" class=\"task-list-item\";>perform or load cal</li>');
+    // catch tracking with no ROIs defined
+    if($("#analysisModeSelect").val()=="tracking"&&!isStereo){
+        $("#taskList").append('<li id=\"defineROIsLi\" class=\"task-list-item\";>define tracking subsets</li>');
+      var ROIShapes = getPlotlyPathShapes('ROI');
+      var numROIs = ROIShapes.length;
+      if(numROIs<=0){
+          $('#defineROIsLi').removeClass('task-list-item-done');
+          validInput = false;
+      }else
+          $('#defineROIsLi').addClass('task-list-item-done');
+    }
+    if(calRequired){
+        if(calPath=='undefined'){
+            validInput = false;
+            $('#loadCalLi').removeClass('task-list-item-done');
+        }else
+            $('#loadCalLi').addClass('task-list-item-done');
+    }
     if(isCine){
         if(cinePathLeft=="undefined"){
             validInput = false;
-            //enableResolution = false;
             enableCross = false;
+            $('#cineLoadLi').removeClass('task-list-item-done');
+        }else{
+            $('#cineLoadLi').addClass('task-list-item-done');
         }
-        if(showStereoPane==1||showStereoPane==2){
+        if(isStereo){
             if(cinePathRight=="undefined"){
                 validInput = false;
                 enableCross = false;
-            }
-            if(calPath=='undefined'){
-                validInput = false;
-            }
-        }
-        if(showStereoPane==0&&$("#calibrationCheck")[0].checked){
-            if(calPath=='undefined'){
-                validInput = false;
-            }
+                $('#cineLoadStereoLi').removeClass('task-list-item-done');
+            }else
+                $('#cineLoadStereoLi').addClass('task-list-item-done');
         }
     }
-    else{
+    else if(isSequence){
         // see if the left reference image is set:
-        if(refImagePathLeft=='undefined'||(refImagePathLeft=='sequence' && !isSequence)) {
-            consoleMsg('left reference image not set yet');
+        if(refImagePathLeft=='undefined'||!defImagePathsLeft[0]) {
+//            consoleMsg('left reference image not set yet');
             validInput = false;
             enableCross = false;
-            //enableResolution = false;
-        }
-        // check that the image extensions all match
-        var refExtension = refImagePathLeft.split('.').pop().toLowerCase();
+            $('#seqLoadLi').removeClass('task-list-item-done');
+        }else
+            $('#seqLoadLi').addClass('task-list-item-done');
+        // nothing really changes for is stereo for sequence
+    }
+    else{ // assume list
+        // see if the left reference image is set:
+        if(refImagePathLeft=='undefined') {
+//            consoleMsg('left reference image not set yet');
+            validInput = false;
+            enableCross = false;
+            $('#listLoadRefLi').removeClass('task-list-item-done');
+        }else
+            $('#listLoadRefLi').addClass('task-list-item-done');
+            
+        // TODO check that the image extensions all match?
+        //var refExtension = refImagePathLeft.split('.').pop().toLowerCase();
         if(!defImagePathsLeft[0]){
-            consoleMsg('deformed images have not been defined yet');
+//            consoleMsg('deformed images have not been defined yet');
             validInput = false;
-        }
-        // check all the deformed images
-        if(!isSequence){
-            for(var i = 0, l = defImagePathsLeft.length; i < l; i++) {
-                var defExtension = defImagePathsLeft[i].name.split('.').pop().toLowerCase();
-                if(refExtension!=defExtension){
-                    //consoleMsg('deformed image ' + defImagePathsLeft[i].name + ' extension does not match ref extension');
-                    validInput = false;
-                }
-            }
-        }
-
-        if(showStereoPane==1||showStereoPane==2||(showStereoPane==0&&$("#calibrationCheck")[0].checked)){
-            if(!calPath){
-                validInput = false;
-            }
-            if(!isSequence){
-                for(var i = 0, l = defImagePathsRight.length; i < l; i++) {
-                    var defExtension = defImagePathsRight[i].name.split('.').pop().toLowerCase();
-                    if(refExtension!=defExtension){
-                        //consoleMsg('deformed image ' + defImagePathsRight[i].name + ' extension does not match ref extension');
-                        validInput = false;
-                    }
-                }
-            }
-        }
-
-        // TODO check right images ...
+            $('#listLoadDefLi').removeClass('task-list-item-done');
+        }else
+            $('#listLoadDefLi').addClass('task-list-item-done');
         // see if the right reference image is set:
-        if(refImagePathRight=='undefined'||(refImagePathRight=='sequence' && !isSequence)) {
-            enableCross = false;
-            if(showStereoPane==1||showStereoPane==2){
-                consoleMsg('right reference image not set yet');
+        if(isStereo){
+            if(refImagePathRight=='undefined') {
+                enableCross = false;
+//                consoleMsg('right reference image not set yet');
                 validInput = false;
-            }
+                $('#listLoadStereoRefLi').removeClass('task-list-item-done');
+            }else
+                $('#listLoadStereoRefLi').removeClass('task-list-item-done');
+            if(!defImagePathsRight[0]){
+//                consoleMsg('right deformed images have not been defined yet');
+                validInput = false;
+                $('#listLoadStereoDefLi').removeClass('task-list-item-done');
+            }else
+                $('#listLoadStereoDefLi').addClass('task-list-item-done');
         }
-        if(!isSequence&&defImagePathsRight.length<1)
-            if(showStereoPane==1||showStereoPane==2)
-                validInput = false;
-    } // end else (not cine)
+    } // end list file input
+        
+        
     // TODO see if the left and right ref have the same dimensions
     // TODO check the number of def images left and right
 
     if(validInput){
         $("#runLi").show();
         $("#writeLi").show();
-        consoleMsg("input requirements successful");
+//        consoleMsg("input requirements successful");
     }else{
         $("#runLi").hide();
         $("#writeLi").hide();
@@ -1400,9 +1435,4 @@ function checkValidInput() {
         $("#previewCross").hide();
         $("#initCross").hide();
     }
-    //if(enableResolution){
-    //    $("#resolutionLi").show();
-    //}else{
-    //    $("#resolutionLi").hide();
-    //}
 }

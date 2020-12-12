@@ -71,7 +71,9 @@
       <div class="fixed-col">
         <h1>IMAGES</h1>
         <p class="nav-item non-tracklib-tools">file select method:</p>
-        <select id="fileSelectMode" class="non-tracklib-tools" style="width: 95%; margin-bottom: 10px; margin-left: 10px;">
+        <select id="fileSelectMode" class="non-tracklib-tools"
+          style="width: 95%; margin-bottom: 10px; margin-left: 10px;"
+        >
           <option value="list">select individually</option>
           <option value="sequence">sequence of images</option>
           <option value="cine">.cine video frames</option>
@@ -177,10 +179,14 @@
               </div>
             </div>
             <!-- end nav two cam -->
-            <div class="nav-item tracklib-tools" style="margin-bottom:5px;">go to frame <input class="nav-item" type="text" id="cineGoToIndex" name="cineGoToIndex" value="0" style="width: 35%;"></div>
+            <div class="nav-item tracklib-tools" style="margin-bottom: 5px;">
+              go to frame <input class="nav-item" type="text" id="cineGoToIndex"
+                name="cineGoToIndex" value="0" style="width: 35%;"
+              >
+            </div>
             <div class="nav-item">ref frame</div>
-            <input class="nav-item update-tracklib-preview" type="text" id="cineRefIndex" name="cineRefIndex" value="0"
-              style="width: 95%;"
+            <input class="nav-item update-tracklib-preview" type="text" id="cineRefIndex"
+              name="cineRefIndex" value="0" style="width: 95%;"
             >
             <div class="nav-item">start frame</div>
             <input class="nav-item" type="text" id="cineStartIndex" name="cineStartIndex" value="0"
@@ -195,10 +201,14 @@
               style="width: 95%;"
             >
             <div class="nav-item tracklib-tools">num frames in preview</div>
-            <input class="nav-item tracklib-tools update-tracklib-preview" type="text" id="numPreviewFrames" name="numPreviewFrames" value="1"
-              style="width: 95%;"
+            <input class="nav-item tracklib-tools update-tracklib-preview" type="text"
+              id="numPreviewFrames" name="numPreviewFrames" value="1" style="width: 95%;"
             >
-            <div class="nav-item">frame rate <span id="cineFrameRatePreviewSpan" style="display: block; float: right; width: 33%;"></span></div>
+            <div class="nav-item">
+              frame rate <span id="cineFrameRatePreviewSpan"
+                style="display: block; float: right; width: 33%;"
+              ></span>
+            </div>
           </div>
           <!-- end cine input -->
         </div>
@@ -227,8 +237,11 @@
         </div>
         <!-- end nav-two-cam-->
         <div class="nav-item">
-          <h1 style="margin-top: 30px;">CALIBRATION</h1>
-          <div class="nav-one-cam"><input id="calibrationCheck" type="checkbox" style="margin-left:10px;"> calibrate results</div>
+          <h1 style="margin-top: 20px;">CALIBRATION</h1>
+          <div class="nav-one-cam">
+            <input id="calibrationCheck" type="checkbox" style="margin-left: 10px;">
+            calibrate results
+          </div>
           <div class="cal-options">
             <label id="performCal" class="custom-file-input action-li"> <i
               class="material-icons md-dark md-br-pad"
@@ -248,7 +261,7 @@
           </div>
         </div>
         <!-- end nav-two-cam-->
-        <h1 style="margin-top: 40px;">ANALYSIS</h1>
+        <h1 style="margin-top: 20px;">ANALYSIS</h1>
         <div id="runLoader" class="pre-loader"></div>
         <ul>
           <li id="changeWorkingDirLi" class="action-li"><i
@@ -263,14 +276,22 @@
           <li id="abortLi" class="action-li"><i class="material-icons md-dark md-br-pad">cancel</i>
             <span>abort analysis</span></li>
         </ul>
-        <svg class="spinner" width="65px" height="65px" viewBox="0 0 66 66"
+        
+        <div id="taskListDiv">
+        <h1 style="margin: 20px 0px 5px;" title="Steps that need to be completed before the analysis can be run">TASK LIST</h1>
+          <ul id="taskList">
+          </ul>
+        </div>
+        
+        
+        
+        <!-- <svg class="spinner" width="65px" height="65px" viewBox="0 0 66 66"
           xmlns="http://www.w3.org/2000/svg"
         >
             <circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33"
             r="30"
           ></circle>
-          </svg>
-        <div class="test-animation"></div>
+          </svg>  -->
       </div>
       <!-- end fixed-col -->
       <div class="fluid-col">
