@@ -106,58 +106,65 @@ function showLivePlots(){
 }
 
 function resetWorkingDirectory(){
-        $("#refImageText span").text('');
-        $("#refImageTextRight span").text('');
-        $("#defImageListLeft").empty();
-        $("#defImageListRight").empty();
+    $("#frameScroller").attr('max',0);
+    $("#frameScroller").attr('min',0);
+    $("#frameScroller").val(0);
+    $("#currentPreviewSpan").text('');
 
-        $("#imageFolderSpan").text('');
-        $("#imageSequencePreviewSpan").text('');
-        $("#imagePrefix").val('');
-        $("#refIndex").val(0);
-        $("#startIndex").val(0);
-        $("#endIndex").val(0);
-        $("#skipIndex").val(1);
-        $("#numDigits").val(1);
-        $("#stereoLeftSuffix").val('_0');
-        $("#stereoRightSuffix").val('_1');
-        $("#imageExtension").val('');
+    $("#refImageText span").text('');
+    $("#refImageTextRight span").text('');
+    $("#defImageListLeft").empty();
+    $("#defImageListRight").empty();
 
-        $("#cineLeftPreviewSpan").text('');
-        $("#cineRightPreviewSpan").text('');
-        $("#cineStartPreviewSpan").text('');
-        $("#cineEndPreviewSpan").text('');
-        $("#cineRefIndex").val(0);
-        $("#cineStartIndex").val(0);
-        $("#cineEndIndex").val(0);
-        $("#cineSkipIndex").val(1);
-        
-        $("#calList").empty();
-        $("#runLoader").removeClass('post-loader-success');
-        $("#runLoader").removeClass('post-loader-fail');
-        $("#runLoader").removeClass('loader');
+    $("#imageFolderSpan").text('');
+    $("#imageSequencePreviewSpan").text('');
+    $("#imagePrefix").val('');
+    $("#refIndex").val(0);
+    $("#startIndex").val(0);
+    $("#endIndex").val(0);
+    $("#skipIndex").val(1);
+    $("#numDigits").val(1);
+    $("#stereoLeftSuffix").val('_0');
+    $("#stereoRightSuffix").val('_1');
+    $("#imageExtension").val('');
 
-        $("#panzoomLeft").html('');
-        $("#panzoomRight").html('');
+    $("#cineLeftPreviewSpan").text('');
+    $("#cineRightPreviewSpan").text('');
+    $("#startPreviewSpan").text('');
+    $("#endPreviewSpan").text('');
+    $("#cineRefIndex").val(0);
+    $("#cineStartIndex").val(0);
+    $("#cineEndIndex").val(0);
+    $("#cineSkipIndex").val(1);
 
-        $("#previewCross").hide();
-        $("#initCross").hide();
+    $("#calList").empty();
+    $("#runLoader").removeClass('post-loader-success');
+    $("#runLoader").removeClass('post-loader-fail');
+    $("#runLoader").removeClass('loader');
 
-        refImagePathLeft = "undefined";
-        refImagePathRight = "undefined";
-        cinePathLeft = "undefined";
-        cinePathRight = "undefined";
-        calPath = "undefined";
+    $("#panzoomLeft").html('');
+    $("#panzoomRight").html('');
 
-        deleteDisplayImageFiles(0);
-        deleteDisplayImageFiles(1);
-        deleteDisplayImageFiles(2);
-        
-        updatePreview('','left');
-        updatePreview('','right');
+    $("#previewCross").hide();
+    $("#initCross").hide();
 
-        deleteHiddenFiles('keypoints');
-        deleteHiddenFiles('background');
+    refImagePathLeft = "undefined";
+    refImagePathRight = "undefined";
+    cinePathLeft = "undefined";
+    cinePathRight = "undefined";
+    calPath = "undefined";
+    defImagePathsLeft = [];
+    defImagePathsRight = [];
+
+    deleteDisplayImageFiles(0);
+    deleteDisplayImageFiles(1);
+    deleteDisplayImageFiles(2);
+
+    updatePreview('','left');
+    updatePreview('','right');
+
+    deleteHiddenFiles('keypoints');
+    deleteHiddenFiles('background');
 }
 
 document.getElementById("clearLi").onclick = function() {
@@ -330,15 +337,15 @@ function callCineStatExec(file,mode,callback) {
                              //alert(stats[1]);
                              //alert(stats[2]);
                              // check that the two cine files have valid frame ranges
-                             if($("#cineStartPreviewSpan").text()!=""||$("#cineEndPreviewSpan").text()!="")
-                                 if($("#cineStartPreviewSpan").text()!=stats[1]||$("#cineEndPreviewSpan").text()!=stats[2]){
+                             if($("#startPreviewSpan").text()!=""||$("#endPreviewSpan").text()!="")
+                                 if($("#startPreviewSpan").text()!=stats[1]||$("#endPreviewSpan").text()!=stats[2]){
                                      alert("Error, all .cine files need to have matching frame ranges");
                                      return false;
                                  }
                              cineFirstFrame = stats[1];
-                             $("#cineStartPreviewSpan").text(stats[1]);
-                             $("#cineCurrentPreviewSpan").text(stats[1]);
-                             $("#cineEndPreviewSpan").text(stats[2]);
+                             $("#startPreviewSpan").text(stats[1]);
+                             $("#currentPreviewSpan").text(stats[1]);
+                             $("#endPreviewSpan").text(stats[2]);
                              $("#cineGoToIndex").val(stats[1]);
                              $("#cineFrameRatePreviewSpan").text(stats[3]);
                              if(mode==0){
@@ -420,21 +427,21 @@ function updateTracklibDisplayImages(index){
     args.push($("#cineRefIndex").val());
     
     args.push('cine_start_index');
-    var startFrame = Number($("#cineCurrentPreviewSpan").text()) - ($("#numPreviewFrames").val()-1)*$("#cineSkipIndex").val();
-    if(startFrame < Number($("#cineStartPreviewSpan").text()))
-        startFrame = Number($("#cineStartPreviewSpan").text());
+    var startFrame = Number($("#currentPreviewSpan").text()) - ($("#numPreviewFrames").val()-1)*$("#cineSkipIndex").val();
+    if(startFrame < Number($("#startPreviewSpan").text()))
+        startFrame = Number($("#startPreviewSpan").text());
     args.push(startFrame);
     // overload the start frame as the current frame since the preview begins
     // with the current frame
 //    args.push($("#cineStartIndex").val());
-//    args.push($("#cineCurrentPreviewSpan").text());
+//    args.push($("#currentPreviewSpan").text());
     
     // the end frame is the start frame plus num_frames * skips
     args.push('cine_end_index');
-    args.push($("#cineCurrentPreviewSpan").text());
-//    var endFrame = Number($("#cineCurrentPreviewSpan").text()) + ($("#numPreviewFrames").val()-1)*$("#cineSkipIndex").val();
-//    if(endFrame > Number($("#cineEndPreviewSpan").text()))
-//        endFrame = Number($("#cineEndPreviewSpan").text());
+    args.push($("#currentPreviewSpan").text());
+//    var endFrame = Number($("#currentPreviewSpan").text()) + ($("#numPreviewFrames").val()-1)*$("#cineSkipIndex").val();
+//    if(endFrame > Number($("#endPreviewSpan").text()))
+//        endFrame = Number($("#endPreviewSpan").text());
 //    args.push(endFrame);
     
     args.push('cine_skip_index');
@@ -601,7 +608,7 @@ function updateTracklibDisplayImages(index){
 //        args.push(rightNameEpipolar);
 //        args.push('filter:epipolar_line');
 //        args.push('frame_number');
-//        args.push($("#cineCurrentPreviewSpan").text());
+//        args.push($("#currentPreviewSpan").text());
 //        args.push('epipolar_is_left');
 //        if(isLeft)
 //            args.push('true');

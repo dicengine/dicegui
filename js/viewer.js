@@ -172,7 +172,6 @@ function loadImageSequence(cb){
     cb = cb || $.noop;
     var fullImageName = concatImageSequenceName(0);
     var fullStereoImageName = concatImageSequenceName(1);
-    var fullTrinocImageName = concatImageSequenceName(2);
     updateImageSequencePreview();
 
     fs.stat(fullImageName, function(err, stat) {
@@ -245,9 +244,9 @@ $("#loadSubsetFileInput").change(function (evt) {
     }
 });
 
-$("#loadRef").click(function (){
-    loadImageSequence();
-});
+//$("#loadRef").click(function (){
+//    loadImageSequence();
+//});
 
 $("#leftCineInput").on("click",function () {
     this.value = null;
@@ -266,8 +265,8 @@ $("#leftCineInput").change(function (evt) {
 //                deleteHiddenFiles('background');
 //                cinePathRight = "undefined";
 //                $("#cineRightPreviewSpan").text("");
-//                $("#cineStartPreviewSpan").text("");
-//                $("#cineEndPreview span").text("");
+//                $("#startPreviewSpan").text("");
+//                $("#endPreviewSpan").text("");
 //                $("#panzoomRight").html('');
 //                // create a tiff image of the selected reference frame
 //                callCineStatExec(file,0);
@@ -296,7 +295,7 @@ $("#rightCineInput").change(function (evt) {
 function reloadCineImages(index){
     // check that the ref index is valid
     if(cinePathLeft!="undefined"||cinePathRight!="undefined")
-        if(index < Number($("#cineStartPreviewSpan").text()) || index > Number($("#cineEndPreviewSpan").text())){
+        if(index < Number($("#startPreviewSpan").text()) || index > Number($("#endPreviewSpan").text())){
             alert("invalid index");
             return;
         }
@@ -319,32 +318,72 @@ $("#cineRefIndex").change(function () {
 });
 
 $("#frameScroller").on('input', function () {
-    $("#cineCurrentPreviewSpan").text($(this).val());
+    $("#currentPreviewSpan").text($(this).val());
 }).change(function(){
-    reloadCineImages($(this).val());
+    if($("#fileSelectMode").val()=="list"){
+        $('#defImageListLeft li').each(function(i){
+            $(this).removeClass('def-image-ul-selected');
+        });
+        $('#defImageListRight li').each(function(i){
+            $(this).removeClass('def-image-ul-selected');
+        });
+        if(Number($(this).val())==0){
+            if(refImagePathLeft!="")
+                updatePreview(refImagePathLeft,'left');
+            else{
+                updatePreview("",'left');
+            }
+            if(showStereoPane==1&&refImagePathRight!="")
+                updatePreview(refImagePathRight,'right');
+            else{
+                updatePreview("",'right');
+            }
+            
+        }else{
+            var index = $(this).val()-1;
+            if(defImagePathsLeft.length >= $(this).val()){
+                updatePreview(defImagePathsLeft[index].path,'left');
+                $("#defImageListLeft li:eq(" + index.toString() + ")").addClass("def-image-ul-selected");
+            }
+            else{
+                updatePreview("",'left');
+            }
+            if(defImagePathsRight.length >= $(this).val()){
+                updatePreview(defImagePathsRight[index].path,'right');
+                $("#defImageListRight li:eq(" + index.toString() + ")").addClass("def-image-ul-selected");
+            }
+            else{
+                updatePreview("",'right');
+            }
+        }
+    }else if($("#fileSelectMode").val()=="sequence"){
+        updateImageSequencePreview(true);
+    }
+    else if($("#fileSelectMode").val()=="cine")
+        reloadCineImages($(this).val());
 });
 
 $("#cineGoToIndex").keypress(function(event) { 
     if (event.keyCode === 13) { 
-        if($(this).val() < Number($("#cineStartPreviewSpan").text()) || $(this).val() > Number($("#cineEndPreviewSpan").text())){
+        if($(this).val() < Number($("#startPreviewSpan").text()) || $(this).val() > Number($("#endPreviewSpan").text())){
             alert("invalid index");
             return;
         }
         $("#frameScroller").val($(this).val());
-        $("#cineCurrentPreviewSpan").text($(this).val());
+        $("#currentPreviewSpan").text($(this).val());
         reloadCineImages($(this).val());
     } 
 }); 
 
 $(".update-tracklib-preview").keypress(function(event) { 
     if (event.keyCode === 13) { 
-        reloadCineImages($("#frameScroller").val());//$("#cineCurrentPreviewSpan").text());
+        reloadCineImages($("#frameScroller").val());//$("#currentPreviewSpan").text());
     } 
 }); 
 
 
 $(".update-tracklib-preview").change(function () {
-    reloadCineImages($("#frameScroller").val());//$("#cineCurrentPreviewSpan").text());
+    reloadCineImages($("#frameScroller").val());//$("#currentPreviewSpan").text());
 });
 
 $("#rightRefInput").on("click",function () {
@@ -355,6 +394,7 @@ $("#rightRefInput").change(function (evt) {
         file = tgt.files[0];
     $("#refImageTextRight span").text(file.name);
     updatePreview(file.path,'right',[],[],"",function(){refImagePathRight = file.path;});
+    updateFrameScrollerRange();
 });
 
 $("#calInput").on("click",function () {
@@ -410,6 +450,7 @@ $("#leftDefInput").change(function (evt) {
         }
     }
     checkValidInput();
+    updateFrameScrollerRange();
 });
 
 function createCalPreview(event){

@@ -443,6 +443,9 @@ h4 {
     margin-bottom: 10px;
     margin-left: 5px;
 }
+.def-image-ul-selected {
+    background-color: LightSkyBlue;
+}
 .def-image-ul {
     font-size: 12px;
     line-height: 20px;

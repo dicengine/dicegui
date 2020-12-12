@@ -33,8 +33,8 @@ var diceTrackLibOn = false;
 // image sets
 var refImagePathLeft = "undefined";
 var refImagePathRight = "undefined";
-var defImagePathsLeft = new Array();
-var defImagePathsRight = new Array();
+var defImagePathsLeft = [];
+var defImagePathsRight = [];
 var cinePathLeft = "undefined";
 var cinePathRight = "undefined";
 var cineFirstFrame = 0;

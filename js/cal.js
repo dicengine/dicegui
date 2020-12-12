@@ -595,7 +595,7 @@ function updateCalSequenceLabels(stats){
     $("#calFrameScroller").attr('max',stats.endIndex);
     $("#calFrameScroller").attr('step',stats.frameInterval);
     
-    updateImageSequencePreview();
+    updateCalImageSequencePreview();
 
     updateSelectableList();
 
@@ -647,13 +647,13 @@ function updateFrameScroller(){
 
 $("#startIndex,#endIndex,#skipIndex").on('focusout',function(e){
     updateFrameScroller();
-    updateImageSequencePreview(function(){updateSelectableList;updateCalPreview(true)});
+    updateCalImageSequencePreview(function(){updateSelectableList;updateCalPreview(true)});
 });
 
 $("#imagePrefix,#startIndex,#endIndex,#skipIndex,#numDigits,#imageExtension,#stereoLeftSuffix,#stereoRightSuffix").keypress(function(e){
     if(e.which!=13) return;
     updateFrameScroller();
-    updateImageSequencePreview(function(){updateSelectableList;updateCalPreview(true)});
+    updateCalImageSequencePreview(function(){updateSelectableList;updateCalPreview(true)});
 });
 
 $("#binaryThresh").on('input',function(){
@@ -791,7 +791,7 @@ function updateSelectableList(){
     }
 }
 
-function updateImageSequencePreview(cb){
+function updateCalImageSequencePreview(cb){
     var fullImageName='';
     
     if($("#calFileSelectMode").val()=="cine"){

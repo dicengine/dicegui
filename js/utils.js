@@ -291,7 +291,6 @@ $("#changeImageFolder").click(function(){
     if(path){
         autoDetectImageSequence(path[0],updateSequenceLabels);
         $('#imageFolder span').text(path[0]);
-        //updateImageSequencePreview();
     }
 });
 
@@ -304,17 +303,26 @@ function updateSequenceLabels(stats){
     $("#stereoLeftSuffix").val(stats.leftSuffix);
     $("#stereoRightSuffix").val(stats.rightSuffix);
     $("#imageExtension").val(stats.extension);
-
+    updateFrameScrollerRange();
     updateImageSequencePreview(true);
 }
 
-$("#imagePrefix,#refIndex,#numDigits,#imageExtension,#stereoLeftSuffix,#stereoRightSuffix").on('keyup',function(){
-    updateImageSequencePreview(false);
-});
+$("#startIndex,#endIndex,#skipIndex,#imagePrefix,#numDigits,#imageExtension,#stereoLeftSuffix,#stereoRightSuffix").keypress(function(event) { 
+    if(!$('#fileSelectMode').val()=="sequence") return;
+    if (event.keyCode === 13) { 
+        if($('#skipIndex').val()<0)
+            $('#skipIndex').val(0);
+        updateFrameScrollerRange();
+        updateImageSequencePreview(true);
+    }
+}); 
+
+//$("#startIndex,#endIndex,#skipIndex,#imagePrefix,#numDigits,#imageExtension,#stereoLeftSuffix,#stereoRightSuffix").on('keyup',function(){
+//});
 
 function concatImageSequenceName(stereoImageFlag){
     var fullImageName = "";
-    $('#imageSequencePreview span').text('');    
+    $('#imageSequencePreview span').text('');
     fullImageName = $("#imageFolderSpan").text();
     if(os.platform()=='win32'){
         fullImageName += '\\';
@@ -323,7 +331,7 @@ function concatImageSequenceName(stereoImageFlag){
     }
     fullImageName += $("#imagePrefix").val();
     // get the number of digits in the ref index
-    var tmpNum = Number($("#refIndex").val());
+    var tmpNum = Number($("#currentPreviewSpan").text());//Number($("#refIndex").val());
     var defDig = 0;
     if(tmpNum==0)
         defDig = 1;
@@ -335,7 +343,7 @@ function concatImageSequenceName(stereoImageFlag){
         for(var j=0;j<digits - defDig;++j){
             fullImageName += "0";
         }
-    fullImageName += $("#refIndex").val();
+    fullImageName += $("#currentPreviewSpan").text();//$("#refIndex").val();
     if((showStereoPane==1||showStereoPane==2)&&stereoImageFlag==0){
         fullImageName += $("#stereoLeftSuffix").val();
     }else if((showStereoPane==1||showStereoPane==2)&&stereoImageFlag==1){
@@ -738,6 +746,25 @@ function showStereoViewer(){
     $("#stereoParams").show();
     $('#runLi span').text('run stereo');
     $('#x1x2').text('x 2');
+}
+
+function updateFrameScrollerRange(){
+    if($("#fileSelectMode").val()=="list"){
+        $("#startPreviewSpan").text("ref");
+        $("#endPreviewSpan").text(defImagePathsLeft.length);
+        $("#currentPreviewSpan").text("0");
+        $("#frameScroller").attr('max',defImagePathsLeft.length);
+        $("#frameScroller").attr('min',0);
+        $("#frameScroller").val(0);
+    }else if($("#fileSelectMode").val() == "sequence"){
+        $("#startPreviewSpan").text($("#startIndex").val());
+        $("#endPreviewSpan").text($("#endIndex").val());
+        $("#currentPreviewSpan").text($("#startIndex").val());
+        $("#frameScroller").attr('max',$("#endIndex").val());
+        $("#frameScroller").attr('min',$("#startIndex").val());
+        $("#frameScroller").val($("#startIndex").val());
+        $("#frameScroller").attr('step',$("#skipIndex").val());
+    }
 }
 
 $("#analysisModeSelect").on('change',function() {

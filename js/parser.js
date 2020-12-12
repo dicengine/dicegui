@@ -137,6 +137,7 @@ function impl_input_xml_file(xml){
                     $("#defImageListLeft").append("<li class='defListLi' id='defListLi_"+current_length_li+"'>" + def_name_split[def_name_split.length-1] + "</li>");
                     getFileObject(full_def_name, function (fileObject) {
                         defImagePathsLeft.push(fileObject);
+                        updateFrameScrollerRange();
                         // sort the defImagePathsLeft in case the asynch getFileObject re-ordered the list
                         defImagePathsLeft.sort(function(a, b) {
                             return (a.name > b.name) - (a.name < b.name);
@@ -204,6 +205,7 @@ function impl_input_xml_file(xml){
             if(image_prefix) $("#imagePrefix").val(image_prefix);
             image_ext = xml_get(xml,"image_file_extension");
             if(image_ext) $("#imageExtension").val(image_ext);
+            updateFrameScrollerRange();
             loadImageSequence(function(){parseSubsetFile(xml);});
         }
     }
@@ -663,45 +665,3 @@ function pointsToSubsetLocationTrace(points,name){
     };
     return scatterTrace;
 }
-
-//function xml_has(xml,param_name){
-//    console.log($(xml).find('Parameter[name="'+param_name+'"]'))
-//    var obj = $(xml).find('Parameter[name="'+param_name+'"]');
-//    return obj && obj !== 'null' && obj !== 'undefined';
-//}
-
-    
-//    var request = new XMLHttpRequest();
-//    request.open("GET", filename, false);
-//    request.send();
-//    var xml = request.responseXML;
-//    //console.log(xml);
-//    var xml_params = xml.getElementsByTagName('Parameter');
-//    console.log(xml_params);
-//    parse_input_file(xml_params);
-//    var params = xml.getElementsByTagName('ParameterList');
-//    for(var i = 0; i < params.length; i++) {
-//        var sub_params = xml.getElementsByTagName('ParameterList');
-//            for(var i = 0; i < sub_params.length; i++) {
-//                var name = sub_params[i].getAttribute('name');
-//                var type = sub_params[i].getAttribute('type');
-//                var value = sub_params[i].getAttribute('value');
-//                console.log("sub_parameterlist name " + name);
-//                var param = sub_params[i].getElementsByTagName('Parameter');
-//                for(var i = 0; i < param.length; i++) {
-//                    var name = sub_params[i].getAttribute('name');
-//                    var type = sub_params[i].getAttribute('type');
-//                    var value = sub_params[i].getAttribute('value');
-//                    console.log("sub_parameter name " + name + " type " + type + " value " + value);
-//                }
-//            }
-//    }
-//}
-
-//function parse_input_file(xml_params){
-//    // set the subset size:
-//    for(var i=0;i<params.length;i++){
-//        console.log
-//    }
-//    
-//}

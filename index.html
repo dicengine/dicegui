@@ -76,7 +76,18 @@
           <option value="sequence">sequence of images</option>
           <option value="cine">.cine video frames</option>
         </select>
-
+        <p class="nav-item">frames:</p>
+        <div style="display: block" id="rangePreview" class="nav-item">
+          <span id="startPreviewSpan" style="display: block; float: left; width: 33%;"></span> <span
+            id="currentPreviewSpan"
+            style="display: block; float: left; text-align: center; width: 33%;"
+          ></span> <span id="endPreviewSpan"
+            style="display: block; text-align: right; float: right; width: 33%;"
+          ></span>
+        </div>
+        <input class="nav-item" style="width: 95%;" id="frameScroller" type="range" min="0" max="1"
+          defaultValue="0" value="0" step="1"
+        >
         <div id="leftImageMenu">
           <!-- begin list input -->
           <div class="nav-list">
@@ -100,7 +111,7 @@
           <!-- end list input -->
           <!-- begin sequence input -->
           <div class="nav-sequence">
-            <div id="changeImageFolder" class="action-li">
+            <div id="changeImageFolder" class="action-li" style="padding-top: 8px;">
               <i class="material-icons md-dark md-br-pad">folder</i> image folder
             </div>
             <div id="imageFolder" style="word-wrap: break-word;">
@@ -136,10 +147,10 @@
             >
               <span id="imageSequencePreviewSpan"></span>
             </div>
-            <label id="loadRef" class="action-li"> <i
+            <!-- <label id="loadRef" class="action-li"> <i
               class="material-icons md-dark md-br-pad"
             >add_a_photo</i> refresh preview
-            </label>
+            </label>  -->
           </div>
           <!-- end sequence input -->
           <!-- begin cine input -->
@@ -166,18 +177,6 @@
               </div>
             </div>
             <!-- end nav two cam -->
-            <p class="nav-item">frames:</p>
-            <div style="display: block" id="cineRangePreview" class="nav-item">
-              <span id="cineStartPreviewSpan" style="display: block; float: left; width: 33%;"></span>
-              <span id="cineCurrentPreviewSpan"
-                style="display: block; float: left; text-align: center; width: 33%;"
-              ></span> <span id="cineEndPreviewSpan"
-                style="display: block; text-align: right; float: right; width: 33%;"
-              ></span>
-            </div>
-            <input class="nav-item" style="width: 95%;" id="frameScroller" type="range" min="0"
-              max="1" defaultValue="0" value="0" step="1"
-            >
             <div class="nav-item tracklib-tools" style="margin-bottom:5px;">go to frame <input class="nav-item" type="text" id="cineGoToIndex" name="cineGoToIndex" value="0" style="width: 35%;"></div>
             <div class="nav-item">ref frame</div>
             <input class="nav-item update-tracklib-preview" type="text" id="cineRefIndex" name="cineRefIndex" value="0"
