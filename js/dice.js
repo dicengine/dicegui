@@ -43,9 +43,6 @@ function integerLength(integer) {
     return integer.toString().length;
 }
 
-// global variable to see if there is already a live plot visible
-//var livePlotWin = null;
-//var livePlotLineWin = null;
 function showLivePlots(){
     //var online = navigator.onLine;
     // disable live plots when working offline
@@ -85,21 +82,22 @@ function showLivePlots(){
         return;
     }
 //    livePlotContourRepeat();
-    if(livePlotPtsX.length <=0 && !addLivePlotLineActive) return;
-    if(livePlotPtsX.length >0){
+    var livePlotInfo = livePlotDims();
+    if(livePlotInfo.numLivePlotPts<=0 && !livePlotInfo.livePlotLineActive) return;
+    if(livePlotInfo.numLivePlotPts >0){
         var livePlotFiles = ""
         // TODO set up the files to read
         //livePlotFiles = "DICe_solution_0.txt DICe_solution_1.txt DICe_solution_2.txt DICe_solution_3.txt DICe_solution_4.txt DICe_solution_5.txt DICe_solution_6.txt";
-        for(var i=0;i<livePlotPtsX.length;++i){
+        for(var i=0;i<livePlotInfo.numLivePlotPts;++i){
             livePlotFiles += 'live_plot_pt_' + i + '.txt';
-            if(i<livePlotPtsX.length-1)
+            if(i<livePlotInfo.numLivePlotPts-1)
                 livePlotFiles += ' ';
         }
         localStorage.setItem("livePlotFiles", livePlotFiles);
         $("#resultsButton").trigger( "click" );
         livePlotRepeat();
     }
-    if(addLivePlotLineActive){
+    if(livePlotInfo.livePlotLineActive){
         $("#resultsButton").trigger( "click" );
         livePlotLineRepeat();
     }
@@ -770,7 +768,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
     content += '<Parameter name="output_folder" type="string" value="' + outputFolder + '" /> \n';
     content += '<Parameter name="correlation_parameters_file" type="string" value="' + paramsFile + '" />\n';
 
-    var ROIShapes = getPlotlyPathShapes('ROI');
+    var ROIShapes = getPlotlyShapes('ROI');
     var numROIs = ROIShapes.length;
     //  for global if no ROI has been defined, define a default one
     if(numROIs==0&&$("#analysisModeSelect").val()=="global"){
@@ -915,17 +913,32 @@ function writeBestFitFile() {
 }
 
 function writeLivePlotsFile() {
-    if((livePlotPtsX.length >0 || addLivePlotLineActive)&&($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global")){
+    if($("#analysisModeSelect").val()!="subset") return;
+    var data = document.getElementById("plotlyViewerLeft").data;
+    if(!data) return;
+    var livePlotPtsTraceId = data.findIndex(obj => { 
+        return obj.name === "livePlotPts";
+    });
+    console.log('writeLivePlotsFile(): livePlotPtsTraceId ' + livePlotPtsTraceId);
+    if(livePlotPtsTraceId<0) return;
+    var x = data[livePlotPtsTraceId].x;
+    var y = data[livePlotPtsTraceId].y;
+    var lineShapes = getPlotlyShapes('livePlotLine');
+    if(lineShapes.length>1){
+        alert('error ocurred in determining live plot line shapes');
+    }
+    if(x.length > 0||lineShapes.length==1){
         var livePlotFile = fullPath('','live_plot.dat');
-        consoleMsg('writing live plot data file ' + livePlotFile);
+        console.log('writing live plot data file ' + livePlotFile);
         var LPcontent = '';
         LPcontent += '# two numbers is a point four numbers is a line\n';
-        for(var i=0;i<livePlotPtsX.length;++i){
-            LPcontent += livePlotPtsX[i] + ' ' + livePlotPtsY[i] + '\n'
+        for(var i=0;i<x.length;++i){
+            LPcontent += x[i] + ' ' + y[i] + '\n'
         }
-        if(addLivePlotLineActive){
-            LPcontent += livePlotLineXOrigin + ' ' + livePlotLineYOrigin + ' ' + livePlotLineXAxis + ' ' + livePlotLineYAxis + '\n'
-        }
+        if(lineShapes.length==1)
+            LPcontent += Math.floor(lineShapes[0].x0) + ' ' + Math.floor(lineShapes[0].y0) + 
+            ' ' + Math.floor(lineShapes[0].x1) + ' ' + Math.floor(lineShapes[0].y1) + '\n'
+        // TODO should we allow multiple lines?
         fs.writeFile(livePlotFile, LPcontent, function (err) {
             if(err){
                  alert("Error: an error ocurred creating the file "+ err.message)
@@ -1180,9 +1193,9 @@ function writeSubsetFile(only_write,resolution,ss_locs){
     var subsetFile = fullPath('','subset_defs.txt');
     consoleMsg('writing subset file ' + subsetFile);
 
-    var pathShapes = getPlotlyPathShapes('ROI');
+    var pathShapes = getPlotlyShapes('ROI');
     var numROIs = pathShapes.length;
-    var excludedShapes = getPlotlyPathShapes('excluded');
+    var excludedShapes = getPlotlyShapes('excluded');
     var numExcluded = excludedShapes.length;
     
     var content = '';
@@ -1337,7 +1350,7 @@ function checkValidInput() {
     // catch tracking with no ROIs defined
     if($("#analysisModeSelect").val()=="tracking"&&!isStereo){
         $("#taskList").append('<li id=\"defineROIsLi\" class=\"task-list-item\";>define tracking subsets</li>');
-      var ROIShapes = getPlotlyPathShapes('ROI');
+      var ROIShapes = getPlotlyShapes('ROI');
       var numROIs = ROIShapes.length;
       if(numROIs<=0){
           $('#defineROIsLi').removeClass('task-list-item-done');
@@ -1346,7 +1359,7 @@ function checkValidInput() {
           $('#defineROIsLi').addClass('task-list-item-done');
     }
     if(calRequired){
-        if(calPath=='undefined'){
+        if(!calPath || calPath=='undefined'){
             validInput = false;
             $('#loadCalLi').removeClass('task-list-item-done');
         }else
@@ -1406,7 +1419,7 @@ function checkValidInput() {
                 validInput = false;
                 $('#listLoadStereoRefLi').removeClass('task-list-item-done');
             }else
-                $('#listLoadStereoRefLi').removeClass('task-list-item-done');
+                $('#listLoadStereoRefLi').addClass('task-list-item-done');
             if(!defImagePathsRight[0]){
 //                consoleMsg('right deformed images have not been defined yet');
                 validInput = false;

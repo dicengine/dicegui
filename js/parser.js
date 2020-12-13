@@ -32,9 +32,13 @@ function parseSubsetFile(xml){
                     }
                 }); // end readfile
             }else{ // file doesn't exist
+                readLivePlotFile();
             }
         }); // end stat subset file
     }  // end has subset_file
+    else{
+        readLivePlotFile();
+    }
 }
 
 function impl_input_xml_file(xml){
@@ -246,41 +250,6 @@ function impl_input_xml_file(xml){
         }
     });
     
-    // see if there is a "live_plot.dat" file in the folder
-    var LPFileName = fullPath('','live_plot.dat');
-    fs.stat(LPFileName, function(err, stat) {
-        if(err == null) {
-            fs.readFile(LPFileName,'utf8',function(err,data){
-                if(err){
-                }else{
-                    var lines = data.toString().split('\n');
-                    for(var line = 0; line < lines.length; line++){
-                        if(lines[line].charAt(0)=='#') continue;
-                        var tokens = lines[line].split(/\s+/g).map(Number);
-                        if(isNaN(tokens[0]))continue;
-                        //console.log("tokens: " + tokens);
-                        //console.log("token length " +  tokens.length);
-                        if(tokens.length==2){
-                            livePlotPtsX.push(tokens[0]);
-                            livePlotPtsY.push(tokens[1]);
-                        }else if(tokens.length==4){
-                            livePlotLineXOrigin = tokens[0];
-                            livePlotLineYOrigin = tokens[1];
-                            livePlotLineXAxis = tokens[2];
-                            livePlotLineYAxis = tokens[3];
-                            addLivePlotLineActive = true;
-                            $("#addLivePlotLine").css('color','#33ccff');
-                        }else{
-                            //alert("Error reading live plot data: invalid line in file");
-                        }
-                    }
-                    // set the coordinates
-                    //drawROIs();
-                }
-            }); // end readfile
-        }
-    });
-
     // see if there is a calibration parameters file
     calPath = xml_get(xml,"camera_system_file");
     console.log('has calibration file: ' + calPath);
@@ -302,6 +271,48 @@ function impl_input_xml_file(xml){
     checkValidInput();
 }
 
+function readLivePlotFile(){
+    // see if there is a "live_plot.dat" file in the folder
+    var LPFileName = fullPath('','live_plot.dat');
+    var livePlotPtsX = [];
+    var livePlotPtsY = [];
+    var ox = 0;
+    var oy = 0;
+    var px = 0;
+    var py = 0;
+    fs.stat(LPFileName, function(err, stat) {
+        if(err == null) {
+            fs.readFile(LPFileName,'utf8',function(err,data){
+                if(err){
+                }else{
+                    var lines = data.toString().split('\n');
+                    for(var line = 0; line < lines.length; line++){
+                        if(lines[line].charAt(0)=='#') continue;
+                        var tokens = lines[line].split(/\s+/g).map(Number);
+                        if(isNaN(tokens[0]))continue;
+                        //console.log("tokens: " + tokens);
+                        //console.log("token length " +  tokens.length);
+                        if(tokens.length==2){
+                            livePlotPtsX.push(tokens[0]);
+                            livePlotPtsY.push(tokens[1]);
+                        }else if(tokens.length==4){
+                            ox = tokens[0];
+                            oy = tokens[1];
+                            px = tokens[2];
+                            py = tokens[3];
+                        }else{
+                            //alert("Error reading live plot data: invalid line in file");
+                        }
+                    }
+                    // set the coordinates
+                    addLivePlotPts(livePlotPtsX,livePlotPtsY);
+                    if(ox!=0||oy!=0||px!=0||py!=0)
+                        addLivePlotLine(ox,oy,px,py);
+                }
+            }); // end readfile
+        }
+    });
+}
 
 // note: the read_susbset_file does not read the
 // subset_id for a conformal subset, instead it assumes that the
@@ -315,7 +326,7 @@ function readSubsetFile(data){
     //clearObstructed();
     var currentROI = 0;
     // if a representative subset shape exists, keep it
-    var shapes = getPlotlyPathShapes('representativeSubset');
+    var shapes = getPlotlyShapes('representativeSubset');
     var subsetLocations = {x:[],y:[]};
     var max_vertices = 500;
     var lines = data.toString().split('\n');
@@ -386,9 +397,9 @@ function readSubsetFile(data){
     // assuming here that the plotly div already exists
     var update = {shapes: shapes};
     Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
-    //console.log(pointsToSubsetLocationTrace(subsetLocations));
     if(subsetLocations.x.length>0)
-        Plotly.addTraces(document.getElementById("plotlyViewerLeft"),pointsToSubsetLocationTrace(subsetLocations));
+        Plotly.addTraces(document.getElementById("plotlyViewerLeft"),pointsToScatterTrace(subsetLocations));
+    readLivePlotFile();
 }
 
 function update_cine_indices(xml){
@@ -568,26 +579,32 @@ function shapesToCentroids(shapes){
     if(shapes.length==0) return;
     // iterate the shapes and for each path shape, compute the centroid
     for(var i=0;i<shapes.length;++i){
-        if(shapes[i].type!='path') continue;
-        var points = pathShapeToPoints(shapes[i]);
-        var j = 0;
-        var det = 0.0;
         var cx = 0.0; var cy = 0.0;
-        for (var ii = 0; ii < points.x.length; ii++){
-            // closed polygon
-            if (ii + 1 == points.x.length)
-                j = 0;
-            else
-                j = ii + 1;
-            // compute the determinant
-            var tempDet = points.x[ii] * points.y[j] - points.x[j]*points.y[ii];
-            det += tempDet;
-            cx += (points.x[ii] + points.x[j])*tempDet;
-            cy += (points.y[ii] + points.y[j])*tempDet;
+        if(shapes[i].type=='line'){
+            cx = (shapes[i].x0 + shapes[i].x1)/2;
+            cy = (shapes[i].y0 + shapes[i].y1)/2;
+        }else if(shapes[i].type=='path'){
+            var points = pathShapeToPoints(shapes[i]);
+            var j = 0;
+            var det = 0.0;
+            for (var ii = 0; ii < points.x.length; ii++){
+                // closed polygon
+                if (ii + 1 == points.x.length)
+                    j = 0;
+                else
+                    j = ii + 1;
+                // compute the determinant
+                var tempDet = points.x[ii] * points.y[j] - points.x[j]*points.y[ii];
+                det += tempDet;
+                cx += (points.x[ii] + points.x[j])*tempDet;
+                cy += (points.y[ii] + points.y[j])*tempDet;
+            }
+            // divide by the total mass of the polygon
+            cx /= 3.0*det;
+            cy /= 3.0*det;
+        }else{
+            // cx = 0 cy = 0
         }
-        // divide by the total mass of the polygon
-        cx /= 3.0*det;
-        cy /= 3.0*det;
         centroids.x.push(Math.floor(cx));
         centroids.y.push(Math.floor(cy));
     }
@@ -649,7 +666,8 @@ function pathShapeToPoints(shape){
     return points;
 }
 
-function pointsToSubsetLocationTrace(points,name){
+function pointsToScatterTrace(points,name,color,text){
+    if(!color) color = 'cyan';
     if(!name) name = 'subsetCoordinates';
     var visible = false;
     var scatterTrace = {
@@ -660,8 +678,12 @@ function pointsToSubsetLocationTrace(points,name){
             y:points.y,
             mode:'markers',
             marker: {
-                color: '#F6F926'
+                color: color
             },
     };
+    if(text){
+        scatterTrace.hovertemplate = '(%{x},%{y})<br>%{text}<extra></extra>';
+        scatterTrace.text = text;
+    }
     return scatterTrace;
 }

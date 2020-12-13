@@ -227,8 +227,6 @@ $("#loadSubsetFileInput").change(function (evt) {
         var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
         if(file){
-            addLivePlotPtsActive = false;
-            $("#addLivePlotPts").css('color','rgba(0, 0, 0, 0.5)');
             fs.readFile(file.path,'utf8',function(err,data){
                 if(err){
                 }else{

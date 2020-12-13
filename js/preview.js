@@ -29,7 +29,7 @@ function getPreviewLayout(){
             hovermode: 'closest',
     };
     if($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global"){
-        _layout.newshape = {line: {color: 'cyan'},fillcolor:'cyan',opacity:0.4};
+        _layout.newshape = {line: {color: 'yellow'},fillcolor:'cyan',opacity:0.4};
     }
     if($("#analysisModeSelect").val()=="tracking"){
         _layout.newshape = {line: {color: 'purple'},fillcolor:'green',opacity:0.4};
@@ -60,6 +60,16 @@ function getPreviewConfig(dest){
             icon: importIcon,
             click: () => {$('#loadSubsetFileInputIcon').click();}
     }
+    let deleteLivePlotPtsIcon = {
+            'width': 24,
+            'height': 24,
+            'path': "M7,11v2h10v-2H7z M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10c5.52,0,10-4.48,10-10C22,6.48,17.52,2,12,2z M12,20c-4.41,0-8-3.59-8-8s3.59-8,8-8s8,3.59,8,8S16.41,20,12,20z"
+    }
+    var deleteLivePlotPtsButton = {
+            name: 'Delete live plot pts',
+            icon: deleteLivePlotPtsIcon,
+            click: () => { deleteLivePlotPts();}
+    }
     var _config = {
             displaylogo: false,
             scrollZoom: true,
@@ -75,8 +85,10 @@ function getPreviewConfig(dest){
             _config.modeBarButtonsToAdd = [
                 'drawclosedpath',
                 'eraseshape',
+                'drawline',
                 showSubsetLocationsButton,
-                importSubsetLocationsButton];
+                importSubsetLocationsButton,
+                deleteLivePlotPtsButton];
         }
     }
     if($("#analysisModeSelect").val()=="tracking"){
@@ -143,9 +155,12 @@ function updatePreview(filePath,dest,data=[],argsIn,debugConsoleDivId,cb){
     // if there is already a data entry for the subset coordinates, automatically push that to the data array
     var div = document.getElementById(spec.destDivId);
     if(div.data)
-        for(var i=0;i<div.data.length;++i)
+        for(var i=0;i<div.data.length;++i){
             if(div.data[i].name=='subsetCoordinates')
                 data.push(div.data[i]);
+            if(div.data[i].name=='livePlotPts')
+                data.push(div.data[i]);
+        }
     
     // set up the arguments to call the DICe opencv server which will convert whatever the input image
     // is to png so that it can be displayed in the viewer
@@ -312,6 +327,109 @@ function updateImage(spec,data){
         });
         posDiv.innerText = infotext;
     });
+    if(spec.dest=='left'){
+        div.on('plotly_click', function(data){
+            if(spec.dest!='left') return;
+            if(data.event.button!=2) return;// right click only 
+            addLivePlotPts([data.points[0].x],[data.points[0].y]);
+//            alert('i was clicked');
+        });
+    }
+}
+
+function livePlotDims(){
+    var result = {numLivePlotPts:0,
+            livePlotLineActive: false};
+    if($("#analysisModeSelect").val()!="subset") return result;
+    var data = document.getElementById("plotlyViewerLeft").data;
+    var livePlotPtsTraceId = data.findIndex(obj => { 
+        return obj.name === "livePlotPts";
+    });
+    if(livePlotPtsTraceId>=0){
+        result.numLivePlotPts = data[livePlotPtsTraceId].x.length;
+    }
+    var lineShapes = getPlotlyShapes('livePlotLine')
+    result.livePlotLineActive = lineShapes.length==1;
+    return result;
+}
+
+function addLivePlotLine(ox,oy,px,py){
+    // check if live plot points have been defined
+    if($("#analysisModeSelect").val()!="subset") return;
+    var lineShape = {
+            type: 'line',
+            x0: ox,
+            x1: px,
+            y0: oy,
+            y1: py,
+            line: {color: 'yellow', width: 3},
+            name: 'livePlotLine',
+            editable: true,
+            opacity: 0.8
+    };
+    var existingShapes = getPlotlyShapes();
+    existingShapes.push(lineShape);
+    var update = {'shapes' : existingShapes}
+    Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
+}
+
+function addLivePlotPts(ptsX,ptsY){
+    // check if live plot points have been defined
+    if($("#analysisModeSelect").val()!="subset") return;
+    var data = document.getElementById("plotlyViewerLeft").data;
+    if(!data){
+        alert('error: plotly viewer left data has not been defined');
+        return;
+    }
+    for(var i=0;i<ptsX.length;++i)
+        console.log('add live plot point @' + ptsX[i] + ',' + ptsY[i]);
+    var livePlotPtsTraceId = data.findIndex(obj => { 
+        return obj.name === "livePlotPts";
+    });
+    console.log('livePlotPtsTraceId ' + livePlotPtsTraceId);
+    var x = [];
+    var y = [];
+    var text = [];
+    if(livePlotPtsTraceId>=0){
+        // update the points by adding one to it
+        x = data[livePlotPtsTraceId].x;
+        y = data[livePlotPtsTraceId].y;
+        text = data[livePlotPtsTraceId].text;
+    }
+    var pointId = x.length;
+    for(var i=0;i<ptsX.length;++i){
+        x.push(ptsX[i]);
+        y.push(ptsY[i]);
+        text.push('live plot pt: ' + pointId.toString());
+        pointId++;
+    }
+    if(livePlotPtsTraceId>0){
+        var update = {
+                x: [x],
+                y: [y],
+                text: [text]
+        }
+        Plotly.restyle(document.getElementById("plotlyViewerLeft"), update, livePlotPtsTraceId);
+    }
+    else{
+        var coords = {x:x,y:y};
+        var color = 'yellow'; //'#00ff00';
+        var previewTrace = pointsToScatterTrace(coords,'livePlotPts',color,text);
+        previewTrace.visible = true;
+        Plotly.addTraces(document.getElementById("plotlyViewerLeft"),previewTrace);
+    }
+}
+
+function deleteLivePlotPts(){
+    console.log('deleteLivePlotPts()');
+    var allTraces = document.getElementById("plotlyViewerLeft").data;
+    var previewResult = allTraces.findIndex(obj => { 
+        return obj.name === "livePlotPts";
+    });
+    if(previewResult>=0){
+        Plotly.deleteTraces(document.getElementById("plotlyViewerLeft"), previewResult);
+    }
+    // TODO delete line info as well
 }
 
 function removeSubsetPreview(){
@@ -369,43 +487,53 @@ function getSubsetCoordinatesTrace(){
         return {};
 }
 
-function getPlotlyPathShapes(name,strict=false){
-    var pathShapes = [];
+function getPlotlyShapes(name,strict=false){
+    var returnShapes = [];
     var plotlyDivLeft = document.getElementById("plotlyViewerLeft");
     if(plotlyDivLeft.layout){
         if(plotlyDivLeft.layout.shapes){
             var shapes = plotlyDivLeft.layout.shapes;
             for(var i=0;i<shapes.length;++i){
-                if(shapes[i].type=='path')
+                //if(shapes[i].type=='path')
                     if(name){
                         if(!strict&&shapes[i].name.includes(name))
-                            pathShapes.push(shapes[i]);
+                            returnShapes.push(shapes[i]);
                         else if(shapes[i].name==name)
-                            pathShapes.push(shapes[i]);
+                            returnShapes.push(shapes[i]);
                     }else{
-                        pathShapes.push(shapes[i]);
+                        returnShapes.push(shapes[i]);
                     }
             }
         }
     }
-    return pathShapes;
+    return returnShapes;
 }
 
 $("#plotlyViewerLeft").on('plotly_relayout', function(){
     console.log('plotly_relayout event begin');
-    assignShapeNames();
-    checkForInternalShapes();
+    if(updateLivePlotLine() ||
+            assignShapeNames() ||
+            checkForInternalShapes()){
+        var update = {'shapes' : getPlotlyShapes()}
+        Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
+    }
+    
     // update the subset coordinates trace
-    var shapes = getPlotlyPathShapes('ROI');
+    var shapes = getPlotlyShapes('ROI');
     if(shapes.length<=0){
         checkValidInput();
         return;
     }
+    
+    // check if subset coordinates have already been defined
+    
     var centroids = shapesToCentroids(shapes);
     var text = [];
     if(centroids.x)
-        for(var i=0;i<centroids.x.length;++i)
-            text.push('id: ' + i.toString());
+        for(var i=0;i<centroids.x.length;++i){
+            var shapeId = shapes[i].name.split('_').pop();
+            text.push('id: ' + shapeId.toString());
+        }
     var coordsTraceId = document.getElementById("plotlyViewerLeft").data.findIndex(obj => { 
         return obj.name === "subsetCoordinates";
     });
@@ -421,7 +549,7 @@ $("#plotlyViewerLeft").on('plotly_relayout', function(){
     }
     // the subset coordinates trace may not exist, if not and the analsis mode is tracking add one
     else if(centroids.x&&$("#analysisModeSelect").val()=="tracking"&&showStereoPane==0){
-        Plotly.addTraces(document.getElementById("plotlyViewerLeft"),pointsToSubsetLocationTrace(centroids));
+        Plotly.addTraces(document.getElementById("plotlyViewerLeft"),pointsToScatterTrace(centroids));
     }
     checkValidInput();
     console.log('plotly_relayout event end');
@@ -478,7 +606,7 @@ function drawRepresentativeSubset(){
     var cy = refImageHeight/2;
 
     // check if representative subset already exists and get it's points
-    var existingBox = getPlotlyPathShapes('representativeSubset');
+    var existingBox = getPlotlyShapes('representativeSubset');
     if(existingBox.length>0){
         var boxPoints = pathShapeToPoints(existingBox[0]);
         cx = (boxPoints.x[0] + boxPoints.x[1])/2;
@@ -533,7 +661,7 @@ function undrawRepresentativeSubset(){
 }
 
 function numROIShapes(){
-    return getPlotlyPathShapes('ROI').length;
+    return getPlotlyShapes('ROI').length;
 }
 
 function deleteShape(index){
@@ -543,33 +671,88 @@ function deleteShape(index){
                 document.getElementById("plotlyViewerLeft").layout.shapes.splice(index,1);
 }
 
+function updateLivePlotLine(){
+    var relayoutNeeded = false;
+    var shapes = getPlotlyShapes(); // get all shapes, not just ROIs
+    //console.log(shapes);
+    
+    var oldLineIndex = -1;
+    var newLineIndex = -1;
+    for(var i=0;i<shapes.length;++i){
+        if(shapes[i].type==='line'){
+            if(shapes[i].name){
+                if(oldLineIndex>=0)
+                    alert('error in update live plot line, too many existing lines found');
+                oldLineIndex = i;
+            }
+            else{
+                if(newLineIndex>=0)
+                    alert('error in update live plot line, too many new lines found');
+                newLineIndex = i;
+            }
+        }
+    }
+    if(newLineIndex>=0){
+        shapes[newLineIndex].name='livePlotLine';
+        shapes[newLineIndex].line = {color: 'yellow', width: 3};
+        shapes[newLineIndex].opacity = 0.8;
+        relayoutNeeded = true;
+    }
+    if(oldLineIndex>=0&&newLineIndex>=0){
+        console.log('DELETING OLD SHAPE');
+        deleteShape(oldLineIndex);
+    }
+    return relayoutNeeded;
+}
+
 function assignShapeNames(){
-    var shapes = getPlotlyPathShapes(); // get all shapes, not just ROIs
-    for(var i=0;i<shapes.length;i++){
-        if(shapes[i].name===undefined){
+    var relayoutNeeded = false;
+    var shapes = getPlotlyShapes(); // get all shapes, not just ROIs
+    var ROICount = 0;
+    var i = shapes.length;
+    while (i--) {
+        if(shapes[i].name===undefined&&shapes[i].type==='path'){
             if($("#showDeformedCheck")[0].checked){
                 alert('cannot add ROIs while show tracked ROIs is active');
                 deleteShape(i);
+                relayoutNeeded = true;
                 continue;
-            }else
-                shapes[i].name='ROI_' + i.toString();
+            }else{
+                shapes[i].name='ROI_' + ROICount.toString();
+                ROICount++;
+            }
         }
     }
+    return relayoutNeeded;
+//    for(var i=0;i<shapes.length;i++){
+//        if(shapes[i].name===undefined&&shapes[i].type==='path'){
+//            if($("#showDeformedCheck")[0].checked){
+//                alert('cannot add ROIs while show tracked ROIs is active');
+//                deleteShape(i);
+//                continue;
+//            }else{
+//                shapes[i].name='ROI_' + ROICount.toString();
+//                ROICount++;
+//            }
+//        }
+//    }
 }
 
 function checkForInternalShapes(){
+    var relayoutNeeded = false;
     console.log('checkForInternalShapes');
-    var shapes = getPlotlyPathShapes(); // get all shapes, not just ROIs
+    var shapes = getPlotlyShapes(); // get all shapes, not just ROIs
     if(shapes.length<=0) return;
     var centroids = shapesToCentroids(shapes);
-    var changesMade = false;
     // loop through the shapes to
-    for(var i=0;i<centroids.x.length;i++){
+    // iterate the shapes backwards because the exclusions are always added after the base shape
+    for(var i=centroids.x.length-1;i>=0;i--){
         if(!shapes[i].name.includes('ROI')) continue;
+        //console.log('checking shape ' + shapes[i].name);
         var cx = centroids.x[i];
         var cy = centroids.y[i];
-        // iterate the shapes backwards because the exclusions are always added after the base shape
-        for(var j=shapes.length-1;j>=0;j--){
+        //console.log('checking shape ' + cx + ' ' + cy);
+        for(var j=0;j<shapes.length;j++){
             if(j==i) continue;
             if(!shapes[j].name.includes('ROI'))continue;
             var inShapeId = shapes[j].name.split('_').pop();
@@ -578,24 +761,19 @@ function checkForInternalShapes(){
                 shapes[i].line = {color: 'red'};
                 shapes[i].fillcolor = 'red';
                 shapes[i].opacity = 0.2;
-                changesMade = true;
+                relayoutNeeded = true;
                 break;
             }
         }
     }
-    if(changesMade){
-        var update = {
-                'shapes' : shapes,
-        }
-        Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
-    }
+    return relayoutNeeded;
 }
 
 function removeAllPlotlyShapesAndTraces(){
     console.log('removeAllPlotlyShapesAndTraces()');
     if(!document.getElementById("plotlyViewerLeft").layout) return;
     // remove the shapes
-    var lineColor = 'cyan';
+    var lineColor = 'yellow';
     var fillColor = 'cyan';
     if($("#analysisModeSelect").val()=="tracking"){
         lineColor =  'purple';
@@ -613,9 +791,11 @@ function removeAllPlotlyShapesAndTraces(){
     if(document.getElementById("plotlyViewerLeft").data)
         numTraces = document.getElementById("plotlyViewerLeft").data.length;
     if(numTraces>0){
-        for(var i=0;i<numTraces;++i)
-            Plotly.deleteTraces(document.getElementById("plotlyViewerLeft"),i);
+        for(var i=0;i<numTraces;++i){
+            Plotly.deleteTraces(document.getElementById("plotlyViewerLeft"),0);
+        }
     }
+    console.log(document.getElementById("plotlyViewerLeft").data);
 }
 
 function addSubsetSSSIGPreviewTrace(locsFile){
@@ -634,7 +814,7 @@ function addSubsetSSSIGPreviewTrace(locsFile){
                     coords.x.push(locsData[i++]);
                     coords.y.push(locsData[i]);
                 }
-                var previewTrace = pointsToSubsetLocationTrace(coords,'subsetPreview');
+                var previewTrace = pointsToScatterTrace(coords,'subsetPreview');
                 previewTrace.visible = true;
                 Plotly.addTraces(document.getElementById("plotlyViewerLeft"),previewTrace);
             }); // end readFile

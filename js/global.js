@@ -51,15 +51,7 @@ var bestFitXAxis = 0;
 var bestFitYAxis = 0;
 
 // regions of interest
-var livePlotPtsX = [];
-var livePlotPtsY = [];
 var drawEpipolarActive = false;
-var addLivePlotPtsActive = false;
-var addLivePlotLineActive = false;
-var livePlotLineXOrigin = 0;
-var livePlotLineYOrigin = 0;
-var livePlotLineXAxis = 0;
-var livePlotLineYAxis = 0;
 
 // state of windows etc. in interface
 var showPrefPane = true;

@@ -794,7 +794,6 @@ $("#analysisModeSelect").on('change',function() {
         $(".global").hide();
         $(".tracking").show();
         // force 2D
-        resetLivePlots();
         if(!diceTrackLibOn){
             show2DViewer();
             $(".non-tracklib-tools").show();
@@ -829,7 +828,6 @@ $("#analysisModeSelect").on('change',function() {
         $(".tracklib-tools").hide();
         $(".tracking").hide();
         // force 2D
-        //resetLivePlots();
         show2DViewer();
     }
     resizeAll();
