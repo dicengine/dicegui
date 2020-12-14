@@ -891,25 +891,26 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
 }
 
 function writeBestFitFile() {
-    if($("#bestFitCheck")[0].checked&&$("#analysisModeSelect").val()=="subset"){
-        var bestFitFile = fullPath('','best_fit_plane.dat');
-        consoleMsg('writing best fit plane file ' + bestFitFile);
-        var BFcontent = '';
-        BFcontent += '# origin of the coordinate system\n';
-        BFcontent += bestFitXOrigin + ' ' + bestFitYOrigin + '\n'
-        BFcontent += '# point on the axis \n';
-        BFcontent += bestFitXAxis + ' ' + bestFitYAxis;
-        if($("#bestFitYAxisCheck")[0].checked){
-            BFcontent += ' YAXIS ';
-        }
-        BFcontent += '\n';
-        fs.writeFile(bestFitFile, BFcontent, function (err) {
-            if(err){
-                alert("Error: an error ocurred creating the file "+ err.message)
-            }
-            consoleMsg('best_fit_plane.dat file has been successfully saved');
-        });
+    if(!$("#bestFitCheck")[0].checked||$("#analysisModeSelect").val()!="subset"||showStereoPane!=1) return;
+    var bestFitShapes = getPlotlyShapes('bestFitLine');
+    if(bestFitShapes.length==0) return;
+    var bestFitFile = fullPath('','best_fit_plane.dat');
+    consoleMsg('writing best fit plane file ' + bestFitFile);
+    var BFcontent = '';
+    BFcontent += '# origin of the coordinate system\n';
+    BFcontent += Math.floor(bestFitShapes[0].x0) + ' ' + Math.floor(bestFitShapes[0].y0) + '\n'
+    BFcontent += '# point on the axis \n';
+    BFcontent += Math.floor(bestFitShapes[0].x1) + ' ' + Math.floor(bestFitShapes[0].y1);
+    if($("#bestFitYAxisCheck")[0].checked){
+        BFcontent += ' YAXIS ';
     }
+    BFcontent += '\n';
+    fs.writeFile(bestFitFile, BFcontent, function (err) {
+        if(err){
+            alert("Error: an error ocurred creating the file "+ err.message)
+        }
+        consoleMsg('best_fit_plane.dat file has been successfully saved');
+    });
 }
 
 function writeLivePlotsFile() {
@@ -1413,6 +1414,7 @@ function checkValidInput() {
             $('#listLoadDefLi').addClass('task-list-item-done');
         // see if the right reference image is set:
         if(isStereo){
+            console.log(refImagePathRight);
             if(refImagePathRight=='undefined') {
                 enableCross = false;
 //                consoleMsg('right reference image not set yet');

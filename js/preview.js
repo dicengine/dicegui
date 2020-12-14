@@ -290,6 +290,60 @@ function updateCoordsHeatmap(width,height){
 
 var coordsHeatmap = {};
 
+function showBestFitLine(){
+    var shapes = getPlotlyShapes();
+    if(shapes.length==0) return;
+    for(var i=0;i<shapes.length;++i)
+        if(shapes[i].name)
+            if(shapes[i].name=='bestFitLine')
+                    shapes[i].visible = ($("#bestFitCheck")[0].checked&&showStereoPane==1);
+    var update = {'shapes' : shapes}
+    Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
+}
+
+function drawBestFitLine(ox,oy,px,py){
+    // check if shapes already include a bestfit line
+    var pv = document.getElementById("plotlyViewerLeft");
+    if(!pv.layout) return;
+    if(!pv.layout.images) return;
+    var existingShapes = getPlotlyShapes();
+    var bestFitLineIndex = -1;
+    for(var i=0;i<existingShapes.length;++i){
+        if(existingShapes[i].name)
+            if(existingShapes[i].name==='bestFitLine')
+                bestFitLineIndex = i;
+    }
+    if(bestFitLineIndex>=0&&!ox) return;
+    if(bestFitLineIndex<0){
+        var imW = pv.layout.images[0].sizex;
+        var imH = pv.layout.images[0].sizey;
+        if(!ox) ox = 0.3*imW;
+        if(!oy) oy = 0.8*imH;
+        if(!px) px = 0.7*imW;
+        if(!py) py = 0.8*imH;
+        var bestFitLine = {
+                type: 'line',
+                x0: ox,
+                x1: px,
+                y0: oy,
+                y1: py,
+                line: {color: 'blue', width: 3},
+                name: 'bestFitLine',
+                editable: true,
+                opacity: 0.8,
+                visible: $("#bestFitCheck")[0].checked
+        };
+        existingShapes.push(bestFitLine);
+    }else{
+        existingShapes[bestFitLineIndex].x0 = ox;
+        existingShapes[bestFitLineIndex].y0 = oy;
+        existingShapes[bestFitLineIndex].x1 = px;
+        existingShapes[bestFitLineIndex].y1 = py;
+    }
+    var update = {'shapes' : existingShapes}
+    Plotly.relayout(pv,update);
+}
+
 function updateImage(spec,data){
     console.log('updateImage(): path ' + spec.destPath + ' in div '  + spec.destDivId);
     var obj = getPreviewLayoutConfig(spec.dest);
@@ -326,8 +380,11 @@ function updateImage(spec,data){
     data.push(coordsHeatmap);
     // TODO call restyle or relayout instead of newPlot each time?
     Plotly.newPlot(div,data,obj.layout,obj.config);
-    if(spec.dest=='left'&&$("#analysisModeSelect").val()=="subset")
+    if(spec.dest=='left'&&$("#analysisModeSelect").val()=="subset"){
         drawRepresentativeSubset();
+        if(showStereoPane==1)
+            drawBestFitLine();
+    }
     var posDiv = document.getElementById('leftPos');
     if(spec.dest=='right')
         posDiv = document.getElementById('rightPos');
@@ -523,6 +580,8 @@ function getPlotlyShapes(name,strict=false){
 
 $("#plotlyViewerLeft").on('plotly_relayout', function(){
     console.log('plotly_relayout event begin');
+    var checkShapes = getPlotlyShapes();
+    console.log(checkShapes);
     if(updateLivePlotLine() ||
             assignShapeNames() ||
             checkForInternalShapes()){
@@ -660,6 +719,7 @@ function undrawRepresentativeSubset(){
     if(document.getElementById("plotlyViewerLeft").layout.shapes){
         shapes = document.getElementById("plotlyViewerLeft").layout.shapes;
     }
+    // TODO this loop should iterate backwards, it only works now since there is only one repSubset
     for(var i=0;i<shapes.length;++i){
         if(shapes[i].name=='representativeSubset'){
             shapes.splice(i,1);
@@ -693,7 +753,8 @@ function updateLivePlotLine(){
             if(shapes[i].name){
                 if(oldLineIndex>=0)
                     alert('error in update live plot line, too many existing lines found');
-                oldLineIndex = i;
+                if(shapes[i].name==='livePlotLine')
+                    oldLineIndex = i;
             }
             else{
                 if(newLineIndex>=0)

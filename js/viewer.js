@@ -575,3 +575,9 @@ $("#calibrationCheck").change(function() {
     checkValidInput();
 });
 
+$("#bestFitCheck").change(function() {
+    showBestFitLine();
+});
+
+
+

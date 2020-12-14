@@ -586,7 +586,7 @@ $("#stereoButton").click(function(){
         $(".tracklib-tools").hide();
     }
     checkValidInput();
-    //drawROIs();
+    showBestFitLine();
     resizeAll();
 });
 

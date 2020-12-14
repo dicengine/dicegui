@@ -33,11 +33,13 @@ function parseSubsetFile(xml){
                 }); // end readfile
             }else{ // file doesn't exist
                 readLivePlotFile();
+                readBestFitFile();
             }
         }); // end stat subset file
     }  // end has subset_file
     else{
         readLivePlotFile();
+        readBestFitFile();
     }
 }
 
@@ -154,7 +156,7 @@ function impl_input_xml_file(xml){
                 stereo_full_name = image_folder + stereo_ref_image;
                 stereo_name_splits = stereo_full_name.split(/[\\\/]/);
                 $("#refImageTextRight span").text(stereo_name_splits[stereo_name_splits.length-1]);
-                updatePreview(stereo_full_name,'right');
+                updatePreview(stereo_full_name,'right',[],[],"",function(){refImagePathRight = stereo_full_name;});
             }
             // load the stereo deformed image list
             stereo_deformed_list = $(xml).find('ParameterList[name="stereo_deformed_images"]');
@@ -214,42 +216,6 @@ function impl_input_xml_file(xml){
         }
     }
     
-    // see if there is a "best_fit_plane.dat" file in the folder
-    var bestFitFileName = fullPath('','best_fit_plane.dat');
-    fs.stat(bestFitFileName, function(err, stat) {
-        if(err == null) {
-            fs.readFile(bestFitFileName,'utf8',function(err,data){
-                if(err){
-                }else{
-                    //var pre_coord_data = data.toString().split(/\s+/g).map(Number);
-                    var lines = data.toString().split('\n');
-                    var coord_data = [];
-                    for(var line = 0; line < lines.length; line++){
-                        if(lines[line].charAt(0)=='#') continue;
-                        var tokens = lines[line].split(/\s+/g).map(Number);
-                        for(var i=0;i<tokens.length;++i){
-                            if(!isNaN(tokens[i])&&tokens[i]!=0) coord_data.push(tokens[i]);
-                        }
-                    }
-                    console.log('best fit coord data: ' + coord_data);
-                    // set the coordinates
-                    bestFitXOrigin = coord_data[0];
-                    bestFitYOrigin = coord_data[1];
-                    bestFitXAxis = coord_data[2];
-                    bestFitYAxis = coord_data[3];
-                    $("#bestFitCheck")[0].checked = true;
-                    // check for YAXIS
-                    if(data.toString().includes("YAXIS")){
-                        $("#bestFitYAxisCheck")[0].checked = true;
-                    }
-                    //drawROIs();
-                }
-            }); // end readfile
-        }else{
-            $("#bestFitCheck")[0].checked = false;
-        }
-    });
-    
     // see if there is a calibration parameters file
     calPath = xml_get(xml,"camera_system_file");
     console.log('has calibration file: ' + calPath);
@@ -269,6 +235,51 @@ function impl_input_xml_file(xml){
         parse_params_xml_file(paramsFile);
     }
     checkValidInput();
+}
+
+function readBestFitFile(){
+    // see if there is a "best_fit_plane.dat" file in the folder
+    var bestFitFileName = fullPath('','best_fit_plane.dat');
+    var ox = 0;
+    var oy = 0;
+    var px = 0;
+    var py = 0;
+    fs.stat(bestFitFileName, function(err, stat) {
+        if(err == null) {
+            fs.readFile(bestFitFileName,'utf8',function(err,data){
+                if(err){
+                }else{
+                    //var pre_coord_data = data.toString().split(/\s+/g).map(Number);
+                    var lines = data.toString().split('\n');
+                    var coord_data = [];
+                    for(var line = 0; line < lines.length; line++){
+                        if(lines[line].charAt(0)=='#') continue;
+                        var tokens = lines[line].split(/\s+/g).map(Number);
+                        for(var i=0;i<tokens.length;++i){
+                            if(!isNaN(tokens[i])&&tokens[i]!=0) coord_data.push(tokens[i]);
+                        }
+                    }
+                    console.log('best fit coord data: ' + coord_data);
+                    // set the coordinates
+                    ox = coord_data[0];
+                    oy = coord_data[1];
+                    px = coord_data[2];
+                    py = coord_data[3];
+                    $("#bestFitCheck")[0].checked = true;
+                    // check for YAXIS
+                    if(data.toString().includes("YAXIS")){
+                        $("#bestFitYAxisCheck")[0].checked = true;
+                    }
+                    drawBestFitLine(ox,oy,px,py);
+                    showBestFitLine();
+                    //drawROIs();
+                }
+            }); // end readfile
+        }else{
+            $("#bestFitCheck")[0].checked = false;
+        }
+    });
+
 }
 
 function readLivePlotFile(){
@@ -400,6 +411,7 @@ function readSubsetFile(data){
     if(subsetLocations.x.length>0)
         Plotly.addTraces(document.getElementById("plotlyViewerLeft"),pointsToScatterTrace(subsetLocations));
     readLivePlotFile();
+    readBestFitFile();
 }
 
 function update_cine_indices(xml){
