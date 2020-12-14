@@ -580,8 +580,6 @@ function getPlotlyShapes(name,strict=false){
 
 $("#plotlyViewerLeft").on('plotly_relayout', function(){
     console.log('plotly_relayout event begin');
-    var checkShapes = getPlotlyShapes();
-    console.log(checkShapes);
     if(updateLivePlotLine() ||
             assignShapeNames() ||
             checkForInternalShapes()){
@@ -865,7 +863,6 @@ function removeAllPlotlyShapesAndTraces(){
             Plotly.deleteTraces(document.getElementById("plotlyViewerLeft"),0);
         }
     }
-    console.log(document.getElementById("plotlyViewerLeft").data);
 }
 
 function addSubsetSSSIGPreviewTrace(locsFile){

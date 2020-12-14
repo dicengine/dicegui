@@ -16,8 +16,6 @@
     if (window.module)
         module = window.module;
 </script>
-<!-- Tiff -->
-<script src="./js/tiff.js" defer></script>
 <!-- Custom JS -->
 <!-- <script type="text/javascript" src="./js/loader.js"></script>  -->
 <script src="./js/requires.js" defer></script>
@@ -33,11 +31,6 @@
 <script src="./js/live_plot_line.js" defer></script>
 <script src="./js/live_plot_tracklib.js" defer></script>
 <script src="./js/show_tracking.js" defer></script>
-<!-- SVG -->
-<script src="./js/svg.js" defer></script>
-<script src="./js/svg.draggable.min.js" defer></script>
-<!-- Panzoom -->
-<script src="./js/jquery.panzoom.min.js" defer></script>
 <script src="./js/viewer.js" defer></script>
 <!-- Local style sheet -->
 <link rel="stylesheet" type="text/css" href="style.css">
@@ -320,9 +313,6 @@
               <!-- end toggle div -->
               <div id="viewWindowLeft" class="fill-div" style="background-color: darkgray;">
                 <div id="plotlyViewerLeft" class="plotly-viewer"><!-- placeholder for plotly plots --></div>
-                <div id="panzoomLeft" class="panzoom" style="display: none">
-                  <div id="svgContainer" class="svg-container"></div>
-                </div>
               </div>
             </div>
             <!-- end fill div left -->
@@ -349,7 +339,6 @@
               <!-- end toggle div -->
               <div id="viewWindowRight" class="fill-div" style="background-color: darkgray;">
                 <div id="plotlyViewerRight" class="plotly-viewer"><!-- placeholder for plotly plots --></div>
-                <div id="panzoomRight" class="panzoom" style="display:none"></div>
               </div>
             </div>
             <!-- end fill div right -->

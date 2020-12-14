@@ -265,7 +265,6 @@ $("#leftCineInput").change(function (evt) {
 //                $("#cineRightPreviewSpan").text("");
 //                $("#startPreviewSpan").text("");
 //                $("#endPreviewSpan").text("");
-//                $("#panzoomRight").html('');
 //                // create a tiff image of the selected reference frame
 //                callCineStatExec(file,0);
 //            }
@@ -551,20 +550,6 @@ $("#performCal").click(function () {
     win.loadURL('file://' + __dirname + '/cal.html');
     //win.webContents.openDevTools()
 });
-
-function openPreviewCross() {
-    localStorage.setItem("workingDirectory",workingDirectory);
-    var win = new BrowserWindow({ 
-            webPreferences: {
-		nodeIntegration: true
-	    },
-            width: 1200, height: 1000 });
-    win.on('closed', () => {
-        win = null
-    })
-    win.loadURL('file://' + __dirname + '/preview_cross.html');
-    //win.webContents.openDevTools()
-}
 
 $("#calibrationCheck").change(function() {
     if(this.checked) {

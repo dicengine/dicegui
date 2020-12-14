@@ -142,12 +142,6 @@ function resetWorkingDirectory(){
     $("#runLoader").removeClass('post-loader-fail');
     $("#runLoader").removeClass('loader');
 
-//    $("#panzoomLeft").html('');
-//    $("#panzoomRight").html('');
-
-    $("#previewCross").hide();
-    $("#initCross").hide();
-
     updatePreview('','left');
     updatePreview('','right');
     
@@ -159,13 +153,12 @@ function resetWorkingDirectory(){
     defImagePathsLeft = [];
     defImagePathsRight = [];
 
-//    deleteDisplayImageFiles(0);
-//    deleteDisplayImageFiles(1);
-//    deleteDisplayImageFiles(2);
-//
-//    deleteHiddenFiles('keypoints');
-//    deleteHiddenFiles('background');
-    
+    deleteDisplayImageFiles(0);
+    deleteDisplayImageFiles(1);
+    deleteDisplayImageFiles(2);
+
+    deleteHiddenFiles('keypoints');
+    deleteHiddenFiles('background');
 }
 
 document.getElementById("clearLi").onclick = function() {
