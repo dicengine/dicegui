@@ -1,15 +1,27 @@
 $(window).load(function(){
 });
 
+var plotlyMarginL = 40;
+var plotlyMarginR = 5;
+var plotlyMarginB = 20;
+var plotlyMarginT = 30;
+
 function resizePreview(){
     console.log('resizing the plotly previews');
-//    if(document.getElementById("plotlyViewerLeft").layout)
-//        if(document.getElementById("plotlyViewerLeft").layout.images)
-            Plotly.Plots.resize(document.getElementById("plotlyViewerLeft"));
-//    if(document.getElementById("plotlyViewerRight").layout)
-//        if(document.getElementById("plotlyViewerRight").layout.images)
-            Plotly.Plots.resize(document.getElementById("plotlyViewerRight"));
-            console.log('resizing complete');
+    var pvs = [document.getElementById("plotlyViewerLeft"),
+        document.getElementById("plotlyViewerRight")];
+    for(var i=0;i<pvs.length;++i){
+        var pv = pvs[i];
+        if(pv.layout){
+            Plotly.Plots.resize(pv);
+            if(pv.layout.images){
+                var imW = pv.layout.images[0].sizex;
+                var imH = pv.layout.images[0].sizey;
+                var update = { 'xaxis.range': [0,imW], 'yaxis.range': [imH,0] };
+                Plotly.relayout(pv, update);
+            }
+        }
+    }
 }
 
 function getPreviewLayout(){
@@ -25,7 +37,7 @@ function getPreviewLayout(){
                 zeroline: false,
                 showline: false,
             },
-            margin: {l: 40,r: 5,b: 20,t: 30},
+            margin: {l: plotlyMarginL,r: plotlyMarginR,b: plotlyMarginB,t: plotlyMarginT},
             hovermode: 'closest',
     };
     if($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global"){
@@ -674,8 +686,6 @@ function deleteShape(index){
 function updateLivePlotLine(){
     var relayoutNeeded = false;
     var shapes = getPlotlyShapes(); // get all shapes, not just ROIs
-    //console.log(shapes);
-    
     var oldLineIndex = -1;
     var newLineIndex = -1;
     for(var i=0;i<shapes.length;++i){
@@ -699,7 +709,6 @@ function updateLivePlotLine(){
         relayoutNeeded = true;
     }
     if(oldLineIndex>=0&&newLineIndex>=0){
-        console.log('DELETING OLD SHAPE');
         deleteShape(oldLineIndex);
     }
     return relayoutNeeded;

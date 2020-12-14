@@ -59,8 +59,6 @@ function initialize_gui(load_existing){
                     showStereoViewer();
                 }else if(showStereoPaneState==0){
                     show2DViewer();
-                }else{
-                    showTrinocViewer();
                 }
                 if(omitTextState){
                     $("#omitTextCheck").prop("checked",true);
@@ -319,9 +317,6 @@ $("#startIndex,#endIndex,#skipIndex,#imagePrefix,#numDigits,#imageExtension,#ste
     }
 }); 
 
-//$("#startIndex,#endIndex,#skipIndex,#imagePrefix,#numDigits,#imageExtension,#stereoLeftSuffix,#stereoRightSuffix").on('keyup',function(){
-//});
-
 function concatImageSequenceName(stereoImageFlag){
     var fullImageName = "";
     $('#imageSequencePreview span').text('');
@@ -469,6 +464,7 @@ $(".pane-opener").click(function(){
     }
     // hide this element
     $(this).parent().parent().parent().hide();
+
     resizeAll();
 });
 
@@ -491,7 +487,6 @@ $(".pane-closer").click(function(){
     }else if(parentId=="subFillDivRight"){    
         $("#rightMinimized").show();
     }
-    
     resizeAll();
 })
 
@@ -543,9 +538,6 @@ function resizeAll(){
     resizeFullDivs("#innerFluidRightCol");
     resizeFullDivs("#subFillDivLeft");
     resizeFullDivs("#subFillDivRight");
-    //resizeFullDivs("#leftMinimized");
-    $("#panzoomLeft").panzoom("resetDimensions");
-    $("#panzoomRight").panzoom("resetDimensions");
     resizePreview();
 }
 
@@ -586,18 +578,14 @@ $("#stereoButton").click(function(){
             $(".non-tracklib-tools").show();
             $(".tracklib-tools").hide();
         }
-        checkValidInput();
-//    }else if(oldText=='run stereo'){ // turn off trinocular for now
-//        showTrinocViewer();
-//        checkValidInput();        
     }else{
         show2DViewer();
         if($("#analysisModeSelect").val()=='tracking')
             $(".results-right").hide();
         $(".non-tracklib-tools").show();
         $(".tracklib-tools").hide();
-        checkValidInput();
     }
+    checkValidInput();
     //drawROIs();
     resizeAll();
 });
@@ -702,30 +690,6 @@ function show2DViewer(){
     checkValidInput();
 }
 
-function showTrinocViewer(){
-    $('#subFillDivLeft').css('display','inline-block');
-    $('#subFillDivRight').css('display','inline-block');
-    $("#rightMinimized").hide();
-    $("#leftMinimized").hide();
-    $("#leftPaneToggle").show();
-    $('#subFillDivRight').css('width','33%');
-    $('#subFillDivLeft').css('width','33%');
-    $(".nav-two-cam").css('display','block');
-    $(".nav-three-cam").css('display','block');
-    $("#stackButton").css('display','block');
-    $(".nav-one-cam").hide();
-    showStereoPane = 2;
-    if(viewersStacked){
-        stackViews();
-    }
-    else {
-        unstackViews();
-    }
-    $("#stereoParams").show();
-    $('#runLi span').text('run trinoc');
-    $('#x1x2').text('x 3');
-}
-
 function showStereoViewer(){
     $('#subFillDivLeft').css('display','inline-block');
     $('#subFillDivRight').css('display','inline-block');
@@ -740,12 +704,12 @@ function showStereoViewer(){
     $(".nav-three-cam").css('display','none');
     $("#stackButton").css('display','block');
     showStereoPane = 1;
-    if(viewersStacked){
-        stackViews();
-    }
-    else {
-        unstackViews();
-    }
+//    if(viewersStacked){
+//        stackViews();
+//    }
+//    else {
+//        unstackViews();
+//    }
     $("#stereoParams").show();
     $('#runLi span').text('run stereo');
     $('#x1x2').text('x 2');
