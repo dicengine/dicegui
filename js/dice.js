@@ -525,8 +525,7 @@ function updateTracklibDisplayImages(index){
                 if(err == null) {
                     Plotly.d3.json(fullPath('.dice','.preview_left.json'), function(jsonErr, fig) {
                         if(jsonErr==null){
-                            updatePreview(fullPath('',displayLeft),'left',fig.data);
-//                            Plotly.addTraces(document.getElementById("plotlyViewerLeft"),fig.data);
+                            updatePreview(fullPath('',displayLeft),'left',fig.data,[],"",function(){undrawShape('','neighCircle');undrawShape('','epipolarLine');});
                         }else{
                             alert('error: reading json file failed');
                         }
@@ -537,10 +536,12 @@ function updateTracklibDisplayImages(index){
             fs.stat(fullPath('',displayRight), function(err, stat) {
                 if(err == null) {
                     Plotly.d3.json(fullPath('.dice','.preview_right.json'), function(jsonErr, fig) {
+//                        console.log(fig);
                         if(jsonErr==null){
                             updatePreview(fullPath('',displayRight),'right',fig.data);
                         }else{
                             alert('error: reading json file failed');
+                            console.log(jsonErr);
                         }
                       });
                 }else{

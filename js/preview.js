@@ -138,6 +138,7 @@ function updatePreview(filePath,dest,data=[],argsIn,debugConsoleDivId,cb){
         console.log('error: invalid destination ' + dest);
         return;
     }
+    if(data) console.log(data);
 
     var spec = [];
     spec.srcPath = filePath;
@@ -246,104 +247,6 @@ function updatePreview(filePath,dest,data=[],argsIn,debugConsoleDivId,cb){
     });
 }
 
-function heatmapNeedsUpdate(width,height){
-    if(jQuery.isEmptyObject(coordsHeatmap)) return true;
-    if(!coordsHeatmap.x) return true;
-    if(!coordsHeatmap.y) return true;
-    if(coordsHeatmap.x.length!=width) return true;
-    if(coordsHeatmap.y.length!=height) return true;
-    return false;
-}
-
-
-function updateCoordsHeatmap(width,height){
-    if(!heatmapNeedsUpdate(width,height)) return;
-    console.log('updating the coords heatmap');
-    var hmX = [];
-    var hmY = [];
-    var hmZ = [];
-    for(var i = 0; i < height; i++){
-        hmY.push(i);
-        var temp = [];
-        for(var j = 0; j < width; j++)
-            temp.push(0);
-        hmZ.push(temp);
-    }
-    for(var j = 0; j < width; j++)
-        hmX.push(j);
-    coordsHeatmap = {
-            name: 'coordsHeatmap',
-            x: hmX,
-            y: hmY,
-            z: hmZ,
-            showlegend: false,
-            
-            opacity: 0.0,
-            type: 'heatmap',
-//            colorscale: [["0.0", "rgb(255, 255, 255, 0.5)"], ["1.0", "rgb(255, 255, 255, 0.5)"]],  
-            xgap: 1,
-            ygap: 1,
-            hoverinfo: 'none',
-            showscale: false
-    };
-}
-
-var coordsHeatmap = {};
-
-function showBestFitLine(){
-    var shapes = getPlotlyShapes();
-    if(shapes.length==0) return;
-    for(var i=0;i<shapes.length;++i)
-        if(shapes[i].name)
-            if(shapes[i].name=='bestFitLine')
-                    shapes[i].visible = ($("#bestFitCheck")[0].checked&&showStereoPane==1);
-    var update = {'shapes' : shapes}
-    Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
-}
-
-function drawBestFitLine(ox,oy,px,py){
-    // check if shapes already include a bestfit line
-    var pv = document.getElementById("plotlyViewerLeft");
-    if(!pv.layout) return;
-    if(!pv.layout.images) return;
-    var existingShapes = getPlotlyShapes();
-    var bestFitLineIndex = -1;
-    for(var i=0;i<existingShapes.length;++i){
-        if(existingShapes[i].name)
-            if(existingShapes[i].name==='bestFitLine')
-                bestFitLineIndex = i;
-    }
-    if(bestFitLineIndex>=0&&!ox) return;
-    if(bestFitLineIndex<0){
-        var imW = pv.layout.images[0].sizex;
-        var imH = pv.layout.images[0].sizey;
-        if(!ox) ox = 0.3*imW;
-        if(!oy) oy = 0.8*imH;
-        if(!px) px = 0.7*imW;
-        if(!py) py = 0.8*imH;
-        var bestFitLine = {
-                type: 'line',
-                x0: ox,
-                x1: px,
-                y0: oy,
-                y1: py,
-                line: {color: 'blue', width: 3},
-                name: 'bestFitLine',
-                editable: true,
-                opacity: 0.8,
-                visible: $("#bestFitCheck")[0].checked
-        };
-        existingShapes.push(bestFitLine);
-    }else{
-        existingShapes[bestFitLineIndex].x0 = ox;
-        existingShapes[bestFitLineIndex].y0 = oy;
-        existingShapes[bestFitLineIndex].x1 = px;
-        existingShapes[bestFitLineIndex].y1 = py;
-    }
-    var update = {'shapes' : existingShapes}
-    Plotly.relayout(pv,update);
-}
-
 function updateImage(spec,data){
     console.log('updateImage(): path ' + spec.destPath + ' in div '  + spec.destDivId);
     var obj = getPreviewLayoutConfig(spec.dest);
@@ -377,7 +280,7 @@ function updateImage(spec,data){
     // add a heatmap 
 
     updateCoordsHeatmap(spec.width,spec.height);
-    data.push(coordsHeatmap);
+    data.unshift(coordsHeatmap);
     // TODO call restyle or relayout instead of newPlot each time?
     Plotly.newPlot(div,data,obj.layout,obj.config);
     if(spec.dest=='left'&&$("#analysisModeSelect").val()=="subset"){
@@ -396,12 +299,20 @@ function updateImage(spec,data){
         });
         posDiv.innerText = infotext;
     });
-    if(spec.dest=='left'){
+    div.on('plotly_click', function(data){
+        if(spec.dest!='left' && spec.dest!='right') return;
+        if(data.points[0].data.name==='tracklibPreviewScatter'){
+            drawNeighCircle(spec.dest,data.points[0].x,data.points[0].y);
+            updateNeighInfoTrace(spec.dest,data.points[0].pointIndex);
+            drawEpipolarLine(spec.dest,data.points[0].pointIndex);
+        }
+    });
+    
+    if(spec.dest=='left' && $("#analysisModeSelect").val()=="subset"){
         div.on('plotly_click', function(data){
             if(spec.dest!='left') return;
             if(data.event.button!=2) return;// right click only 
             addLivePlotPts([data.points[0].x],[data.points[0].y]);
-//            alert('i was clicked');
         });
     }
 }
@@ -669,24 +580,26 @@ function angle2d(x1,y1,x2,y2){
 
 function drawRepresentativeSubset(){
     if(!$("#analysisModeSelect").val()=="subset") return;
-    if(!document.getElementById("plotlyViewerLeft").layout) return;
-    
+    var pv = document.getElementById("plotlyViewerLeft");
+    if(!pv.layout) return;
     var cx = refImageWidth/2;
     var cy = refImageHeight/2;
-
+    var subsetSize = $("#subsetSize").val();
     // check if representative subset already exists and get it's points
-    var existingBox = getPlotlyShapes('representativeSubset');
-    if(existingBox.length>0){
-        var boxPoints = pathShapeToPoints(existingBox[0]);
+    var existingShapes = [];
+    if(pv.layout.shapes){
+        existingShapes = pv.layout.shapes;
+    }
+    var existingBoxIndex = existingShapes.findIndex(obj => { 
+        return obj.name === "representativeSubset";
+    });
+    if(existingBoxIndex>=0){
+        var boxPoints = pathShapeToPoints(existingShapes[existingBoxIndex]);
         cx = (boxPoints.x[0] + boxPoints.x[1])/2;
         cy = (boxPoints.y[0] + boxPoints.y[3])/2;
-        undrawRepresentativeSubset();
     }
-    var subsetSize = $("#subsetSize").val();
-    var shape = {};
-    shape.type = 'path';
     var points = {x:[cx-subsetSize/2,cx+subsetSize/2,cx+subsetSize/2,cx-subsetSize/2],
-                  y:[cy-subsetSize/2,cy-subsetSize/2,cy+subsetSize/2,cy+subsetSize/2]};
+            y:[cy-subsetSize/2,cy-subsetSize/2,cy+subsetSize/2,cy+subsetSize/2]};
     var path = 'M';
     for(var i=0;i<points.x.length;++i){
         path+= points.x[i] + ',' + points.y[i];
@@ -694,40 +607,121 @@ function drawRepresentativeSubset(){
             path +='L';
     }
     path += 'Z';
-    shape.path = path;
-    shape.line = {color: 'yellow', width:2}
-    shape.opacity = 1.0;
-    shape.editable = true;
-    shape.name = 'representativeSubset';
-
-    var existingShapes = [];
-    if(document.getElementById("plotlyViewerLeft").layout.shapes){
-        existingShapes = document.getElementById("plotlyViewerLeft").layout.shapes;
+    if(existingBoxIndex>=0){
+        existinShapes[existingBoxIndex].path = path;
+        existinShapes[existingBoxIndex].visible = true;
+    }else{
+        var shape = {};
+        shape.name = 'representativeSubset';
+        shape.type = 'path';
+        shape.path = path;
+        shape.line = {color: 'yellow', width:2}
+        shape.opacity = 1.0;
+        shape.visible = true;
+        shape.editable = true;
+        existingShapes.push(shape);
     }
-    existingShapes.push(shape);
-    var update = {
-            'shapes' : existingShapes,
-    }
-    Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
+    var update = {'shapes' : existingShapes}
+    Plotly.relayout(pv,update);
 }
-function undrawRepresentativeSubset(){
-    console.log('undrawRepresentativeSubset()');
-    if(!document.getElementById("plotlyViewerLeft").layout)return;
-    var shapes = [];
-    if(document.getElementById("plotlyViewerLeft").layout.shapes){
-        shapes = document.getElementById("plotlyViewerLeft").layout.shapes;
+
+function drawNeighCircle(dest,cx,cy){
+    if(!$("#analysisModeSelect").val()=="tracking"||showStereoPane!=1) return;
+    var pv = document.getElementById("plotlyViewerLeft");
+    if(dest=='right'){
+        var pv = document.getElementById("plotlyViewerRight");
+        undrawShape('left','neighCircle');
+    }else{
+        undrawShape('right','neighCircle');
     }
-    // TODO this loop should iterate backwards, it only works now since there is only one repSubset
-    for(var i=0;i<shapes.length;++i){
-        if(shapes[i].name=='representativeSubset'){
-            shapes.splice(i,1);
-            break;
+    var pvl = pv.layout;
+    if(!pvl) return;
+//    var cx = refImageWidth/2;
+//    var cy = refImageHeight/2;
+
+    // check if representative subset already exists and get it's points
+    var existingShapes = [];
+    var existingCircleIndex = -1;
+    var existingCircleLineXIndex = -1;
+    var existingCircleLineYIndex = -1;
+    if(pvl.shapes)
+        existingShapes = pvl.shapes;
+    
+    for(var i=0;i<existingShapes.length;++i){
+        if(existingShapes[i].name){
+            if(existingShapes[i].name=='neighCircle')
+                existingCircleIndex = i;
+            if(existingShapes[i].name=='neighCircleLineX')
+                existingCircleLineXIndex = i;
+            if(existingShapes[i].name=='neighCircleLineY')
+                existingCircleLineYIndex = i;
         }
     }
-    var update = {
-            'shapes' : shapes,
+    var circleSize = Number($("#neighborRadius").val());
+    if(existingCircleIndex>=0){
+        existingShapes[existingCircleIndex].x0 = cx - circleSize;
+        existingShapes[existingCircleIndex].x1 = cx + circleSize;
+        existingShapes[existingCircleIndex].y0 = cy - circleSize;
+        existingShapes[existingCircleIndex].y1 = cy + circleSize;
+        existingShapes[existingCircleIndex].visible = true;
+    }else{
+        var circle = {
+                type:'circle',
+                x0: cx - circleSize,
+                x1: cx + circleSize,
+                y0: cy - circleSize,
+                y1: cy + circleSize,
+                line: {color: 'red', width:2},
+                opacity: 0.5,
+                editable: false,
+                visible: true,
+                name: 'neighCircle'
+        };
+        existingShapes.push(circle);
     }
-    Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
+    if(existingCircleLineXIndex>=0){
+        if(existingCircleLineYIndex<0) 
+            console.log('error: drawing neigh circle failed');
+        existingShapes[existingCircleLineXIndex].x0 = cx - circleSize;
+        existingShapes[existingCircleLineXIndex].x1 = cx + circleSize;
+        existingShapes[existingCircleLineXIndex].y0 = cy;
+        existingShapes[existingCircleLineXIndex].y1 = cy;
+        existingShapes[existingCircleLineYIndex].x0 = cx;
+        existingShapes[existingCircleLineYIndex].x1 = cx;
+        existingShapes[existingCircleLineYIndex].y0 = cy - circleSize;
+        existingShapes[existingCircleLineYIndex].y1 = cy + circleSize;
+        existingShapes[existingCircleLineXIndex].visible = true;
+        existingShapes[existingCircleLineYIndex].visible = true;
+    }else{
+        var lineX = {
+                type: 'line',
+                x0: cx - circleSize,
+                x1: cx + circleSize,
+                y0: cy,
+                y1: cy,
+                line: {color: 'red', width: 1, dash:'dash'},
+                name: 'neighCircleLineX',
+                editable: false,
+                visible: true,
+                opacity: 0.5
+        };
+        var lineY = {
+                type: 'line',
+                x0: cx,
+                x1: cx,
+                y0: cy - circleSize,
+                y1: cy + circleSize,
+                line: {color: 'red', width: 1, dash:'dash'},
+                name: 'neighCircleLineY',
+                editable: false,
+                visible: true,
+                opacity: 0.5
+        };
+        existingShapes.push(lineX);
+        existingShapes.push(lineY);
+    }
+    var update = {'shapes' : existingShapes}
+    Plotly.relayout(pv,update);
 }
 
 function numROIShapes(){
@@ -808,7 +802,7 @@ function assignShapeNames(){
 
 function checkForInternalShapes(){
     var relayoutNeeded = false;
-    console.log('checkForInternalShapes');
+    console.log('checkForInternalShapes()');
     var shapes = getPlotlyShapes(); // get all shapes, not just ROIs
     if(shapes.length<=0) return;
     var centroids = shapesToCentroids(shapes);
@@ -893,10 +887,264 @@ function addSubsetSSSIGPreviewTrace(locsFile){
     }); 
 }
 
-//$("#plotlyViewerLeft").on('plotly_hover', function(data){
-//    console.log(data);
-////    var infotext = data.points.map(function(d){
-////        return ('['+d.x+','+d.y+']');
-////    });
-////    $('#rightPos').innerHTML = infotext;
-//})
+
+function heatmapNeedsUpdate(width,height){
+    if(jQuery.isEmptyObject(coordsHeatmap)) return true;
+    if(!coordsHeatmap.x) return true;
+    if(!coordsHeatmap.y) return true;
+    if(coordsHeatmap.x.length!=width) return true;
+    if(coordsHeatmap.y.length!=height) return true;
+    return false;
+}
+
+
+function updateCoordsHeatmap(width,height){
+    if(!heatmapNeedsUpdate(width,height)) return;
+    console.log('updating the coords heatmap');
+    var hmX = [];
+    var hmY = [];
+    var hmZ = [];
+    for(var i = 0; i < height; i++){
+        hmY.push(i);
+        var temp = [];
+        for(var j = 0; j < width; j++)
+            temp.push(0);
+        hmZ.push(temp);
+    }
+    for(var j = 0; j < width; j++)
+        hmX.push(j);
+    coordsHeatmap = {
+            name: 'coordsHeatmap',
+            x: hmX,
+            y: hmY,
+            z: hmZ,
+            showlegend: false,
+            
+            opacity: 0.0,
+            type: 'heatmap',
+//            colorscale: [["0.0", "rgb(255, 255, 255, 0.5)"], ["1.0", "rgb(255, 255, 255, 0.5)"]],  
+            xgap: 1,
+            ygap: 1,
+            hoverinfo: 'none',
+            showscale: false
+    };
+}
+
+var coordsHeatmap = {};
+
+function showBestFitLine(){
+    var shapes = getPlotlyShapes();
+    if(shapes.length==0) return;
+    for(var i=0;i<shapes.length;++i)
+        if(shapes[i].name)
+            if(shapes[i].name==='bestFitLine')
+                    shapes[i].visible = ($("#bestFitCheck")[0].checked&&showStereoPane==1);
+    var update = {'shapes' : shapes}
+    Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
+}
+
+function drawBestFitLine(ox,oy,px,py){
+    // check if shapes already include a bestfit line
+    var pv = document.getElementById("plotlyViewerLeft");
+    if(!pv.layout) return;
+    if(!pv.layout.images) return;
+    var existingShapes = getPlotlyShapes();
+    var bestFitLineIndex = -1;
+    for(var i=0;i<existingShapes.length;++i){
+        if(existingShapes[i].name)
+            if(existingShapes[i].name==='bestFitLine')
+                bestFitLineIndex = i;
+    }
+    if(bestFitLineIndex>=0&&!ox) return;
+    if(bestFitLineIndex<0){
+        var imW = pv.layout.images[0].sizex;
+        var imH = pv.layout.images[0].sizey;
+        if(!ox) ox = 0.3*imW;
+        if(!oy) oy = 0.8*imH;
+        if(!px) px = 0.7*imW;
+        if(!py) py = 0.8*imH;
+        var bestFitLine = {
+                type: 'line',
+                x0: ox,
+                x1: px,
+                y0: oy,
+                y1: py,
+                line: {color: 'blue', width: 3},
+                name: 'bestFitLine',
+                editable: true,
+                opacity: 0.8,
+                visible: $("#bestFitCheck")[0].checked
+        };
+        existingShapes.push(bestFitLine);
+    }else{
+        existingShapes[bestFitLineIndex].x0 = ox;
+        existingShapes[bestFitLineIndex].y0 = oy;
+        existingShapes[bestFitLineIndex].x1 = px;
+        existingShapes[bestFitLineIndex].y1 = py;
+    }
+    var update = {'shapes' : existingShapes}
+    Plotly.relayout(pv,update);
+}
+
+function updateNeighInfoTrace(dest,index){
+    if(dest!='left'&&dest!='right') return;
+    var pvLeft = document.getElementById("plotlyViewerLeft");
+    var pvRight = document.getElementById("plotlyViewerRight");
+    var pv;
+    if(dest==='left'){
+        pv = pvLeft;
+        if(pvRight.data){ // remove the right neigh scatter trace if it exists
+            var scatterIdRight = pvRight.data.findIndex(obj => { 
+                return obj.name === "tracklibNeighScatter";
+            });
+            if(scatterIdRight>=0){
+                var updateRight = {visible:false};
+                Plotly.restyle(pvRight,updateRight,scatterIdRight);
+            }
+        }
+    }
+    if(dest==='right'){
+        pv = pvRight;
+        if(pvRight.data){ // remove the left neigh scatter trace if it exists.
+            var scatterIdLeft = pvLeft.data.findIndex(obj => { 
+                return obj.name === "tracklibNeighScatter";
+            });
+            if(scatterIdLeft>=0){
+                var updateLeft = {visible:false};
+                Plotly.restyle(pvLeft,updateLeft,scatterIdLeft);
+            }
+        }
+    }
+    if(!pv.data) return;
+    var scatterTraceId = pv.data.findIndex(obj => { 
+        return obj.name === "tracklibPreviewScatter";
+    });
+    if(scatterTraceId<0) return;
+    if(!pv.data[scatterTraceId].neighInfo) return;
+    if(pv.data[scatterTraceId].neighInfo.length<=index) return;
+    
+    var ids = pv.data[scatterTraceId].neighInfo[index].ids;
+    if(!ids) return;
+    //console.log(ids);
+    
+    var areas = pv.data[scatterTraceId].neighInfo[index].areas;
+    var diffAreas = pv.data[scatterTraceId].neighInfo[index].diffAreas;
+    var angles = pv.data[scatterTraceId].neighInfo[index].angles;
+    var dists = pv.data[scatterTraceId].neighInfo[index].distances;
+    var grays = pv.data[scatterTraceId].neighInfo[index].grays;
+    var diffGrays = pv.data[scatterTraceId].neighInfo[index].diffGrays;
+    
+    // collect the x and y points from the neighbors
+    var x = [];
+    var y = [];
+    var text = [];
+    for(var i=0;i<ids.length;++i){
+        x.push(pv.data[scatterTraceId].x[ids[i]]);
+        y.push(pv.data[scatterTraceId].y[ids[i]]);
+        text.push('area:' + areas[i] + ' (Δ:'+diffAreas[i]+','+ parseFloat(diffAreas[i]*100.0/areas[i]).toPrecision(3) + '%)' + '<br>'
+                + 'gray:' + grays[i] + ' (Δ:'+diffGrays[i]+',' + parseFloat(diffGrays[i]*100.0/grays[i]).toPrecision(3) + '%)' + '<br>'
+                + 'angle:' + parseFloat(angles[i]).toPrecision(3) + '<br>' 
+                + 'dist:' + parseFloat(dists[i]).toPrecision(3));
+    }
+    var neighTraceId = pv.data.findIndex(obj => { 
+        return obj.name === "tracklibNeighScatter";
+    });
+    if(neighTraceId<0){
+        var scatterTrace = {
+                name: 'tracklibNeighScatter',
+                hovertemplate : '%{text}<extra></extra>',
+                visible: true,
+                type:'scatter',
+                x:x,
+                y:y,
+                text: text,
+                mode:'markers',
+                showlegend: false,
+                marker: {color: 'blue'},
+        };
+        Plotly.addTraces(pv,scatterTrace);
+    }else{
+        var update = {x:[x],y:[y],text:[text],visible:true};
+        Plotly.restyle(pv,update,neighTraceId);
+    }
+}
+
+function drawEpipolarLine(dest,index){ 
+    // *** NOTE for this method, dest is where the click event ocurred,
+    //          the line should appear in the opposite image
+    if(!$("#analysisModeSelect").val()=="tracking"||showStereoPane!=1) return;
+    var pvIn = document.getElementById("plotlyViewerLeft");
+    var pvOut = document.getElementById("plotlyViewerRight");
+    if(dest=='right'){
+        var pvIn = document.getElementById("plotlyViewerRight");
+        var pvOut = document.getElementById("plotlyViewerLeft");
+    }
+    undrawShape('','epipolarLine');
+    var pvl = pvOut.layout;
+    if(!pvl) return;
+    
+    
+    var scatterTraceId = pvIn.data.findIndex(obj => { 
+        return obj.name === "tracklibPreviewScatter";
+    });
+    if(scatterTraceId<0) return;
+    if(index>=pvIn.data[scatterTraceId].epiY0.length) return;
+    var y0 = pvIn.data[scatterTraceId].epiY0[index];
+    var y1 = pvIn.data[scatterTraceId].epiY1[index];
+    
+    // check if epipolar line exists and get it's points
+    var existingShapes = [];
+    var existingEpipolarIndex = -1;
+    if(pvl.shapes)
+        existingShapes = pvl.shapes;
+    for(var i=0;i<existingShapes.length;++i){
+        if(existingShapes[i].name){
+            if(existingShapes[i].name=='epipolarLine')
+                existingEpipolarIndex = i;
+        }
+    }
+    if(existingEpipolarIndex>=0){
+        existingShapes[existingEpipolarIndex].y0 = y0;
+        existingShapes[existingEpipolarIndex].y1 = y1;
+        existingShapes[existingEpipolarIndex].visible = true;
+    }else{
+        var x0 = 0;
+        var x1 = pvl.images[0].sizex;
+        var epiLine = {
+                name: 'epipolarLine',
+                type:'line',
+                x0: x0,
+                x1: x1,
+                y0: y0,
+                y1: y1,
+                line: {color: 'red', width:2},
+                opacity: 0.2,
+                editable: false,
+                visible: true
+        };
+        existingShapes.push(epiLine);
+    }
+    var update = {'shapes' : existingShapes}
+    Plotly.relayout(pvOut,update);
+}
+
+function undrawShape(dest,name){
+    if(dest.length==0 || dest=='left')
+        undrawShapeImpl(document.getElementById("plotlyViewerLeft"),name);
+    if(dest.length==0 || dest=='right')
+        undrawShapeImpl(document.getElementById("plotlyViewerRight"),name);
+}
+
+function undrawShapeImpl(pv,name){
+    if(!pv.layout)return;
+    if(!pv.layout.shapes)return;
+    var shapes = pv.layout.shapes;
+    for(var i=0;i<shapes.length;++i){
+        if(shapes[i].name)
+            if(shapes[i].name.includes(name)){
+                shapes[i].visible = false;
+            }
+    }
+    var update = {'shapes' : shapes}
+    Plotly.relayout(pv,update);
+}

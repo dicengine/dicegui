@@ -533,7 +533,6 @@ function defaultConsole(){
 // resize all columns and inner-columns to make fill-divs fill the column
 function resizeAll(){
     resizeViewerFillDivs();
-
     resizeFullDivs("#innerFluidLeftCol");
     resizeFullDivs("#innerFluidRightCol");
     resizeFullDivs("#subFillDivLeft");
@@ -587,7 +586,7 @@ $("#stereoButton").click(function(){
     }
     checkValidInput();
     showBestFitLine();
-    resizeAll();
+//    resizeAll();
 });
 
 function resizeViewerFillDivs(){
@@ -687,6 +686,7 @@ function show2DViewer(){
     $('#x1x2').text('x 1');
     //deactivateEpipolar();
     $(".tracklib-tools").hide();
+    resizeAll();
     checkValidInput();
 }
 
@@ -713,6 +713,7 @@ function showStereoViewer(){
     $("#stereoParams").show();
     $('#runLi span').text('run stereo');
     $('#x1x2').text('x 2');
+    resizeAll();
     checkValidInput();
 }
 
