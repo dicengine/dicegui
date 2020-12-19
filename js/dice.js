@@ -533,7 +533,10 @@ function updateTracklibDisplayImages(index){
                 if(err == null) {
                     Plotly.d3.json(fullPath('.dice','.preview_left.json'), function(jsonErr, fig) {
                         if(jsonErr==null){
-                            updatePreview(fullPath('',displayLeft),'left',fig.data,[],"",function(){undrawShape('','neighCircle');undrawShape('','epipolarLine');});
+                            updatePreview(fullPath('',displayLeft),'left',fig.data,[],"",function(){
+                                undrawShape('','neighCircle');
+                                undrawShape('','epipolarLine');
+                                });
                         }else{
                             alert('error: reading json file failed');
                         }

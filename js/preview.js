@@ -277,8 +277,10 @@ function updateImage(spec,data){
             layer: 'below',
         }];
     }
+    // add tracklines for tracklib
+    addPreviewTracks(obj.layout,data);
+    
     // add a heatmap 
-
     updateCoordsHeatmap(spec.width,spec.height);
     data.unshift(coordsHeatmap);
     // TODO call restyle or relayout instead of newPlot each time?
@@ -987,6 +989,43 @@ function drawBestFitLine(ox,oy,px,py){
     Plotly.relayout(pv,update);
 }
 
+function addPreviewTracks(layout,data){
+    if($('#analysisModeSelect').val()!="tracking"||showStereoPane!=1) return;
+    var scatterTraceId = data.findIndex(obj => { 
+        return obj.name === "tracklibPreviewScatter";
+    });
+    if(scatterTraceId<0) return;
+    var px = data[scatterTraceId].x;
+    var py = data[scatterTraceId].y;
+    var fwdNeighId = data[scatterTraceId].fwdNeighId;
+    // draw lines between all the points that have neighbors
+    // remove all old track_lines
+    if(!layout) return;
+    if(!layout.shapes) layout.shapes = [];
+    var i = layout.shapes.length;
+    while (i--) {
+        if(layout.shapes[i].name)
+            if(layout.shapes[i].name==='trackLine')
+                layout.shapes.splice(i,1);
+    }
+    for(var i=0;i<px.length;++i){
+        if(fwdNeighId[i]<0) continue;
+        var track_line = {
+                name: 'trackLine',
+                type:'line',
+                x0: px[i],
+                x1: px[fwdNeighId[i]],
+                y0: py[i],
+                y1: py[fwdNeighId[i]],
+                line: {color: 'yellow', width:2},
+                opacity: 0.8,
+                editable: false,
+                visible: true
+        };
+        layout.shapes.push(track_line);
+    }
+}
+
 function updateNeighInfoTrace(dest,index){
     if(dest!='left'&&dest!='right') return;
     var pvLeft = document.getElementById("plotlyViewerLeft");
@@ -1038,6 +1077,8 @@ function updateNeighInfoTrace(dest,index){
     var diffGrays = pv.data[scatterTraceId].neighInfo[index].diffGrays;
     var failCodes = pv.data[scatterTraceId].neighInfo[index].failCodes;
     var disparities = pv.data[scatterTraceId].neighInfo[index].disparities;
+    var px = pv.data[scatterTraceId].x;
+    var py = pv.data[scatterTraceId].y;
     
     // collect the x and y points from the neighbors
     var x = [];
@@ -1046,9 +1087,9 @@ function updateNeighInfoTrace(dest,index){
     for(var i=0;i<ids.length;++i){
         var failCode = failCodes[i];
         if(failCode.length==0) failCode = "none";
-        x.push(pv.data[scatterTraceId].x[ids[i]]);
-        y.push(pv.data[scatterTraceId].y[ids[i]]);
-        text.push('('+pv.data[scatterTraceId].x[ids[i]]+','+pv.data[scatterTraceId].y[ids[i]]+') <br>'
+        x.push(px[ids[i]]);
+        y.push(py[ids[i]]);
+        text.push('('+px[ids[i]]+','+py[ids[i]]+') <br>'
                 + 'frame: ' + frames[i] + '<br>'
                 + 'area: ' + areas[i] + ' (Δ:'+diffAreas[i]+', '+ parseFloat(diffAreas[i]*100.0/areas[i]).toPrecision(3) + '%)' + '<br>'
                 + 'gray: ' + grays[i] + ' (Δ:'+diffGrays[i]+', ' + parseFloat(diffGrays[i]*100.0/255.0).toPrecision(3) + '%)' + '<br>'
