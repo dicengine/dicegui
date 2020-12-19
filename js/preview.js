@@ -1028,33 +1028,31 @@ function addPreviewTracks(layout,data){
 
 function updateNeighInfoTrace(dest,index){
     if(dest!='left'&&dest!='right') return;
-    var pvLeft = document.getElementById("plotlyViewerLeft");
-    var pvRight = document.getElementById("plotlyViewerRight");
-    var pv;
-    if(dest==='left'){
-        pv = pvLeft;
-        if(pvRight.data){ // remove the right neigh scatter trace if it exists
-            var scatterIdRight = pvRight.data.findIndex(obj => { 
-                return obj.name === "tracklibNeighScatter";
-            });
-            if(scatterIdRight>=0){
-                var updateRight = {visible:false};
-                Plotly.restyle(pvRight,updateRight,scatterIdRight);
-            }
-        }
-    }
+    var pv = document.getElementById("plotlyViewerLeft");
+    var pvStereo = document.getElementById("plotlyViewerRight");
     if(dest==='right'){
-        pv = pvRight;
-        if(pvRight.data){ // remove the left neigh scatter trace if it exists.
-            var scatterIdLeft = pvLeft.data.findIndex(obj => { 
-                return obj.name === "tracklibNeighScatter";
-            });
-            if(scatterIdLeft>=0){
-                var updateLeft = {visible:false};
-                Plotly.restyle(pvLeft,updateLeft,scatterIdLeft);
-            }
-        }
+        pv = document.getElementById("plotlyViewerRight");
+        pvStereo = document.getElementById("plotlyViewerLeft");
     }
+    if(pvStereo.data){ // remove the stereo neigh scatter trace if it exists
+        var updateStereo = {visible:false};
+        var scatterId = pvStereo.data.findIndex(obj => { 
+            return obj.name === "tracklibNeighScatter";
+        });
+        if(scatterId>=0)
+            Plotly.restyle(pvStereo,updateStereo,scatterId);
+        var stereoScatterId = pv.data.findIndex(obj => { // remove any stereo neigh scatters from clicks in the othe image 
+            return obj.name === "tracklibStereoNeighScatter";
+        });
+        if(stereoScatterId>=0)
+            Plotly.restyle(pv,updateStereo,stereoScatterId);
+    }
+    if(!pvStereo.data) return;
+    var scatterTraceIdStereo = pvStereo.data.findIndex(obj => { 
+        return obj.name === "tracklibPreviewScatter";
+    });
+    if(scatterTraceIdStereo<0) return; // use the neighbor scatter trace to get info for potential stereo neighbors
+    
     if(!pv.data) return;
     var scatterTraceId = pv.data.findIndex(obj => { 
         return obj.name === "tracklibPreviewScatter";
@@ -1062,23 +1060,27 @@ function updateNeighInfoTrace(dest,index){
     if(scatterTraceId<0) return;
     if(!pv.data[scatterTraceId].neighInfo) return;
     if(pv.data[scatterTraceId].neighInfo.length<=index) return;
-    
     var ids = pv.data[scatterTraceId].neighInfo[index].ids;
     if(!ids) return;
-    //console.log(ids);
+
+    if(!pv.data[scatterTraceId].stereoNeighInfo) return;
+    if(pv.data[scatterTraceId].stereoNeighInfo.length<=index) return;
+    var stereoIds = pv.data[scatterTraceId].stereoNeighInfo[index].ids;
+    if(!stereoIds) return;
     
     var areas = pv.data[scatterTraceId].neighInfo[index].areas;
-    var frames = pv.data[scatterTraceId].neighInfo[index].frames;
     var diffAreas = pv.data[scatterTraceId].neighInfo[index].diffAreas;
-    var angles = pv.data[scatterTraceId].neighInfo[index].angles;
     var dists = pv.data[scatterTraceId].neighInfo[index].distances;
+    var disparities = pv.data[scatterTraceId].neighInfo[index].disparities;
+    var failCodes = pv.data[scatterTraceId].neighInfo[index].failCodes;
+    var frames = pv.data[scatterTraceId].neighInfo[index].frames;
+    var angles = pv.data[scatterTraceId].neighInfo[index].angles;
     var diffDists = pv.data[scatterTraceId].neighInfo[index].diffDists;
     var grays = pv.data[scatterTraceId].neighInfo[index].grays;
     var diffGrays = pv.data[scatterTraceId].neighInfo[index].diffGrays;
-    var failCodes = pv.data[scatterTraceId].neighInfo[index].failCodes;
-    var disparities = pv.data[scatterTraceId].neighInfo[index].disparities;
     var px = pv.data[scatterTraceId].x;
     var py = pv.data[scatterTraceId].y;
+    var myFrame = pv.data[scatterTraceId].frame[index];
     
     // collect the x and y points from the neighbors
     var x = [];
@@ -1091,7 +1093,7 @@ function updateNeighInfoTrace(dest,index){
         y.push(py[ids[i]]);
         text.push('('+px[ids[i]]+','+py[ids[i]]+') <br>'
                 + 'frame: ' + frames[i] + '<br>'
-                + 'area: ' + areas[i] + ' (Δ:'+diffAreas[i]+', '+ parseFloat(diffAreas[i]*100.0/areas[i]).toPrecision(3) + '%)' + '<br>'
+                + 'area: ' + areas[i] + ' (Δ:'+diffAreas[i]+', '+ parseFloat(diffAreas[i]*100.0/(areas[i]-diffAreas[i])).toPrecision(3) + '%)' + '<br>'
                 + 'gray: ' + grays[i] + ' (Δ:'+diffGrays[i]+', ' + parseFloat(diffGrays[i]*100.0/255.0).toPrecision(3) + '%)' + '<br>'
                 + 'dist: ' + parseFloat(dists[i]).toPrecision(2) + ' (Δ:'+parseFloat(diffDists[i]).toPrecision(2)+', '+parseFloat(diffDists[i]*100.0/(dists[i]-diffDists[i])).toPrecision(3) + '%)' + '<br>'
                 + 'angle: ' + parseFloat(angles[i]).toPrecision(3) + '<br>'
@@ -1118,6 +1120,54 @@ function updateNeighInfoTrace(dest,index){
     }else{
         var update = {x:[x],y:[y],text:[text],visible:true};
         Plotly.restyle(pv,update,neighTraceId);
+    }
+    
+    if(dest!='left') return; // stereo neighbor info is only one way (left to right) no stereo neigh info for right
+    
+    var stereoAreas = pv.data[scatterTraceId].stereoNeighInfo[index].areas;
+    var stereoDiffAreas = pv.data[scatterTraceId].stereoNeighInfo[index].diffAreas;
+    var stereoEpiDists = pv.data[scatterTraceId].stereoNeighInfo[index].distsFromEpi;
+    var stereoDisparities = pv.data[scatterTraceId].stereoNeighInfo[index].disparities;
+    var stereoFailCodes = pv.data[scatterTraceId].stereoNeighInfo[index].failCodes;
+    var stereoPx = pvStereo.data[scatterTraceIdStereo].x;
+    var stereoPy = pvStereo.data[scatterTraceIdStereo].y;
+    
+    // collect the x and y points from the neighbors
+    var stereoX = [];
+    var stereoY = [];
+    var stereoText = [];
+    for(var i=0;i<stereoIds.length;++i){
+        var failCode = stereoFailCodes[i];
+        if(failCode.length==0) failCode = "none";
+        stereoX.push(stereoPx[stereoIds[i]]);
+        stereoY.push(stereoPy[stereoIds[i]]);
+        stereoText.push('('+stereoPx[stereoIds[i]]+','+stereoPy[stereoIds[i]]+') <br>'
+                + 'frame: ' + myFrame + '<br>'
+                + 'area: ' + stereoAreas[i] + ' (Δ:'+stereoDiffAreas[i]+', '+ parseFloat(stereoDiffAreas[i]*100.0/(stereoAreas[i]-stereoDiffAreas[i])).toPrecision(3) + '%)' + '<br>'
+                + 'dist from epi: ' + parseFloat(stereoEpiDists[i]).toPrecision(2) + '<br>'
+                + 'stereo disparity: ' + parseFloat(stereoDisparities[i]).toPrecision(3) + '<br>'
+                + 'fail: '+failCode);
+    }
+    var stereoNeighTraceId = pvStereo.data.findIndex(obj => { 
+        return obj.name === "tracklibStereoNeighScatter";
+    });
+    if(stereoNeighTraceId<0){
+        var stereoScatterTrace = {
+                name: 'tracklibStereoNeighScatter',
+                hovertemplate : '%{text}<extra></extra>',
+                visible: true,
+                type:'scatter',
+                x:stereoX,
+                y:stereoY,
+                text: stereoText,
+                mode:'markers',
+                showlegend: false,
+                marker: {color: 'green'},
+        };
+        Plotly.addTraces(pvStereo,stereoScatterTrace);
+    }else{
+        var stereoUpdate = {x:[stereoX],y:[stereoY],text:[stereoText],visible:true};
+        Plotly.restyle(pvStereo,stereoUpdate,stereoNeighTraceId);
     }
 }
 

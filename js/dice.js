@@ -538,6 +538,7 @@ function updateTracklibDisplayImages(index){
                                 undrawShape('','epipolarLine');
                                 });
                         }else{
+                            console.log(jsonErr);
                             alert('error: reading json file failed');
                         }
                       });
