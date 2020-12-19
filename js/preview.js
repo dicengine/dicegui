@@ -301,6 +301,7 @@ function updateImage(spec,data){
     });
     div.on('plotly_click', function(data){
         if(spec.dest!='left' && spec.dest!='right') return;
+        //console.log(data);
         if(data.points[0].data.name==='tracklibPreviewScatter'){
             drawNeighCircle(spec.dest,data.points[0].x,data.points[0].y);
             updateNeighInfoTrace(spec.dest,data.points[0].pointIndex);
@@ -1028,23 +1029,33 @@ function updateNeighInfoTrace(dest,index){
     //console.log(ids);
     
     var areas = pv.data[scatterTraceId].neighInfo[index].areas;
+    var frames = pv.data[scatterTraceId].neighInfo[index].frames;
     var diffAreas = pv.data[scatterTraceId].neighInfo[index].diffAreas;
     var angles = pv.data[scatterTraceId].neighInfo[index].angles;
     var dists = pv.data[scatterTraceId].neighInfo[index].distances;
+    var diffDists = pv.data[scatterTraceId].neighInfo[index].diffDists;
     var grays = pv.data[scatterTraceId].neighInfo[index].grays;
     var diffGrays = pv.data[scatterTraceId].neighInfo[index].diffGrays;
+    var failCodes = pv.data[scatterTraceId].neighInfo[index].failCodes;
+    var disparities = pv.data[scatterTraceId].neighInfo[index].disparities;
     
     // collect the x and y points from the neighbors
     var x = [];
     var y = [];
     var text = [];
     for(var i=0;i<ids.length;++i){
+        var failCode = failCodes[i];
+        if(failCode.length==0) failCode = "none";
         x.push(pv.data[scatterTraceId].x[ids[i]]);
         y.push(pv.data[scatterTraceId].y[ids[i]]);
-        text.push('area:' + areas[i] + ' (Δ:'+diffAreas[i]+','+ parseFloat(diffAreas[i]*100.0/areas[i]).toPrecision(3) + '%)' + '<br>'
-                + 'gray:' + grays[i] + ' (Δ:'+diffGrays[i]+',' + parseFloat(diffGrays[i]*100.0/grays[i]).toPrecision(3) + '%)' + '<br>'
-                + 'angle:' + parseFloat(angles[i]).toPrecision(3) + '<br>' 
-                + 'dist:' + parseFloat(dists[i]).toPrecision(3));
+        text.push('('+pv.data[scatterTraceId].x[ids[i]]+','+pv.data[scatterTraceId].y[ids[i]]+') <br>'
+                + 'frame: ' + frames[i] + '<br>'
+                + 'area: ' + areas[i] + ' (Δ:'+diffAreas[i]+', '+ parseFloat(diffAreas[i]*100.0/areas[i]).toPrecision(3) + '%)' + '<br>'
+                + 'gray: ' + grays[i] + ' (Δ:'+diffGrays[i]+', ' + parseFloat(diffGrays[i]*100.0/255.0).toPrecision(3) + '%)' + '<br>'
+                + 'dist: ' + parseFloat(dists[i]).toPrecision(2) + ' (Δ:'+parseFloat(diffDists[i]).toPrecision(2)+', '+parseFloat(diffDists[i]*100.0/(dists[i]-diffDists[i])).toPrecision(3) + '%)' + '<br>'
+                + 'angle: ' + parseFloat(angles[i]).toPrecision(3) + '<br>'
+                + 'disparity: ' + parseFloat(disparities[i]).toPrecision(3) + '<br>'
+                + 'fail: '+failCode);
     }
     var neighTraceId = pv.data.findIndex(obj => { 
         return obj.name === "tracklibNeighScatter";

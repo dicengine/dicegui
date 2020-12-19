@@ -931,3 +931,4 @@ function saveStateFile() {
         consoleMsg('.dice.js file has been successfully saved');
     });
 }
+

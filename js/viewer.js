@@ -374,13 +374,12 @@ $("#cineGoToIndex").keypress(function(event) {
 
 $(".update-tracklib-preview").keypress(function(event) { 
     if (event.keyCode === 13) { 
-        reloadCineImages($("#frameScroller").val());//$("#currentPreviewSpan").text());
+        reloadCineImages($("#frameScroller").val());
     } 
 }); 
 
-
-$(".update-tracklib-preview").change(function () {
-    reloadCineImages($("#frameScroller").val());//$("#currentPreviewSpan").text());
+$("#segPreviewCheck").change(function() {
+    reloadCineImages($("#frameScroller").val());
 });
 
 $("#rightRefInput").on("click",function () {
@@ -564,5 +563,37 @@ $("#bestFitCheck").change(function() {
     showBestFitLine();
 });
 
-
+//$(".weight-2d").change(function() {
+//    // sum the values
+//    if(Number($('#areaWeight').val()) < 0 || Number($('#grayWeight').val()) < 0 ||
+//            Number($('#distWeight').val()) < 0 || Number($('#angleWeight').val()) < 0){
+//        $(this).val(0).change();
+//        alert('2d tracking weights must be positive');
+//        return;
+//    }
+//    var sum = Number($('#areaWeight').val()) + Number($('#grayWeight').val()) + Number($('#distWeight').val()) + Number($('#angleWeight').val());
+//    console.log('sum ' + sum);
+//    if(sum>100.0){
+//        $(this).val(0).change();
+//        alert('2d tracking weight values must sum to <= 100');
+//        return;
+//    }
+//    $('#weightSum').text(sum);
+//}); 
+//
+//$(".weight-stereo").change(function() {
+//    // sum the values
+//    if(Number($('#stereoAreaWeight').val()) < 0 || Number($('#distFromEpiWeight').val()) < 0){
+//        $(this).val(0).change();
+//        alert('stereo tracking weights must be positive');
+//        return;
+//    }
+//    var sum = Number($('#stereoAreaWeight').val()) + Number($('#distFromEpiWeight').val());
+//    if(sum>100.0){
+//        $(this).val(0).change();
+//        alert('stereo tracking weight values must sum to <= 100');
+//        return;
+//    }
+//    $('#stereoWeightSum').text(sum);
+//}); 
 

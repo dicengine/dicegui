@@ -419,7 +419,7 @@ function updateTracklibDisplayImages(index){
     args.push(cinePathRight);
 
     args.push('cine_ref_index');
-    args.push($("#cineRefIndex").val());
+    args.push(parseInt($("#cineRefIndex").val()));
     
     args.push('cine_start_index');
     var startFrame = Number($("#currentPreviewSpan").text()) - ($("#numPreviewFrames").val()-1)*$("#cineSkipIndex").val();
@@ -433,14 +433,14 @@ function updateTracklibDisplayImages(index){
     
     // the end frame is the start frame plus num_frames * skips
     args.push('cine_end_index');
-    args.push($("#currentPreviewSpan").text());
+    args.push(parseInt($("#currentPreviewSpan").text()));
 //    var endFrame = Number($("#currentPreviewSpan").text()) + ($("#numPreviewFrames").val()-1)*$("#cineSkipIndex").val();
 //    if(endFrame > Number($("#endPreviewSpan").text()))
 //        endFrame = Number($("#endPreviewSpan").text());
 //    args.push(endFrame);
     
     args.push('cine_skip_index');
-    args.push($("#cineSkipIndex").val());
+    args.push(parseInt($("#cineSkipIndex").val()));
     
     args.push('camera_system_file');
     args.push(calPath);
@@ -457,51 +457,6 @@ function updateTracklibDisplayImages(index){
     args.push('max_area');
     args.push(parseInt($("#maxArea").val()));
     
-    args.push('max_pt_density'); // needs to be a double value
-    if($("#maxPtDensity").val().includes('.')){
-        args.push($("#maxPtDensity").val());
-    }else{
-        args.push($("#maxPtDensity").val()  +'.0');
-    }
-    
-    args.push('colocation_tol'); // needs to be a double value
-    if($("#colocationTol").val().includes('.')){
-        args.push($("#colocationTol").val());
-    }else{
-        args.push($("#colocationTol").val()  +'.0');
-    }
-    
-    args.push('match_tol');
-    if($("#matchTol").val().includes('.')){
-        args.push($("#matchTol").val());
-    }else{
-        args.push($("#matchTol").val()  +'.0');
-    }
-    
-    args.push('cross_match_tol');
-    if($("#crossMatchTol").val().includes('.')){
-        args.push($("#crossMatchTol").val());
-    }else{
-        args.push($("#crossMatchTol").val()  +'.0');
-    }
-    
-    args.push('neighbor_radius');
-    if($("#neighborRadius").val().includes('.')){
-        args.push($("#neighborRadius").val());
-    }else{
-        args.push($("#neighborRadius").val()  +'.0');
-    }
-
-    args.push('min_pts_per_track');
-    args.push(parseInt($("#minPtsPerTrack").val()));
-
-    args.push('max_track_gap');
-    if(parseInt($("#maxTrackGap").val())>=1){
-        args.push(parseInt($("#minPtsPerTrack").val()));
-    }else{
-        args.push('1');
-    }
-
     args.push('num_background_frames');
     var numBackgroundFrames = parseInt($("#numBackgroundFrames").val());
     if(numBackgroundFrames<1||numBackgroundFrames > ($("#cineEndIndex").val()-$("#cineStartIndex").val())){
@@ -509,6 +464,59 @@ function updateTracklibDisplayImages(index){
         $("#numBackgroundFrames").val(1);
     }
     args.push(numBackgroundFrames);
+    
+    args.push('max_pt_density'); // needs to be a double value
+    args.push(Number($("#maxPtDensity").val()).toFixed(7));
+    
+    args.push('colocation_tol'); // needs to be a double value
+    args.push(Number($("#colocationTol").val()).toFixed(2));
+    
+    args.push('neighbor_radius');
+    args.push(Number($("#neighborRadius").val()).toFixed(1));
+
+    args.push('dist_weight');
+    args.push(Number($("#distWeight").val()).toFixed(2));
+
+    args.push('area_tol'); // needs to be a double value
+    args.push(Number($("#areaTol").val()).toFixed(2));
+    
+    args.push('area_weight');
+    args.push(Number($("#areaWeight").val()).toFixed(2));
+
+    args.push('gray_tol');
+    args.push(parseInt($("#grayTol").val()));
+    
+    args.push('gray_weight');
+    args.push(Number($("#grayWeight").val()).toFixed(2));
+
+    args.push('angle_tol'); // needs to be a double value
+    args.push(Number($("#angleTol").val()).toFixed(2));
+
+    args.push('angle_weight');
+    args.push(Number($("#angleWeight").val()).toFixed(2));
+
+    args.push('stereo_area_tol'); // needs to be a double value
+    args.push(Number($("#stereoAreaTol").val()).toFixed(2));
+    
+    args.push('stereo_area_weight');
+    args.push(Number($("#stereoAreaWeight").val()).toFixed(2));
+
+    args.push('dist_from_epi_tol'); // needs to be a double value
+    args.push(Number($("#distFromEpiTol").val()).toFixed(2));
+    
+    args.push('dist_from_epi_weight');
+    args.push(Number($("#distFromEpiWeight").val()).toFixed(2));
+
+    args.push('min_pts_per_track');
+    args.push(parseInt($("#minPtsPerTrack").val()));
+
+    args.push('num_search_frames');
+    if(parseInt($("#numSearchFrames").val())>=1){
+        args.push(parseInt($("#numSearchFrames").val()));
+    }else{
+        args.push('1');
+    }
+
     
     console.log(args);
     var child_process = require('child_process');
@@ -1000,46 +1008,53 @@ function writeParamsFile(only_write,resolution,ss_locs) {
             return;
         }
         content += '<Parameter name="min_pts_per_track" type="int" value="' + parseInt($("#minPtsPerTrack").val()) +'" />\n';
-        if(parseInt($("#maxTrackGap").val())<1){
-            alert('max track gap must be 1 or larger');
+        if(parseInt($("#numSearchFrames").val())<1){
+            alert('num search frames must be 1 or larger');
             endProgress(false);
             return;
         }
-        content += '<Parameter name="max_track_gap" type="int" value="' + parseInt($("#maxTrackGap").val()) +'" />\n';
+        content += '<Parameter name="num_search_frames" type="int" value="' + parseInt($("#numSearchFrames").val()) +'" />\n';
         content += '<Parameter name="max_pt_density" type="double" value="';
-        if($("#maxPtDensity").val().includes('.')){
-            content += $("#maxPtDensity").val();
-        }else{
-            content += $("#maxPtDensity").val()  +'.0';
-        }
+        content += Number($("#maxPtDensity").val()).toFixed(7);
         content += '" />\n';
         content += '<Parameter name="colocation_tol" type="double" value="';
-        if($("#colocationTol").val().includes('.')){
-            content += $("#colocationTol").val();
-        }else{
-            content += $("#colocationTol").val()  +'.0';
-        }
-        content += '" />\n';
-        content += '<Parameter name="match_tol" type="double" value="';
-        if($("#matchTol").val().includes('.')){
-            content += $("#matchTol").val();
-        }else{
-            content += $("#matchTol").val()  +'.0';
-        }
-        content += '" />\n';
-        content += '<Parameter name="cross_match_tol" type="double" value="';
-        if($("#crossMatchTol").val().includes('.')){
-            content += $("#crossMatchTol").val();
-        }else{
-            content += $("#crossMatchTol").val()  +'.0';
-        }
+        content += Number($("#colocationTol").val()).toFixed(2);
         content += '" />\n';
         content += '<Parameter name="neighbor_radius" type="double" value="';
-        if($("#neighborRadius").val().includes('.')){
-            content += $("#neighborRadius").val();
-        }else{
-            content += $("#neighborRadius").val()  +'.0';
-        }
+        content += Number($("#neighborRadius").val()).toFixed(1);
+        content += '" />\n';
+        content += '<Parameter name="dist_weight" type="double" value="';
+        content += Number($("#distWeight").val()).toFixed(2);
+        content += '" />\n';
+        content += '<Parameter name="area_tol" type="double" value="';
+        content += Number($("#areaTol").val()).toFixed(2);
+        content += '" />\n';
+        content += '<Parameter name="area_weight" type="double" value="';
+        content += Number($("#areaWeight").val()).toFixed(2);
+        content += '" />\n';
+        content += '<Parameter name="gray_tol" type="int" value="';
+        content += parseInt($("#grayTol").val());
+        content += '" />\n';
+        content += '<Parameter name="gray_weight" type="double" value="';
+        content += Number($("#grayWeight").val()).toFixed(2);
+        content += '" />\n';
+        content += '<Parameter name="angle_tol" type="double" value="';
+        content += Number($("#angleTol").val()).toFixed(2);
+        content += '" />\n';
+        content += '<Parameter name="angle_weight" type="double" value="';
+        content += Number($("#angleWeight").val()).toFixed(2);
+        content += '" />\n';
+        content += '<Parameter name="stereo_area_tol" type="double" value="';
+        content += Number($("#stereoAreaTol").val()).toFixed(2);
+        content += '" />\n';
+        content += '<Parameter name="stereo_area_weight" type="double" value="';
+        content += Number($("#stereoAreaWeight").val()).toFixed(2);
+        content += '" />\n';
+        content += '<Parameter name="dist_from_epi_tol" type="double" value="';
+        content += Number($("#distFromEpiTol").val()).toFixed(2);
+        content += '" />\n';
+        content += '<Parameter name="dist_from_epi_weight" type="double" value="';
+        content += Number($("#distFromEpiWeight").val()).toFixed(2);
         content += '" />\n';
         var numBackgroundFrames = parseInt($("#numBackgroundFrames").val());
         if(numBackgroundFrames<0||numBackgroundFrames > ($("#cineEndIndex").val()-$("#cineStartIndex").val())){
@@ -1181,7 +1196,8 @@ function writeParamsFile(only_write,resolution,ss_locs) {
 function writeSubsetFile(only_write,resolution,ss_locs){
 
     if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1){ // for tracklib, no subset file needs to be written
-        callDICeExec(resolution,ss_locs);
+        if(!only_write)
+            callDICeExec(resolution,ss_locs);
         return;
     }
     
@@ -1322,7 +1338,7 @@ function checkValidInput() {
     var isList = $("#fileSelectMode").val()=='list';
     var isStereo = showStereoPane==1||showStereoPane==2;
     var calRequired = isStereo || $("#calibrationCheck")[0].checked;
-    
+    //var isTracklib = $("#analysisModeSelect").val()=="tracking"&&isStereo;
     // clear the ul and add relevant items for this type of analysis
     $("#taskList").empty();
     if(isList){
@@ -1343,6 +1359,23 @@ function checkValidInput() {
     if(calRequired)
         $("#taskList").append('<li id=\"loadCalLi\" class=\"task-list-item\";>perform or load cal</li>');
     // catch tracking with no ROIs defined
+//    if(isTracklib){
+//        $("#taskList").append('<li id=\"weightsLi\" class=\"task-list-item\";>set tracking weights</li>');
+//        $('#weightsLi').addClass('task-list-item-done');
+//        if(Number($('#areaWeight').val()) < 0 || Number($('#grayWeight').val()) < 0 ||
+//                Number($('#distWeight').val()) < 0 || Number($('#angleWeight').val()) < 0){
+//            validInput = false;
+//            $('#weightsLi').removeClass('task-list-item-done');
+//        }
+//        var sum = Number($('#areaWeight').val()) + Number($('#grayWeight').val()) + Number($('#distWeight').val()) + Number($('#angleWeight').val());
+//        if(sum>100.0){
+//            validInput = false;
+//            $('#weightsLi').removeClass('task-list-item-done');
+//        }
+//        if(validInput){
+//            $('#weightsLi').addClass('task-list-item-done');
+//        }
+//    }
     if($("#analysisModeSelect").val()=="tracking"&&!isStereo){
         $("#taskList").append('<li id=\"defineROIsLi\" class=\"task-list-item\";>define tracking subsets</li>');
       var ROIShapes = getPlotlyShapes('ROI');

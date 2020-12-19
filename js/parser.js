@@ -540,14 +540,6 @@ function impl_params_xml_file(xml){
     console.log('colocation_tol: ' + colocation_tol);
     if(colocation_tol)
         $("#colocationTol").val(colocation_tol);
-    match_tol = xml_get(xml,"match_tol");
-    console.log('match_tol: ' + match_tol);
-    if(match_tol)
-        $("#matchTol").val(match_tol);
-    cross_match_tol = xml_get(xml,"cross_match_tol");
-    console.log('cross_match_tol: ' + cross_match_tol);
-    if(cross_match_tol)
-        $("#crossMatchTol").val(cross_match_tol);
     neighbor_radius = xml_get(xml,"neighbor_radius");
     console.log('neighbor_radius: ' + neighbor_radius);
     if(neighbor_radius)
@@ -556,15 +548,70 @@ function impl_params_xml_file(xml){
     console.log('min_pts_per_track: ' + min_pts_per_track);
     if(min_pts_per_track)
         $("#minPtsPerTrack").val(min_pts_per_track);
-    max_track_gap = xml_get(xml,"max_track_gap");
-    console.log('max_track_gap: ' + max_track_gap);
-    if(max_track_gap)
-        $("#maxTrackGap").val(max_track_gap);
+    num_search_frames = xml_get(xml,"num_search_frames");
+    console.log('num_search_frames: ' + num_search_frames);
+    if(num_search_frames)
+        $("#numSearchFrames").val(num_search_frames);
     num_background = xml_get(xml,"num_background_frames");
     console.log('num_background_frames: ' + num_background);
     if(num_background)
         $("#numBackgroundFrames").val(num_background);
 
+    stereo_area_tol = xml_get(xml,"stereo_area_tol");
+    console.log('stereo_area_tol: ' + stereo_area_tol);
+    if(stereo_area_tol)
+        $("#stereoAreaTol").val(stereo_area_tol);
+
+    stereo_area_weight = xml_get(xml,"stereo_area_weight");
+    console.log('stereo_area_weight: ' + stereo_area_weight);
+    if(stereo_area_weight)
+        $("#stereoAreaWeight").val(stereo_area_weight);
+    
+    dist_from_epi_tol = xml_get(xml,"dist_from_epi_tol");
+    console.log('dist_from_epi_tol: ' + dist_from_epi_tol);
+    if(dist_from_epi_tol)
+        $("#distFromEpiTol").val(dist_from_epi_tol);
+    
+    dist_from_epi_weight = xml_get(xml,"dist_from_epi_weight");
+    console.log('dist_from_epi_weight: ' + dist_from_epi_weight);
+    if(dist_from_epi_weight)
+        $("#distFromEpiWeight").val(dist_from_epi_weight);
+    
+    dist_weight = xml_get(xml,"dist_weight");
+    console.log('dist_weight: ' + dist_weight);
+    if(dist_weight)
+        $("#distWeight").val(dist_weight);
+    
+    area_tol = xml_get(xml,"area_tol");
+    console.log('area_tol: ' + area_tol);
+    if(area_tol)
+        $("#areaTol").val(area_tol);
+    
+    area_weight = xml_get(xml,"area_weight");
+    console.log('area_weight: ' + area_weight);
+    if(area_weight)
+        $("#areaWeight").val(area_weight);
+    
+    gray_tol = xml_get(xml,"gray_tol");
+    console.log('gray_tol: ' + gray_tol);
+    if(gray_tol)
+        $("#grayTol").val(gray_tol);
+    
+    gray_weight = xml_get(xml,"gray_weight");
+    console.log('gray_weight: ' + gray_weight);
+    if(gray_weight)
+        $("#grayWeight").val(gray_weight);
+    
+    angle_tol = xml_get(xml,"angle_tol");
+    console.log('angle_tol: ' + angle_tol);
+    if(angle_tol)
+        $("#angleTol").val(angle_tol);
+    
+    angle_weight = xml_get(xml,"angle_weight");
+    console.log('angle_weight: ' + angle_weight);
+    if(angle_weight)
+        $("#angleWeight").val(angle_weight);
+    
     checkValidInput();
 }
 
