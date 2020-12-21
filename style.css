@@ -425,7 +425,7 @@ h4 {
     height: 35vh;
     min-height: 35vh;
     font-size: 12px;
-    overflow-y: scroll;
+    overflow: hidden; /*scroll*/
     padding-right: 0;
 }
 .results-sub-window {

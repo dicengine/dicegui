@@ -4,6 +4,56 @@ var dataObjsTracklib = [];
 var currentTableTracklib = 0;
 var plottingPausedTracklib = false;
 
+
+function updateTracklib3dScatter(data){
+    var div = document.getElementById("livePlot3d");
+    var layout3d = {
+            scene : {
+                aspectmode: 'data',
+                xaxis: {
+                    title: {
+                        text: 'X',
+                    },
+                },
+                yaxis: {
+                    scaleanchor: 'x',
+                    title: {
+                        text: 'Y',
+                    }
+                },
+                zaxis: {
+                    scaleanchor: 'x',
+                    title: {
+                        text: 'Z',
+                    }
+                },
+                camera: {
+                  center: {
+                        x: 0, y: 0, z: 0}, 
+                  eye: { 
+                        x: 0, y: 0, z:-2}, 
+                  up: {
+                        x: 0, y: -1, z: 0},
+                },
+            },
+            margin: {
+                l: 0,
+                r: 0,
+                b: 0,
+                t: 0,
+                pad: 4,
+            }
+    };
+    var config = {
+            displaylogo: false,
+            scrollZoom: true,
+            responsive: true
+    };
+    // TODO add configuration
+    Plotly.newPlot(div,data,layout3d,config);
+}
+
+
 function livePlotTracklibRepeat() {
 //  updateTracklibResults();
     nIntervIdTracklib = setInterval(function(){

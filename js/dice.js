@@ -54,7 +54,9 @@ function showLivePlots(){
     localStorage.setItem("workingDirectory",workingDirectory);
     if($("#analysisModeSelect").val()=="tracking"){
         if(diceTrackLibOn && showStereoPane==1){
-            livePlotTracklibRepeat();
+            // TODO enable live plots for tracklib
+            $("#resultsButton").trigger( "click" );
+            //livePlotTracklibRepeat();
         }else{
             var numROI = numROIShapes();
             var livePlotFiles = '';
@@ -413,6 +415,9 @@ function updateTracklibDisplayImages(index){
     args.push('display_file_right');
     args.push(displayRight);
     
+    args.push('preview_mode');
+    args.push('true');
+    
     args.push('cine_file');
     args.push(cinePathLeft);
     args.push('stereo_cine_file');
@@ -536,12 +541,22 @@ function updateTracklibDisplayImages(index){
                             updatePreview(fullPath('',displayLeft),'left',fig.data,[],"",function(){
                                 undrawShape('','neighCircle');
                                 undrawShape('','epipolarLine');
-                                });
+                            });
+                            showLivePlots();
                         }else{
                             console.log(jsonErr);
                             alert('error: reading json file failed');
                         }
-                      });
+                    });
+                    Plotly.d3.json(fullPath('.dice','.preview_3d.json'), function(jsonErr, fig) {
+                        if(jsonErr==null){
+                            updateTracklib3dScatter(fig.data);
+                        }else{
+                            console.log(jsonErr);
+                            //alert('error: reading 3d preview json file failed');
+                            Plotly.purge(document.getElementById("livePlot3d"));
+                        }
+                    });
                 }else{
                 }
             });
@@ -571,106 +586,6 @@ function updateTracklibDisplayImages(index){
     });
     
 }
-
-//function drawEpipolarLine(isLeft,dot_x,dot_y,reset=false) {
-//    //if($("#analysisModeSelect").val()!="tracking") return;
-//    // check to see that there is at least one image selected:
-//    if(refImagePathLeft=='undefined'&&refImagePathRight=='undefined') return;
-//    // generate the command line
-//    args = [];
-//    leftName = '';
-//    leftNameFilter = '';
-//    rightName = '';
-//    rightNameFilter = '';
-//    hiddenDir = fullPath('.dice','');
-//    fs.readdir(hiddenDir, (err,dir) => {
-//        for(var i = 0; i < dir.length; i++) {
-//            if(dir[i].includes('.display_image_left')&&!dir[i].includes('filter')&&!dir[i].includes('epipolar')){
-//                leftName = fullPath('.dice',dir[i]);
-//                leftNameFilter = fullPath('.dice',dir[i].replace('.'+dir[i].split('.').pop(),"_filter.png"));
-//                leftNameEpipolar = fullPath('.dice',dir[i].replace('.'+dir[i].split('.').pop(),"_epipolar.png"));
-//            }else if(dir[i].includes('.display_image_right')&&!dir[i].includes('filter')&&!dir[i].includes('epipolar')){
-//                rightName = fullPath('.dice',dir[i]);
-//                rightNameFilter = fullPath('.dice',dir[i].replace('.'+dir[i].split('.').pop(),"_filter.png"));
-//                rightNameEpipolar = fullPath('.dice',dir[i].replace('.'+dir[i].split('.').pop(),"_epipolar.png"));
-//            }
-//        }
-//        if(reset){
-//            getFileObject(leftName, function (fileObject) {
-//                loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
-//            });
-//            getFileObject(rightName, function (fileObject) {
-//                loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
-//            });
-//            return;
-//        }
-//        if($("#segPreviewCheck")[0].checked || $("#showTracksCheck")[0].checked)
-//            args.push(leftNameFilter);
-//        else
-//            args.push(leftName);
-//        args.push(leftNameEpipolar);
-//        if($("#segPreviewCheck")[0].checked || $("#showTracksCheck")[0].checked)
-//            args.push(rightNameFilter);
-//        else
-//            args.push(rightName);
-//        args.push(rightNameEpipolar);
-//        args.push('filter:epipolar_line');
-//        args.push('frame_number');
-//        args.push($("#currentPreviewSpan").text());
-//        args.push('epipolar_is_left');
-//        if(isLeft)
-//            args.push('true');
-//        else
-//            args.push('false');
-//        args.push('epipolar_dot_x');
-//        args.push(dot_x);
-//        args.push('epipolar_dot_y');
-//        args.push(dot_y);
-//        args.push('cal_file');
-//        args.push(fullPath('','cal.xml'));
-//        consoleMsg('calling OpenCVServerExec with args ' + args);
-//
-//        // call the filter exec
-//        var child_process = require('child_process');
-//        var readline      = require('readline');
-//        var proc = child_process.spawn(execOpenCVServerPath,args,{cwd:workingDirectory});//,maxBuffer:1024*1024});
-//
-//        proc.on('error', function(){
-//            alert('DICe OpenCVServer failed for epipolar line: invalid executable: ' + execOpenCVServerPath);
-//        });
-//        proc.on('close', (code) => {
-//            console.log(`OpenCVServer exited with code ${code}`);
-//            if(code!=0){
-//                alert('OpenCVServer failed');
-//            }
-//            else{
-//                // load new preview images
-//                fs.stat(fullPath('.dice','.display_image_left_epipolar.png'), function(err, stat) {
-//                    if(err == null) {
-//                        getFileObject(fullPath('.dice','.display_image_left_epipolar.png'), function (fileObject) {
-//                            loadImage(fileObject,"#panzoomLeft","auto","auto",1,false,false,"","",false);
-//                        });
-//                    }else{
-//                    }
-//                });
-//                fs.stat(fullPath('.dice','.display_image_right_epipolar.png'), function(err, stat) {
-//                    if(err == null) {
-//                        getFileObject(fullPath('.dice','.display_image_right_epipolar.png'), function (fileObject) {
-//                            loadImage(fileObject,"#panzoomRight","auto","auto",1,false,false,"","",false);
-//                        });
-//                    }else{
-//                    }
-//                });
-//            }
-//        });
-//        readline.createInterface({
-//            input     : proc.stdout,
-//            terminal  : false
-//        }).on('line', function(line) {
-//            consoleMsg(line);
-//        });
-//    })
-//}
 
 function callCrossInitExec() {
 
@@ -1363,23 +1278,6 @@ function checkValidInput() {
     if(calRequired)
         $("#taskList").append('<li id=\"loadCalLi\" class=\"task-list-item\";>perform or load cal</li>');
     // catch tracking with no ROIs defined
-//    if(isTracklib){
-//        $("#taskList").append('<li id=\"weightsLi\" class=\"task-list-item\";>set tracking weights</li>');
-//        $('#weightsLi').addClass('task-list-item-done');
-//        if(Number($('#areaWeight').val()) < 0 || Number($('#grayWeight').val()) < 0 ||
-//                Number($('#distWeight').val()) < 0 || Number($('#angleWeight').val()) < 0){
-//            validInput = false;
-//            $('#weightsLi').removeClass('task-list-item-done');
-//        }
-//        var sum = Number($('#areaWeight').val()) + Number($('#grayWeight').val()) + Number($('#distWeight').val()) + Number($('#angleWeight').val());
-//        if(sum>100.0){
-//            validInput = false;
-//            $('#weightsLi').removeClass('task-list-item-done');
-//        }
-//        if(validInput){
-//            $('#weightsLi').addClass('task-list-item-done');
-//        }
-//    }
     if($("#analysisModeSelect").val()=="tracking"&&!isStereo){
         $("#taskList").append('<li id=\"defineROIsLi\" class=\"task-list-item\";>define tracking subsets</li>');
       var ROIShapes = getPlotlyShapes('ROI');

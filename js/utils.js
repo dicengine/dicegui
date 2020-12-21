@@ -246,6 +246,7 @@ function testForDebugMsg() {
                     if (showStereoPaneState == 1 && $("#analysisModeSelect").val() == 'tracking') {
                         $(".non-tracklib-tools").hide();
                         $(".tracklib-tools").show();
+                        $(".results-right").show();
                         showStereoViewer();
                     }
                 }
@@ -583,6 +584,7 @@ $("#stereoButton").click(function(){
             $(".results-right").hide();
         $(".non-tracklib-tools").show();
         $(".tracklib-tools").hide();
+        $(".results-right").hide();
     }
     checkValidInput();
     showBestFitLine();
