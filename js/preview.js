@@ -89,7 +89,9 @@ function getPreviewConfig(dest){
             modeBarButtonsToRemove: [
                 'autoScale2d',
                 'select2d',
-                'lasso2d'
+                'lasso2d',
+                'hoverCompareCartesian',
+                'hoverClosestCartesian'
                 ],
     };
     if($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global"){
@@ -303,11 +305,9 @@ function updateImage(spec,data){
     });
     div.on('plotly_click', function(data){
         if(spec.dest!='left' && spec.dest!='right') return;
-        //console.log(data);
         if(data.points[0].data.name==='tracklibPreviewScatter'){
-            drawNeighCircle(spec.dest,data.points[0].x,data.points[0].y);
-            updateNeighInfoTrace(spec.dest,data.points[0].pointIndex);
-            drawEpipolarLine(spec.dest,data.points[0].pointIndex);
+            var index2d = data.points[0].pointIndex;
+            updateInspectors(spec.dest,index2d);
         }
     });
     
@@ -628,7 +628,7 @@ function drawRepresentativeSubset(){
     Plotly.relayout(pv,update);
 }
 
-function drawNeighCircle(dest,cx,cy){
+function drawNeighCircle(dest,index){
     if(!$("#analysisModeSelect").val()=="tracking"||showStereoPane!=1) return;
     var pv = document.getElementById("plotlyViewerLeft");
     if(dest=='right'){
@@ -639,8 +639,15 @@ function drawNeighCircle(dest,cx,cy){
     }
     var pvl = pv.layout;
     if(!pvl) return;
-//    var cx = refImageWidth/2;
-//    var cy = refImageHeight/2;
+    
+    if(!pv.data) return;
+    var scatterTraceId = pv.data.findIndex(obj => { 
+        return obj.name === "tracklibPreviewScatter";
+    });
+    if(scatterTraceId<0) return;
+    if(index<0||index>pv.data[scatterTraceId].x.length) return;
+    var cx = pv.data[scatterTraceId].x[index];
+    var cy = pv.data[scatterTraceId].y[index];
 
     // check if representative subset already exists and get it's points
     var existingShapes = [];
@@ -1142,6 +1149,7 @@ function updateNeighInfoTrace(dest,index){
         stereoX.push(stereoPx[stereoIds[i]]);
         stereoY.push(stereoPy[stereoIds[i]]);
         stereoText.push('('+stereoPx[stereoIds[i]]+','+stereoPy[stereoIds[i]]+') <br>'
+                + 'stereo id: ' + pvStereo.data[scatterTraceIdStereo].stereoGlobalId[stereoIds[i]] + '<br>'
                 + 'frame: ' + myFrame + '<br>'
                 + 'area: ' + stereoAreas[i] + ' (Δ:'+stereoDiffAreas[i]+', '+ parseFloat(stereoDiffAreas[i]*100.0/(stereoAreas[i]-stereoDiffAreas[i])).toPrecision(3) + '%)' + '<br>'
                 + 'dist from epi: ' + parseFloat(stereoEpiDists[i]).toPrecision(2) + '<br>'

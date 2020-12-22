@@ -550,11 +550,14 @@ function updateTracklibDisplayImages(index){
                     });
                     Plotly.d3.json(fullPath('.dice','.preview_3d.json'), function(jsonErr, fig) {
                         if(jsonErr==null){
-                            updateTracklib3dScatter(fig.data);
+                            updateTracklib3dScatter(fig.data,function(){
+                                addTracklibFieldstoFieldSelect(function(){updateTracklib2dScatter();});
+                            });
                         }else{
                             console.log(jsonErr);
                             //alert('error: reading 3d preview json file failed');
                             Plotly.purge(document.getElementById("livePlot3d"));
+                            Plotly.purge(document.getElementById("livePlots"));
                         }
                     });
                 }else{

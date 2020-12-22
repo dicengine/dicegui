@@ -31,12 +31,12 @@ function livePlotRepeat() {
 }
 
 $("#livePlotFieldSelect").on('change',function() {
-    currentTable = Number($("#livePlotFieldSelect option:selected").val().split("_").pop());
-    
     if($("#analysisModeSelect").val()=="tracking" && diceTrackLibOn && showStereoPane==1)
-        plotTracklibDataTable();
-    else
+        updateTracklib2dScatter();
+    else{
+        currentTable = Number($("#livePlotFieldSelect option:selected").val().split("_").pop());
         plotDataTable();
+    }
 });
 
 function livePlot(fileNames){
@@ -57,6 +57,7 @@ function livePlot(fileNames){
         console.log("fileToDataObj succeeded!", response);
         var firstValidIndex = getFirstValidIndex(dataObjs);
         if(firstPlot){
+            $("#livePlotFieldSelect").empty();
             for(i=0;i<dataObjs[firstValidIndex].headings.length;++i){
                 var liID = "li_livePlot_" + i;
                 var liTitle = dataObjs[firstValidIndex].headings[i];

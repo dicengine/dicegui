@@ -1,11 +1,103 @@
-var nIntervIdTracklib;
-var firstPlotTracklib = true;
-var dataObjsTracklib = [];
-var currentTableTracklib = 0;
-var plottingPausedTracklib = false;
+function addTracklibFieldstoFieldSelect(cb){
+    $("#livePlotFieldSelect").empty();
+    $("#livePlotFieldSelect").append(new Option('world coord x','x'));
+    $("#livePlotFieldSelect").append(new Option('world coord y','y'));
+    $("#livePlotFieldSelect").append(new Option('world coord z','z'));
+    $("#livePlotFieldSelect").append(new Option('area','area'));
+    $("#livePlotFieldSelect").append(new Option('gray','gray'));
+    $("#livePlotFieldSelect").append(new Option('Δx/frame','velX'));
+    $("#livePlotFieldSelect").append(new Option('Δy/frame','velY'));
+    $("#livePlotFieldSelect").append(new Option('Δz/frame','velZ'));
+    cb = cb || $.noop;
+    cb();
+}
+
+$("#trackGID").change(function() {
+    if($('#trackGID').val()<0){
+        $('#trackGID').val(0);
+        alert('invalid global id');
+    }
+    updateTracklib2dScatter();
+});
 
 
-function updateTracklib3dScatter(data){
+$("#trackGID").keypress(function(event) { 
+    if (event.keyCode === 13) { 
+        if($('#trackGID').val()<0){
+            $('#trackGID').val(0);
+            alert('invalid global id');
+        }
+        updateTracklib2dScatter();
+    }
+}); 
+
+function updateTracklib2dScatter(){
+    var div = document.getElementById("livePlots");
+    var data = document.getElementById("livePlot3d").data; // grab the data that is stored on the 3d plot
+    if(!data) return;
+    var fieldText = $("#livePlotFieldSelect option:selected" ).text();
+    var field = $("#livePlotFieldSelect option:selected" ).val();
+    var id = parseInt($("#trackGID").val());
+    // pull the 2d information from the 3d scatter trace
+    var traceName = "3dScatterTrace_" + id.toString();
+    var curveNum = data.findIndex(obj => { 
+        return obj.name === traceName;
+    });
+    if(curveNum<0){
+        alert('invalid global id: ' + $("#trackGID").val());
+        $("#trackGID").val(0);
+        // purge the 2d results
+        Plotly.purge(document.getElementById("livePlots"));
+//        updateTracklib2dScatter();
+        return;
+    }
+    if(!data[curveNum].hasOwnProperty(field)){
+        alert('error: invalid 2d field requested: ' + fieldText);
+        return;
+    }
+    var layout = {
+            xaxis: {title: {text: 'frame'}},
+            yaxis: {title: {text: fieldText}},
+            margin: {l:60,r:50,b:40,t:10,pad:4},
+            autosize: true,
+            hovermode: 'closest',
+    };
+    var config = {
+            displaylogo: false,
+            scrollZoom: true,
+            responsive: true,
+            modeBarButtonsToRemove: [
+                'autoScale2d',
+                'select2d',
+                'lasso2d',
+                'hoverCompareCartesian',
+                'hoverClosestCartesian'
+                ],
+    };
+    var data2d = {
+            name: '2dScatterTrace',
+            hovertemplate : '(%{x},%{y})<extra></extra>',
+            visible: true,
+            type:'scatter',
+            mode:'lines+markers',
+            showlegend: false,
+            line: {color: '#316395', width: 2},
+            marker: {color: '#316395', size: 7},
+            x: data[curveNum].frame,
+            y: data[curveNum][field],
+            leftIndex: data[curveNum].leftIndex
+    }
+    Plotly.newPlot(div,[data2d],layout,config);
+    div.on('plotly_click', function(data){
+        if(data.points[0].data.name==='2dScatterTrace'){
+            var index2d = data.points[0].data.leftIndex[data.points[0].pointIndex];
+            updateInspectors('left',index2d);
+        }
+    });
+
+}
+
+function updateTracklib3dScatter(data,cb){
     var div = document.getElementById("livePlot3d");
     var layout3d = {
             scene : {
@@ -28,12 +120,9 @@ function updateTracklib3dScatter(data){
                     }
                 },
                 camera: {
-                  center: {
-                        x: 0, y: 0, z: 0}, 
-                  eye: { 
-                        x: 0, y: 0, z:-2}, 
-                  up: {
-                        x: 0, y: -1, z: 0},
+                  center: {x: 0, y: 0, z: 0}, 
+                  eye: {x: 0, y: 0, z:-2}, 
+                  up: {x: 0, y: -1, z: 0},
                 },
             },
             margin: {
@@ -47,214 +136,158 @@ function updateTracklib3dScatter(data){
     var config = {
             displaylogo: false,
             scrollZoom: true,
-            responsive: true
+            responsive: true,
+            modeBarButtonsToRemove: [
+                'hoverCompareCartesian',
+                'hoverClosestCartesian',
+                ],
     };
     // TODO add configuration
     Plotly.newPlot(div,data,layout3d,config);
-}
+    cb = cb || $.noop;
+    cb();
 
-
-function livePlotTracklibRepeat() {
-//  updateTracklibResults();
-    nIntervIdTracklib = setInterval(function(){
-//      updateTracklibResults();
-        if($("#runLoader").hasClass('post-loader-success')){
-            $("#resultsButton").trigger( "click" );
-            updateTracklibResults();
-            clearInterval(nIntervIdTracklib);
+    div.on('plotly_click', function(data){
+//      console.log(data);
+        // NOTE: in 3d trace the point id is pointNumber not pointIndex like it is for 2d
+        if(data.points[0].data.name.includes('3dScatterTrace_')){
+            var ptNum = data.points[0].pointNumber;
+            var leftIndex  = data.points[0].data.leftIndex[ptNum];
+            updateInspectors('left',leftIndex);//,data.points[0].curveNumber,ptNum);
         }
-    }, 5000);
-}
-
-function tracklibDataPopulated(){
-    if(dataObjsTracklib.length>=1) return true;
-    else return false;
-}
-
-function updateTracklibResults(){
-    var workingDir = localStorage.getItem("workingDirectory");
-    var resultsFile;
-    if(os.platform()=='win32'){
-        resultsFile = workingDir + '\\results\\fragments.txt'; 
-    }else{
-        resultsFile = workingDir + '/results/fragments.txt'; 
-    }
-    console.log('updating tracklib results with file: ' + resultsFile);
-    dataObjsTracklib = [];
-    dataObjsTracklib.push({fileName:resultsFile,roi_id:-1,headings:[],data:[],initialized:false});
-    var promise = fileToDataObj(dataObjsTracklib,0); // should only be one results file
-    promise.then(function(response) {
-    if(response[0]=="file read failed!"||response=="file read failed!"){
-        console.log('failed to load tracklib results file ' + resultsFile);
-        return;
-    }
-        console.log("fileToDataObj succeeded!", response);
-        if(firstPlotTracklib){
-            for(i=0;i<dataObjsTracklib[0].headings.length;++i){
-                var liID = "li_livePlot_" + i;
-                var liTitle = dataObjsTracklib[0].headings[i];
-                $("#livePlotFieldSelect").append(new Option(liTitle, liID));
-            }
-            $('#livePlotFieldSelect :nth-child(7)').prop('selected', true); // To select via index
-            firstPlotTracklib = false;
-        }
-        plotTracklibDataTable();
-    },function(error) {
-        console.error("fileToDataObj failed!", error);
     });
 }
 
-$(".update-tracklib-plots").keypress(function(event) { 
-    if (event.keyCode === 13) { 
-        plotTracklibDataTable();
-    } 
-}); 
-
-
-$(".update-tracklib-plots").change(function () {
-    plotTracklibDataTable();
-});
-
-
-function plotTracklibDataTable(){
-    // clear the divs and clear the plots
-    $('#livePlots').empty();
-    // create a div on the page:
-    currentTableTracklib = Number($("#livePlotFieldSelect option:selected").val().split("_").pop());
-    
-    // get the max global id from the set
-    if(dataObjsTracklib.length<1) return;
-    if(dataObjsTracklib[0].data.length<6) return;
-    
-    var maxGID = 0;
-    for(i=0;i<dataObjsTracklib[0].data[5].length;++i){ // 5 is global id
-        if(dataObjsTracklib[0].data[5][i] > maxGID){
-            maxGID = dataObjsTracklib[0].data[5][i];
+function highlightTrack(curveNum,ptIndex){
+    // color all the trace lines back to the default
+    var update = {
+            'marker.color': '#FB00D1',
+            'marker.size' : 4,
+            'line.color': '#FB00D1',
+            'line.width': 2
+    };
+    setTimeout(function(){
+        Plotly.restyle("livePlot3d", update);
+        // color the trace for this point
+        if(ptIndex<0||curveNum<0){
+            // turn off any selected points
+            var div3d = document.getElementById("livePlot3d");
+            var traceId3d = div3d.data.findIndex(obj => { 
+                return obj.name === "selected3dPoint";
+            });
+            if(traceId3d>=0)
+                Plotly.deleteTraces(div3d,traceId3d);
+            var div2d = document.getElementById("livePlots");
+            var traceId2d = div2d.data.findIndex(obj => { 
+                return obj.name === "selected2dPoint";
+            });
+            if(traceId2d>=0)
+                Plotly.deleteTraces(div2d,traceId2d);
+            return;
         }
-    }
-    console.log('max GID: ' + maxGID);
+        update = {
+                'marker.color': '#316395',
+                'line.color': '#316395',
+                'line.width': 4
+        }
+        Plotly.restyle("livePlot3d", update,curveNum);
+        addClickedPointTrace(curveNum,ptIndex);
+        addClickedPointTrace2d(curveNum,ptIndex);
+    },200); // BUG in Plotly requires this timeout
+}
 
-    // collect all the data for the selected id (global or local)
-    var id_index = 5;
-    var alert_text = " global ";
-    if($("#idTypeSelect").val()=='leftID'){
-        id_index = 3;
-        alert_text = " left ";
-    }
-    else if($("#idTypeSelect").val()=='rightID'){
-        id_index = 4;
-        alert_text = " right ";
-    }
-    var id_val = parseInt($("#trackID").val());
-
-    var tmp_data = {x:[],y:[],z:[],gid:-1,type:'scatter3d'};
-
-    var color = '#1f77b4';
-    var highlight_color = '#b41f71';
-    var dataMap = new Array(maxGID+1);
-    // initialize the data container
-    for(i=0;i<dataMap.length;++i){
-        dataMap[i] = {x:[],y:[],z:[],type:'scatter3d',
-                marker: {
-                    color: color,
-                    size: 2,
-                    symbol: 'circle'
-                        },
+function addClickedPointTrace(curveNum,ptIndex){
+    var div = document.getElementById("livePlot3d");
+    var x = [div.data[curveNum].x[ptIndex]];
+    var y = [div.data[curveNum].y[ptIndex]];
+    var z = [div.data[curveNum].z[ptIndex]];
+    var text = [div.data[curveNum].text[ptIndex]];
+    var traceId = div.data.findIndex(obj => { 
+        return obj.name === "selected3dPoint";
+    });
+    if(traceId<0){
+        var trace = {
+                name: 'selected3dPoint',
+                hovertemplate : '(%{x},%{y},%{z})<br>%{text}<extra></extra>',
+                visible: true,
+                type:'scatter3d',
+                x:x,
+                y:y,
+                z:z,
+                text: text,
+                mode:'markers',
+                showlegend: false,
+                marker: {color: '#0DF9FF', size: 8},
         };
+        Plotly.addTraces(div,trace);
+    }else{
+        var update = {x:[x],y:[y],z:[z],text:[text],visible:true,marker: {color: '#0DF9FF', size: 8}};
+        Plotly.restyle(div,update,traceId);
     }
-    // retrieve the data for each point and organize by id
-    for(i=0;i<dataObjsTracklib[0].data[5].length;++i){ // 5 is global id
-        var gid = dataObjsTracklib[0].data[5][i];
-        var lid = dataObjsTracklib[0].data[id_index][i];
-        if(gid<0) continue;
-        if(lid==id_val){
-            dataMap[gid].marker.color = highlight_color;
-        }
-        dataMap[gid].name = 'gid ' + gid;
-        dataMap[gid].x.push(dataObjsTracklib[0].data[10][i]);
-        dataMap[gid].y.push(dataObjsTracklib[0].data[11][i]);
-        dataMap[gid].z.push(dataObjsTracklib[0].data[12][i]);
-    }
-    // plot 3d of all valid global points
-    var divID3D = "div_livePlot3d";
-    $("#livePlot3D").append('<div id="' + divID3D + '" class="plot_div" style="height:100%; width:100%; float:left;" ></div>');
-    var layout3D = {
-            scene : {
-                aspectmode: 'data',
-                xaxis: {
-                    title: {
-                        text: 'X',
-                    },
-                },
-                yaxis: {
-                    scaleanchor: 'x',
-                    title: {
-                        text: 'Y',
-                    }
-                },
-                zaxis: {
-                    scaleanchor: 'x',
-                    title: {
-                        text: 'Z',
-                    }
-                },
-                margin: {
-                    l: 0,
-                    r: 0,
-                    b: 0,
-                    t: 0,
-                    pad: 4,
-                },
-                showlegend: false
-            }
-    };
-//  var plotlyData3D = {x:[],y:[],z:[],type:'scatter',gid:-1};
-//    for(i=0;i<dataObjsTracklib[0].data[5].length;++i){ // 5 is global id
-//        if(dataObjsTracklib[0].data[5][i]>=0){
-//            plotlyData3D.x.push(dataObjsTracklib[0].data[10][i]);
-//            plotlyData3D.y.push(dataObjsTracklib[0].data[11][i]);
-//            plotlyData3D.z.push(dataObjsTracklib[0].data[12][i]);
-//        }
-//    }
-//    Plotly.plot(document.getElementById(divID3D),[plotlyData3D],layout3D);
-    Plotly.plot(document.getElementById(divID3D),dataMap,layout3D);
+}
+
+function addClickedPointTrace2d(curveNum,ptIndex){
+    if($('#trackGID').val()!=curveNum);
+        $('#trackGID').val(curveNum).change();
     
-    var divID = "div_livePlot_" + currentTableTracklib;
-    $("#livePlots").append('<div id="' + divID + '" class="plot_div" style="height:100%; width:100%; float:left;" ></div>');
-    var liID = "li_livePlot_" + currentTableTracklib;
-    var liTitle = dataObjsTracklib[0].headings[currentTableTracklib];
-    var layout = {
-            xaxis: {
-                title: {
-                    text: 'Frame',
-                },
-            },
-            yaxis: {
-//                autorange: 'true',
-//                fixedrange: 'false',
-                title: {
-                    text: liTitle,
-                }
-            },
-            margin: {
-                l: 60,
-                r: 50,
-                b: 40,
-                t: 10,
-                pad: 4,
-            },
-    };
-    
-    var plotlyData = {x:[],y:[],type:'scatter'};
-    for(i=0;i<dataObjsTracklib[0].data[id_index].length;++i){
-        if(dataObjsTracklib[0].data[id_index][i]==id_val){
-            plotlyData.x.push(dataObjsTracklib[0].data[0][i]);
-            plotlyData.y.push(dataObjsTracklib[0].data[currentTableTracklib][i]);
+    var div = document.getElementById("livePlots");
+    if(!div.data) return;
+    if(ptIndex<0||ptIndex>=div.data[0].x.length) return;
+    var x = [div.data[0].x[ptIndex]];
+    var y = [div.data[0].y[ptIndex]];
+    var traceId = div.data.findIndex(obj => { 
+        return obj.name === "selected2dPoint";
+    });
+    if(traceId<0){
+        var trace = {
+                name: 'selected2dPoint',
+                visible: true,
+                type:'scatter',
+                x:x,
+                y:y,
+                mode:'markers',
+                showlegend: false,
+                marker: {color: '#0DF9FF', size: 10},
+                hovertemplate : '(%{x},%{y})<extra></extra>',
+        };
+        Plotly.addTraces(div,trace);
+    }else{
+        var update = {x:[x],y:[y],visible:true,marker: {color: '#0DF9FF', size: 8}};
+        Plotly.restyle(div,update,traceId);
+    }
+}
+
+function updateInspectors(dest,index2d){//,stereoGlobalId,index3d){
+    drawNeighCircle(dest,index2d);
+    updateNeighInfoTrace(dest,index2d);
+    drawEpipolarLine(dest,index2d);
+    // deterine the stereoGlobalId
+    var data = document.getElementById("plotlyViewerLeft").data;
+    if(dest==='right')
+        data = document.getElementById("plotlyViewerRight").data;
+    // find the tracklivepreview trace
+    var scatterTraceId = data.findIndex(obj => { 
+        return obj.name === "tracklibPreviewScatter";
+    });
+    if(scatterTraceId<0) return;
+    if(!data[scatterTraceId].frame) return;
+    var frame = data[scatterTraceId].frame[index2d];
+    if(!data[scatterTraceId].stereoGlobalId) return;
+    var stereoGlobalId = data[scatterTraceId].stereoGlobalId[index2d];
+    if(stereoGlobalId<0) return;
+    // detemine the 3d index based on the frame #
+    var traceName = "3dScatterTrace_" + stereoGlobalId.toString();
+    var data3d = document.getElementById("livePlot3d").data;
+    var curveNum = data3d.findIndex(obj => { 
+        return obj.name === traceName;
+    });
+//    if(curveNum<0)return;
+    var index3d = -1;
+    for(var i=0;i<data3d[curveNum].frame.length;++i)
+        if(data3d[curveNum].frame[i]==frame){
+            index3d = i;
+            break;
         }
-    }
-    if(plotlyData.x.length<1||plotlyData.y.length<1){
-        alert('Invalid' + alert_text + 'id: ' + id_val.toString());
-        return;
-    }
-    Plotly.plot(document.getElementById(divID),[plotlyData],layout);
+//    if(index3d<0) return;
+    highlightTrack(curveNum,index3d);
 }
