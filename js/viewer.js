@@ -298,9 +298,14 @@ function reloadCineImages(index){
         }
     var offsetIndex = Number(index);
     // for tracklib special filters can be applied over the images
-    if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1&&$("#segPreviewCheck")[0].checked){ // signifies tracklib
-        updateTracklibDisplayImages(offsetIndex);
+    if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1&&$("#segPreviewCheck")[0].checked){  // signifies tracklib
+            updateTracklibDisplayImages(offsetIndex);
     }else{    // otherwise just diplay the raw frame
+        // remove any plots or display lines
+        Plotly.purge(document.getElementById("plotlyViewerLeft"));
+        Plotly.purge(document.getElementById("plotlyViewerRight"));
+        Plotly.purge(document.getElementById("livePlots"));
+        Plotly.purge(document.getElementById("livePlot3d"));
         if(cinePathLeft!="undefined")
             updateCineDisplayImage(cinePathLeft,offsetIndex,'left',function(){showDeformedROIs();});
         if(cinePathRight!="undefined")

@@ -217,11 +217,11 @@ function addClickedPointTrace(curveNum,ptIndex){
                 text: text,
                 mode:'markers',
                 showlegend: false,
-                marker: {color: '#0DF9FF', size: 8},
+                marker: {color: '#316395', size: 8},
         };
         Plotly.addTraces(div,trace);
     }else{
-        var update = {x:[x],y:[y],z:[z],text:[text],visible:true,marker: {color: '#0DF9FF', size: 8}};
+        var update = {x:[x],y:[y],z:[z],text:[text],visible:true,marker: {color: '#316395', size: 8}};
         Plotly.restyle(div,update,traceId);
     }
 }
@@ -247,12 +247,12 @@ function addClickedPointTrace2d(curveNum,ptIndex){
                 y:y,
                 mode:'markers',
                 showlegend: false,
-                marker: {color: '#0DF9FF', size: 10},
+                marker: {color: '#316395', size: 14},
                 hovertemplate : '(%{x},%{y})<extra></extra>',
         };
         Plotly.addTraces(div,trace);
     }else{
-        var update = {x:[x],y:[y],visible:true,marker: {color: '#0DF9FF', size: 8}};
+        var update = {x:[x],y:[y],visible:true,marker: {color: '#316395', size: 14}};
         Plotly.restyle(div,update,traceId);
     }
 }
