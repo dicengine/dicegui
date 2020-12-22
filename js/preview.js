@@ -1192,8 +1192,6 @@ function drawEpipolarLine(dest,index){
     undrawShape('','epipolarLine');
     var pvl = pvOut.layout;
     if(!pvl) return;
-    
-    
     var scatterTraceId = pvIn.data.findIndex(obj => { 
         return obj.name === "tracklibPreviewScatter";
     });
@@ -1201,25 +1199,43 @@ function drawEpipolarLine(dest,index){
     if(index>=pvIn.data[scatterTraceId].epiY0.length) return;
     var y0 = pvIn.data[scatterTraceId].epiY0[index];
     var y1 = pvIn.data[scatterTraceId].epiY1[index];
+    var w = pvl.images[0].sizex;
+    
+    // compute the offsets for the dist from epi tol
+    var lineLength = Math.sqrt((y1-y0)*(y1-y0) + w*w);
+    var epiTol = Number($("#distFromEpiTol").val());
+    var deltaY = epiTol * lineLength/w;
     
     // check if epipolar line exists and get it's points
     var existingShapes = [];
     var existingEpipolarIndex = -1;
+    var existingEpipolarIndexTop = -1;
+    var existingEpipolarIndexBottom = -1;
     if(pvl.shapes)
         existingShapes = pvl.shapes;
     for(var i=0;i<existingShapes.length;++i){
         if(existingShapes[i].name){
-            if(existingShapes[i].name=='epipolarLine')
+            if(existingShapes[i].name==='epipolarLine')
                 existingEpipolarIndex = i;
+            if(existingShapes[i].name==='epipolarLineTop')
+                existingEpipolarIndexTop = i;
+            if(existingShapes[i].name==='epipolarLineBottom')
+                existingEpipolarIndexBottom = i;
         }
     }
-    if(existingEpipolarIndex>=0){
+    if(existingEpipolarIndex>=0){ // assume if one exists all three exist
         existingShapes[existingEpipolarIndex].y0 = y0;
         existingShapes[existingEpipolarIndex].y1 = y1;
         existingShapes[existingEpipolarIndex].visible = true;
+        existingShapes[existingEpipolarIndexTop].y0 = y0 + deltaY;
+        existingShapes[existingEpipolarIndexTop].y1 = y1 + deltaY;
+        existingShapes[existingEpipolarIndexTop].visible = true;
+        existingShapes[existingEpipolarIndexBottom].y0 = y0 - deltaY;
+        existingShapes[existingEpipolarIndexBottom].y1 = y1 - deltaY;
+        existingShapes[existingEpipolarIndexBottom].visible = true;
     }else{
         var x0 = 0;
-        var x1 = pvl.images[0].sizex;
+        var x1 = w;
         var epiLine = {
                 name: 'epipolarLine',
                 type:'line',
@@ -1233,6 +1249,32 @@ function drawEpipolarLine(dest,index){
                 visible: true
         };
         existingShapes.push(epiLine);
+        var epiLineTop = {
+                name: 'epipolarLineTop',
+                type:'line',
+                x0: x0,
+                x1: x1,
+                y0: y0 + deltaY,
+                y1: y1 + deltaY,
+                line: {color: 'red', width:2, dash:'dash'},
+                opacity: 0.2,
+                editable: false,
+                visible: true
+        };
+        existingShapes.push(epiLineTop);
+        var epiLineBottom = {
+                name: 'epipolarLineBottom',
+                type:'line',
+                x0: x0,
+                x1: x1,
+                y0: y0 - deltaY,
+                y1: y1 - deltaY,
+                line: {color: 'red', width:2, dash:'dash'},
+                opacity: 0.2,
+                editable: false,
+                visible: true
+        };
+        existingShapes.push(epiLineBottom);
     }
     var update = {'shapes' : existingShapes}
     Plotly.relayout(pvOut,update);
