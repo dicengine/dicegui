@@ -94,11 +94,15 @@ function updateTracklib2dScatter(){
             updateInspectors('left',index2d);
         }
     });
-
 }
 
-function updateTracklib3dScatter(data,cb){
+function updateTracklib3dScatter(data,camera,cb){
     var div = document.getElementById("livePlot3d");
+    // according to the docs, the camera position is not in terms of the data coordinate system
+    // but some other frame of reference where the center is the "center of the 3d domain" (whatever that means)
+    // the up vector needs to be flipped upside down because in DIC and computer vision Y is down
+    // The z coodinate of the eye vector is set to -2 to try and view the whole field of view of results,
+    // this might need to be adjusted later.
     var layout3d = {
             scene : {
                 aspectmode: 'data',
@@ -120,8 +124,11 @@ function updateTracklib3dScatter(data,cb){
                     }
                 },
                 camera: {
+//                    center: camera.center, 
+//                    eye: camera.eye, 
+//                    up: camera.up,
                   center: {x: 0, y: 0, z: 0}, 
-                  eye: {x: 0, y: 0, z:-2}, 
+                  eye: {x: 0, y: 0, z:-3}, 
                   up: {x: 0, y: -1, z: 0},
                 },
             },

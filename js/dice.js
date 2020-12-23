@@ -550,7 +550,7 @@ function updateTracklibDisplayImages(index){
                     });
                     Plotly.d3.json(fullPath('.dice','.preview_3d.json'), function(jsonErr, fig) {
                         if(jsonErr==null){
-                            updateTracklib3dScatter(fig.data,function(){
+                            updateTracklib3dScatter(fig.data,fig.camera,function(){
                                 addTracklibFieldstoFieldSelect(function(){updateTracklib2dScatter();});
                             });
                         }else{
