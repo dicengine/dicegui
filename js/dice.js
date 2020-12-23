@@ -253,10 +253,10 @@ function callDICeExec(resolution,ss_locs) {
             if(resolution){
                 localStorage.setItem("workingDirectory",workingDirectory);
                 var win = new BrowserWindow({ 
-                webPreferences: {
-		    nodeIntegration: true
-		},
-                width: 850, height: 1000 });
+                    webPreferences: {
+                        nodeIntegration: true
+                    },
+                    width: 850, height: 1000 });
                 win.on('closed', () => {
                     win = null
                 })
@@ -264,7 +264,7 @@ function callDICeExec(resolution,ss_locs) {
                 //win.webContents.openDevTools()
             }else if(ss_locs){
                 addSubsetSSSIGPreviewTrace(fullPath('.dice','.subset_locs.txt'));
-//                drawDotsAndBoxesForSubsets(fullPath('.dice','.subset_locs.txt'));
+//              drawDotsAndBoxesForSubsets(fullPath('.dice','.subset_locs.txt'));
             }else{
                 postExecTasks();
             }
@@ -410,13 +410,13 @@ function updateTracklibDisplayImages(index){
         displayRight = '.dice/.preview_right.png';
     }
 
-    args.push('display_file_left');
-    args.push(displayLeft);
-    args.push('display_file_right');
-    args.push(displayRight);
-    
-    args.push('preview_mode');
-    args.push('true');
+//    args.push('display_file_left');
+//    args.push(displayLeft);
+//    args.push('display_file_right');
+//    args.push(displayRight);
+//    
+//    args.push('preview_mode');
+//    args.push('true');
     
     args.push('cine_file');
     args.push(cinePathLeft);
@@ -534,51 +534,9 @@ function updateTracklibDisplayImages(index){
     proc.on('close', (code) => {
         console.log(`OpenCVServer exited with code ${code}`);
         if(code==0){
-            fs.stat(fullPath('',displayLeft), function(err, stat) {
-                if(err == null) {
-                    Plotly.d3.json(fullPath('.dice','.preview_left.json'), function(jsonErr, fig) {
-                        if(jsonErr==null){
-                            updatePreview(fullPath('',displayLeft),'left',fig.data,[],"",function(){
-                                undrawShape('','neighCircle');
-                                undrawShape('','epipolarLine');
-                            });
-                            showLivePlots();
-                        }else{
-                            console.log(jsonErr);
-                            alert('error: reading json file failed');
-                        }
-                    });
-                    Plotly.d3.json(fullPath('.dice','.preview_3d.json'), function(jsonErr, fig) {
-                        if(jsonErr==null){
-                            updateTracklib3dScatter(fig.data,fig.camera,function(){
-                                addTracklibFieldstoFieldSelect(function(){updateTracklib2dScatter();});
-                            });
-                        }else{
-                            console.log(jsonErr);
-                            //alert('error: reading 3d preview json file failed');
-                            Plotly.purge(document.getElementById("livePlot3d"));
-                            Plotly.purge(document.getElementById("livePlots"));
-                        }
-                    });
-                }else{
-                }
-            });
-            fs.stat(fullPath('',displayRight), function(err, stat) {
-                if(err == null) {
-                    Plotly.d3.json(fullPath('.dice','.preview_right.json'), function(jsonErr, fig) {
-//                        console.log(fig);
-                        if(jsonErr==null){
-                            updatePreview(fullPath('',displayRight),'right',fig.data);
-                        }else{
-                            alert('error: reading json file failed');
-                            console.log(jsonErr);
-                        }
-                      });
-                }else{
-                }
-            });
+            loadPlotlyJsonOutput('preview');
         }else{
-            console.log('error ocurred while applying filter: ' + code);
+            console.log('error ocurred for tracklib preview: ' + code);
         }
     });
     readline.createInterface({
@@ -659,8 +617,13 @@ function postExecTasks(){
         var proc = child_process.spawn(execTrackingMoviePath,['input.xml'],{cwd:workingDirectory});
     }
     // if this is a mono tracking run, load the results files into memory in case the user wants to view the tracked results
-    if($("#analysisModeSelect").val()=="tracking" && showStereoPane==0){
-        loadTrackingResultsIntoMemory();
+    if($("#analysisModeSelect").val()=="tracking"){
+        if(showStereoPane==1){
+            // TODO segPreviewCheck?
+            loadPlotlyJsonOutput('results');
+        }else{
+            loadTrackingResultsIntoMemory();
+        }
     }
 }
 

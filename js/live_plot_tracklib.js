@@ -14,20 +14,22 @@ function addTracklibFieldstoFieldSelect(cb){
 
 $("#trackGID").change(function() {
     if($('#trackGID').val()<0){
+        alert('invalid global id: ' + $("#trackGID").val());
         $('#trackGID').val(0);
-        alert('invalid global id');
     }
-    updateTracklib2dScatter();
+    updateInspectors('left',-1);
+//    updateTracklib2dScatter();
 });
 
 
 $("#trackGID").keypress(function(event) { 
     if (event.keyCode === 13) { 
         if($('#trackGID').val()<0){
+            alert('invalid global id: ' + $("#trackGID").val());
             $('#trackGID').val(0);
-            alert('invalid global id');
         }
-        updateTracklib2dScatter();
+        updateInspectors('left',-1);
+//        updateTracklib2dScatter();
     }
 }); 
 
@@ -45,9 +47,9 @@ function updateTracklib2dScatter(){
     });
     if(curveNum<0){
         alert('invalid global id: ' + $("#trackGID").val());
-        $("#trackGID").val(0);
+        $("#trackGID").val(0).change();
         // purge the 2d results
-        Plotly.purge(document.getElementById("livePlots"));
+//        Plotly.purge(document.getElementById("livePlots"));
 //        updateTracklib2dScatter();
         return;
     }
@@ -128,7 +130,7 @@ function updateTracklib3dScatter(data,camera,cb){
 //                    eye: camera.eye, 
 //                    up: camera.up,
                   center: {x: 0, y: 0, z: 0}, 
-                  eye: {x: 0, y: 0, z:-3}, 
+                  eye: {x: 0, y: 0, z:-2.8}, 
                   up: {x: 0, y: -1, z: 0},
                 },
             },
@@ -190,16 +192,19 @@ function highlightTrack(curveNum,ptIndex){
             });
             if(traceId2d>=0)
                 Plotly.deleteTraces(div2d,traceId2d);
-            return;
         }
         update = {
                 'marker.color': '#316395',
                 'line.color': '#316395',
                 'line.width': 4
         }
-        Plotly.restyle("livePlot3d", update,curveNum);
-        addClickedPointTrace(curveNum,ptIndex);
-        addClickedPointTrace2d(curveNum,ptIndex);
+        if(curveNum>=0){
+            Plotly.restyle("livePlot3d", update,curveNum);
+            if(ptIndex>=0){
+                addClickedPointTrace(curveNum,ptIndex);
+                addClickedPointTrace2d(curveNum,ptIndex);
+            }
+        }
     },200); // BUG in Plotly requires this timeout
 }
 
@@ -234,8 +239,10 @@ function addClickedPointTrace(curveNum,ptIndex){
 }
 
 function addClickedPointTrace2d(curveNum,ptIndex){
-    if($('#trackGID').val()!=curveNum);
-        $('#trackGID').val(curveNum).change();
+    if($('#trackGID').val()!=curveNum){
+        $('#trackGID').val(curveNum);//.change();
+        updateTracklib2dScatter();
+    }
     
     var div = document.getElementById("livePlots");
     if(!div.data) return;
@@ -277,24 +284,94 @@ function updateInspectors(dest,index2d){//,stereoGlobalId,index3d){
         return obj.name === "tracklibPreviewScatter";
     });
     if(scatterTraceId<0) return;
-    if(!data[scatterTraceId].frame) return;
-    var frame = data[scatterTraceId].frame[index2d];
-    if(!data[scatterTraceId].stereoGlobalId) return;
-    var stereoGlobalId = data[scatterTraceId].stereoGlobalId[index2d];
-    if(stereoGlobalId<0) return;
+    var stereoGlobalId = 0;
+    if(index2d<0) stereoGlobalId = Number($("#trackGID").val());
+    else{ // get the stereo GID from the clicked point data
+        if(!data[scatterTraceId].frame) return;
+        var frame = data[scatterTraceId].frame[index2d];
+        if(!data[scatterTraceId].stereoGlobalId) return;
+        stereoGlobalId = data[scatterTraceId].stereoGlobalId[index2d];
+        if(stereoGlobalId<0) return;
+    }
     // detemine the 3d index based on the frame #
     var traceName = "3dScatterTrace_" + stereoGlobalId.toString();
     var data3d = document.getElementById("livePlot3d").data;
     var curveNum = data3d.findIndex(obj => { 
         return obj.name === traceName;
     });
+    if(curveNum<0){
+        alert('invalid global id: ' + $("#trackGID").val());
+        curveNum = 0;
+        $("#trackGID").val(curveNum);
+    }
 //    if(curveNum<0)return;
     var index3d = -1;
-    for(var i=0;i<data3d[curveNum].frame.length;++i)
-        if(data3d[curveNum].frame[i]==frame){
-            index3d = i;
-            break;
-        }
+    if(index2d>0){
+        for(var i=0;i<data3d[curveNum].frame.length;++i)
+            if(data3d[curveNum].frame[i]==frame){
+                index3d = i;
+                break;
+            }
+    }
 //    if(index3d<0) return;
     highlightTrack(curveNum,index3d);
 }
+
+function loadPlotlyJsonOutput(source){
+    
+    var displayLeft = "";
+    if(os.platform()=='win32'){
+        displayLeft = '.dice\\.preview_left.png';
+    }else{
+        displayLeft = '.dice/.preview_left.png';
+    }
+    var displayRight = "";
+    if(os.platform()=='win32'){
+        displayRight = '.dice\\.preview_right.png';
+    }else{
+        displayRight = '.dice/.preview_right.png';
+    }
+    fs.stat(fullPath('',displayLeft), function(err, stat) {
+        if(err == null) {
+            Plotly.d3.json(fullPath('.dice','.' + source + '_left.json'), function(jsonErr, fig) {
+                if(jsonErr==null){
+                    updatePreview(fullPath('',displayLeft),'left',fig.data,[],"",function(){
+                        undrawShape('','neighCircle');
+                        undrawShape('','epipolarLine');
+                    });
+                    showLivePlots();
+                }else{
+                    console.log(jsonErr);
+                    alert('error: reading json file failed');
+                }
+            });
+            Plotly.d3.json(fullPath('.dice','.' + source + '_3d.json'), function(jsonErr, fig) {
+                if(jsonErr==null){
+                    updateTracklib3dScatter(fig.data,fig.camera,function(){
+                        addTracklibFieldstoFieldSelect(function(){updateTracklib2dScatter();});
+                    });
+                }else{
+                    console.log(jsonErr);
+                    //alert('error: reading 3d preview json file failed');
+                    Plotly.purge(document.getElementById("livePlot3d"));
+                    Plotly.purge(document.getElementById("livePlots"));
+                }
+            });
+        }else{
+        }
+    });
+    fs.stat(fullPath('',displayRight), function(err, stat) {
+        if(err == null) {
+            Plotly.d3.json(fullPath('.dice','.' + source + '_right.json'), function(jsonErr, fig) {
+                if(jsonErr==null){
+                    updatePreview(fullPath('',displayRight),'right',fig.data);
+                }else{
+                    alert('error: reading json file failed');
+                    console.log(jsonErr);
+                }
+              });
+        }else{
+        }
+    });
+}
+

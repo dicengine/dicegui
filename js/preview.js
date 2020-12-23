@@ -631,10 +631,11 @@ function drawRepresentativeSubset(){
 function drawNeighCircle(dest,index){
     if(!$("#analysisModeSelect").val()=="tracking"||showStereoPane!=1) return;
     var pv = document.getElementById("plotlyViewerLeft");
-    if(dest=='right'){
+    if(dest=='right'||index<0){
         var pv = document.getElementById("plotlyViewerRight");
         undrawShape('left','neighCircle');
-    }else{
+    }
+    if(dest=='left'||index<0){
         undrawShape('right','neighCircle');
     }
     var pvl = pv.layout;
@@ -645,7 +646,7 @@ function drawNeighCircle(dest,index){
         return obj.name === "tracklibPreviewScatter";
     });
     if(scatterTraceId<0) return;
-    if(index<0||index>pv.data[scatterTraceId].x.length) return;
+    if(index<0||index>=pv.data[scatterTraceId].x.length) return;
     var cx = pv.data[scatterTraceId].x[index];
     var cy = pv.data[scatterTraceId].y[index];
 
@@ -1043,22 +1044,40 @@ function updateNeighInfoTrace(dest,index){
     }
     if(pvStereo.data){ // remove the stereo neigh scatter trace if it exists
         var updateStereo = {visible:false};
+        var scatterIds = [];
         var scatterId = pvStereo.data.findIndex(obj => { 
             return obj.name === "tracklibNeighScatter";
         });
-        if(scatterId>=0)
-            Plotly.restyle(pvStereo,updateStereo,scatterId);
+        if(scatterId>=0) scatterIds.push(scatterId);
+        if(index<0){ // means turn off the neigh info trace
+            scatterId = pvStereo.data.findIndex(obj => { 
+                return obj.name === "tracklibStereoNeighScatter";
+            });
+            if(scatterId>=0) scatterIds.push(scatterId);
+        }
+        if(scatterIds.length>0)
+            Plotly.restyle(pvStereo,updateStereo,scatterIds);
+        
+        var stereoScatterIds = [];
         var stereoScatterId = pv.data.findIndex(obj => { // remove any stereo neigh scatters from clicks in the othe image 
             return obj.name === "tracklibStereoNeighScatter";
         });
-        if(stereoScatterId>=0)
-            Plotly.restyle(pv,updateStereo,stereoScatterId);
+        if(stereoScatterId>=0) stereoScatterIds.push(stereoScatterId);
+        if(index<0){
+            stereoScatterId = pv.data.findIndex(obj => { // remove any stereo neigh scatters from clicks in the othe image 
+                return obj.name === "tracklibNeighScatter";
+            });
+            if(stereoScatterId>=0) stereoScatterIds.push(stereoScatterId);
+        }
+        if(stereoScatterIds.length>0)
+            Plotly.restyle(pv,updateStereo,stereoScatterIds);
     }
     if(!pvStereo.data) return;
     var scatterTraceIdStereo = pvStereo.data.findIndex(obj => { 
         return obj.name === "tracklibPreviewScatter";
     });
     if(scatterTraceIdStereo<0) return; // use the neighbor scatter trace to get info for potential stereo neighbors
+    if(index<0) return;
     
     if(!pv.data) return;
     var scatterTraceId = pv.data.findIndex(obj => { 
@@ -1196,7 +1215,7 @@ function drawEpipolarLine(dest,index){
         return obj.name === "tracklibPreviewScatter";
     });
     if(scatterTraceId<0) return;
-    if(index>=pvIn.data[scatterTraceId].epiY0.length) return;
+    if(index<0||index>=pvIn.data[scatterTraceId].epiY0.length) return;
     var y0 = pvIn.data[scatterTraceId].epiY0[index];
     var y1 = pvIn.data[scatterTraceId].epiY1[index];
     var w = pvl.images[0].sizex;
