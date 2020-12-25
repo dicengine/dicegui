@@ -55,7 +55,7 @@ function showLivePlots(){
     if($("#analysisModeSelect").val()=="tracking"){
         if(diceTrackLibOn && showStereoPane==1){
             // TODO enable live plots for tracklib
-            $("#resultsButton").trigger( "click" );
+            $("#plotsButton").trigger( "click" );
             //livePlotTracklibRepeat();
         }else{
             var numROI = numROIShapes();
@@ -78,7 +78,7 @@ function showLivePlots(){
                     livePlotFiles += ' ';
             }
             localStorage.setItem("livePlotFiles", livePlotFiles);
-            $("#resultsButton").trigger( "click" );
+            $("#plotsButton").trigger( "click" );
             livePlotRepeat();
         }
         return;
@@ -96,11 +96,11 @@ function showLivePlots(){
                 livePlotFiles += ' ';
         }
         localStorage.setItem("livePlotFiles", livePlotFiles);
-        $("#resultsButton").trigger( "click" );
+        $("#plotsButton").trigger( "click" );
         livePlotRepeat();
     }
     if(livePlotInfo.livePlotLineActive){
-        $("#resultsButton").trigger( "click" );
+        $("#plotsButton").trigger( "click" );
         livePlotLineRepeat();
     }
 }
@@ -417,6 +417,9 @@ function updateTracklibDisplayImages(index){
 //    
 //    args.push('preview_mode');
 //    args.push('true');
+
+    args.push('show_segmentation');
+    args.push($("#showSegmentationCheck")[0].checked);
     
     args.push('cine_file');
     args.push(cinePathLeft);

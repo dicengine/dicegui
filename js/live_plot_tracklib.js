@@ -271,6 +271,61 @@ function addClickedPointTrace2d(curveNum,ptIndex){
     }
 }
 
+function setTrackingVisibility(){
+    var visible = $('#showTrackingCheck')[0].checked;
+    if(visible){
+        $(".track-plot").show();
+    }
+    else {
+        $(".track-plot").hide();
+    }
+    var update = {visible:visible};
+    var pvl = document.getElementById("plotlyViewerLeft");
+    var pvr = document.getElementById("plotlyViewerRight");
+    if(pvl.data){
+        var ids = [];
+        for(var i=0;i<pvl.data.length;++i){
+            if(pvl.data[i].name.includes('tracklibPreviewScatter'))
+                ids.push(i);
+        }
+        Plotly.restyle(pvl,update,ids);
+    }
+    if(pvr.data){
+        var ids = [];
+        for(var i=0;i<pvr.data.length;++i){
+            if(pvr.data[i].name.includes('tracklibPreviewScatter'))
+                ids.push(i);
+        }
+        Plotly.restyle(pvr,update,ids);
+    }
+    var shapesUpdate = {};
+    if(pvl.layout){
+        if(pvl.layout.shapes){
+            for(var i=0;i<pvl.layout.shapes.length;++i){
+                if(pvl.layout.shapes[i].name.includes('trackLine')){
+                    var propString = 'shapes[' + i.toString() + '].visible';
+                    shapesUpdate[propString] = visible;
+                }
+            }
+            if(Object.keys(shapesUpdate).length>0)
+                Plotly.relayout(pvl,shapesUpdate);
+        }
+    }
+    shapesUpdate = {};
+    if(pvr.layout){
+        if(pvr.layout.shapes){
+            for(var i=0;i<pvr.layout.shapes.length;++i){
+                if(pvr.layout.shapes[i].name.includes('trackLine')){
+                    var propString = 'shapes[' + i.toString() + '].visible';
+                    shapesUpdate[propString] = visible;
+                }
+            }
+            if(Object.keys(shapesUpdate).length>0)
+                Plotly.relayout(pvr,shapesUpdate);
+        }
+    }
+}
+
 function updateInspectors(dest,index2d){//,stereoGlobalId,index3d){
     drawNeighCircle(dest,index2d);
     updateNeighInfoTrace(dest,index2d);
@@ -316,6 +371,14 @@ function updateInspectors(dest,index2d){//,stereoGlobalId,index3d){
 //    if(index3d<0) return;
     highlightTrack(curveNum,index3d);
 }
+$("#showSegmentationCheck").click(function(){
+    reloadCineImages($("#frameScroller").val());
+});
+
+$("#showTrackingCheck").click(function(){
+    updateInspectors('left',-1);
+    setTrackingVisibility();
+});
 
 function loadPlotlyJsonOutput(source){
     
@@ -338,6 +401,7 @@ function loadPlotlyJsonOutput(source){
                     updatePreview(fullPath('',displayLeft),'left',fig.data,[],"",function(){
                         undrawShape('','neighCircle');
                         undrawShape('','epipolarLine');
+                        setTrackingVisibility();
                     });
                     showLivePlots();
                 }else{
@@ -364,7 +428,7 @@ function loadPlotlyJsonOutput(source){
         if(err == null) {
             Plotly.d3.json(fullPath('.dice','.' + source + '_right.json'), function(jsonErr, fig) {
                 if(jsonErr==null){
-                    updatePreview(fullPath('',displayRight),'right',fig.data);
+                    updatePreview(fullPath('',displayRight),'right',fig.data,[],"",function(){setTrackingVisibility();});
                 }else{
                     alert('error: reading json file failed');
                     console.log(jsonErr);

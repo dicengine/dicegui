@@ -192,10 +192,6 @@
             <input class="nav-item" type="text" id="cineSkipIndex" name="cineSkipIndex" value="1"
               style="width: 95%;"
             >
-            <div class="nav-item tracklib-tools">num frames in preview</div>
-            <input class="nav-item tracklib-tools update-tracklib-preview" type="text"
-              id="numPreviewFrames" name="numPreviewFrames" value="1" style="width: 95%;"
-            >
             <div class="nav-item">
               frame rate <span id="cineFrameRatePreviewSpan"
                 style="display: block; float: right; width: 33%;"
@@ -349,8 +345,8 @@
           <div class="toggle-div console-toggle-div">
             <div class="toggle-div-banner">
               <span class="toggle-title-bold" id="consoleButton">CONSOLE</span>
-              <span class="toggle-title" style="padding-left:10px; padding-right:10px;">|</span>
-              <span class="toggle-title action-li" id="resultsButton">PLOTS</span>
+              <span class="toggle-title" style="padding-left:10px; padding-right:5px;">|</span>
+              <span class="toggle-title action-li" id="plotsButton">PLOTS</span>
               <!--<span class="toggle-title full-field-global" style="padding-left:10px; padding-right:10px;">|</span>-->
               <span class="toggle-icon action-li">
                 <i id="clearConsoleIcon" class="material-icons md-dark action-li" title="clear console">block</i>
@@ -359,12 +355,12 @@
             </div>
             <!-- end toggle div banner -->
             <div class="toggle-div-body" style="height:auto;">
-              <div id="resultsWindow" class="results-window" style="display:none;">
+              <div id="plotsWindow" class="results-window" style="display:none;">
                 <div id="resultsWindowLeft" class="results-sub-window results-left">
-                  <div id="livePlots" style="width:100%; height: 93%; float: left; overflow: hidden; padding-bottom:10px;"></div>
-                  <select id="livePlotFieldSelect" style="padding-left:10px; width:30%;"></select>
-                  <span class="tracklib-tools" style="padding-left:10px; padding-right:5px;">ID:</span>
-                  <input type="text" class="tracklib-tools update-tracklib-plots" id="trackGID" name="trackGID" value="0" style="width: 10%;">
+                  <div id="livePlots" class="track-plot" style="width:100%; height: 93%; float: left; overflow: hidden; padding-bottom:10px;"></div>
+                  <select id="livePlotFieldSelect" class="track-plot" style="padding-left:10px; width:30%;"></select>
+                  <span class="tracklib-tools track-plot" style="padding-left:10px; padding-right:5px;">ID:</span>
+                  <input type="text" class="tracklib-tools update-tracklib-plots track-plot" id="trackGID" name="trackGID" value="0" style="width: 10%;">
                     <!--<select id="idTypeSelect" class="tracklib-tools update-tracklib-plots">
                     <option value="leftID">left ID</option>
                     <option value="rightID">right ID</option>
@@ -378,7 +374,7 @@
                   <select class="non-tracklib-tools" id="stepSelect"></select> <!-- <input id="fixAxisCheck" type="checkbox" style="margin-left: 10px;"><span> fix y-axis</span> -->
                   <span   class="non-tracklib-tools" id="stepBackward" class="action-li" style="padding-left:5px;">previous</span>
                   <span   class="non-tracklib-tools" id="stepForward" class="action-li" style="padding-left:5px;">next</span>
-                  <div    class="tracklib-tools" id="livePlot3d" style="width:100%; height: 100%; float: left; overflow: hidden; padding-bottom:10px;"></div>
+                  <div    class="tracklib-tools track-plot" id="livePlot3d" style="width:100%; height: 100%; float: left; overflow: hidden; padding-bottom:10px;"></div>
                 </div>
               </div>
               <div id="consoleWindow" class="console">
@@ -407,101 +403,193 @@
                 <option value="global">global</option>
               </select>
               <div id="tracklibParams" class="param-options tracklib-tools">
-                <p>
-                  <p><input id="segPreviewCheck" type="checkbox"> preview tracking</p>
-                  <p style="padding-top:15px;"><b>segmentation</b></p>
-                  <div style="overflow:hidden;">
-                    <div style="width:50%; float:left;"><p>thresh left (counts)</p>
-                    <input type="text" class="update-tracklib-preview" id="threshLeft"
-                      name="threshLeft" value="10" style="width: 90%;"
-                    ></div>
-                    <div style="width:50%; float:right;"><p>thresh right (counts)</p>
-                    <input type="text" class="update-tracklib-preview" id="threshRight"
-                      name="threshRight" value="10" style="width: 90%;"
-                    ></div>
+
+                <div class="toggle-div console-toggle-div">
+                  <div class="toggle-div-banner">
+                    <span class="toggle-title-bold" id="previewButton">PREVIEW</span> <span
+                      class="toggle-title" style="padding-left: 10px; padding-right: 5px;"
+                    >|</span> <span class="toggle-title action-li" id="resultsButton">RESULTS</span>
                   </div>
-                  <div style="overflow:hidden;">
-                    <div style="width:50%; float:left;"><p>min area (px)</p>
-                    <input type="text" class="update-tracklib-preview" id="minArea" name="minArea" value="1" style="width: 90%;"></div>
-                    <div style="width:50%; float:right;"><p>max area (px)</p>
-                    <input type="text" class="update-tracklib-preview" id="maxArea" name="maxArea" value="500" style="width: 90%;"></div>
+                  <!-- end toggle div banner -->
+                <div class="toggle-div-body" style="height: auto;  border-style:ridge;">
+                  <div id="resultsWindow" style="display:none;">
+                  THIS IS THE RESULTS WINDOW
                   </div>
-                  <div style="overflow:hidden; padding-top:8px;">
-                    <p style="width:50%; float:left;">background frames</p>
-                    <input type="text" class="update-tracklib-preview" id="numBackgroundFrames" name="numBackgroundFrames" value="25" style="width: 27%; float:left;">
-                  </div>
-                  <div style="overflow:hidden">
-                    <p style="width:50%; float:left;">max density (pt/px<sup>2</sup>)</p>
-                    <input type="text" class="update-tracklib-preview" id="maxPtDensity" name="maxPtDensity" value="0.0063662" style="width: 27%; float:left;">
-                    </div>
-                  <div style="overflow:hidden">
-                    <p style="width:50%; float:left;">min Δx/frame (px)</p>
-                    <input type="text" class="update-tracklib-preview" id="colocationTol" name="colocationTol" value="0.2" style="width: 27%; float:left;">
-                  </div>
-                  <p style="padding-top:15px;"><b>2d tracking</b></p>
-                  <div style="overflow:hidden">
-                    <p style="width:50%; float:left;">num search frames</p>
-                    <input type="text" class="update-tracklib-preview" id="numSearchFrames" name="numSearchFrames" value="1" style="width: 27%; float:left;">
-                  </div>
-                  <div style="overflow:hidden;">
-                    <p style="width:50%; float:left;"></p>
-                    <span style="width: 45%; float:left;"><span style="width:60%;">tolerance</span><span style="width:30%;float:right;">weight</span></span>
-                  </div>
-                  <div style="overflow:hidden;">
-                    <p style="width:50%; float:left;">Δarea/area (%)</p>
-                    <span style="width: 45%; float:left;"><input type="text" class="update-tracklib-preview" id="areaTol" name="areaTol" value="25.0" style="width: 60%;">
-                    w<sub>a</sub><input type="text" class="weight-2d" id="areaWeight" name="areaWeight" value="1.0" style="width: 25%;float:right;"></span>
-                  </div>
-                  <div style="overflow:hidden">
-                    <p style="width:50%; float:left;">Δgray (counts)</p>
-                    <span style="width: 45%; float:left;"><input type="text" class="update-tracklib-preview" id="grayTol" name="grayTol" value="20" style="width: 60%;">
-                    w<sub>g</sub><input type="text" class="weight-2d" id="grayWeight" name="grayWeight" value="1.0" style="width: 25%;float:right;"></span>
-                  </div>
-                  <div style="overflow:hidden">
-                    <p style="width:50%; float:left;">search radius (px)</p>
-                    <span style="width:45%; float:left;"><input type="text" class="update-tracklib-preview" id="neighborRadius" name="neighborRadius" value="50.0" style="width: 60%;">
-                    w<sub>d</sub><input type="text" class="weight-2d" id="distWeight" name="distWeight" value="1.0" style="width: 25%;float:right;">
-                    </span>
-                  </div>
-                  <div style="overflow:hidden">
-                    <p style="width:50%; float:left;">Δangle (rad)</p>
-                    <span style="width:45%;float:left;"><input type="text" class="update-tracklib-preview" id="angleTol" name="angleTol" value="0.78" style="width: 60%;">
-                    w<sub>α</sub><input type="text" class="weight-2d" id="angleWeight" name="angleWeight" value="1.0" style="width: 25%;float:right;">
-                    </span>
-                  </div>
-                  <p>disparity = w<sub>a</sub>(Δarea/area) + w<sub>g</sub>(Δgray/255) + w<sub>d</sub>(Δu/u) + 2w<sub>α</sub>(Δangle/π)</p>
-                  <!-- <div style="overflow:hidden;"> 
+                    <div id="previewWindow">
+                      <div id="previewTracklib" class="action-li" style="margin-top: 10px;">
+                        <i class="material-icons md-dark md-br-pad" style="margin-bottom: 0px;">check_circle</i>
+                        update preview
+                      </div>
+                      <div style="overflow: hidden;">
+                        <div style="width: 50%; float: left;">num frames in preview</div>
+                        <input class="update-tracklib-preview" type="text" id="numPreviewFrames"
+                          name="numPreviewFrames" value="1" style="width: 27%; float: left;"
+                        >
+                      </div>
+                      <div style="overflow: hidden;">
+                      <p style="padding-top: 15px; float:left;"><b>segmentation</b></p>
+                      <p style="padding-top: 15px; float:right;"><input id="showSegmentationCheck" type="checkbox" checked> show</p>
+                      </div>
+                      <hr style="width:100%;text-align:left;margin-left:0;">
+                      <div style="overflow: hidden;">
+                        <div style="width: 50%; float: left; padding-top:10px;">
+                          <p>thresh left (counts)</p>
+                          <input type="text" class="update-tracklib-preview" id="threshLeft"
+                            name="threshLeft" value="10" style="width: 54%;"
+                          >
+                        </div>
+                        <div style="width: 50%; float: right; padding-top: 10px;">
+                          <p>thresh right (counts)</p>
+                          <input type="text" class="update-tracklib-preview" id="threshRight"
+                            name="threshRight" value="10" style="width: 54%;"
+                          >
+                        </div>
+                      </div>
+                      <div style="overflow: hidden;">
+                        <div style="width: 50%; float: left;">
+                          <p>min area (px)</p>
+                          <input type="text" class="update-tracklib-preview" id="minArea"
+                            name="minArea" value="1" style="width: 54%;"
+                          >
+                        </div>
+                        <div style="width: 50%; float: right;">
+                          <p>max area (px)</p>
+                          <input type="text" class="update-tracklib-preview" id="maxArea"
+                            name="maxArea" value="500" style="width: 54%;"
+                          >
+                        </div>
+                      </div>
+                      <div style="overflow: hidden; padding-top: 8px;">
+                        <p style="width: 50%; float: left;">background frames</p>
+                        <input type="text" class="update-tracklib-preview" id="numBackgroundFrames"
+                          name="numBackgroundFrames" value="25" style="width: 27%; float: left;"
+                        >
+                      </div>
+                      <div style="overflow: hidden">
+                        <p style="width: 50%; float: left;">
+                          max density (pt/px<sup>2</sup>)
+                        </p>
+                        <input type="text" class="update-tracklib-preview" id="maxPtDensity"
+                          name="maxPtDensity" value="0.0063662" style="width: 27%; float: left;"
+                        >
+                      </div>
+                      <div style="overflow: hidden">
+                        <p style="width: 50%; float: left;">min Δx/frame (px)</p>
+                        <input type="text" class="update-tracklib-preview" id="colocationTol"
+                          name="colocationTol" value="0.2" style="width: 27%; float: left;"
+                        >
+                      </div>
+                      <div style="overflow: hidden;">
+                      <p style="padding-top: 15px; float:left;"><b>tracking</b></p>
+                      <p style="padding-top: 15px; float:right;"><input id="showTrackingCheck" type="checkbox"> show</p>
+                      </div>
+                      <hr style="width:100%;text-align:left;margin-left:0">
+                      <p style="padding-top: 15px;">
+                        <b>2d</b>
+                      </p>
+                      <div style="overflow: hidden">
+                        <p style="width: 50%; float: left;">num search frames</p>
+                        <input type="text" class="update-tracklib-preview" id="numSearchFrames"
+                          name="numSearchFrames" value="1" style="width: 27%; float: left;"
+                        >
+                      </div>
+                      <div style="overflow: hidden;">
+                        <p style="width: 50%; float: left;"></p>
+                        <span style="width: 45%; float: left;"><span style="width: 60%;">tolerance</span><span
+                          style="width: 30%; float: right;"
+                        >weight</span></span>
+                      </div>
+                      <div style="overflow: hidden;">
+                        <p style="width: 50%; float: left;">Δarea/area (%)</p>
+                        <span style="width: 45%; float: left;"><input type="text"
+                          class="update-tracklib-preview" id="areaTol" name="areaTol" value="25.0"
+                          style="width: 60%;"
+                        > w<sub>a</sub><input type="text" class="weight-2d" id="areaWeight"
+                          name="areaWeight" value="1.0" style="width: 25%; float: right;"
+                        ></span>
+                      </div>
+                      <div style="overflow: hidden">
+                        <p style="width: 50%; float: left;">Δgray (counts)</p>
+                        <span style="width: 45%; float: left;"><input type="text"
+                          class="update-tracklib-preview" id="grayTol" name="grayTol" value="20"
+                          style="width: 60%;"
+                        > w<sub>g</sub><input type="text" class="weight-2d" id="grayWeight"
+                          name="grayWeight" value="1.0" style="width: 25%; float: right;"
+                        ></span>
+                      </div>
+                      <div style="overflow: hidden">
+                        <p style="width: 50%; float: left;">search radius (px)</p>
+                        <span style="width: 45%; float: left;"><input type="text"
+                          class="update-tracklib-preview" id="neighborRadius" name="neighborRadius"
+                          value="50.0" style="width: 60%;"
+                        > w<sub>d</sub><input type="text" class="weight-2d" id="distWeight"
+                          name="distWeight" value="1.0" style="width: 25%; float: right;"
+                        > </span>
+                      </div>
+                      <div style="overflow: hidden">
+                        <p style="width: 50%; float: left;">Δangle (rad)</p>
+                        <span style="width: 45%; float: left;"><input type="text"
+                          class="update-tracklib-preview" id="angleTol" name="angleTol" value="0.78"
+                          style="width: 60%;"
+                        > w<sub>α</sub><input type="text" class="weight-2d" id="angleWeight"
+                          name="angleWeight" value="1.0" style="width: 25%; float: right;"
+                        > </span>
+                      </div>
+                      <p>
+                        disparity = w<sub>a</sub>(Δarea/area) + w<sub>g</sub>(Δgray/255) + w<sub>d</sub>(Δu/u)
+                        + 2w<sub>α</sub>(Δangle/π)
+                      </p>
+                      <!-- <div style="overflow:hidden;"> 
                     <p style="width:50%; float:left;">sum (100% max)</p>
                     <span style="width:45%; float:left"><span style="width: 60%;"></span><span id="weightSum" style="width: 30%;float:right;">100.0</span></span>
                   </div>-->
-                  
-                  <p style="padding-top:15px;"><b>stereo tracking</b></p>
-                  <div style="overflow:hidden;">
-                    <p style="width:50%; float:left;">min pts per track</p>
-                    <input type="text" class="update-tracklib-preview" id="minPtsPerTrack" name="minPtsPerTrack" value="3" style="width: 27%; float:left;">
-                  </div>
-                  <div style="overflow:hidden;">
-                    <p style="width:50%; float:left;"></p>
-                    <span style="width: 45%; float:left;"><span style="width:60%;">tolerance</span><span style="width:30%;float:right;">weight</span></span>
-                  </div>
-                  <div style="overflow:hidden;">
-                    <p style="width:50%; float:left;">Δarea<sub>s</sub>/area (%)</p>
-                    <span style="width:45%; float:left;"><input type="text" class="update-tracklib-preview" id="stereoAreaTol" name="stereoAreaTol" value="25.0" style="width: 60%;">
-                    w<sub>s</sub><input type="text" class="weight-stereo" id="stereoAreaWeight" name="stereoAreaWeight" value="1.0" style="width: 25%;float:right;">
-                    </span>
-                  </div>
-                  <div style="overflow:hidden;">
-                    <p style="width:50%; float:left;">dist from epi line, e (px)</p>
-                    <span style="width:45%; float:left"><input type="text" class="update-tracklib-preview" id="distFromEpiTol" name="distFromEpiTol" value="10.0" style="width: 60%;">
-                    w<sub>e</sub><input type="text" class="weight-stereo" id="distFromEpiWeight" name="distFromEpiWeight" value="2.0" style="width: 25%;float:right;">
-                    </span>
-                  </div>
-                  <p>disparity = w<sub>s</sub>(Δarea<sub>s</sub>/area) + w<sub>e</sub>e</p>
-                  <!-- <div style="overflow:hidden;">
+
+                      <p style="padding-top: 15px;">
+                        <b>stereo</b>
+                      </p>
+                      <div style="overflow: hidden;">
+                        <p style="width: 50%; float: left;">min pts per track</p>
+                        <input type="text" class="update-tracklib-preview" id="minPtsPerTrack"
+                          name="minPtsPerTrack" value="3" style="width: 27%; float: left;"
+                        >
+                      </div>
+                      <div style="overflow: hidden;">
+                        <p style="width: 50%; float: left;"></p>
+                        <span style="width: 45%; float: left;"><span style="width: 60%;">tolerance</span><span
+                          style="width: 30%; float: right;"
+                        >weight</span></span>
+                      </div>
+                      <div style="overflow: hidden;">
+                        <p style="width: 50%; float: left;">
+                          Δarea<sub>s</sub>/area (%)
+                        </p>
+                        <span style="width: 45%; float: left;"><input type="text"
+                          class="update-tracklib-preview" id="stereoAreaTol" name="stereoAreaTol"
+                          value="25.0" style="width: 60%;"
+                        > w<sub>s</sub><input type="text" class="weight-stereo"
+                          id="stereoAreaWeight" name="stereoAreaWeight" value="1.0"
+                          style="width: 25%; float: right;"
+                        > </span>
+                      </div>
+                      <div style="overflow: hidden;">
+                        <p style="width: 50%; float: left;">dist from epi line, e (px)</p>
+                        <span style="width: 45%; float: left"><input type="text"
+                          class="update-tracklib-preview" id="distFromEpiTol" name="distFromEpiTol"
+                          value="10.0" style="width: 60%;"
+                        > w<sub>e</sub><input type="text" class="weight-stereo"
+                          id="distFromEpiWeight" name="distFromEpiWeight" value="2.0"
+                          style="width: 25%; float: right;"
+                        > </span>
+                      </div>
+                      <p>
+                        disparity = w<sub>s</sub>(Δarea<sub>s</sub>/area) + w<sub>e</sub>e
+                      </p>
+                    </div>
+                    <!-- <div style="overflow:hidden;">
                     <p style="width:50%; float:left;">sum</p>
                     <span style="width:45%; float:left"><span style="width: 60%;"></span><span id="stereoWeightSum" style="width: 30%;float:right;">100.0</span></span>
                   </div> -->
-                </p>
+                </div></div>
               </div>
               <div id="subsetParams" class="param-options full-field">
                 <p>initialization method:</p>

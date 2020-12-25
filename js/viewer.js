@@ -200,23 +200,43 @@ function loadImageSequence(cb){
 
 $("#consoleButton").on("click",function () {
     if(!$(this).hasClass('action-li')) return;
-    $("#resultsButton").addClass('action-li');
-    $("#resultsButton").addClass('toggle-title');
+    $("#plotsButton").addClass('action-li');
+    $("#plotsButton").addClass('toggle-title');
     $(this).removeClass('action-li');
     $(this).addClass('toggle-title-bold');
     $("#consoleWindow").show();
-    $("#resultsWindow").hide();
+    $("#plotsWindow").hide();
 });
 
-$("#resultsButton").on("click",function () {
+$("#plotsButton").on("click",function () {
     if(!$(this).hasClass('action-li')) return;
     $("#consoleButton").addClass('action-li');
     $("#consoleButton").addClass('toggle-title');
     $(this).removeClass('action-li');
     $(this).addClass('toggle-title-bold');
     $("#consoleWindow").hide();
-    $("#resultsWindow").show();
+    $("#plotsWindow").show();
 });
+
+$("#resultsButton").on("click",function () {
+    if(!$(this).hasClass('action-li')) return;
+    $("#previewButton").addClass('action-li');
+    $("#previewButton").addClass('toggle-title');
+    $(this).removeClass('action-li');
+    $(this).addClass('toggle-title-bold');
+    $("#resultsWindow").show();
+    $("#previewWindow").hide();
+});
+$("#previewButton").on("click",function () {
+    if(!$(this).hasClass('action-li')) return;
+    $("#resultsButton").addClass('action-li');
+    $("#resultsButton").addClass('toggle-title');
+    $(this).removeClass('action-li');
+    $(this).addClass('toggle-title-bold');
+    $("#previewWindow").show();
+    $("#resultsWindow").hide();
+});
+
 
 //$("#loadSubsetFileInput").on("click",function () {
 //    this.value = null;
@@ -298,7 +318,7 @@ function reloadCineImages(index){
         }
     var offsetIndex = Number(index);
     // for tracklib special filters can be applied over the images
-    if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1&&$("#segPreviewCheck")[0].checked){  // signifies tracklib
+    if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1&&($("#showSegmentationCheck")[0].checked||$("#showTrackingCheck")[0].checked)){  // signifies tracklib
             updateTracklibDisplayImages(offsetIndex);
     }else{    // otherwise just diplay the raw frame
         // remove any plots or display lines
@@ -383,7 +403,7 @@ $(".update-tracklib-preview").keypress(function(event) {
     } 
 }); 
 
-$("#segPreviewCheck").change(function() {
+$("#previewTracklib").on("click",function () {
     reloadCineImages($("#frameScroller").val());
 });
 

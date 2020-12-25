@@ -203,18 +203,19 @@ function updatePreview(filePath,dest,data=[],argsIn,debugConsoleDivId,cb){
     proc.on('close', (code) => {
         console.log(`OpenCVServer exited with code ${code}`);
         // execute call back with error code
-        cb(code);
         if(code>=0&&code<4){
             console.log("updatePreview(): src path " + spec.srcPath);
             console.log("updatePreview(): dest path " + spec.destPath);
             fs.stat(spec.destPath, function(err, stat) {
                 if(err == null) {
                     updateImage(spec,data);
+                    cb(code);
                     if(dest=='left'||dest=='right')
                         checkValidInput();
                 }
             });
         }else{
+            cb(code);
             console.log('error ocurred ' + code);
         }
     });
