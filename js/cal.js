@@ -525,8 +525,8 @@ function respondToOpenCVErrorCode(code){
             $("#previewRightSpan").text("marker location failed");
         }else if(code==4){
             // clear the preview images
-            purgePlotlyViewer('cal_left');
-            purgePlotlyViewer('cal_right');
+            resetPlotlyViewer('cal_left');
+            resetPlotlyViewer('cal_right');
             $("#previewLeftSpan").text("image load failure");
             $("#previewRightSpan").text("image load failure");
         }else{

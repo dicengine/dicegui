@@ -99,10 +99,12 @@ function impl_input_xml_file(xml){
     if(cine_file){
         console.log('reading cine file: ' + image_folder + cine_file);
         $("#fileSelectMode").val("cine");
-        $("#fileSelectMode").change();
         stereo_cine_file = xml_get(xml,"stereo_cine_file");
-        if(stereo_cine_file) showStereoViewer();
+        if(stereo_cine_file){
+            showStereoViewer();
+        }
         else show2DViewer();
+        $("#fileSelectMode").change();
         full_name = image_folder + cine_file;
         getFileObject(full_name, function (fileObject) {
             callCineStatExec(fileObject,0,function(){update_cine_indices(xml); parseSubsetFile(xml);});

@@ -2,14 +2,28 @@ $(window).load(function(){
     initializePlotlyViewers();
 });
 
+function resetPlotlyViewer(dest,keepImage=false){
+    var params = getPreviewLayoutConfig(dest);
+    var div = destToPlotlyDiv(dest);
+    if(!div) return;
+    if(keepImage)
+        if(div.layout)
+            if(div.layout.images){
+                params.layout.images = div.layout.images;
+                var shapes = [{name:'viewBox',type:'rect',
+                    x0:0,y0:0,x1:div.layout.images[0].sizex,y1:div.layout.images[0].sizey,line:{width:0}}];
+                params.layout.shapes = shapes;
+            }
+    var data = [{type:'scatter',x:[0],y:[0],visible:false,name:'dummyData',showlegend:false,mode:'none'}];
+//    console.log(params.config);
+//    console.log(params.layout);
+    Plotly.purge(div); // need to call purge, otherwise the mode bar buttons won't update
+    Plotly.newPlot(div,data,params.layout,params.config);
+}
+
 function initializePlotlyViewers(){
-    var paramsLeft = getPreviewLayoutConfig('left');
-    var paramsRight = getPreviewLayoutConfig('right');
-    // add a dummy data sets so that the plotly object has some data
-    var dataLeft = [{type:'scatter',x:[0],y:[0],visible:false,name:'dummyDataLeft',showlegend:false,mode:'none'}];
-    var dataRight = [{type:'scatter',x:[0],y:[0],visible:false,name:'dummyDataRight',showlegend:false,mode:'none'}];
-    Plotly.newPlot("plotlyViewerLeft",dataLeft,paramsLeft.layout,paramsLeft.config);
-    Plotly.newPlot("plotlyViewerRight",dataRight,paramsRight.layout,paramsRight.config);
+    resetPlotlyViewer('left');
+    resetPlotlyViewer('right');
     // TODO perhaps move these events somewhere else?
     document.getElementById("plotlyViewerLeft").on('plotly_click', function(data){
         if(data.points[0].data.name==='tracklibPreviewScatter'){
@@ -38,13 +52,6 @@ function destToPlotlyDiv(dest){
         return document.getElementById("plotlyViewerCalRight");
     }else
         return null;
-}
-
-function purgePlotlyViewer(dest){
-    var div = destToPlotlyDiv(dest);
-    if(!div.layout) return;
-    Plotly.purge(div);
-    initializePlotlyViewers();
 }
 
 function deletePlotlyTraces(dest,name){
@@ -260,7 +267,8 @@ function getPreviewConfig(dest){
             //'transform': 'matrix(0.75 0 0 -0.75 0 1000)'
     }
     var showSubsetLocationsButton = {
-            name: 'Show subset locations',
+            name: 'showSubsets',
+            title: 'Show subset locations',
             icon: dotsIcon,
             click: () => { drawSubsetCoordinates(); }
     }
@@ -270,7 +278,8 @@ function getPreviewConfig(dest){
             'path': "M12,16.5l4-4h-3v-9h-2v9H8L12,16.5z M21,3.5h-6v1.99h6V19.52H3V5.49h6V3.5H3c-1.1,0-2,0.9-2,2v14c0,1.1,0.9,2,2,2h18c1.1,0,2-0.9,2-2v-14C23,4.4,22.1,3.5,21,3.5z"
     }
     var importSubsetLocationsButton = {
-            name: 'Import subset file',
+            name: 'importSubsets',
+            title: 'Import subset locations',
             icon: importIcon,
             click: () => {$('#loadSubsetFileInputIcon').click();}
     }
@@ -280,7 +289,8 @@ function getPreviewConfig(dest){
             'path': "M7,11v2h10v-2H7z M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10c5.52,0,10-4.48,10-10C22,6.48,17.52,2,12,2z M12,20c-4.41,0-8-3.59-8-8s3.59-8,8-8s8,3.59,8,8S16.41,20,12,20z"
     }
     var deleteLivePlotPtsButton = {
-            name: 'Delete live plot pts',
+            name: 'deleteLivePlotPts',
+            title: 'Delete live plot pts',
             icon: deleteLivePlotPtsIcon,
             click: () => { deleteLivePlotPts();}
     }
@@ -311,6 +321,8 @@ function getPreviewConfig(dest){
         if(showStereoPane==1){ // signifies tracklib (stereo tracking)
             _config.modeBarButtonsToRemove.push('drawclosedpath');
             _config.modeBarButtonsToRemove.push('eraseshape');
+            _config.modeBarButtonsToRemove.push('drawline');
+            _config.modeBarButtonsToRemove.push('showSubsets');
         }else if(dest=='left'){
             _config.modeBarButtonsToAdd = [
                 'drawclosedpath',

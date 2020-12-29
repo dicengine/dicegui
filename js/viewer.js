@@ -332,8 +332,8 @@ function reloadCineImages(index,loadData=true){
             updateTracklibDisplayImages(offsetIndex,loadData);
     }else{    // otherwise just diplay the raw frame
         // remove any plots or display lines
-        purgePlotlyViewer('left');
-        purgePlotlyViewer('right');
+        resetPlotlyViewer('left');
+        resetPlotlyViewer('right');
         Plotly.purge(document.getElementById("livePlots"));
         Plotly.purge(document.getElementById("livePlot3d"));
         if(cinePathLeft!="undefined")
@@ -363,12 +363,12 @@ $("#frameScroller").on('input', function () {
             if(refImagePathLeft!="")
                 updatePreviewImage({srcPath:refImagePathLeft,dest:'left'});
             else{
-                purgePlotlyViewer('left');
+                resetPlotlyViewer('left');
             }
             if(showStereoPane==1&&refImagePathRight!="")
                 updatePreviewImage({srcPath:refImagePathRight,dest:'right'});
             else{
-                purgePlotlyViewer('right');
+                resetPlotlyViewer('right');
             }
         }else{
             var index = $(this).val()-1;
@@ -377,14 +377,14 @@ $("#frameScroller").on('input', function () {
                 $("#defImageListLeft li:eq(" + index.toString() + ")").addClass("def-image-ul-selected");
             }
             else{
-                purgePlotlyViewer('left');
+                resetPlotlyViewer('left');
             }
             if(defImagePathsRight.length >= $(this).val()){
                 updatePreviewImage({srcPath:defImagePathsRight[index].path,dest:'right'});
                 $("#defImageListRight li:eq(" + index.toString() + ")").addClass("def-image-ul-selected");
             }
             else{
-                purgePlotlyViewer('right');
+                resetPlotlyViewer('right');
             }
         }
     }else if($("#fileSelectMode").val()=="sequence"){

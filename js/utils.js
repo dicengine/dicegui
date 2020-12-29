@@ -572,6 +572,8 @@ $("#stereoButton").click(function(){
         showStereoViewer();
         $(".results-right").show();
         if($("#analysisModeSelect").val()=='tracking'&&showStereoPane==1){
+            resetPlotlyViewer('left',true);
+            resetPlotlyViewer('right',true);
             $(".non-tracklib-tools").hide();
             $(".tracklib-tools").show();
         }else{
@@ -798,6 +800,8 @@ $("#analysisModeSelect").on('change',function() {
         // force 2D
         show2DViewer();
     }
+    resetPlotlyViewer('left',true);
+    resetPlotlyViewer('right',true);
     resizeAll();
     checkValidInput();
 });

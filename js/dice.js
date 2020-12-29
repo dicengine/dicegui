@@ -144,8 +144,8 @@ function resetWorkingDirectory(){
     $("#runLoader").removeClass('post-loader-fail');
     $("#runLoader").removeClass('loader');
 
-    purgePlotlyViewer('left');
-    purgePlotlyViewer('right');
+    resetPlotlyViewer('left');
+    resetPlotlyViewer('right');
     
     refImagePathLeft = "undefined";
     refImagePathRight = "undefined";
