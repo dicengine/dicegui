@@ -60,6 +60,7 @@ function impl_input_xml_file(xml){
     if(subset_size){
         $("#subsetSize").val(subset_size);
         $("#subsetSizeLabel").text(subset_size);
+        drawRepresentativeSubset();
     }
     if(step_size || subset_size){
         is_subset_or_global = true;
@@ -127,7 +128,7 @@ function impl_input_xml_file(xml){
             full_name = image_folder + ref_image;
             name_splits = full_name.split(/[\\\/]/);
             $("#refImageText span").text(name_splits[name_splits.length-1]);
-            updatePreview(full_name,'left',[],[],"",function(){parseSubsetFile(xml); refImagePathLeft = full_name;});
+            updatePreviewImage({srcPath:full_name,dest:'left'},function(){parseSubsetFile(xml); refImagePathLeft = full_name;});
             // load the deformed image list
             deformed_list = $(xml).find('ParameterList[name="deformed_images"]');
             if(deformed_list){
@@ -154,7 +155,7 @@ function impl_input_xml_file(xml){
                 stereo_full_name = image_folder + stereo_ref_image;
                 stereo_name_splits = stereo_full_name.split(/[\\\/]/);
                 $("#refImageTextRight span").text(stereo_name_splits[stereo_name_splits.length-1]);
-                updatePreview(stereo_full_name,'right',[],[],"",function(){refImagePathRight = stereo_full_name;});
+                updatePreviewImage({srcPath:stereo_full_name,dest:'right'},function(){refImagePathRight = stereo_full_name;});
             }
             // load the stereo deformed image list
             stereo_deformed_list = $(xml).find('ParameterList[name="stereo_deformed_images"]');
@@ -613,6 +614,7 @@ function impl_params_xml_file(xml){
         $("#angleWeight").val(angle_weight);
     
     checkValidInput();
+    checkHasOutput();
 }
 
 function xml_get(xml,param_name){

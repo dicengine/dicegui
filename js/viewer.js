@@ -180,14 +180,14 @@ function loadImageSequence(cb){
             return;
         }
         else{
-            updatePreview(fullImageName,'left',[],[],"",cb);
+            updatePreviewImage({srcPath:fullImageName,dest:'left'},cb);
             if(showStereoPane==1||showStereoPane==2){
                 fs.stat(fullStereoImageName, function(err, stat) {
                     if(err != null) {
                         alert("Invalid stereo image file name: " + fullStereoImageName);
                         return;
                     }
-                    updatePreview(fullStereoImageName,'right');
+                    updatePreviewImage({srcPath:fullStereoImageName,dest:'right'});
                     flagSequenceImages();
                 });
             }
@@ -218,6 +218,10 @@ $("#plotsButton").on("click",function () {
     $("#plotsWindow").show();
 });
 
+function isResultsMode(){
+    return !$("#resultsButton").hasClass('action-li');
+}
+
 $("#resultsButton").on("click",function () {
     if(!$(this).hasClass('action-li')) return;
     $("#previewButton").addClass('action-li');
@@ -226,7 +230,11 @@ $("#resultsButton").on("click",function () {
     $(this).addClass('toggle-title-bold');
     $("#resultsWindow").show();
     $("#previewWindow").hide();
+    // reload the results file
+    $("#showTrackingCheck").prop("checked",true);
+    reloadCineImages($("#frameScroller").val());
 });
+
 $("#previewButton").on("click",function () {
     if(!$(this).hasClass('action-li')) return;
     $("#resultsButton").addClass('action-li');
@@ -235,6 +243,8 @@ $("#previewButton").on("click",function () {
     $(this).addClass('toggle-title-bold');
     $("#previewWindow").show();
     $("#resultsWindow").hide();
+    $('#trackGID').val(0);
+    reloadCineImages($("#frameScroller").val());
 });
 
 
@@ -309,7 +319,7 @@ $("#rightCineInput").change(function (evt) {
     }
 });
 
-function reloadCineImages(index){
+function reloadCineImages(index,loadData=true){
     // check that the ref index is valid
     if(cinePathLeft!="undefined"||cinePathRight!="undefined")
         if(index < Number($("#startPreviewSpan").text()) || index > Number($("#endPreviewSpan").text())){
@@ -319,11 +329,11 @@ function reloadCineImages(index){
     var offsetIndex = Number(index);
     // for tracklib special filters can be applied over the images
     if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1&&($("#showSegmentationCheck")[0].checked||$("#showTrackingCheck")[0].checked)){  // signifies tracklib
-            updateTracklibDisplayImages(offsetIndex);
+            updateTracklibDisplayImages(offsetIndex,loadData);
     }else{    // otherwise just diplay the raw frame
         // remove any plots or display lines
-        Plotly.purge(document.getElementById("plotlyViewerLeft"));
-        Plotly.purge(document.getElementById("plotlyViewerRight"));
+        purgePlotlyViewer('left');
+        purgePlotlyViewer('right');
         Plotly.purge(document.getElementById("livePlots"));
         Plotly.purge(document.getElementById("livePlot3d"));
         if(cinePathLeft!="undefined")
@@ -351,38 +361,38 @@ $("#frameScroller").on('input', function () {
         });
         if(Number($(this).val())==0){
             if(refImagePathLeft!="")
-                updatePreview(refImagePathLeft,'left');
+                updatePreviewImage({srcPath:refImagePathLeft,dest:'left'});
             else{
-                updatePreview("",'left');
+                purgePlotlyViewer('left');
             }
             if(showStereoPane==1&&refImagePathRight!="")
-                updatePreview(refImagePathRight,'right');
+                updatePreviewImage({srcPath:refImagePathRight,dest:'right'});
             else{
-                updatePreview("",'right');
+                purgePlotlyViewer('right');
             }
-            
         }else{
             var index = $(this).val()-1;
             if(defImagePathsLeft.length >= $(this).val()){
-                updatePreview(defImagePathsLeft[index].path,'left');
+                updatePreviewImage({srcPath:defImagePathsLeft[index].path,dest:'left'});
                 $("#defImageListLeft li:eq(" + index.toString() + ")").addClass("def-image-ul-selected");
             }
             else{
-                updatePreview("",'left');
+                purgePlotlyViewer('left');
             }
             if(defImagePathsRight.length >= $(this).val()){
-                updatePreview(defImagePathsRight[index].path,'right');
+                updatePreviewImage({srcPath:defImagePathsRight[index].path,dest:'right'});
                 $("#defImageListRight li:eq(" + index.toString() + ")").addClass("def-image-ul-selected");
             }
             else{
-                updatePreview("",'right');
+                purgePlotlyViewer('right');
             }
         }
     }else if($("#fileSelectMode").val()=="sequence"){
         updateImageSequencePreview(true);
     }
-    else if($("#fileSelectMode").val()=="cine")
-        reloadCineImages($(this).val());
+    else if($("#fileSelectMode").val()=="cine"){
+        reloadCineImages($(this).val(),!isResultsMode());
+    }
 });
 
 $("#cineGoToIndex").keypress(function(event) { 
@@ -414,7 +424,7 @@ $("#rightRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
     $("#refImageTextRight span").text(file.name);
-    updatePreview(file.path,'right',[],[],"",function(){refImagePathRight = file.path;});
+    updatePreviewImage({srcPath:file.path,dest:'right'},function(){refImagePathRight = file.path;});
     updateFrameScrollerRange();
 });
 
@@ -451,7 +461,7 @@ $("#leftRefInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
     $("#refImageText span").text(file.name);
-    updatePreview(file.path,'left',[],[],"",function(){refImagePathLeft = file.path;});
+    updatePreviewImage({srcPath:file.path,dest:'left'},function(){refImagePathLeft = file.path;});
 });
 
 $("#leftDefInput").on("click",function () {
@@ -587,6 +597,11 @@ $("#calibrationCheck").change(function() {
 $("#bestFitCheck").change(function() {
     showBestFitLine();
 });
+
+$("#showRepSubsetCheck").change(function() {
+    drawRepresentativeSubset();
+});
+
 
 //$(".weight-2d").change(function() {
 //    // sum the values

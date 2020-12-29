@@ -1,10 +1,212 @@
 $(window).load(function(){
+    initializePlotlyViewers();
 });
 
-var plotlyMarginL = 40;
-var plotlyMarginR = 5;
-var plotlyMarginB = 20;
-var plotlyMarginT = 30;
+function initializePlotlyViewers(){
+    var paramsLeft = getPreviewLayoutConfig('left');
+    var paramsRight = getPreviewLayoutConfig('right');
+    // add a dummy data sets so that the plotly object has some data
+    var dataLeft = [{type:'scatter',x:[0],y:[0],visible:false,name:'dummyDataLeft',showlegend:false,mode:'none'}];
+    var dataRight = [{type:'scatter',x:[0],y:[0],visible:false,name:'dummyDataRight',showlegend:false,mode:'none'}];
+    Plotly.newPlot("plotlyViewerLeft",dataLeft,paramsLeft.layout,paramsLeft.config);
+    Plotly.newPlot("plotlyViewerRight",dataRight,paramsRight.layout,paramsRight.config);
+    // TODO perhaps move these events somewhere else?
+    document.getElementById("plotlyViewerLeft").on('plotly_click', function(data){
+        if(data.points[0].data.name==='tracklibPreviewScatter'){
+            var index2d = data.points[0].pointIndex;
+            updateInspectors('left',index2d);
+        }
+        if($("#analysisModeSelect").val()=="subset"&&data.event.button==2)
+            addLivePlotPts([data.points[0].x],[data.points[0].y]);
+    });
+    document.getElementById("plotlyViewerRight").on('plotly_click', function(data){
+        if(data.points[0].data.name==='tracklibPreviewScatter'){
+            var index2d = data.points[0].pointIndex;
+            updateInspectors('right',index2d);
+        }
+    });
+}
+
+function destToPlotlyDiv(dest){
+    if(dest==='left'){
+        return document.getElementById("plotlyViewerLeft");
+    }else if(dest==='right'){
+        return document.getElementById("plotlyViewerRight");
+    }else if('cal_left'){
+        return document.getElementById("plotlyViewerCalLeft");
+    }else if('cal_right'){
+        return document.getElementById("plotlyViewerCalRight");
+    }else
+        return null;
+}
+
+function purgePlotlyViewer(dest){
+    var div = destToPlotlyDiv(dest);
+    if(!div.layout) return;
+    Plotly.purge(div);
+    initializePlotlyViewers();
+}
+
+function deletePlotlyTraces(dest,name){
+    var div = destToPlotlyDiv(dest);
+    if(!div.data) return;
+    var ids = [];
+    for(var i=0;i<div.data.length;++i){
+        if(div.data[i].name)
+            if(div.data[i].name.includes(name))
+                ids.push(i);
+    }
+    if(ids.length>0)
+        Plotly.deleteTraces(div,ids);
+}
+
+function replacePlotlyData(dest,data){
+    var div = destToPlotlyDiv(dest);
+    // search for existing traces with the same name as the data being added
+    // if they exist, delete them before adding the new data
+    for(var i=0;i<data.length;++i){
+        if(data[i].name){
+            var ids = [];
+            for(var j=0;j<div.data.length;++j){
+                if(div.data[j].name)
+                    if(div.data[j].name==data[i].name){
+                        ids.push(j);
+                    }
+            }
+            if(ids.length>0){
+                Plotly.deleteTraces(div,ids);
+            }
+        }
+    }
+    Plotly.addTraces(div,data);
+}
+
+function addPlotlyData(dest,data){
+    Plotly.addTraces(destToPlotlyDiv(dest),data);
+}
+
+function updatePreviewImage(update,cb){
+    // This function only replaces the images of a plotly layout using plotly.relayout, it does nothing to the data
+    // or layout shapes
+    // Before updating the plotly layout image, it runs the opencvserver to convert any non-png images to png for 
+    // display, and also can be used to decorate the display image with for example segmentation results, etc.
+
+    cb = cb || $.noop;
+    var dest = update.dest;
+    var srcPath = update.srcPath || "";
+    var destPath = fullPath('.dice','.preview_' + dest + '.png');
+    var imgWidth = -1;
+    var imgHeigh = -1;
+//  if(dest!='left'&&dest!='right'&&dest!='cal_left'&&dest!='cal_right'){
+//  console.log('error: invalid destination ' + dest);
+//  return;
+//}
+    var argsIn = update.argsIn || [];
+    var debugConsoleDivId = update.debugConsoleDivId || "";
+    var div = destToPlotlyDiv(dest);
+    
+    // set up the arguments to call the DICe opencv server which will convert whatever the input image
+    // is to png so that it can be displayed in the viewer
+    args = [];
+    args.push(srcPath);
+    args.push(destPath);
+    if(argsIn.length > 0){
+        for(var i=0;i<argsIn.length;++i)
+            args.push(argsIn[i]);
+    }else
+        args.push('filter:none'); // no filter applied, but non .png images are converted to png
+//    console.log(args);
+    
+    var child_process = require('child_process');
+    var readline      = require('readline');
+    var proc = child_process.spawn(execOpenCVServerPath,args,{cwd:workingDirectory});//,maxBuffer:1024*1024});
+    proc.on('error', function(){
+        alert('DICe OpenCVServer failed: invalid executable: ' + execOpenCVServerPath);
+    });
+    proc.on('close', (code) => {
+        console.log(`OpenCVServer exited with code ${code}`);
+        // execute call back with error code
+        if(code>=0&&code<4){
+            console.log("updatePreviewImage(): src path " + srcPath);
+            console.log("updatePreviewImage(): dest path " + destPath);
+            fs.stat(destPath, function(err, stat) {
+                if(err == null) {
+                    var layoutUpdate = {};
+                    if(div.layout.images){
+                        layoutUpdate['xaxis.range'] = [div.layout.xaxis.range[0],div.layout.xaxis.range[1]];
+                        layoutUpdate['yaxis.range'] = [div.layout.yaxis.range[0],div.layout.yaxis.range[1]];
+                    }else{
+                        layoutUpdate['xaxis.range'] = [0,imgWidth];
+                        layoutUpdate['yaxis.range'] = [imgHeight,0];
+                    }
+                    layoutUpdate.images = [{
+                        source: destPath,
+                        xref: 'x',
+                        yref: 'y',
+                        x: 0,
+                        y: 0,
+                        sizex: imgWidth,
+                        sizey: imgHeight,
+                        layer: 'below',
+                    }];
+                    // add a shape around the image to get the reset axes button working
+                    // TODO come up with a better solution for this, for now it seems that
+                    // since the preview is created before the image is drawn, the reset x and y axes ranges
+                    // are not updated
+                    var existingShapes = [];
+                    if(div.layout)
+                        if(div.layout.shapes)
+                            existingShapes = div.layout.shapes;
+                    var viewBoxIndex = -1;
+                    for(var i=0;i<existingShapes.length;++i)
+                        if(existingShapes[i].name)
+                            if(existingShapes[i].name==='viewBox')
+                                viewBoxIndex = i;
+                    if(viewBoxIndex<0){
+                        existingShapes.push({name:'viewBox',type:'rect',x0:0,y0:0,x1:imgWidth,y1:imgHeight,line:{width:0}});
+                        layoutUpdate.shapes = existingShapes;
+                    }
+                    Plotly.relayout(div,layoutUpdate);
+                    cb(code);
+                    if(dest=='left'||dest=='right')
+                        checkValidInput();
+                }
+            });
+        }else{
+            cb(code);
+            console.log('error ocurred ' + code);
+        }
+    });
+    readline.createInterface({
+        input     : proc.stdout,
+        terminal  : false
+    }).on('line', function(line) {
+        //console.log(line);
+        if(debugConsoleDivId.length>0){
+            if(debugConsoleDivId.length > 0){
+                $(debugConsoleDivId).append(line + '</br>');
+                $(debugConsoleDivId).scrollTop($(debugConsoleDivId).get(0).scrollHeight);
+            }
+        }else{
+            console.log(line);
+        }
+        // collect buffer output to set height and width of the image
+        // this gets printed to the cout buffer by the opencv server while
+        // converting the image to .png format
+        if(line.includes("BUFFER_OUT")&&line.includes("IMAGE_WIDTH")){
+            console.log('setting image width to ' + line.split(' ').pop());
+            imgWidth = Number(line.split(' ').pop());
+            if(dest=='left')
+                refImageWidth = imgWidth;
+        }
+        if(line.includes("BUFFER_OUT")&&line.includes("IMAGE_HEIGHT")){
+            console.log('setting image height to ' + line.split(' ').pop());
+            imgHeight = Number(line.split(' ').pop());
+            if(dest=='left')
+                refImageHeight = imgHeight;
+        }
+    });
+}
 
 function resizePreview(){
     console.log('resizing the plotly previews');
@@ -37,7 +239,7 @@ function getPreviewLayout(){
                 zeroline: false,
                 showline: false,
             },
-            margin: {l: plotlyMarginL,r: plotlyMarginR,b: plotlyMarginB,t: plotlyMarginT},
+            margin: {l:40,r:5,b:20,t:30},
             hovermode: 'closest',
     };
     if($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global"){
@@ -134,192 +336,258 @@ function getPreviewLayoutConfig(dest){
     return obj;
 }
 
-function updatePreview(filePath,dest,data=[],argsIn,debugConsoleDivId,cb){
-    cb = cb || $.noop;
-    if(dest!='left'&&dest!='right'&&dest!='cal_left'&&dest!='cal_right'){
-        console.log('error: invalid destination ' + dest);
-        return;
-    }
-    if(data) console.log(data);
+//function updatePreview(update,cb){
+//    cb = cb || $.noop;
+//    var filePath = update.filePath || "";
+//    var dest = update.dest;
+//    var data = update.data || [];
+//    var argsIn = update.argsIn || [];
+//    var debugConsoleDivId = update.debugConsoleDivId || "";
+//    var updateImageOnly = update.updateImageOnly || false;
+//    
+//    if(dest!='left'&&dest!='right'&&dest!='cal_left'&&dest!='cal_right'){
+//        console.log('error: invalid destination ' + dest);
+//        return;
+//    }
+//    //if(data) console.log(data);
+//    var source = 'preview';
+//    if(isResultsMode()) source = 'results';
+//    
+//    var spec = [];
+//    spec.updateImageOnly = updateImageOnly;
+//    spec.srcPath = filePath;
+//    if(dest=='left'){
+//        spec.destPath = fullPath('.dice','.' + source + '_left.png');
+//        spec.destDivId = "plotlyViewerLeft";
+//    }
+//    else if(dest=='right'){
+//        spec.destPath = fullPath('.dice','.' + source + '_right.png');
+//        spec.destDivId = "plotlyViewerRight";
+//    }
+//    else if(dest=='cal_left'){
+//        spec.destPath = fullPath('.dice','.preview_cal_left.png');
+//        spec.destDivId = "plotlyViewerCalLeft";
+//    }
+//    else if(dest=='cal_right'){
+//        spec.destPath = fullPath('.dice','.preview_cal_right.png');
+//        spec.destDivId = "plotlyViewerCalRight";
+//    }
+//    spec.dest = dest;
+//    if(0 === spec.srcPath.length){
+//        console.log('clearing the display image for dest ' + dest);
+//        Plotly.purge(document.getElementById(spec.destDivId));
+//        //updateImage(spec,[]);
+//        return;
+//    }
+//    // if there is already a data entry for the subset coordinates, automatically push that to the data array
+//    var div = document.getElementById(spec.destDivId);
+//    if(div.data)
+//        for(var i=0;i<div.data.length;++i){
+//            if(div.data[i].name=='subsetCoordinates')
+//                data.push(div.data[i]);
+//            if(div.data[i].name=='livePlotPts')
+//                data.push(div.data[i]);
+//        }
+//    
+//    // set up the arguments to call the DICe opencv server which will convert whatever the input image
+//    // is to png so that it can be displayed in the viewer
+//    args = [];
+//    args.push(spec.srcPath);
+//    args.push(spec.destPath);
+//    var hasArgs = false;
+//    if(argsIn!==undefined)
+//        if(argsIn.length > 0)
+//            hasArgs = true;
+//    if(hasArgs){
+//        for(var i=0;i<argsIn.length;++i)
+//            args.push(argsIn[i]);
+//    }else
+//        args.push('filter:none'); // no filter applied, but non .png images are converted to png
+//    
+//    console.log(args);
+//    
+//    var child_process = require('child_process');
+//    var readline      = require('readline');
+//    var proc = child_process.spawn(execOpenCVServerPath,args,{cwd:workingDirectory});//,maxBuffer:1024*1024});
+//    proc.on('error', function(){
+//        alert('DICe OpenCVServer failed: invalid executable: ' + execOpenCVServerPath);
+//    });
+//    proc.on('close', (code) => {
+//        console.log(`OpenCVServer exited with code ${code}`);
+//        // execute call back with error code
+//        if(code>=0&&code<4){
+//            console.log("updatePreview(): src path " + spec.srcPath);
+//            console.log("updatePreview(): dest path " + spec.destPath);
+//            fs.stat(spec.destPath, function(err, stat) {
+//                if(err == null) {
+//                    updateImage(spec,data);
+//                    cb(code);
+//                    if(dest=='left'||dest=='right')
+//                        checkValidInput();
+//                }
+//            });
+//        }else{
+//            cb(code);
+//            console.log('error ocurred ' + code);
+//        }
+//    });
+//    readline.createInterface({
+//        input     : proc.stdout,
+//        terminal  : false
+//    }).on('line', function(line) {
+//        //console.log(line);
+//        if(debugConsoleDivId){
+//            if(debugConsoleDivId.length > 0){
+//                $(debugConsoleDivId).append(line + '</br>');
+//                $(debugConsoleDivId).scrollTop($(debugConsoleDivId).get(0).scrollHeight);
+//            }
+//        }else{
+//            console.log(line);
+//        }
+//        // collect buffer output to set height and width of the image
+//        // this gets printed to the cout buffer by the opencv server while
+//        // converting the image to .png format
+//        if(line.includes("BUFFER_OUT")&&line.includes("IMAGE_WIDTH")){
+//            console.log('setting image width to ' + line.split(' ').pop());
+//            spec.width = Number(line.split(' ').pop());
+//            if(dest=='left')
+//                refImageWidth = spec.width;
+//        }
+//        if(line.includes("BUFFER_OUT")&&line.includes("IMAGE_HEIGHT")){
+//            console.log('setting image height to ' + line.split(' ').pop());
+//            spec.height = Number(line.split(' ').pop());
+//            if(dest=='left')
+//                refImageHeight = spec.height;
+//        }
+//    });
+//}
 
-    var spec = [];
-    spec.srcPath = filePath;
-    if(dest=='left'){
-        spec.destPath = fullPath('.dice','.preview_left.png');
-        spec.destDivId = "plotlyViewerLeft";
-    }
-    else if(dest=='right'){
-        spec.destPath = fullPath('.dice','.preview_right.png');
-        spec.destDivId = "plotlyViewerRight";
-    }
-    else if(dest=='cal_left'){
-        spec.destPath = fullPath('.dice','.preview_cal_left.png');
-        spec.destDivId = "plotlyViewerCalLeft";
-    }
-    else if(dest=='cal_right'){
-        spec.destPath = fullPath('.dice','.preview_cal_right.png');
-        spec.destDivId = "plotlyViewerCalRight";
-    }
-    spec.dest = dest;
-    if(0 === spec.srcPath.length){
-        console.log('clearing the display image for dest ' + dest);
-        Plotly.purge(document.getElementById(spec.destDivId));
-        //updateImage(spec,[]);
-        return;
-    }
-    // if there is already a data entry for the subset coordinates, automatically push that to the data array
-    var div = document.getElementById(spec.destDivId);
-    if(div.data)
-        for(var i=0;i<div.data.length;++i){
-            if(div.data[i].name=='subsetCoordinates')
-                data.push(div.data[i]);
-            if(div.data[i].name=='livePlotPts')
-                data.push(div.data[i]);
-        }
-    
-    // set up the arguments to call the DICe opencv server which will convert whatever the input image
-    // is to png so that it can be displayed in the viewer
-    args = [];
-    args.push(spec.srcPath);
-    args.push(spec.destPath);
-    var hasArgs = false;
-    if(argsIn!==undefined)
-        if(argsIn.length > 0)
-            hasArgs = true;
-    if(hasArgs){
-        for(var i=0;i<argsIn.length;++i)
-            args.push(argsIn[i]);
-    }else
-        args.push('filter:none'); // no filter applied, but non .png images are converted to png
-    
-    console.log(args);
-    
-    var child_process = require('child_process');
-    var readline      = require('readline');
-    var proc = child_process.spawn(execOpenCVServerPath,args,{cwd:workingDirectory});//,maxBuffer:1024*1024});
-    proc.on('error', function(){
-        alert('DICe OpenCVServer failed: invalid executable: ' + execOpenCVServerPath);
-    });
-    proc.on('close', (code) => {
-        console.log(`OpenCVServer exited with code ${code}`);
-        // execute call back with error code
-        if(code>=0&&code<4){
-            console.log("updatePreview(): src path " + spec.srcPath);
-            console.log("updatePreview(): dest path " + spec.destPath);
-            fs.stat(spec.destPath, function(err, stat) {
-                if(err == null) {
-                    updateImage(spec,data);
-                    cb(code);
-                    if(dest=='left'||dest=='right')
-                        checkValidInput();
-                }
-            });
-        }else{
-            cb(code);
-            console.log('error ocurred ' + code);
-        }
-    });
-    readline.createInterface({
-        input     : proc.stdout,
-        terminal  : false
-    }).on('line', function(line) {
-        //console.log(line);
-        if(debugConsoleDivId){
-            if(debugConsoleDivId.length > 0){
-                $(debugConsoleDivId).append(line + '</br>');
-                $(debugConsoleDivId).scrollTop($(debugConsoleDivId).get(0).scrollHeight);
-            }
-        }else{
-            console.log(line);
-        }
-        // collect buffer output to set height and width of the image
-        // this gets printed to the cout buffer by the opencv server while
-        // converting the image to .png format
-        if(line.includes("BUFFER_OUT")&&line.includes("IMAGE_WIDTH")){
-            console.log('setting image width to ' + line.split(' ').pop());
-            spec.width = Number(line.split(' ').pop());
-            if(dest=='left')
-                refImageWidth = spec.width;
-        }
-        if(line.includes("BUFFER_OUT")&&line.includes("IMAGE_HEIGHT")){
-            console.log('setting image height to ' + line.split(' ').pop());
-            spec.height = Number(line.split(' ').pop());
-            if(dest=='left')
-                refImageHeight = spec.height;
-        }
-    });
-}
+//function createNewPlotlyPreview(spec,layout,config,data){
+//    var div = document.getElementById(spec.destDivId);
+//
+//    // add tracklines for tracklib
+//    addPreviewTracks(layout,data);
+//    
+//    // add a heatmap 
+//    updateCoordsHeatmap(spec.width,spec.height);
+//    data.unshift(coordsHeatmap);
+//    // TODO call restyle or relayout instead of newPlot each time?
+//    Plotly.newPlot(div,data,layout,config);
+//    if(spec.dest=='left'&&$("#analysisModeSelect").val()=="subset"){
+//        drawRepresentativeSubset();
+//        if(showStereoPane==1)
+//            drawBestFitLine();
+//    }
+//    var posDiv = document.getElementById('leftPos');
+//    if(spec.dest=='right')
+//        posDiv = document.getElementById('rightPos');
+//    
+//    div.on('plotly_hover', function(data){
+//        if(spec.dest!='left' && spec.dest!='right') return;
+//        var infotext = data.points.map(function(d){
+//            return ('['+d.x+','+d.y+']');
+//        });
+//        posDiv.innerText = infotext;
+//    });
+//    div.on('plotly_click', function(data){
+//        if(spec.dest!='left' && spec.dest!='right') return;
+//        if(data.points[0].data.name==='tracklibPreviewScatter'){
+//            var index2d = data.points[0].pointIndex;
+//            updateInspectors(spec.dest,index2d);
+//        }
+//    });
+//    
+//    if(spec.dest=='left' && $("#analysisModeSelect").val()=="subset"){
+//        div.on('plotly_click', function(data){
+//            if(spec.dest!='left') return;
+//            if(data.event.button!=2) return;// right click only 
+//            addLivePlotPts([data.points[0].x],[data.points[0].y]);
+//        });
+//    }
+//}
 
-function updateImage(spec,data){
-    console.log('updateImage(): path ' + spec.destPath + ' in div '  + spec.destDivId);
-    var obj = getPreviewLayoutConfig(spec.dest);
-    // see if there is an existing plotly plot and if so keep the x and y axis ranges (same zoom)
-    // also keep the shapes if they exist
-    var div = document.getElementById(spec.destDivId);
-    if(div.layout){
-        if(div.layout.xaxis){ // TODO test for xaxis defined?
-            obj.layout.xaxis.range = [div.layout.xaxis.range[0],div.layout.xaxis.range[1]];
-            obj.layout.yaxis.range = [div.layout.yaxis.range[0],div.layout.yaxis.range[1]];
-        }
-        if(div.layout.shapes){
-            obj.layout.shapes = div.layout.shapes;
-        }
-    }else{
-        obj.layout.xaxis.range = [0,spec.width];
-        obj.layout.yaxis.range = [spec.height,0];
-    }
-    if(spec.srcPath.length>0){
-        obj.layout.images = [{
-            source: spec.destPath,
-            xref: 'x',
-            yref: 'y',
-            x: 0,
-            y: 0,
-            sizex: spec.width,
-            sizey: spec.height,
-            layer: 'below',
-        }];
-    }
-    // add tracklines for tracklib
-    addPreviewTracks(obj.layout,data);
-    
-    // add a heatmap 
-    updateCoordsHeatmap(spec.width,spec.height);
-    data.unshift(coordsHeatmap);
-    // TODO call restyle or relayout instead of newPlot each time?
-    Plotly.newPlot(div,data,obj.layout,obj.config);
-    if(spec.dest=='left'&&$("#analysisModeSelect").val()=="subset"){
-        drawRepresentativeSubset();
-        if(showStereoPane==1)
-            drawBestFitLine();
-    }
-    var posDiv = document.getElementById('leftPos');
-    if(spec.dest=='right')
-        posDiv = document.getElementById('rightPos');
-    
-    div.on('plotly_hover', function(data){
-        if(spec.dest!='left' && spec.dest!='right') return;
-        var infotext = data.points.map(function(d){
-            return ('['+d.x+','+d.y+']');
-        });
-        posDiv.innerText = infotext;
-    });
-    div.on('plotly_click', function(data){
-        if(spec.dest!='left' && spec.dest!='right') return;
-        if(data.points[0].data.name==='tracklibPreviewScatter'){
-            var index2d = data.points[0].pointIndex;
-            updateInspectors(spec.dest,index2d);
-        }
-    });
-    
-    if(spec.dest=='left' && $("#analysisModeSelect").val()=="subset"){
-        div.on('plotly_click', function(data){
-            if(spec.dest!='left') return;
-            if(data.event.button!=2) return;// right click only 
-            addLivePlotPts([data.points[0].x],[data.points[0].y]);
-        });
-    }
-}
+//function updatePlotlyPreviewImage(spec,layout){
+//    var div = document.getElementById(spec.destDivId);
+//    var update = {images:layout.images};
+//    Plotly.relayout(div,update);
+//}
+//
+//function updateImage(spec,data){
+//    console.log('updateImage(): path ' + spec.destPath + ' in div '  + spec.destDivId);
+//    var obj = getPreviewLayoutConfig(spec.dest);
+//    // see if there is an existing plotly plot and if so keep the x and y axis ranges (same zoom)
+//    // also keep the shapes if they exist
+//    var div = document.getElementById(spec.destDivId);
+//    if(div.layout){
+//        if(div.layout.xaxis){ // TODO test for xaxis defined?
+//            obj.layout.xaxis.range = [div.layout.xaxis.range[0],div.layout.xaxis.range[1]];
+//            obj.layout.yaxis.range = [div.layout.yaxis.range[0],div.layout.yaxis.range[1]];
+//        }
+//        if(div.layout.shapes){
+//            obj.layout.shapes = div.layout.shapes;
+//        }
+//    }else{
+//        obj.layout.xaxis.range = [0,spec.width];
+//        obj.layout.yaxis.range = [spec.height,0];
+//    }
+//    if(spec.srcPath.length>0){
+//        obj.layout.images = [{
+//            source: spec.destPath,
+//            xref: 'x',
+//            yref: 'y',
+//            x: 0,
+//            y: 0,
+//            sizex: spec.width,
+//            sizey: spec.height,
+//            layer: 'below',
+//        }];
+//    }
+//
+//    if(spec.updateImageOnly)
+//        updatePlotlyPreviewImage(spec,obj.layout);
+//    else
+//        createNewPlotlyPreview(spec,obj.layout,obj.config,data);
+//    
+////    // add tracklines for tracklib
+////    addPreviewTracks(obj.layout,data);
+////    
+////    // add a heatmap 
+////    updateCoordsHeatmap(spec.width,spec.height);
+////    data.unshift(coordsHeatmap);
+////    // TODO call restyle or relayout instead of newPlot each time?
+////    Plotly.newPlot(div,data,obj.layout,obj.config);
+////    if(spec.dest=='left'&&$("#analysisModeSelect").val()=="subset"){
+////        drawRepresentativeSubset();
+////        if(showStereoPane==1)
+////            drawBestFitLine();
+////    }
+////    var posDiv = document.getElementById('leftPos');
+////    if(spec.dest=='right')
+////        posDiv = document.getElementById('rightPos');
+////    
+////    div.on('plotly_hover', function(data){
+////        if(spec.dest!='left' && spec.dest!='right') return;
+////        var infotext = data.points.map(function(d){
+////            return ('['+d.x+','+d.y+']');
+////        });
+////        posDiv.innerText = infotext;
+////    });
+////    div.on('plotly_click', function(data){
+////        if(spec.dest!='left' && spec.dest!='right') return;
+////        if(data.points[0].data.name==='tracklibPreviewScatter'){
+////            var index2d = data.points[0].pointIndex;
+////            updateInspectors(spec.dest,index2d);
+////        }
+////    });
+////    
+////    if(spec.dest=='left' && $("#analysisModeSelect").val()=="subset"){
+////        div.on('plotly_click', function(data){
+////            if(spec.dest!='left') return;
+////            if(data.event.button!=2) return;// right click only 
+////            addLivePlotPts([data.points[0].x],[data.points[0].y]);
+////        });
+////    }
+//}
 
 function livePlotDims(){
     var result = {numLivePlotPts:0,
@@ -457,11 +725,8 @@ function drawSubsetCoordinates(){
     }
 }
 
-function getPlotlyData(){
-    return document.getElementById("plotlyViewerLeft").data;
-}
 function getSubsetCoordinatesTrace(){
-    var allTraces = getPlotlyData();
+    var allTraces = document.getElementById("plotlyViewerLeft").data;
     var result = allTraces.findIndex(obj => { 
      return obj.name === "subsetCoordinates";
     });
@@ -611,9 +876,10 @@ function drawRepresentativeSubset(){
             path +='L';
     }
     path += 'Z';
+    var visibility = $("#showRepSubsetCheck")[0].checked;
     if(existingBoxIndex>=0){
-        existinShapes[existingBoxIndex].path = path;
-        existinShapes[existingBoxIndex].visible = true;
+        existingShapes[existingBoxIndex].path = path;
+        existingShapes[existingBoxIndex].visible = visibility;
     }else{
         var shape = {};
         shape.name = 'representativeSubset';
@@ -621,7 +887,7 @@ function drawRepresentativeSubset(){
         shape.path = path;
         shape.line = {color: 'yellow', width:2}
         shape.opacity = 1.0;
-        shape.visible = true;
+        shape.visible = visibility;
         shape.editable = true;
         existingShapes.push(shape);
     }
@@ -996,43 +1262,6 @@ function drawBestFitLine(ox,oy,px,py){
     }
     var update = {'shapes' : existingShapes}
     Plotly.relayout(pv,update);
-}
-
-function addPreviewTracks(layout,data){
-    if($('#analysisModeSelect').val()!="tracking"||showStereoPane!=1) return;
-    var scatterTraceId = data.findIndex(obj => { 
-        return obj.name === "tracklibPreviewScatter";
-    });
-    if(scatterTraceId<0) return;
-    var px = data[scatterTraceId].x;
-    var py = data[scatterTraceId].y;
-    var fwdNeighId = data[scatterTraceId].fwdNeighId;
-    // draw lines between all the points that have neighbors
-    // remove all old track_lines
-    if(!layout) return;
-    if(!layout.shapes) layout.shapes = [];
-    var i = layout.shapes.length;
-    while (i--) {
-        if(layout.shapes[i].name)
-            if(layout.shapes[i].name==='trackLine')
-                layout.shapes.splice(i,1);
-    }
-    for(var i=0;i<px.length;++i){
-        if(fwdNeighId[i]<0) continue;
-        var track_line = {
-                name: 'trackLine',
-                type:'line',
-                x0: px[i],
-                x1: px[fwdNeighId[i]],
-                y0: py[i],
-                y1: py[fwdNeighId[i]],
-                line: {color: 'yellow', width:2},
-                opacity: 0.8,
-                editable: false,
-                visible: true
-        };
-        layout.shapes.push(track_line);
-    }
 }
 
 function updateNeighInfoTrace(dest,index){

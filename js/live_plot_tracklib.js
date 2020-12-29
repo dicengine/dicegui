@@ -272,14 +272,15 @@ function addClickedPointTrace2d(curveNum,ptIndex){
 }
 
 function setTrackingVisibility(){
-    var visible = $('#showTrackingCheck')[0].checked;
-    if(visible){
+    var dataVisible = $('#showTrackingCheck')[0].checked || isResultsMode();
+    var linesVisible = ($('#showTrackingCheck')[0].checked && $("#numPreviewFrames").val()>1) || isResultsMode();
+    if(linesVisible){
         $(".track-plot").show();
     }
     else {
         $(".track-plot").hide();
     }
-    var update = {visible:visible};
+    var update = {visible:dataVisible};
     var pvl = document.getElementById("plotlyViewerLeft");
     var pvr = document.getElementById("plotlyViewerRight");
     if(pvl.data){
@@ -304,7 +305,7 @@ function setTrackingVisibility(){
             for(var i=0;i<pvl.layout.shapes.length;++i){
                 if(pvl.layout.shapes[i].name.includes('trackLine')){
                     var propString = 'shapes[' + i.toString() + '].visible';
-                    shapesUpdate[propString] = visible;
+                    shapesUpdate[propString] = linesVisible;
                 }
             }
             if(Object.keys(shapesUpdate).length>0)
@@ -317,7 +318,7 @@ function setTrackingVisibility(){
             for(var i=0;i<pvr.layout.shapes.length;++i){
                 if(pvr.layout.shapes[i].name.includes('trackLine')){
                     var propString = 'shapes[' + i.toString() + '].visible';
-                    shapesUpdate[propString] = visible;
+                    shapesUpdate[propString] = linesVisible;
                 }
             }
             if(Object.keys(shapesUpdate).length>0)
@@ -350,8 +351,11 @@ function updateInspectors(dest,index2d){//,stereoGlobalId,index3d){
     }
     // detemine the 3d index based on the frame #
     var traceName = "3dScatterTrace_" + stereoGlobalId.toString();
+    var curveNum = -1;
+    var index3d = -1;
     var data3d = document.getElementById("livePlot3d").data;
-    var curveNum = data3d.findIndex(obj => { 
+    if(!data3d) return;
+    curveNum = data3d.findIndex(obj => { 
         return obj.name === traceName;
     });
     if(curveNum<0){
@@ -359,8 +363,7 @@ function updateInspectors(dest,index2d){//,stereoGlobalId,index3d){
         curveNum = 0;
         $("#trackGID").val(curveNum);
     }
-//    if(curveNum<0)return;
-    var index3d = -1;
+//  if(curveNum<0)return;
     if(index2d>0){
         for(var i=0;i<data3d[curveNum].frame.length;++i)
             if(data3d[curveNum].frame[i]==frame){
@@ -380,8 +383,15 @@ $("#showTrackingCheck").click(function(){
     setTrackingVisibility();
 });
 
+function clearDebugUtils(){
+    undrawShape('','neighCircle');
+    undrawShape('','epipolarLine');
+    deletePlotlyTraces('left','Neigh');
+    deletePlotlyTraces('right','Neigh');
+}
+
 function loadPlotlyJsonOutput(source){
-    
+    if(source!='preview'&&source!='results') return;
     var displayLeft = "";
     if(os.platform()=='win32'){
         displayLeft = '.dice\\.preview_left.png';
@@ -398,9 +408,10 @@ function loadPlotlyJsonOutput(source){
         if(err == null) {
             Plotly.d3.json(fullPath('.dice','.' + source + '_left.json'), function(jsonErr, fig) {
                 if(jsonErr==null){
-                    updatePreview(fullPath('',displayLeft),'left',fig.data,[],"",function(){
-                        undrawShape('','neighCircle');
-                        undrawShape('','epipolarLine');
+                    updatePreviewImage({srcPath:fullPath('',displayLeft),dest:'left'},function(){
+                        clearDebugUtils();
+                        replacePlotlyData('left',fig.data);
+                        addPreviewTracks('left');
                         setTrackingVisibility();
                     });
                     showLivePlots();
@@ -428,7 +439,11 @@ function loadPlotlyJsonOutput(source){
         if(err == null) {
             Plotly.d3.json(fullPath('.dice','.' + source + '_right.json'), function(jsonErr, fig) {
                 if(jsonErr==null){
-                    updatePreview(fullPath('',displayRight),'right',fig.data,[],"",function(){setTrackingVisibility();});
+                    updatePreviewImage({srcPath:fullPath('',displayRight),dest:'right'},function(){
+                        replacePlotlyData('right',fig.data);
+                        addPreviewTracks('right');
+                        setTrackingVisibility();
+                    });
                 }else{
                     alert('error: reading json file failed');
                     console.log(jsonErr);
@@ -439,3 +454,43 @@ function loadPlotlyJsonOutput(source){
     });
 }
 
+function addPreviewTracks(dest){
+    var div = destToPlotlyDiv(dest);
+    var data = div.data;
+    var layout = div.layout;
+    if(!data||!layout) return;
+    
+    if($('#analysisModeSelect').val()!="tracking"||showStereoPane!=1) return;
+    var scatterTraceId = data.findIndex(obj => { 
+        return obj.name === "tracklibPreviewScatter";
+    });
+    if(scatterTraceId<0) return;
+    var px = data[scatterTraceId].x;
+    var py = data[scatterTraceId].y;
+    var fwdNeighId = data[scatterTraceId].fwdNeighId;
+    // draw lines between all the points that have neighbors
+    // remove all old track_lines
+    if(!layout.shapes) layout.shapes = [];
+    var i = layout.shapes.length;
+    while (i--) {
+        if(layout.shapes[i].name)
+            if(layout.shapes[i].name==='trackLine')
+                layout.shapes.splice(i,1);
+    }
+    for(var i=0;i<px.length;++i){
+        if(fwdNeighId[i]<0) continue;
+        var track_line = {
+                name: 'trackLine',
+                type:'line',
+                x0: px[i],
+                x1: px[fwdNeighId[i]],
+                y0: py[i],
+                y1: py[fwdNeighId[i]],
+                line: {color: 'yellow', width:2},
+                opacity: 0.8,
+                editable: false,
+                visible: true
+        };
+        layout.shapes.push(track_line);
+    }
+}

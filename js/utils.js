@@ -739,6 +739,7 @@ function updateFrameScrollerRange(){
 }
 
 $("#analysisModeSelect").on('change',function() {
+    $("#showRepSubsetCheck").prop("checked",false);
     removeAllPlotlyShapesAndTraces();
     if($(this).val()=="subset"){
         $(".full-field").show();
@@ -749,7 +750,7 @@ $("#analysisModeSelect").on('change',function() {
         $(".results-right").show();
         $(".tracklib-tools").hide();
         $(".tracking").hide();
-        drawRepresentativeSubset();
+//        drawRepresentativeSubset();
         //$("#subsetParams").show();
         //$("#trackingParams").hide();
         //$("#sssigPreview").show();

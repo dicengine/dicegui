@@ -413,8 +413,13 @@
                   <!-- end toggle div banner -->
                 <div class="toggle-div-body" style="height: auto;  border-style:ridge;">
                   <div id="resultsWindow" style="display:none;">
-                  THIS IS THE RESULTS WINDOW
-                  </div>
+                      <p>track display mode</p>
+                      <select id="trackDisplayModeSelect" style="margin-top: 20px;">
+                        <option value="all-tracks">all tracks</option>
+                        <option value="in-frame-only">in frame only</option>
+                        <option value="by-id">by id</option>
+                      </select>
+                    </div>
                     <div id="previewWindow">
                       <div id="previewTracklib" class="action-li" style="margin-top: 10px;">
                         <i class="material-icons md-dark md-br-pad" style="margin-bottom: 0px;">check_circle</i>
@@ -616,6 +621,8 @@
                 <input id="subsetSize" type="range" min="9" max="51" defaultValue="31" value="31"
                   step="2"
                 >
+                <p><input id="showRepSubsetCheck" type="checkbox"> show rep. subset
+                </p>
                 <p>
                   step size: <label id="stepSizeLabel">15</label> (pixels)
                 </p>

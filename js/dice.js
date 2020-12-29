@@ -144,8 +144,8 @@ function resetWorkingDirectory(){
     $("#runLoader").removeClass('post-loader-fail');
     $("#runLoader").removeClass('loader');
 
-    updatePreview('','left');
-    updatePreview('','right');
+    purgePlotlyViewer('left');
+    purgePlotlyViewer('right');
     
     refImagePathLeft = "undefined";
     refImagePathRight = "undefined";
@@ -278,7 +278,7 @@ function updateCineDisplayImage(fileName,index,dest,cb){
     // this assumes that fileName is not alredy decorated
     var decoratedFile = fileName.replace('.'+fileName.split('.').pop(),'_'+index+'.cine');
     console.log('updating cine display image: ' + decoratedFile);
-    updatePreview(decoratedFile,dest,[],[],"",cb);
+    updatePreviewImage({srcPath:decoratedFile,dest:dest},cb);
 }
 
 function callCineStatExec(file,mode,callback) {
@@ -379,7 +379,7 @@ function callCineStatExec(file,mode,callback) {
 //    drawEpipolarLine(false,0,0,true);
 //}
 
-function updateTracklibDisplayImages(index){
+function updateTracklibDisplayImages(index,loadData=true){
     console.log('updateTracklibDisplayImages()');
     if(cinePathLeft=="undefined"||cinePathRight=="undefined"){
         alert('cannot update tracklib image preview since the paths are not defined');
@@ -429,10 +429,19 @@ function updateTracklibDisplayImages(index){
     args.push('cine_ref_index');
     args.push(parseInt($("#cineRefIndex").val()));
     
+    args.push('write_results');
+    if(isResultsMode())
+        args.push('false'); // seems counterintuitive to not write results
+    // when in results mode, but this is prevent over-writing a full analysis results file
+    else args.push('true');
+    
     args.push('cine_start_index');
-    var startFrame = Number($("#currentPreviewSpan").text()) - ($("#numPreviewFrames").val()-1)*$("#cineSkipIndex").val();
-    if(startFrame < Number($("#startPreviewSpan").text()))
-        startFrame = Number($("#startPreviewSpan").text());
+    var startFrame = Number($("#currentPreviewSpan").text());
+    if(!isResultsMode()){ // only one frame is shown in results mode
+        startFrame = Number($("#currentPreviewSpan").text()) - ($("#numPreviewFrames").val()-1)*$("#cineSkipIndex").val();
+        if(startFrame < Number($("#startPreviewSpan").text()))
+            startFrame = Number($("#startPreviewSpan").text());
+    }
     args.push(startFrame);
     // overload the start frame as the current frame since the preview begins
     // with the current frame
@@ -440,6 +449,8 @@ function updateTracklibDisplayImages(index){
 //    args.push($("#currentPreviewSpan").text());
     
     // the end frame is the start frame plus num_frames * skips
+    args.push('cine_preview_index'); // the last frame is also the preview frame for preview mode
+    args.push(parseInt($("#currentPreviewSpan").text()));
     args.push('cine_end_index');
     args.push(parseInt($("#currentPreviewSpan").text()));
 //    var endFrame = Number($("#currentPreviewSpan").text()) + ($("#numPreviewFrames").val()-1)*$("#cineSkipIndex").val();
@@ -537,7 +548,15 @@ function updateTracklibDisplayImages(index){
     proc.on('close', (code) => {
         console.log(`OpenCVServer exited with code ${code}`);
         if(code==0){
-            loadPlotlyJsonOutput('preview');
+            if(isResultsMode()&&loadData)
+                loadPlotlyJsonOutput('results');
+            else if(loadData)
+                loadPlotlyJsonOutput('preview');
+            else{
+                updatePreviewImage({srcPath:fullPath('',displayLeft),dest:'left'},function(){
+                    clearDebugUtils();});
+                updatePreviewImage({srcPath:fullPath('',displayRight),dest:'right'});
+            }
         }else{
             console.log('error ocurred for tracklib preview: ' + code);
         }
@@ -624,6 +643,8 @@ function postExecTasks(){
         if(showStereoPane==1){
             // TODO segPreviewCheck?
             loadPlotlyJsonOutput('results');
+            checkHasOutput();
+            $("#resultsButton").trigger( "click" );
         }else{
             loadTrackingResultsIntoMemory();
         }
@@ -766,6 +787,8 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
         content += '<Parameter name="cine_start_index" type="int" value="'+$("#cineStartIndex").val()+'" />\n';
         content += '<Parameter name="cine_skip_index" type="int" value="'+$("#cineSkipIndex").val()+'" />\n';
         content += '<Parameter name="cine_end_index" type="int" value="'+$("#cineEndIndex").val()+'" />\n';
+        if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1) // signifies tracklib
+            content += '<Parameter name="cine_preview_index" type="int" value="'+parseInt($("#frameScroller").val())+'" />\n';
         if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs){
             content += '<Parameter name="stereo_cine_file" type="string" value="'+cinePathRight+'" />\n';
         }
@@ -886,6 +909,8 @@ function writeParamsFile(only_write,resolution,ss_locs) {
         content += '<Parameter name="estimate_resolution_error_amplitude_step" type="double" value="1.0" />\n';
     }
     if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1){ // signifies tracklib
+        // set the show tracks check to true by default
+        $('#showTrackingCheck').prop('checked', true);
         content += '<Parameter name="thresh_left" type="int" value="' + parseInt($("#threshLeft").val()) +'" />\n';
         content += '<Parameter name="thresh_right" type="int" value="' + parseInt($("#threshRight").val()) +'" />\n';
         content += '<Parameter name="min_area" type="int" value="' + parseInt($("#minArea").val()) +'" />\n';
@@ -901,6 +926,7 @@ function writeParamsFile(only_write,resolution,ss_locs) {
             endProgress(false);
             return;
         }
+        content += '<Parameter name="show_segmentation" type="bool" value="true" />\n'; // segmentation is always on for results viewing
         content += '<Parameter name="num_search_frames" type="int" value="' + parseInt($("#numSearchFrames").val()) +'" />\n';
         content += '<Parameter name="max_pt_density" type="double" value="';
         content += Number($("#maxPtDensity").val()).toFixed(7);
@@ -1213,6 +1239,19 @@ function writeSubsetFile(only_write,resolution,ss_locs){
     }else{
         if(!only_write)
             callDICeExec(resolution,ss_locs);
+    }
+}
+
+function checkHasOutput(){
+    if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1){ // tracklib
+        // see if outputfiles exists
+        fs.stat(fullPath('.dice','.results_3d.json'), function(err, stat) {
+            if(err == null) {
+                $("#resultsButton").show();
+            }else{
+                $("#resultsButton").hide();
+            }
+        });
     }
 }
 

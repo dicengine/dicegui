@@ -69,11 +69,11 @@ fs.watch(hiddenDir, (eventType, filename) => {
     if($("#cancelButton").is(":hidden"))
         return;
     if(filename==".preview_cal_left.png"){
-        updatePreview(filename,'cal_left');
+        updatePreviewImage({srcPath:filename,dest:'cal_left'});
 //        $("#leftPreviewBody").css('border', '');
     }
     if(filename==".preview_cal_right.png"){
-        updatePreview(filename,'cal_right');
+        updatePreviewImage({srcPath:filename,dest:'cal_right'});
 //        $("#rightPreviewBody").css('border', '');
     }
 })
@@ -469,8 +469,10 @@ function updateCalPreview(firstLoad=false){
     console.log("updateCalPreview: left file " + decObj.decoratedLeft);
     console.log("updateCalPreview: right file " + decObj.decoratedRight);
     startProgress();
-    updatePreview(decObj.decoratedLeft,'cal_left',[],args,"#calConsoleWindow",function (code) {respondToOpenCVErrorCode(code);});
-    updatePreview(decObj.decoratedRight,'cal_right',[],args,"#calConsoleWindow",function (code) {respondToOpenCVErrorCode(code);});
+    var update = {srcPath:decObj.decoratedLeft, dest:'cal_left',argsIn:args,debugConsoleDivId:"#calConsoleWindow"};
+    updatePreviewImage(update,function (code) {respondToOpenCVErrorCode(code);});
+    update = {srcPath:decObj.decoratedRight, dest:'cal_right',argsIn:args,debugConsoleDivId:"#calConsoleWindow"};
+    updatePreviewImage(update,function (code) {respondToOpenCVErrorCode(code);});
 }
 
 function decorateFileNames(){
@@ -523,15 +525,15 @@ function respondToOpenCVErrorCode(code){
             $("#previewRightSpan").text("marker location failed");
         }else if(code==4){
             // clear the preview images
-            updatePreview('','cal_left');
-            updatePreview('','cal_right');
+            purgePlotlyViewer('cal_left');
+            purgePlotlyViewer('cal_right');
             $("#previewLeftSpan").text("image load failure");
             $("#previewRightSpan").text("image load failure");
         }else{
             // reset the preview images
             var decObj = decorateFileNames();
-            updatePreview(decObj.decoratedLeft,'cal_left');
-            updatePreview(decObj.decoratedRight,'cal_right');
+            updatePreviewImage({srcPath:decObj.decoratedLeft,dest:'cal_left'});
+            updatePreviewImage({srcPath:decObj.decoratedRight,dest:'cal_right'});
             $("#previewLeftSpan").text("preview failure (try adjusting threshold)");
             $("#previewRightSpan").text("preview failure (try adjusting threshold)");
         }
