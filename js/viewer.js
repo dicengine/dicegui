@@ -595,7 +595,7 @@ $("#calibrationCheck").change(function() {
 });
 
 $("#bestFitCheck").change(function() {
-    showBestFitLine();
+    drawBestFitLine();
 });
 
 $("#showRepSubsetCheck").change(function() {

@@ -272,7 +272,6 @@ function readBestFitFile(){
                         $("#bestFitYAxisCheck")[0].checked = true;
                     }
                     drawBestFitLine(ox,oy,px,py);
-                    showBestFitLine();
                     //drawROIs();
                 }
             }); // end readfile

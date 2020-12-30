@@ -589,7 +589,7 @@ $("#stereoButton").click(function(){
         $(".results-right").hide();
     }
     checkValidInput();
-    showBestFitLine();
+//    showBestFitLine();
 //    resizeAll();
 });
 
@@ -717,6 +717,7 @@ function showStereoViewer(){
     $("#stereoParams").show();
     $('#runLi span').text('run stereo');
     $('#x1x2').text('x 2');
+    drawBestFitLine();
     resizeAll();
     checkValidInput();
 }
@@ -742,6 +743,7 @@ function updateFrameScrollerRange(){
 
 $("#analysisModeSelect").on('change',function() {
     $("#showRepSubsetCheck").prop("checked",false);
+    $("#bestFitCheck").prop("checked",false);
     removeAllPlotlyShapesAndTraces();
     if($(this).val()=="subset"){
         $(".full-field").show();
@@ -800,8 +802,12 @@ $("#analysisModeSelect").on('change',function() {
         // force 2D
         show2DViewer();
     }
-    resetPlotlyViewer('left',true);
-    resetPlotlyViewer('right',true);
+    if(!($(this).val()=="tracking"&&showStereoPane==1&&diceTrackLibOn)){
+        // if this is tracklib, the reset is called by the fileselectmode change
+        resetPlotlyViewer('left',true);
+        resetPlotlyViewer('right',true);
+    }
+    drawBestFitLine();
     resizeAll();
     checkValidInput();
 });

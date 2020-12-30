@@ -106,6 +106,7 @@ function showLivePlots(){
 }
 
 function resetWorkingDirectory(){
+    console.log('RESETTING WORKING DIR');
     $("#frameScroller").attr('max',0);
     $("#frameScroller").attr('min',0);
     $("#frameScroller").val(0);
@@ -1308,8 +1309,11 @@ function checkValidInput() {
             validInput = false;
             enableCross = false;
             $('#cineLoadLi').removeClass('task-list-item-done');
+            $(".ref-image-required").attr("disabled", true);
+            $(".ref-image-required").prop("checked", false);
         }else{
             $('#cineLoadLi').addClass('task-list-item-done');
+            $(".ref-image-required").removeAttr("disabled");
         }
         if(isStereo){
             if(cinePathRight=="undefined"){
@@ -1327,8 +1331,12 @@ function checkValidInput() {
             validInput = false;
             enableCross = false;
             $('#seqLoadLi').removeClass('task-list-item-done');
-        }else
+            $(".ref-image-required").attr("disabled", true);
+            $(".ref-image-required").prop("checked", false);
+        }else{
             $('#seqLoadLi').addClass('task-list-item-done');
+            $(".ref-image-required").removeAttr("disabled");
+        }
         // nothing really changes for is stereo for sequence
     }
     else{ // assume list
@@ -1338,8 +1346,12 @@ function checkValidInput() {
             validInput = false;
             enableCross = false;
             $('#listLoadRefLi').removeClass('task-list-item-done');
-        }else
+            $(".ref-image-required").attr("disabled", true);
+            $(".ref-image-required").prop("checked", false);
+        }else{
             $('#listLoadRefLi').addClass('task-list-item-done');
+            $(".ref-image-required").removeAttr("disabled");
+        }
             
         // TODO check that the image extensions all match?
         //var refExtension = refImagePathLeft.split('.').pop().toLowerCase();

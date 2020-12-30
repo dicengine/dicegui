@@ -2,10 +2,58 @@ $(window).load(function(){
     initializePlotlyViewers();
 });
 
+function createCoordsHeatmap(width,height){
+    var hmX = [];
+    var hmY = [];
+    var hmZ = [];
+    for(var i = 0; i < height; i++){
+        hmY.push(i);
+        var temp = [];
+        for(var j = 0; j < width; j++)
+            temp.push(0);
+        hmZ.push(temp);
+    }
+    for(var j = 0; j < width; j++)
+        hmX.push(j);
+    var coordsHeatmap = {
+            name: 'coordsHeatmap',
+            x: hmX,
+            y: hmY,
+            z: hmZ,
+            showlegend: false,
+            opacity: 0.0,
+            type: 'heatmap',
+            xgap: 1,
+            ygap: 1,
+            hoverinfo: 'none',
+            showscale: false
+    };
+    return coordsHeatmap;
+}
+
+function coordsHeatmapNeedsUpdate(dest,width,height){
+    var div = document.getElementById("plotlyViewerLeft");
+    if(dest=='right')
+        div = document.getElementById("plotlyViewerRight");
+    if(!div.data) return true;
+    var index = -1;
+    for(var i=0;i<div.data.length;++i)
+        if(div.data[i].name)
+            if(div.data[i].name==='coordsHeatmap')
+                index = i;
+    if(index<0) return true;
+    if(div.data[index].x.length!=width) return true;
+    if(div.data[index].y.length!=height) return true;
+    return false;
+}
+
 function resetPlotlyViewer(dest,keepImage=false){
+    console.log('resetPlotlyViewer(): dest ' + dest + ' keepImage ' + keepImage);
     var params = getPreviewLayoutConfig(dest);
     var div = destToPlotlyDiv(dest);
     if(!div) return;
+    // this heatmap is necessary to see the image coordinates on hover:
+    var chm = createCoordsHeatmap(1,1);
     if(keepImage)
         if(div.layout)
             if(div.layout.images){
@@ -13,8 +61,17 @@ function resetPlotlyViewer(dest,keepImage=false){
                 var shapes = [{name:'viewBox',type:'rect',
                     x0:0,y0:0,x1:div.layout.images[0].sizex,y1:div.layout.images[0].sizey,line:{width:0}}];
                 params.layout.shapes = shapes;
+                if(div.data){
+                    var index = div.data.findIndex(obj => { 
+                        return obj.name === "coordsHeatmap";
+                    });
+                    if(index>=0)
+                        chm = div.data[index];
+                }
             }
-    var data = [{type:'scatter',x:[0],y:[0],visible:false,name:'dummyData',showlegend:false,mode:'none'}];
+    var data = [chm];
+    console.log(data);
+//    var data = [{type:'scatter',x:[0],y:[0],visible:false,name:'dummyData',showlegend:false,mode:'none'}];
 //    console.log(params.config);
 //    console.log(params.layout);
     Plotly.purge(div); // need to call purge, otherwise the mode bar buttons won't update
@@ -30,14 +87,31 @@ function initializePlotlyViewers(){
             var index2d = data.points[0].pointIndex;
             updateInspectors('left',index2d);
         }
-        if($("#analysisModeSelect").val()=="subset"&&data.event.button==2)
+        console.log(data.event.button);
+        if($("#analysisModeSelect").val()=="subset"&&data.event.button==2){
+            alert('i Am here');
             addLivePlotPts([data.points[0].x],[data.points[0].y]);
+        }
     });
     document.getElementById("plotlyViewerRight").on('plotly_click', function(data){
         if(data.points[0].data.name==='tracklibPreviewScatter'){
             var index2d = data.points[0].pointIndex;
             updateInspectors('right',index2d);
         }
+    });
+    document.getElementById("plotlyViewerLeft").on('plotly_hover', function(data){
+        var posDiv = document.getElementById('leftPos');
+        var infotext = data.points.map(function(d){
+            return ('['+d.x+','+d.y+']');
+        });
+        posDiv.innerText = infotext;
+    });
+    document.getElementById("plotlyViewerRight").on('plotly_hover', function(data){
+        var posDiv = document.getElementById('rightPos');
+        var infotext = data.points.map(function(d){
+            return ('['+d.x+','+d.y+']');
+        });
+        posDiv.innerText = infotext;
     });
 }
 
@@ -174,6 +248,14 @@ function updatePreviewImage(update,cb){
                         layoutUpdate.shapes = existingShapes;
                     }
                     Plotly.relayout(div,layoutUpdate);
+                    // if the image size changed, the coords heatmap needs to be updated
+                    if(dest=='left'||dest=='right'){
+                        if(coordsHeatmapNeedsUpdate(dest,imgWidth,imgHeight)){
+                            console.log('*************NEEEEDS UPDATE***********');
+                            var coordsHeatmap = createCoordsHeatmap(imgWidth,imgHeight);
+                            replacePlotlyData(dest,[coordsHeatmap]);
+                        }
+                    }
                     cb(code);
                     if(dest=='left'||dest=='right')
                         checkValidInput();
@@ -1178,62 +1260,66 @@ function addSubsetSSSIGPreviewTrace(locsFile){
 }
 
 
-function heatmapNeedsUpdate(width,height){
-    if(jQuery.isEmptyObject(coordsHeatmap)) return true;
-    if(!coordsHeatmap.x) return true;
-    if(!coordsHeatmap.y) return true;
-    if(coordsHeatmap.x.length!=width) return true;
-    if(coordsHeatmap.y.length!=height) return true;
-    return false;
-}
+//function heatmapNeedsUpdate(width,height){
+//    if(jQuery.isEmptyObject(coordsHeatmap)) return true;
+//    if(!coordsHeatmap.x) return true;
+//    if(!coordsHeatmap.y) return true;
+//    if(coordsHeatmap.x.length!=width) return true;
+//    if(coordsHeatmap.y.length!=height) return true;
+//    return false;
+//}
+//
+//function updateCoordsHeatmap(width,height){
+//    if(!heatmapNeedsUpdate(width,height)) return;
+//    console.log('updating the coords heatmap');
+//    var hmX = [];
+//    var hmY = [];
+//    var hmZ = [];
+//    for(var i = 0; i < height; i++){
+//        hmY.push(i);
+//        var temp = [];
+//        for(var j = 0; j < width; j++)
+//            temp.push(0);
+//        hmZ.push(temp);
+//    }
+//    for(var j = 0; j < width; j++)
+//        hmX.push(j);
+//    coordsHeatmap = {
+//            name: 'coordsHeatmap',
+//            x: hmX,
+//            y: hmY,
+//            z: hmZ,
+//            showlegend: false,
+//            
+//            opacity: 0.0,
+//            type: 'heatmap',
+////            colorscale: [["0.0", "rgb(255, 255, 255, 0.5)"], ["1.0", "rgb(255, 255, 255, 0.5)"]],  
+//            xgap: 1,
+//            ygap: 1,
+//            hoverinfo: 'none',
+//            showscale: false
+//    };
+//}
+//
+//var coordsHeatmap = {};
 
-
-function updateCoordsHeatmap(width,height){
-    if(!heatmapNeedsUpdate(width,height)) return;
-    console.log('updating the coords heatmap');
-    var hmX = [];
-    var hmY = [];
-    var hmZ = [];
-    for(var i = 0; i < height; i++){
-        hmY.push(i);
-        var temp = [];
-        for(var j = 0; j < width; j++)
-            temp.push(0);
-        hmZ.push(temp);
-    }
-    for(var j = 0; j < width; j++)
-        hmX.push(j);
-    coordsHeatmap = {
-            name: 'coordsHeatmap',
-            x: hmX,
-            y: hmY,
-            z: hmZ,
-            showlegend: false,
-            
-            opacity: 0.0,
-            type: 'heatmap',
-//            colorscale: [["0.0", "rgb(255, 255, 255, 0.5)"], ["1.0", "rgb(255, 255, 255, 0.5)"]],  
-            xgap: 1,
-            ygap: 1,
-            hoverinfo: 'none',
-            showscale: false
-    };
-}
-
-var coordsHeatmap = {};
-
-function showBestFitLine(){
-    var shapes = getPlotlyShapes();
-    if(shapes.length==0) return;
-    for(var i=0;i<shapes.length;++i)
-        if(shapes[i].name)
-            if(shapes[i].name==='bestFitLine')
-                    shapes[i].visible = ($("#bestFitCheck")[0].checked&&showStereoPane==1);
-    var update = {'shapes' : shapes}
-    Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
-}
+//function showBestFitLine(){
+//    var shapes = getPlotlyShapes();
+//    console.log('showBestFitLine() num shapes ' + shapes.length);
+//    if(shapes.length==0) {
+//        drawBestFitLine();
+//        return;
+//    }
+//    for(var i=0;i<shapes.length;++i)
+//        if(shapes[i].name)
+//            if(shapes[i].name==='bestFitLine')
+//                    shapes[i].visible = ($("#bestFitCheck")[0].checked&&showStereoPane==1);
+//    var update = {'shapes' : shapes}
+//    Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
+//}
 
 function drawBestFitLine(ox,oy,px,py){
+    if(!$("#analysisModeSelect").val()=="subset"||showStereoPane!=1) return;
     // check if shapes already include a bestfit line
     var pv = document.getElementById("plotlyViewerLeft");
     if(!pv.layout) return;
@@ -1245,14 +1331,16 @@ function drawBestFitLine(ox,oy,px,py){
             if(existingShapes[i].name==='bestFitLine')
                 bestFitLineIndex = i;
     }
-    if(bestFitLineIndex>=0&&!ox) return;
-    if(bestFitLineIndex<0){
+    if(bestFitLineIndex>=0&&!ox){
+        existingShapes[bestFitLineIndex].visible = $("#bestFitCheck")[0].checked;
+    }else if(bestFitLineIndex<0){
         var imW = pv.layout.images[0].sizex;
         var imH = pv.layout.images[0].sizey;
         if(!ox) ox = 0.3*imW;
         if(!oy) oy = 0.8*imH;
         if(!px) px = 0.7*imW;
         if(!py) py = 0.8*imH;
+        console.log('best fit line points ',ox,oy,px,py);
         var bestFitLine = {
                 type: 'line',
                 x0: ox,
@@ -1271,6 +1359,7 @@ function drawBestFitLine(ox,oy,px,py){
         existingShapes[bestFitLineIndex].y0 = oy;
         existingShapes[bestFitLineIndex].x1 = px;
         existingShapes[bestFitLineIndex].y1 = py;
+        existingShapes[bestFitLineIndex].visible = $("#bestFitCheck")[0].checked;
     }
     var update = {'shapes' : existingShapes}
     Plotly.relayout(pv,update);
