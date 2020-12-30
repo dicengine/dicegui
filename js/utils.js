@@ -744,7 +744,6 @@ function updateFrameScrollerRange(){
 $("#analysisModeSelect").on('change',function() {
     $("#showRepSubsetCheck").prop("checked",false);
     $("#bestFitCheck").prop("checked",false);
-    removeAllPlotlyShapesAndTraces();
     if($(this).val()=="subset"){
         $(".full-field").show();
         $(".full-field-global").show();
