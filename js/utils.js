@@ -84,7 +84,7 @@ function initialize_gui(load_existing){
                         setExecPaths(execPathOverride);
                     }
                 }
-                paraviewMsg = paraviewMsgState;
+//                paraviewMsg = paraviewMsgState;
                 workingDirectory = WD;
                 if (fs.existsSync(workingDirectory)) {
                     createHiddenDir();
@@ -925,11 +925,11 @@ function saveStateFile() {
     else{
         content += 'var omitTextState = false;\n';
     }
-    if(paraviewMsg){
-        content += 'var paraviewMsgState = true;\n';
-    }else{
-        content += 'var paraviewMsgState = false;\n';
-    }
+//    if(paraviewMsg){
+//        content += 'var paraviewMsgState = true;\n';
+//    }else{
+//        content += 'var paraviewMsgState = false;\n';
+//    }
     if(typeof execPathOverride === 'undefined'){
     }else{
         if(execPathOverride!=''){

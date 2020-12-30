@@ -1,6 +1,11 @@
 $(window).load(function(){
-    resetPlotlyViewer('left');
-    resetPlotlyViewer('right');
+    if(document.getElementById("plotlyViewerLeft")){
+        resetPlotlyViewer('left');
+        resetPlotlyViewer('right');
+    }else if(document.getElementById("plotlyViewerCalLeft")){
+        resetPlotlyViewer('cal_left');
+        resetPlotlyViewer('cal_right');
+    }
 });
 
 function resetPlotlyViewer(dest,keepImage=false){
@@ -28,9 +33,9 @@ function destToPlotlyDiv(dest){
         return document.getElementById("plotlyViewerLeft");
     }else if(dest==='right'){
         return document.getElementById("plotlyViewerRight");
-    }else if('cal_left'){
+    }else if(dest==='cal_left'){
         return document.getElementById("plotlyViewerCalLeft");
-    }else if('cal_right'){
+    }else if(dest==='cal_right'){
         return document.getElementById("plotlyViewerCalRight");
     }else
         return null;
@@ -587,6 +592,7 @@ $("#plotlyViewerRight").mousemove(function( event ) {
 });
 
 $("#plotlyViewerLeft").on('plotly_click', function(data){
+    if(!data.points) return;
     if(data.points[0].data.name==='tracklibPreviewScatter'){
         var index2d = data.points[0].pointIndex;
         updateInspectors('left',index2d);
@@ -594,6 +600,7 @@ $("#plotlyViewerLeft").on('plotly_click', function(data){
 });
 
 $("#plotlyViewerRight").on('plotly_click', function(data){
+    if(!data.points) return;
     if(data.points[0].data.name==='tracklibPreviewScatter'){
         var index2d = data.points[0].pointIndex;
         updateInspectors('right',index2d);

@@ -393,6 +393,9 @@ $("#frameScroller").on('input', function () {
     else if($("#fileSelectMode").val()=="cine"){
         reloadCineImages($(this).val(),!isResultsMode());
     }
+    if($("#analysisModeSelect").val()=="subset"){
+        checkSubsetJsonFileExists();
+    }
 });
 
 $("#cineGoToIndex").keypress(function(event) { 

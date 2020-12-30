@@ -58,7 +58,7 @@ var showPrefPane = true;
 var showStereoPane = 0;
 var viewersStacked = false;
 var showConsole = true;
-var paraviewMsg = true;
+//var paraviewMsg = true;
 
 // state of the results files
 var resultsFresh = false;

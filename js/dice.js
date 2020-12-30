@@ -106,7 +106,6 @@ function showLivePlots(){
 }
 
 function resetWorkingDirectory(){
-    console.log('RESETTING WORKING DIR');
     $("#frameScroller").attr('max',0);
     $("#frameScroller").attr('min',0);
     $("#frameScroller").val(0);
@@ -630,10 +629,10 @@ function callCrossInitExec() {
 }
 
 function postExecTasks(){
-    if(paraviewMsg){
-        alert('Analysis successful\n\nView the results files using ParaView\nwhich can be freely downloaded at\nwww.paraview.org');
-        paraviewMsg = false;
-    }
+//    if(paraviewMsg){
+//        alert('Analysis successful\n\nView the results files using ParaView\nwhich can be freely downloaded at\nwww.paraview.org');
+//        paraviewMsg = false;
+//    }
     if($("#exportMovieCheck")[0].checked){
         consoleMsg('writing results movie to results folder');
         var child_process = require('child_process');
@@ -900,6 +899,7 @@ function writeParamsFile(only_write,resolution,ss_locs) {
     var content = '';
     content += '<!-- Auto generated parameters file from DICe GUI -->\n';
     content += '<ParameterList>\n';
+    content += '<Parameter name="write_json_output" type="bool" value="true" />\n';
     if(resolution){
         // add estimate spatial resoltion options
         content += '<Parameter name="estimate_resolution_error" type="bool" value="true" />\n';
@@ -1399,4 +1399,84 @@ function checkValidInput() {
         $("#previewCross").hide();
         $("#initCross").hide();
     }
+}
+
+$("#showContourCheck").change(function() {
+    if(this.checked){
+        $(".contour-setting").removeAttr("disabled");
+        showContourPlot();
+    }else{
+        $(".contour-setting").attr("disabled", true);
+        deletePlotlyTraces('left','fullFieldContour');
+    }
+});
+
+$("#contourFieldSelect").change(function() {
+    showContourPlot();
+});
+
+$("#contourOpacitySelect").change(function() {
+    var result = document.getElementById("plotlyViewerLeft").data.findIndex(obj => { 
+        return obj.name === "fullFieldContour";
+    });
+    var newVal =  $("#contourOpacitySelect").val();
+    if(result>=0)
+        Plotly.restyle(document.getElementById("plotlyViewerLeft"), {"opacity": newVal}, [result]);
+});
+
+function showContourPlot(){
+    if(!$("#showContourCheck")[0].checked) return;
+    // remove any old contours
+    deletePlotlyTraces('left','fullFieldContour');
+    var fileName = getSubsetJsonFileName();
+    var fieldName = $("#contourFieldSelect").val();
+    console.log('showContourPlot(): file ' + fileName + ' field ' + fieldName );
+    
+    Plotly.d3.json(fileName, function(jsonErr, fig) {
+        if(jsonErr==null){
+            console.log(fig);
+            // copy the selected field to the z array
+            fig.data[0].z = [...fig.data[0][fieldName]];
+            replacePlotlyData('left',fig.data);
+        }else{
+            console.log(jsonErr);
+            alert('error: reading subset json file failed');
+        }
+    });
+}
+
+function getSubsetJsonFileName(){
+    var frameId = $("#frameScroller").val();
+    if($("#fileSelectMode").val()!="cine")
+        frameId -= 1; // for sequence and list, the zeroeth index is the reference image so need to decrement by 1
+    // check if the file exists for this frameID, if not return
+    return fullPath('.dice','.results_2d_' + frameId + '.json');
+}
+
+function checkSubsetJsonFileExists(){
+    var fileName = getSubsetJsonFileName();
+    console.log('loadSubsetJsonFile(): ' + fileName);
+    // clear the field select menu
+    $("#contourFieldSelect").empty();
+    $("#showContourCheck").attr("disabled", true);
+    $("#showContourCheck").prop("checked", false);
+    fs.stat(fileName, function(err, stat) {
+        if(err == null) {
+            $("#showContourCheck").removeAttr("disabled");
+            $("#contourFieldSelect").append(new Option('COORDINATE_X','COORDINATE_X'));
+            $("#contourFieldSelect").append(new Option('COORDINATE_Y','COORDINATE_Y'));
+            $("#contourFieldSelect").append(new Option('DISPLACEMENT_X','DISPLACEMENT_X'));
+            $("#contourFieldSelect").append(new Option('DISPLACEMENT_Y','DISPLACEMENT_Y'));
+            $("#contourFieldSelect").append(new Option('SIGMA','SIGMA'));
+            $("#contourFieldSelect").append(new Option('GAMMA','GAMMA'));
+            $("#contourFieldSelect").append(new Option('BETA','BETA'));
+            $("#contourFieldSelect").append(new Option('STATUS_FLAG','STATUS_FLAG'));
+            $("#contourFieldSelect").append(new Option('UNCERTAINTY','UNCERTAINTY'));
+            $("#contourFieldSelect").append(new Option('VSG_STRAIN_XX','VSG_STRAIN_XX'));
+            $("#contourFieldSelect").append(new Option('VSG_STRAIN_YY','VSG_STRAIN_YY'));
+            $("#contourFieldSelect").append(new Option('VSG_STRAIN_XY','VSG_STRAIN_XY'));
+        }else{
+            console.log(err);
+        }
+    });
 }
