@@ -396,6 +396,8 @@ $("#frameScroller").on('input', function () {
     if($("#analysisModeSelect").val()=="subset"){
         checkSubsetJsonFileExists();
     }
+    // turn off live plot info if this is not the first frame
+    toggleLivePlotVisibility($(this).val()==$(this).attr('min'));
 });
 
 $("#cineGoToIndex").keypress(function(event) { 

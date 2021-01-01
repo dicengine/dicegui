@@ -824,6 +824,35 @@ function deleteShape(index){
                 document.getElementById("plotlyViewerLeft").layout.shapes.splice(index,1);
 }
 
+function toggleLivePlotVisibility(visibility){
+    // collect indices of live plot points and the line
+    var div = document.getElementById("plotlyViewerLeft");
+    if(!div) return;
+    var data = div.data;
+    if(!data) return;
+    var livePlotPtsTraceId = data.findIndex(obj => { 
+        return obj.name === "livePlotPts";
+    });
+    if(livePlotPtsTraceId>=0)
+        Plotly.restyle(div,{visible:visibility},livePlotPtsTraceId);
+    var layout = div.layout;
+    if(!layout) return;
+    var shapes = layout.shapes;
+    if(!shapes) return;
+    var shapesIndex = -1;
+    for(var i=0;i<shapes.length;++i){
+        if(shapes[i].name)
+            if(shapes[i].name==='livePlotLine')
+                shapesIndex = i;
+    }
+    if(shapesIndex >=0){
+        var key = 'shapes[' + shapesIndex + '].visible';
+        var update = {};
+        update[key] = visibility;
+        Plotly.relayout(div,update);
+    }
+}
+
 function updateLivePlotLine(){
     var relayoutNeeded = false;
     var shapes = getPlotlyShapes(); // get all shapes, not just ROIs
