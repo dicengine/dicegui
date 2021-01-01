@@ -1439,6 +1439,15 @@ function showContourPlot(){
             console.log(fig);
             // copy the selected field to the z array
             fig.data[0].z = [...fig.data[0][fieldName]];
+            //  TODO update the coodinates with the current posision:
+//            for(var i=0;i<fig.data[0].x.length;++i){
+//                if(fig.data[0]['SIGMA']>=0.0){
+//                    fig.data[0].x[i] += fig.data[0]['DISPLACEMENT_X'][i];
+//                    fig.data[0].y[i] += fig.data[0]['DISPLACEMENT_Y'][i];
+//                }else{
+////                    fig.data[0].z[i] = NaN;
+//                }
+//            }
             replacePlotlyData('left',fig.data);
         }else{
             console.log(jsonErr);

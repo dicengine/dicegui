@@ -831,27 +831,27 @@ function updateLivePlotLine(){
     var newLineIndex = -1;
     for(var i=0;i<shapes.length;++i){
         if(shapes[i].type==='line'){
-            if(shapes[i].name){
-                if(oldLineIndex>=0)
-                    alert('error in update live plot line, too many existing lines found');
+            if(shapes[i].name){ // if it has a name it was a previousl drawn live plot line
+//                if(oldLineIndex>=0)
+//                    alert('error in update live plot line, too many existing lines found');
                 if(shapes[i].name==='livePlotLine')
                     oldLineIndex = i;
             }
-            else{
+            else{ // otherwise it's a new line
                 if(newLineIndex>=0)
                     alert('error in update live plot line, too many new lines found');
                 newLineIndex = i;
             }
         }
     }
+    if(oldLineIndex>=0&&newLineIndex>=0){
+        deleteShape(oldLineIndex);
+    }
     if(newLineIndex>=0){
         shapes[newLineIndex].name='livePlotLine';
         shapes[newLineIndex].line = {color: 'yellow', width: 3};
         shapes[newLineIndex].opacity = 0.8;
         relayoutNeeded = true;
-    }
-    if(oldLineIndex>=0&&newLineIndex>=0){
-        deleteShape(oldLineIndex);
     }
     return relayoutNeeded;
 }
