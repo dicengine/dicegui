@@ -24,12 +24,20 @@ function autoDetectImageSequence(folderPath,cb){
     fs.readdir(folderPath, (err,dir) => {
         if(!dir) return;
         
+        // remove any hidden files from the dir list
+        var i = dir.length;
+        while (i--) {
+            if(dir[i].charAt(0)==='.')
+                dir.splice(i,1);
+        }
+        
         // only mono and stereo implemented at this point, no trinocular
         
         // supported image file naming patterns:
         // CASE A (stereo)        leftPrefix_image# and rightPrefix_image#               example left00034.jpeg and right00034.jpeg
         // CASE B (single camera) prefix_image#                                          example cal-sys-a-00034.tif
         // CASE C (stereo)        prefix_image#_leftSuffix and prefix_image#_rightSuffix example cal-sys-a-00034_0.tif and cal-sys-a-00034_1.tif
+        // CASE D (single camera) prefix_image#_leftSuffix (no right files, this case is from using only the left images of a stetero naming convention)
         
         // note the prefix can be empty such as this CASE C example 00034_0.tif 00034_1.tif
         
@@ -37,7 +45,7 @@ function autoDetectImageSequence(folderPath,cb){
         var extension = '';
         var delim = '';
         imageTokens = [];
-        for(i = 0; i < dir.length; i++) {
+        for(var i = 0; i < dir.length; i++) {
             // skip any file that doesn't have an image file extension
             ext = dir[i].split('.').pop();
             if(extension=='')
@@ -86,6 +94,7 @@ function autoDetectImageSequence(folderPath,cb){
         var startIndex = 0;
         var endIndex = 0;
         var numDigits = 0;
+        var suffix = '';
         var leftSuffix = '';
         var rightSuffix = '';
         var rightPrefix = '';
@@ -101,7 +110,10 @@ function autoDetectImageSequence(folderPath,cb){
         //console.log('numRepeats: ' + numRepeats);
         if(numRepeats>1){ //not an image number, must be a suffix
             if(imageTokens[0].length == 2){
-                patternCase = 'C';
+                if(numRepeats==dir.length-1)
+                    patternCase = 'D';
+                else
+                    patternCase = 'C';
             }
             else{
                 // could be case B with a number in the prefix so test for this
@@ -115,7 +127,10 @@ function autoDetectImageSequence(folderPath,cb){
                     //console.log('I am case B with a number in the prefix');
                     patternCase = 'B';
                 }else{
-                    patternCase = 'C'
+                    if(numRepeats==dir.length-1)
+                        patternCase = 'D';
+                    else
+                        patternCase = 'C';
                 }
             }
         } else {
@@ -142,7 +157,7 @@ function autoDetectImageSequence(folderPath,cb){
         numberCol = 0;
         switch(patternCase) {
         case 'A':
-            //console.log('I am case A');
+            console.log('file naming convention case A');
             leftPrefix = firstRow[firstRow.length-1] + delim; // add delimeter
             rightPrefix = lastRow[firstRow.length-1] + delim; // add delimeter
             if(firstRow.length>2){ // catch the case where there is a number in the prefix
@@ -151,19 +166,27 @@ function autoDetectImageSequence(folderPath,cb){
             }
             break;
         case 'B':
-            //console.log('I am case B');
+            console.log('file naming convention case B');
             prefix = firstRow[firstRow.length-1] + delim;
             if(firstRow.length>2) // catch the case where there is a number in the prefix
              prefix = firstRow[firstRow.length-1] + firstRow[firstRow.length-2] + delim;
             break;
         case 'C':
-            //console.log('I am case C');
+            console.log('file naming convention case C');
             numberCol = 1;
             // prefix can be empty
             if(firstRow.length>2) // if there is no prefix the row length is 2
                 prefix = firstRow[firstRow.length-1];
             leftSuffix = delim + firstRow[0];
             rightSuffix = delim + lastRow[0];
+            break;
+        case 'D':
+            console.log('file naming convention case D');
+            numberCol = 1;
+            // prefix can be empty
+            if(firstRow.length>2) // if there is no prefix the row length is 2
+                prefix = firstRow[firstRow.length-1];
+            suffix = delim + firstRow[0];
             break;
         default:
             //console.log('default case');
@@ -186,6 +209,7 @@ function autoDetectImageSequence(folderPath,cb){
         console.log('endIndex:    ' + endIndex);
         console.log('numDigits:   ' + numDigits);
         console.log('frameInt:    ' + frameInterval);
+        console.log('suffix:      ' + suffix);
         console.log('leftSuffix:  ' + leftSuffix);
         console.log('rightSuffix: ' + rightSuffix);
         console.log('leftPrefix:  ' + leftPrefix);
@@ -194,6 +218,7 @@ function autoDetectImageSequence(folderPath,cb){
         var obj = {
             extension: extension,
             prefix: prefix,
+            suffix: suffix,
             startIndex: startIndex,
             endIndex: endIndex,
             numDigits: numDigits,

@@ -778,6 +778,8 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
         if((showStereoPane==1||showStereoPane==2)){
             content += '<Parameter name="stereo_left_suffix" type="string" value="'+$("#stereoLeftSuffix").val()+'"/>\n';
             content += '<Parameter name="stereo_right_suffix" type="string" value="'+$("#stereoRightSuffix").val()+'" />\n';
+        }else{
+            content += '<Parameter name="file_suffix" type="string" value="'+$("#imageSuffix").val()+'" />\n';
         }
     }
     else if(fileSelectMode=="cine"){
@@ -1447,35 +1449,40 @@ function showContourPlot(){
 
 function getSubsetJsonFileName(){
     var frameId = $("#frameScroller").val();
-    if($("#fileSelectMode").val()!="cine")
+    if($("#fileSelectMode").val()=="list")
         frameId -= 1; // for sequence and list, the zeroeth index is the reference image so need to decrement by 1
     // check if the file exists for this frameID, if not return
     return fullPath('.dice','.results_2d_' + frameId + '.json');
 }
 
+function populateContourFields(){
+    // TODO make this switch on analysis type
+    $("#contourFieldSelect").append(new Option('COORDINATE_X','COORDINATE_X'));
+    $("#contourFieldSelect").append(new Option('COORDINATE_Y','COORDINATE_Y'));
+    $("#contourFieldSelect").append(new Option('DISPLACEMENT_X','DISPLACEMENT_X'));
+    $("#contourFieldSelect").append(new Option('DISPLACEMENT_Y','DISPLACEMENT_Y'));
+    $("#contourFieldSelect").append(new Option('SIGMA','SIGMA'));
+    $("#contourFieldSelect").append(new Option('GAMMA','GAMMA'));
+    $("#contourFieldSelect").append(new Option('BETA','BETA'));
+    $("#contourFieldSelect").append(new Option('STATUS_FLAG','STATUS_FLAG'));
+    $("#contourFieldSelect").append(new Option('UNCERTAINTY','UNCERTAINTY'));
+    $("#contourFieldSelect").append(new Option('VSG_STRAIN_XX','VSG_STRAIN_XX'));
+    $("#contourFieldSelect").append(new Option('VSG_STRAIN_YY','VSG_STRAIN_YY'));
+    $("#contourFieldSelect").append(new Option('VSG_STRAIN_XY','VSG_STRAIN_XY'));
+}
+
 function checkSubsetJsonFileExists(){
     var fileName = getSubsetJsonFileName();
     console.log('loadSubsetJsonFile(): ' + fileName);
-    // clear the field select menu
-    $("#contourFieldSelect").empty();
-    $("#showContourCheck").attr("disabled", true);
-    $("#showContourCheck").prop("checked", false);
     fs.stat(fileName, function(err, stat) {
         if(err == null) {
             $("#showContourCheck").removeAttr("disabled");
-            $("#contourFieldSelect").append(new Option('COORDINATE_X','COORDINATE_X'));
-            $("#contourFieldSelect").append(new Option('COORDINATE_Y','COORDINATE_Y'));
-            $("#contourFieldSelect").append(new Option('DISPLACEMENT_X','DISPLACEMENT_X'));
-            $("#contourFieldSelect").append(new Option('DISPLACEMENT_Y','DISPLACEMENT_Y'));
-            $("#contourFieldSelect").append(new Option('SIGMA','SIGMA'));
-            $("#contourFieldSelect").append(new Option('GAMMA','GAMMA'));
-            $("#contourFieldSelect").append(new Option('BETA','BETA'));
-            $("#contourFieldSelect").append(new Option('STATUS_FLAG','STATUS_FLAG'));
-            $("#contourFieldSelect").append(new Option('UNCERTAINTY','UNCERTAINTY'));
-            $("#contourFieldSelect").append(new Option('VSG_STRAIN_XX','VSG_STRAIN_XX'));
-            $("#contourFieldSelect").append(new Option('VSG_STRAIN_YY','VSG_STRAIN_YY'));
-            $("#contourFieldSelect").append(new Option('VSG_STRAIN_XY','VSG_STRAIN_XY'));
+            showContourPlot();
         }else{
+            // clear the field select menu
+            $("#contourFieldSelect").empty();
+            $("#showContourCheck").attr("disabled", true);
+            $("#showContourCheck").prop("checked", false);
             console.log(err);
         }
     });

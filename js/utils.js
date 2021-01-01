@@ -156,6 +156,7 @@ function initialize_gui(load_existing){
         return;
     });
     checkValidInput();
+    populateContourFields();
 };
 
 function createHiddenDir(){
@@ -297,6 +298,7 @@ $("#changeImageFolder").click(function(){
 
 function updateSequenceLabels(stats){
     $("#imagePrefix").val(stats.prefix);
+    $("#imageSuffix").val(stats.suffix);
     $("#startIndex").val(stats.startIndex);
     $("#endIndex").val(stats.endIndex);
     $("#skipIndex").val(stats.frameInterval);
@@ -347,6 +349,8 @@ function concatImageSequenceName(stereoImageFlag){
     }else if((showStereoPane==1||showStereoPane==2)&&stereoImageFlag==1){
         fullImageName += $("#stereoRightSuffix").val();
     }
+    if(showStereoPane==0)
+        fullImageName += $("#imageSuffix").val();
     fullImageName += $("#imageExtension").val();
     return fullImageName;
 }

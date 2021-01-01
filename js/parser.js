@@ -210,6 +210,8 @@ function impl_input_xml_file(xml){
             if(num_digits) $("#numDigits").val(num_digits);
             image_prefix = xml_get(xml,"image_file_prefix");
             if(image_prefix) $("#imagePrefix").val(image_prefix);
+            image_suffix = xml_get(xml,"file_suffix");
+            if(image_suffix) $("#imageSuffix").val(image_suffix);
             image_ext = xml_get(xml,"image_file_extension");
             if(image_ext) $("#imageExtension").val(image_ext);
             updateFrameScrollerRange();
