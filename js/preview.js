@@ -72,21 +72,30 @@ function replacePlotlyData(dest,data,cb){
     var div = destToPlotlyDiv(dest);
     // search for existing traces with the same name as the data being added
     // if they exist, delete them before adding the new data
-    for(var i=0;i<data.length;++i){
-        if(data[i].name){
-            var ids = [];
-            for(var j=0;j<div.data.length;++j){
-                if(div.data[j].name)
-                    if(div.data[j].name==data[i].name){
-                        ids.push(j);
+    if(!div.data){
+        Plotly.addTraces(div,data);
+    }else{
+        var ids = [];
+        for(var i=0;i<data.length;++i){
+            if(data[i].name){
+                console.log('checking for ', data[i].name);
+                for(var j=0;j<div.data.length;++j){
+                    if(div.data[j].name){
+                        console.log('testing agains existing field ' + div.data[j].name);
+                        if(div.data[j].name==data[i].name){
+                            console.log('found match, index ' + j);
+                            ids.push(j);
+                        }
                     }
-            }
-            if(ids.length>0){
-                Plotly.deleteTraces(div,ids);
+                }
             }
         }
+        
+        if(ids.length>0){
+            Plotly.deleteTraces(div,ids);
+        }
+        Plotly.addTraces(div,data);
     }
-    Plotly.addTraces(div,data);
     cb();
 }
 

@@ -113,9 +113,8 @@ function initialize_gui(load_existing){
                     updateWorkingDirLabel();
                 }
                 // remove all the display images:
-                deleteDisplayImageFiles(0);
-                deleteDisplayImageFiles(1);
-                deleteDisplayImageFiles(2);
+                deleteHiddenFiles('.preview_left');
+                deleteHiddenFiles('.preview_right');
                 deleteHiddenFiles('keypoints');
                 deleteHiddenFiles('background');
                 // test if debugging messages are turned on or off
@@ -143,9 +142,8 @@ function initialize_gui(load_existing){
             });
             updateWorkingDirLabel();
             // remove all the display images:
-            deleteDisplayImageFiles(0);
-            deleteDisplayImageFiles(1);
-            deleteDisplayImageFiles(2);
+            deleteHiddenFiles('.preview_left');
+            deleteHiddenFiles('.preview_right');
             deleteHiddenFiles('keypoints');
             deleteHiddenFiles('background');
             // test if debugging messages are turned on or off
@@ -889,7 +887,6 @@ $("#binaryThreshBlockSize").on('input',function(){
 $("#binaryThreshConstant").on('input',function(){
     $("#binaryThreshConstantLabel").text($(this).val());
 });
-
 
 function saveStateFile() {
     fileName = homeDir;

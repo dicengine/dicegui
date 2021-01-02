@@ -38,65 +38,65 @@ var getFileObject = function(filePathOrUrl, cb) {
 //    return { clientX: _x, clientY: _y };
 //}
 
-function deleteDisplayImageFiles(lrm,cb){
-    var cbCalled = false;
-    cb = cb || $.noop;
-    var nameToCheck = '.preview_';
-    if(lrm==0){
-        nameToCheck += 'left';
-    }else if(lrm==1){
-        nameToCheck += 'right';
-    }
-    hiddenDir = fullPath('.dice','');
-    console.log('removing any existing display image files with name base ' + nameToCheck + ' from ' + hiddenDir);
-    fs.readdir(hiddenDir, (err,dir) => {
-        // es5
-        // count up the number of potential files to delete
-        var numExistingFiles = 0;
-        if(!dir)return;
-        for(var i = 0; i < dir.length; i++) {
-            if(dir[i].includes(nameToCheck))
-                numExistingFiles++;
-        }
-        console.log(numExistingFiles + ' display image files exist');
-        if(numExistingFiles==0){
-            cb();
-            return;
-        }
-        for(var i = 0; i < dir.length; i++) {
-            (function(i) {
-                var filePath = dir[i];
-                if(filePath.includes(nameToCheck)){
-                    console.log('attempting to delete file ' + filePath);
-                    var fullFilePath = fullPath('.dice',filePath);
-                    fs.stat(fullFilePath, function(err, stat) {
-                        console.log('stat called on file ' + fullFilePath);
-                        if(err == null) {
-                            fs.unlink(fullFilePath, (err) => {
-                                numExistingFiles--;
-                                if (err) {}//throw err;}
-                                else{
-                                    console.log('successfully deleted '+fullFilePath+' '+i);
-                                    if(numExistingFiles==0) {
-                                        cb();
-                                    }
-                                }
-	                    });
-                        }else{
-                            // no-op
-	                }
-                    }); // end stat
-                } //end includes
-            })(i);
-        }
-    });
-}
+//function deleteDisplayImageFiles(name,dest,cb){
+//    var cbCalled = false;
+//    cb = cb || $.noop;
+//    var nameToCheck = '.preview_';
+//    if(lrm==0){
+//        nameToCheck += 'left';
+//    }else if(lrm==1){
+//        nameToCheck += 'right';
+//    }
+//    hiddenDir = fullPath('.dice','');
+//    console.log('removing any existing display image files with name base ' + nameToCheck + ' from ' + hiddenDir);
+//    fs.readdir(hiddenDir, (err,dir) => {
+//        // es5
+//        // count up the number of potential files to delete
+//        var numExistingFiles = 0;
+//        if(!dir)return;
+//        for(var i = 0; i < dir.length; i++) {
+//            if(dir[i].includes(nameToCheck))
+//                numExistingFiles++;
+//        }
+//        console.log(numExistingFiles + ' display image files exist');
+//        if(numExistingFiles==0){
+//            cb();
+//            return;
+//        }
+//        for(var i = 0; i < dir.length; i++) {
+//            (function(i) {
+//                var filePath = dir[i];
+//                if(filePath.includes(nameToCheck)){
+//                    console.log('attempting to delete file ' + filePath);
+//                    var fullFilePath = fullPath('.dice',filePath);
+//                    fs.stat(fullFilePath, function(err, stat) {
+//                        console.log('stat called on file ' + fullFilePath);
+//                        if(err == null) {
+//                            fs.unlink(fullFilePath, (err) => {
+//                                numExistingFiles--;
+//                                if (err) {}//throw err;}
+//                                else{
+//                                    console.log('successfully deleted '+fullFilePath+' '+i);
+//                                    if(numExistingFiles==0) {
+//                                        cb();
+//                                    }
+//                                }
+//	                    });
+//                        }else{
+//                            // no-op
+//	                }
+//                    }); // end stat
+//                } //end includes
+//            })(i);
+//        }
+//    });
+//}
 
 function deleteHiddenFiles(find_str,cb){
     var cbCalled = false;
     cb = cb || $.noop;
     hiddenDir = fullPath('.dice','');
-    console.log('removing hidden files from ' + hiddenDir);
+    console.log('removing hidden files that include ' + find_str + ' from ' + hiddenDir);
     fs.readdir(hiddenDir, (err,dir) => {
         // count up the number of potential files to delete
         var numExistingFiles = 0;
@@ -121,10 +121,12 @@ function deleteHiddenFiles(find_str,cb){
                         if(err == null) {
                             fs.unlink(fullFilePath, (err) => {
                                 numExistingFiles--;
-                                if (err) throw err;
-                                console.log('successfully deleted '+fullFilePath+' '+i);
-                                if(numExistingFiles==0) {
-                                    cb();
+                                if (err) {} // don't complain about the file not existing
+                                else{
+                                    console.log('successfully deleted '+fullFilePath+' '+i);
+                                    if(numExistingFiles==0) {
+                                        cb();
+                                    }
                                 }
                         });
                         }else{

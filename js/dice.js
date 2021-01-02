@@ -15,6 +15,7 @@ document.getElementById("runLi").onclick = function() {
                         });
                     }
                 });
+                deleteHiddenFiles('.results_2d');
                 // all the input file writes are chained via callbacks with the
                 // last callback executing DICe
                 startProgress();
@@ -155,9 +156,8 @@ function resetWorkingDirectory(){
     defImagePathsLeft = [];
     defImagePathsRight = [];
 
-    deleteDisplayImageFiles(0);
-    deleteDisplayImageFiles(1);
-    deleteDisplayImageFiles(2);
+    deleteHiddenFiles('.preview_left');
+    deleteHiddenFiles('.preview_right');
 
     deleteHiddenFiles('keypoints');
     deleteHiddenFiles('background');
@@ -649,6 +649,7 @@ function postExecTasks(){
             loadTrackingResultsIntoMemory();
         }
     }
+    displayResults();
 }
 
 function startProgress (){
@@ -665,7 +666,6 @@ function endProgress (success){
         $("#runLoader").addClass('post-loader-fail');
     }
 }
-
 
 function writeInputFile(only_write,resolution=false,ss_locs=false) {
     fileName     = fullPath('','input.xml');
@@ -1414,7 +1414,7 @@ $("#showContourCheck").change(function() {
 });
 
 $("#contourFieldSelect").change(function() {
-    showContourPlot();
+    showContourPlot(resizePreview);
 });
 
 $("#contourOpacitySelect").change(function() {
@@ -1428,8 +1428,6 @@ $("#contourOpacitySelect").change(function() {
 
 function showContourPlot(cb){
     if(!$("#showContourCheck")[0].checked) return;
-    // remove any old contours
-    deletePlotlyTraces('left','fullFieldContour');
     var fileName = getSubsetJsonFileName();
     var fieldName = $("#contourFieldSelect").val();
     console.log('showContourPlot(): file ' + fileName + ' field ' + fieldName );
@@ -1438,17 +1436,39 @@ function showContourPlot(cb){
         if(jsonErr==null){
             console.log(fig);
             // copy the selected field to the z array
-            fig.data[0].z = [...fig.data[0][fieldName]];
-            //  TODO update the coodinates with the current posision:
-//            for(var i=0;i<fig.data[0].x.length;++i){
-//                if(fig.data[0]['SIGMA']>=0.0){
+            fig.data[0].z = fig.data[0][fieldName];
+            fig.data[0].x = fig.data[0]['COORDINATE_X'];
+            fig.data[0].y = fig.data[0]['COORDINATE_Y'];
+//            fig.data[0].z = [...fig.data[0][fieldName]];
+            // update the coodinates with the current posision:
+            
+//            var i=fig.data[0].x.length;
+//            while (i--) {
+//                if(fig.data[0]['SIGMA'][i]>=0.0){
 //                    fig.data[0].x[i] += fig.data[0]['DISPLACEMENT_X'][i];
 //                    fig.data[0].y[i] += fig.data[0]['DISPLACEMENT_Y'][i];
 //                }else{
+//                    fig.data[0].z[i] = null;
+////                    fig.data[0].x.splice(i,1);
+////                    fig.data[0].y.splice(i,1);
+////                    fig.data[0].z.splice(i,1);
 ////                    fig.data[0].z[i] = NaN;
 //                }
 //            }
+            
+//            for(var i=0;i<fig.data[0].x.length;++i){
+//                if(fig.data[0].SIGMA[i]>=0.0){
+//                    fig.data[0].x[i] = fig.data[0].x[i] + fig.data[0].DISPLACEMENT_X[i];
+//                    fig.data[0].y[i] = fig.data[0].y[i] + fig.data[0].DISPLACEMENT_Y[i];
+//                }else{
+////                    fig.data[0].z[i] = null;
+//                }
+//            }
+//            Plotly.update(document.getElementById("plotlyViewerLeft"),fig.data);
+//            resizePreview();
             replacePlotlyData('left',fig.data,cb);
+//            Plotly.addTraces(document.getElementById("plotlyViewerLeft"),fig.data);
+//            cb();
         }else{
             console.log(jsonErr);
             alert('error: reading subset json file failed');
@@ -1488,11 +1508,23 @@ function checkSubsetJsonFileExists(){
             $("#showContourCheck").removeAttr("disabled");
             showContourPlot();
         }else{
-            // clear the field select menu
-            $("#contourFieldSelect").empty();
-            $("#showContourCheck").attr("disabled", true);
-            $("#showContourCheck").prop("checked", false);
             console.log(err);
+            // clear the field select menu
+//            $("#contourFieldSelect").empty();
+            $("#showContourCheck").attr("disabled", true);
+            $("#showContourCheck").prop("checked", false).change();
+            // remove contour plots if they have already been plotted
+            
         }
     });
 }
+
+function displayResults(){
+    if($("#analysisModeSelect").val()=="subset"){
+        if($("#fileSelectMode").val()=="list") // advance past the ref frame
+            $("#frameScroller").val(1).change();
+        $("#showContourCheck").prop("checked",true).change();
+//        checkSubsetJsonFileExists();
+    }
+}
+

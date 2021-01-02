@@ -741,6 +741,7 @@ function pointsToScatterTrace(points,name,color,text){
             type:'scatter',
             x:points.x,
             y:points.y,
+            hovertemplate : '(%{x},%{y})<extra></extra>',
             mode:'markers',
             marker: {
                 color: color
