@@ -1406,7 +1406,7 @@ function checkValidInput() {
 $("#showContourCheck").change(function() {
     if(this.checked){
         $(".contour-setting").removeAttr("disabled");
-        showContourPlot();
+        showContourPlot(resizePreview);
     }else{
         $(".contour-setting").attr("disabled", true);
         deletePlotlyTraces('left','fullFieldContour');
@@ -1426,7 +1426,7 @@ $("#contourOpacitySelect").change(function() {
         Plotly.restyle(document.getElementById("plotlyViewerLeft"), {"opacity": newVal}, [result]);
 });
 
-function showContourPlot(){
+function showContourPlot(cb){
     if(!$("#showContourCheck")[0].checked) return;
     // remove any old contours
     deletePlotlyTraces('left','fullFieldContour');
@@ -1448,7 +1448,7 @@ function showContourPlot(){
 ////                    fig.data[0].z[i] = NaN;
 //                }
 //            }
-            replacePlotlyData('left',fig.data);
+            replacePlotlyData('left',fig.data,cb);
         }else{
             console.log(jsonErr);
             alert('error: reading subset json file failed');

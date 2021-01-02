@@ -34,12 +34,14 @@ function parseSubsetFile(xml){
             }else{ // file doesn't exist
                 readLivePlotFile();
                 readBestFitFile();
+                checkSubsetJsonFileExists();
             }
         }); // end stat subset file
     }  // end has subset_file
     else{
         readLivePlotFile();
         readBestFitFile();
+        checkSubsetJsonFileExists();
     }
 }
 
@@ -414,6 +416,7 @@ function readSubsetFile(data){
         Plotly.addTraces(document.getElementById("plotlyViewerLeft"),pointsToScatterTrace(subsetLocations));
     readLivePlotFile();
     readBestFitFile();
+    checkSubsetJsonFileExists();
 }
 
 function update_cine_indices(xml){

@@ -1,3 +1,12 @@
+var coordsXaxisLeft = {};
+var coordsYaxisLeft = {};
+var coordsLeftLeft = 0;
+var coordsTopLeft = 0;
+var coordsXaxisRight = {};
+var coordsYaxisRight = {};
+var coordsLeftRight = 0;
+var coordsTopRight = 0;
+
 $(window).load(function(){
     if(document.getElementById("plotlyViewerLeft")){
         resetPlotlyViewer('left');
@@ -50,11 +59,16 @@ function deletePlotlyTraces(dest,name){
             if(div.data[i].name.includes(name))
                 ids.push(i);
     }
-    if(ids.length>0)
+    if(ids.length>0){
         Plotly.deleteTraces(div,ids);
+        // trigger relayout since for some reason deleting traces from plotly doesn't
+        $("#plotlyViewerLeft").trigger("plotly_relayout");
+        $("#plotlyViewerRight").trigger("plotly_relayout");
+    }
 }
 
-function replacePlotlyData(dest,data){
+function replacePlotlyData(dest,data,cb){
+    cb = cb || $.noop;
     var div = destToPlotlyDiv(dest);
     // search for existing traces with the same name as the data being added
     // if they exist, delete them before adding the new data
@@ -73,6 +87,7 @@ function replacePlotlyData(dest,data){
         }
     }
     Plotly.addTraces(div,data);
+    cb();
 }
 
 function addPlotlyData(dest,data){
@@ -503,14 +518,6 @@ function getPlotlyShapes(name,strict=false){
     }
     return returnShapes;
 }
-var coordsXaxisLeft = {};
-var coordsYaxisLeft = {};
-var coordsLeftLeft = 0;
-var coordsTopLeft = 0;
-var coordsXaxisRight = {};
-var coordsYaxisRight = {};
-var coordsLeftRight = 0;
-var coordsTopRight = 0;
 
 $("#plotlyViewerLeft").on('plotly_relayout', function(){
     console.log('plotly_relayout left event begin');
