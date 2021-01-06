@@ -19,6 +19,7 @@ document.getElementById("runLi").onclick = function() {
                 // all the input file writes are chained via callbacks with the
                 // last callback executing DICe
                 $("#showContourCheck").prop("checked",false).change();
+                updateFrameScrollerRange();
                 startProgress();
                 writeInputFile(false);
                 $("#abortLi").show();
@@ -30,6 +31,7 @@ document.getElementById("runLi").onclick = function() {
             // all the input file writes are chained via callbacks with the
             // last callback executing DICe
             startProgress();
+            updateFrameScrollerRange();
             $("#showContourCheck").prop("checked",false).change();
             writeInputFile(false);
             $("#abortLi").show();
