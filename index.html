@@ -398,14 +398,15 @@
             </div>
             <!-- end toggle div banner -->
             <div class="toggle-div-body">
-              <p>analysis mode:</p>
-              <select id="analysisModeSelect" style="width:50%">
+              <p><b>analysis mode</b></p>
+              <select id="analysisModeSelect" style="width:50%;">
                 <option value="subset">subset-based full-field</option>
                 <option value="tracking">tracking</option>
                 <option value="global">global</option>
               </select>
+              <p class="non-tracklib-tools" style="padding-top:10px;"><b>settings</b></p>
+              <hr class="non-tracklib-tools" style="width:100%;text-align:left;margin-left:0;">
               <div id="tracklibParams" class="param-options tracklib-tools">
-
                 <div class="toggle-div console-toggle-div">
                   <div class="toggle-div-banner">
                     <span class="toggle-title-bold" id="previewButton">PREVIEW</span> <span
@@ -705,19 +706,20 @@
                   defaultValue="5" value="5" step="2"
                 >
                 <p><b>results</b></p>
-                <p><input id="showContourCheck" type="checkbox" style="margin-bottom:10px;" disabled> show results contour plot</p>
-                <p>contour field:</p>
-                <select id="contourFieldSelect" class="contour-setting" style="padding-left:10px; width:50%;" disabled></select>
-                <p>opacity:</p>
-                <select id="contourOpacitySelect" class="contour-setting" style="padding-left:10px; width:50%;" disabled>
+                <hr style="width:100%;text-align:left;margin-left:0; margin-bottom:10px;">
+                <p class="full-field"><input id="showContourCheck" type="checkbox" style="margin-bottom:10px;" disabled> show results contour plot</p>
+                <p class="full-field">contour field:</p>
+                <select id="contourFieldSelect" class="full-field contour-setting" style="padding-left:10px; width:50%;" disabled></select>
+                <p class="full-field">opacity:</p>
+                <select id="contourOpacitySelect" class="full-field contour-setting" style="padding-left:10px; margin-bottom:10px; width:50%;" disabled>
                    <option value="0.0">0.0</option>
                    <option value="0.1">0.1</option>
                    <option value="0.2">0.2</option>
                    <option value="0.3">0.3</option>
-                   <option value="0.4">0.4</option>
+                   <option selected="selected" value="0.4">0.4</option>
                    <option value="0.5">0.5</option>
                    <option value="0.6">0.6</option>
-                   <option selected="selected" value="0.7">0.7</option>
+                   <option value="0.7">0.7</option>
                    <option value="0.8">0.8</option>
                    <option value="0.9">0.9</option>
                    <option value="1.0">1.0</option>

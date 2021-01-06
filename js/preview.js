@@ -279,7 +279,7 @@ function getPreviewConfig(dest){
     }
     var showSubsetLocationsButton = {
             name: 'showSubsets',
-            title: 'Show subset locations',
+            title: 'Show subsets',
             icon: dotsIcon,
             click: () => { drawSubsetCoordinates(); }
     }
@@ -365,7 +365,7 @@ function livePlotDims(){
     if($("#analysisModeSelect").val()!="subset") return result;
     var data = document.getElementById("plotlyViewerLeft").data;
     var livePlotPtsTraceId = data.findIndex(obj => { 
-        return obj.name === "livePlotPts";
+        return obj.name === "live plot pts";
     });
     if(livePlotPtsTraceId>=0){
         result.numLivePlotPts = data[livePlotPtsTraceId].x.length;
@@ -406,7 +406,7 @@ function addLivePlotPts(ptsX,ptsY){
     for(var i=0;i<ptsX.length;++i)
         console.log('add live plot point @' + ptsX[i] + ',' + ptsY[i]);
     var livePlotPtsTraceId = data.findIndex(obj => { 
-        return obj.name === "livePlotPts";
+        return obj.name === "live plot pts";
     });
     console.log('livePlotPtsTraceId ' + livePlotPtsTraceId);
     var x = [];
@@ -436,7 +436,7 @@ function addLivePlotPts(ptsX,ptsY){
     else{
         var coords = {x:x,y:y};
         var color = 'yellow'; //'#00ff00';
-        var previewTrace = pointsToScatterTrace(coords,'livePlotPts',color,text);
+        var previewTrace = pointsToScatterTrace(coords,'live plot pts',color,text);
         previewTrace.visible = true;
         Plotly.addTraces(document.getElementById("plotlyViewerLeft"),previewTrace);
     }
@@ -446,7 +446,7 @@ function deleteLivePlotPts(){
     console.log('deleteLivePlotPts()');
     var allTraces = document.getElementById("plotlyViewerLeft").data;
     var previewResult = allTraces.findIndex(obj => { 
-        return obj.name === "livePlotPts";
+        return obj.name === "live plot pts";
     });
     if(previewResult>=0){
         Plotly.deleteTraces(document.getElementById("plotlyViewerLeft"), previewResult);
@@ -469,28 +469,40 @@ function removeSubsetPreview(){
 // draw the subset coordinates or remove them if they exist
 function drawSubsetCoordinates(){
     console.log('drawSubsetCoordinates()')
+    
     var allTraces = document.getElementById("plotlyViewerLeft").data;
-    var result = allTraces.findIndex(obj => { 
-     return obj.name === "subsetCoordinates";
-    });
-    var newFlag = true;
-    if(result>=0){
-        newFlag = !allTraces[result].visible;
-        Plotly.restyle(document.getElementById("plotlyViewerLeft"), {"visible": newFlag}, [result]);
-    }else if($("#analysisModeSelect").val()=="subset"){ // if doing subset analysis and custom coodinates are not defined, preview where the subsets will end up
-        // check if the subset preview exists, if so turn it off
-        var traceExisted = removeSubsetPreview();
-//        var previewResult = allTraces.findIndex(obj => { 
-//            return obj.name === "subsetPreview";
-//        });
-//        if(previewResult>=0){
-//            Plotly.deleteTraces(document.getElementById("plotlyViewerLeft"), previewResult);
-//            return;
-//        }
-        // if not rebuild it
-        if(!traceExisted){
-            startProgress();
-            writeInputFile(false,false,true);
+    if($("#analysisModeSelect").val()=="subset" && $("#showContourCheck")[0].checked){
+        // TODO update the subset trace to show or not show
+        var result = allTraces.findIndex(obj => { 
+         return obj.name === "subset results";
+        });
+        if(result>=0){
+            var newFlag = !allTraces[result].visible;
+            Plotly.restyle(document.getElementById("plotlyViewerLeft"), {"visible": newFlag}, [result]);
+        }
+        resizePreview();
+    }else if($("#frameScroller").val()==$("#frameScroller").attr('min')){
+        var result = allTraces.findIndex(obj => { 
+            return obj.name === "subsetCoordinates";
+        });
+        if(result>=0){
+            var newFlag = !allTraces[result].visible;
+            Plotly.restyle(document.getElementById("plotlyViewerLeft"), {"visible": newFlag}, [result]);
+        }else if($("#analysisModeSelect").val()=="subset"){ // if doing subset analysis and custom coordinates are not defined, preview where the subsets will end up
+            // check if the subset preview exists, if so turn it off
+            var traceExisted = removeSubsetPreview();
+//          var previewResult = allTraces.findIndex(obj => { 
+//          return obj.name === "subsetPreview";
+//          });
+//          if(previewResult>=0){
+//          Plotly.deleteTraces(document.getElementById("plotlyViewerLeft"), previewResult);
+//          return;
+//          }
+            // if not rebuild it
+            if(!traceExisted){
+                startProgress();
+                writeInputFile(false,false,true);
+            }
         }
     }
 }
@@ -847,7 +859,7 @@ function toggleLivePlotVisibility(visibility){
     var data = div.data;
     if(!data) return;
     var livePlotPtsTraceId = data.findIndex(obj => { 
-        return obj.name === "livePlotPts";
+        return obj.name === "live plot pts";
     });
     if(livePlotPtsTraceId>=0)
         Plotly.restyle(div,{visible:visibility},livePlotPtsTraceId);

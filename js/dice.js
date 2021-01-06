@@ -18,6 +18,7 @@ document.getElementById("runLi").onclick = function() {
                 deleteHiddenFiles('.results_2d');
                 // all the input file writes are chained via callbacks with the
                 // last callback executing DICe
+                $("#showContourCheck").prop("checked",false).change();
                 startProgress();
                 writeInputFile(false);
                 $("#abortLi").show();
@@ -29,6 +30,7 @@ document.getElementById("runLi").onclick = function() {
             // all the input file writes are chained via callbacks with the
             // last callback executing DICe
             startProgress();
+            $("#showContourCheck").prop("checked",false).change();
             writeInputFile(false);
             $("#abortLi").show();
             $("#sssigPreview").hide();
@@ -641,7 +643,6 @@ function postExecTasks(){
     // if this is a mono tracking run, load the results files into memory in case the user wants to view the tracked results
     if($("#analysisModeSelect").val()=="tracking"){
         if(showStereoPane==1){
-            // TODO segPreviewCheck?
             loadPlotlyJsonOutput('results');
             checkHasOutput();
             $("#resultsButton").trigger( "click" );
@@ -833,7 +834,7 @@ function writeLivePlotsFile() {
     var data = document.getElementById("plotlyViewerLeft").data;
     if(!data) return;
     var livePlotPtsTraceId = data.findIndex(obj => { 
-        return obj.name === "livePlotPts";
+        return obj.name === "live plot pts";
     });
     console.log('writeLivePlotsFile(): livePlotPtsTraceId ' + livePlotPtsTraceId);
     if(livePlotPtsTraceId<0) return;
@@ -901,7 +902,6 @@ function writeParamsFile(only_write,resolution,ss_locs) {
     var content = '';
     content += '<!-- Auto generated parameters file from DICe GUI -->\n';
     content += '<ParameterList>\n';
-    content += '<Parameter name="write_json_output" type="bool" value="true" />\n';
     if(resolution){
         // add estimate spatial resoltion options
         content += '<Parameter name="estimate_resolution_error" type="bool" value="true" />\n';
@@ -1036,6 +1036,10 @@ function writeParamsFile(only_write,resolution,ss_locs) {
                 alert('Error: no shape functions selected');
                 return;
             }
+            content += '<ParameterList name="post_process_plotly_contour">\n';
+            content += '<Parameter name="plotly_contour_grid_step" type="int" value=" ' + $("#stepSize").val() + '" />\n';
+            content += '</ParameterList>\n';
+
         }else if($("#analysisModeSelect").val()=="global"){
             content += '<Parameter name="max_solver_iterations_fast" type="int" value="500" />\n';
             content += '<Parameter name="global_solver" type="string" value="gmres_solver" />\n';
@@ -1409,7 +1413,8 @@ $("#showContourCheck").change(function() {
         showContourPlot(resizePreview);
     }else{
         $(".contour-setting").attr("disabled", true);
-        deletePlotlyTraces('left','fullFieldContour');
+        deletePlotlyTraces('left','fullFieldLSContour');
+        deletePlotlyTraces('left','subset results');
     }
 });
 
@@ -1417,71 +1422,64 @@ $("#contourFieldSelect").change(function() {
     showContourPlot(resizePreview);
 });
 
-$("#contourOpacitySelect").change(function() {
+function adjustContourOpacity(){
     var result = document.getElementById("plotlyViewerLeft").data.findIndex(obj => { 
-        return obj.name === "fullFieldContour";
+        return obj.name === 'fullFieldLSContour';
     });
     var newVal =  $("#contourOpacitySelect").val();
     if(result>=0)
         Plotly.restyle(document.getElementById("plotlyViewerLeft"), {"opacity": newVal}, [result]);
+}
+
+$("#contourOpacitySelect").change(function() {
+    adjustContourOpacity();
 });
 
 function showContourPlot(cb){
     if(!$("#showContourCheck")[0].checked) return;
-    var fileName = getSubsetJsonFileName();
+    var LSFileName = getContourJsonFileName(true);
     var fieldName = $("#contourFieldSelect").val();
-    console.log('showContourPlot(): file ' + fileName + ' field ' + fieldName );
+    console.log('showContourPlot(): file ' + LSFileName + ' field ' + fieldName );
+    
+    Plotly.d3.json(LSFileName, function(jsonErr, fig) {
+        if(jsonErr==null){
+            //console.log(fig);
+            // copy the selected field to the z array
+            fig.data[0].z = fig.data[0][fieldName];
+            for(var i=0;i<fig.data[0].z.length;++i)
+                if(fig.data[0].STATUS_FLAG[i] < 0.0)
+                    fig.data[0].z[i] = null;
+            fig.data[0].x = fig.data[0]['COORDINATE_X'];
+            fig.data[0].y = fig.data[0]['COORDINATE_Y'];
+            replacePlotlyData('left',fig.data,cb);
+            adjustContourOpacity();
+        }else{
+            console.log(jsonErr);
+            alert('error: reading subset least squares contour json file failed');
+        }
+    });
+
+    var fileName = getContourJsonFileName();
+    console.log('showContourPlot(): file ' + fileName );
     
     Plotly.d3.json(fileName, function(jsonErr, fig) {
         if(jsonErr==null){
             console.log(fig);
-            // copy the selected field to the z array
-            fig.data[0].z = fig.data[0][fieldName];
-            fig.data[0].x = fig.data[0]['COORDINATE_X'];
-            fig.data[0].y = fig.data[0]['COORDINATE_Y'];
-//            fig.data[0].z = [...fig.data[0][fieldName]];
-            // update the coodinates with the current posision:
-            
-//            var i=fig.data[0].x.length;
-//            while (i--) {
-//                if(fig.data[0]['SIGMA'][i]>=0.0){
-//                    fig.data[0].x[i] += fig.data[0]['DISPLACEMENT_X'][i];
-//                    fig.data[0].y[i] += fig.data[0]['DISPLACEMENT_Y'][i];
-//                }else{
-//                    fig.data[0].z[i] = null;
-////                    fig.data[0].x.splice(i,1);
-////                    fig.data[0].y.splice(i,1);
-////                    fig.data[0].z.splice(i,1);
-////                    fig.data[0].z[i] = NaN;
-//                }
-//            }
-            
-//            for(var i=0;i<fig.data[0].x.length;++i){
-//                if(fig.data[0].SIGMA[i]>=0.0){
-//                    fig.data[0].x[i] = fig.data[0].x[i] + fig.data[0].DISPLACEMENT_X[i];
-//                    fig.data[0].y[i] = fig.data[0].y[i] + fig.data[0].DISPLACEMENT_Y[i];
-//                }else{
-////                    fig.data[0].z[i] = null;
-//                }
-//            }
-//            Plotly.update(document.getElementById("plotlyViewerLeft"),fig.data);
-//            resizePreview();
             replacePlotlyData('left',fig.data,cb);
-//            Plotly.addTraces(document.getElementById("plotlyViewerLeft"),fig.data);
-//            cb();
         }else{
             console.log(jsonErr);
-            alert('error: reading subset json file failed');
+            alert('error: reading subset raw data json file failed');
         }
     });
 }
 
-function getSubsetJsonFileName(){
+function getContourJsonFileName(leastSquares = false){
     var frameId = $("#frameScroller").val();
     if($("#fileSelectMode").val()=="list")
         frameId -= 1; // for sequence and list, the zeroeth index is the reference image so need to decrement by 1
     // check if the file exists for this frameID, if not return
-    return fullPath('.dice','.results_2d_' + frameId + '.json');
+    if(leastSquares) return fullPath('.dice','.results_2d_ls_' + frameId + '.json');
+    else return fullPath('.dice','.results_2d_' + frameId + '.json');
 }
 
 function populateContourFields(){
@@ -1501,7 +1499,7 @@ function populateContourFields(){
 }
 
 function checkSubsetJsonFileExists(){
-    var fileName = getSubsetJsonFileName();
+    var fileName = getContourJsonFileName(true);
     console.log('loadSubsetJsonFile(): ' + fileName);
     fs.stat(fileName, function(err, stat) {
         if(err == null) {
