@@ -765,9 +765,9 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
     }
     else if(fileSelectMode=="sequence"){
         var folderName = $("#imageFolderSpan").text();
-        if(os.platform()=='win32'){
+        if(os.platform()=='win32'&&folderName.slice(-1)!='\\'){
             folderName += '\\';
-        }else{
+        }else if(folderName.slice(-1)!='/'){
             folderName += '/';
         }
         content += '<Parameter name="image_folder" type="string" value="'+folderName +'" />\n';
