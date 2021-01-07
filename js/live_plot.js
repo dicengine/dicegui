@@ -114,5 +114,15 @@ function plotDataTable(){
         plotlyData[i].y = dataObjs[i].data[currentTable];
         plotlyData[i].name = plotlyData[i].name + String(i);
     }
-    Plotly.plot(document.getElementById(divID),plotlyData,layout);
+    var config = {
+            displaylogo: false,
+            scrollZoom: true,
+            responsive: true,
+            modeBarButtonsToRemove: [
+                'autoScale2d',
+                'select2d',
+                'lasso2d'
+                ]
+    };
+    Plotly.plot(document.getElementById(divID),plotlyData,layout,config);
 }

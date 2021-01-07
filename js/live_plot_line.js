@@ -150,5 +150,15 @@ function plotLineDataTable(){
     var plotlyData = {x:[],y:[],type:'scatter',line:{color:lineColor}};
     plotlyData.x = dataObjsLine[0].data[0];
     plotlyData.y = dataObjsLine[0].data[currentTableLine];
-    Plotly.plot(document.getElementById(divID),[plotlyData],layout);
+    var config = {
+            displaylogo: false,
+            scrollZoom: true,
+            responsive: true,
+            modeBarButtonsToRemove: [
+                'autoScale2d',
+                'select2d',
+                'lasso2d'
+                ]
+    };
+    Plotly.plot(document.getElementById(divID),[plotlyData],layout,config);
 }
