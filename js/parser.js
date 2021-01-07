@@ -412,8 +412,22 @@ function readSubsetFile(data){
     // assuming here that the plotly div already exists
     var update = {shapes: shapes};
     Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
-    if(subsetLocations.x.length>0)
-        Plotly.addTraces(document.getElementById("plotlyViewerLeft"),pointsToScatterTrace(subsetLocations));
+    if(subsetLocations.x.length>0){
+        var scatterTrace = {
+                name: 'subsetCoordinates',
+                visible: false,
+                type:'scatter',
+                x:subsetLocations.x,
+                y:subsetLocations.y,
+                hovertemplate : '(%{x},%{y})<extra></extra>',
+                mode:'markers',
+                marker: {
+                    color: 'yellow',
+                    size: 3
+                },
+        };
+        Plotly.addTraces(document.getElementById("plotlyViewerLeft"),scatterTrace);
+    }
     readLivePlotFile();
     readBestFitFile();
     checkSubsetJsonFileExists();
@@ -729,27 +743,4 @@ function pathShapeToPoints(shape){
         points.y.push(parseInt(array[i]));
     }
     return points;
-}
-
-function pointsToScatterTrace(points,name,color,text){
-    if(!color) color = 'cyan';
-    if(!name) name = 'subsetCoordinates';
-    var visible = false;
-    var scatterTrace = {
-            name: name,
-            visible: false,
-            type:'scatter',
-            x:points.x,
-            y:points.y,
-            hovertemplate : '(%{x},%{y})<extra></extra>',
-            mode:'markers',
-            marker: {
-                color: color
-            },
-    };
-    if(text){
-        scatterTrace.hovertemplate = '(%{x},%{y})<br>%{text}<extra></extra>';
-        scatterTrace.text = text;
-    }
-    return scatterTrace;
 }

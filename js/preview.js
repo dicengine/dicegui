@@ -7,6 +7,25 @@ var coordsYaxisRight = {};
 var coordsLeftRight = 0;
 var coordsTopRight = 0;
 
+var plotlyColors = [
+    '#1f77b4',  // muted blue
+    '#ff7f0e',  // safety orange
+    '#2ca02c',  // cooked asparagus green
+    '#d62728',  // brick red
+    '#9467bd',  // muted purple
+    '#8c564b',  // chestnut brown
+    '#e377c2',  // raspberry yogurt pink
+    '#7f7f7f',  // middle gray
+    '#bcbd22',  // curry yellow-green
+    '#17becf'   // blue-teal
+];
+
+// plotly's default colors (after 10 it repeats):
+function plotlyDefaultColor(index){
+    index = index%10;
+    return plotlyColors[index];
+}
+
 $(window).load(function(){
     if(document.getElementById("plotlyViewerLeft")){
         resetPlotlyViewer('left');
@@ -378,13 +397,14 @@ function livePlotDims(){
 function addLivePlotLine(ox,oy,px,py){
     // check if live plot points have been defined
     if($("#analysisModeSelect").val()!="subset") return;
+    var lineColor = plotlyDefaultColor(9);
     var lineShape = {
             type: 'line',
             x0: ox,
             x1: px,
             y0: oy,
             y1: py,
-            line: {color: 'yellow', width: 3},
+            line: {color: lineColor, width: 3},
             name: 'livePlotLine',
             editable: true,
             opacity: 0.8
@@ -434,10 +454,22 @@ function addLivePlotPts(ptsX,ptsY){
         Plotly.restyle(document.getElementById("plotlyViewerLeft"), update, livePlotPtsTraceId);
     }
     else{
-        var coords = {x:x,y:y};
-        var color = 'yellow'; //'#00ff00';
-        var previewTrace = pointsToScatterTrace(coords,'live plot pts',color,text);
-        previewTrace.visible = true;
+        var color = plotlyColors.concat(plotlyColors).concat(plotlyColors);// 'yellow'; //'#00ff00';
+        var previewTrace = {
+                name: 'live plot pts',
+                visible: true,
+                type:'scatter',
+                x:x,
+                y:y,
+                text:text,
+                hovertemplate : '(%{x},%{y})<br>%{text}<extra></extra>',
+                mode:'markers',
+                marker: {
+                    color: color,
+                    size: 8,
+                    line: {color:'white',width:1}
+                },
+        };
         Plotly.addTraces(document.getElementById("plotlyViewerLeft"),previewTrace);
     }
 }
@@ -458,7 +490,7 @@ function removeSubsetPreview(){
     console.log('removeSubsetPreview()');
     var allTraces = document.getElementById("plotlyViewerLeft").data;
     var previewResult = allTraces.findIndex(obj => { 
-        return obj.name === "subsetPreview";
+        return obj.name === 'subset preview';
     });
     if(previewResult>=0){
         Plotly.deleteTraces(document.getElementById("plotlyViewerLeft"), previewResult);
@@ -587,7 +619,19 @@ $("#plotlyViewerLeft").on('plotly_relayout', function(){
     }
     // the subset coordinates trace may not exist, if not and the analsis mode is tracking add one
     else if(centroids.x&&$("#analysisModeSelect").val()=="tracking"&&showStereoPane==0){
-        Plotly.addTraces(div,pointsToScatterTrace(centroids));
+        var scatterTrace = {
+                name: 'subsetCoordinates',
+                visible: false,
+                type:'scatter',
+                x:centroids.x,
+                y:centroids.y,
+                hovertemplate : '(%{x},%{y})<extra></extra>',
+                mode:'markers',
+                marker: {
+                    color: 'yellow'
+                },
+        };
+        Plotly.addTraces(div,scatterTrace);
     }
     checkValidInput();
     console.log('plotly_relayout event end');
@@ -635,7 +679,7 @@ $("#plotlyViewerRight").on('plotly_click', function(data){
     }
 });
 
-$("#plotlyViewerLeft").on('click', function(event){
+$("#plotlyViewerLeft").on('click', function(event){ // note: not plotly_click, to register clicks anywhere in the DOM, not just on a plotly plot
     if($("#analysisModeSelect").val()=="subset"&&event.which==2){
         var xInDataCoord = parseInt(coordsXaxisLeft.p2c(event.offsetX - coordsLeftLeft));
         var yInDataCoord = parseInt(coordsYaxisLeft.p2c(event.offsetY - coordsTopLeft));
@@ -905,8 +949,9 @@ function updateLivePlotLine(){
         deleteShape(oldLineIndex);
     }
     if(newLineIndex>=0){
+        var lineColor = plotlyDefaultColor(9);
         shapes[newLineIndex].name='livePlotLine';
-        shapes[newLineIndex].line = {color: 'yellow', width: 3};
+        shapes[newLineIndex].line = {color: lineColor, width: 3};
         shapes[newLineIndex].opacity = 0.8;
         relayoutNeeded = true;
     }
@@ -981,9 +1026,21 @@ function addSubsetSSSIGPreviewTrace(locsFile){
                     coords.x.push(locsData[i++]);
                     coords.y.push(locsData[i]);
                 }
-                var previewTrace = pointsToScatterTrace(coords,'subsetPreview');
-                previewTrace.visible = true;
+                var previewTrace = {
+                        name: 'subset preview',
+                        visible: true,
+                        type:'scatter',
+                        x:coords.x,
+                        y:coords.y,
+                        hovertemplate : '(%{x},%{y})<extra></extra>',
+                        mode:'markers',
+                        marker: {
+                            color: 'yellow',
+                            size: 3
+                        },
+                };
                 Plotly.addTraces(document.getElementById("plotlyViewerLeft"),previewTrace);
+                resizePreview();
             }); // end readFile
         } // end null
         else{

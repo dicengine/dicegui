@@ -146,7 +146,8 @@ function plotLineDataTable(){
 ////        layout.yaxis.fixedrange = 'true';
 //        layout.yaxis.autorange = 'false';
 //    }
-    var plotlyData = {x:[],y:[],type:'scatter'};
+    var lineColor = plotlyDefaultColor(9);
+    var plotlyData = {x:[],y:[],type:'scatter',line:{color:lineColor}};
     plotlyData.x = dataObjsLine[0].data[0];
     plotlyData.y = dataObjsLine[0].data[currentTableLine];
     Plotly.plot(document.getElementById(divID),[plotlyData],layout);
