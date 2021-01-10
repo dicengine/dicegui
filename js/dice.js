@@ -8,7 +8,7 @@ document.getElementById("runLi").onclick = function() {
                 // delete any existing results files
                 fs.readdirSync(fullPath('results','')).forEach(file => {
                     // check if the file matches the syntax         
-                    if(file.indexOf('DICe_solution_') !== -1){
+                    if(file.indexOf('DICe_solution_') !== -1 || file.indexOf('live_plot_') !== -1){
                         fs.unlink(fullPath('results',file), (err) => {
                             if (err) throw err;
                             console.log('successfully deleted existing results file'+file);
@@ -49,6 +49,7 @@ function integerLength(integer) {
 }
 
 function showLivePlots(){
+    console.log('showLivePlots():');
     //var online = navigator.onLine;
     // disable live plots when working offline
     //if(!online){
@@ -96,6 +97,11 @@ function showLivePlots(){
         // TODO set up the files to read
         //livePlotFiles = "DICe_solution_0.txt DICe_solution_1.txt DICe_solution_2.txt DICe_solution_3.txt DICe_solution_4.txt DICe_solution_5.txt DICe_solution_6.txt";
         for(var i=0;i<livePlotInfo.numLivePlotPts;++i){
+            if(os.platform()=='win32'){
+                livePlotFiles += 'results\\';
+            }else{
+                livePlotFiles += 'results/';
+            }
             livePlotFiles += 'live_plot_pt_' + i + '.txt';
             if(i<livePlotInfo.numLivePlotPts-1)
                 livePlotFiles += ' ';

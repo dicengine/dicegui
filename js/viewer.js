@@ -400,6 +400,7 @@ $("#frameScroller").on('input', function () {
     }
     // turn off live plot info if this is not the first frame
     toggleLivePlotVisibility($(this).val()==$(this).attr('min'));
+    $("#stepSelect").val($(this).val()).change();
 });
 
 $("#cineGoToIndex").keypress(function(event) { 

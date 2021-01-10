@@ -24,23 +24,23 @@ $( "#stepSelect" ).change(function() {
     plottingPausedLine = true;
     var lineFile;
     if(os.platform()=='win32'){
-        lineFile = workingDir + '\\'; 
+        lineFile = workingDir + '\\results\\'; 
     }else{
-        lineFile = workingDir + '/'; 
-    }    
-    lineFile += 'live_plot_line_step_' + $(this).val() + '.txt';
+        lineFile = workingDir + '/results/'; 
+    }
+    lineFile += 'live_plot_line_frame_' + $(this).val() + '.txt';
     console.log('live plot line file: ' + lineFile);
     plotLine(lineFile);
 });
 
 $('#stepForward').click(function() {
-    nextStep = Number($("#stepSelect option:selected").val()) + 2;
+    nextStep = Number($("#stepSelect")[0].selectedIndex) + 2;
     $('#stepSelect :nth-child(' + nextStep +')').prop('selected', true); // To select via index
     $('#stepSelect').trigger('change');
 });
 
 $('#stepBackward').click(function() {
-    prevStep = Number($("#stepSelect option:selected").val());
+    prevStep = Number($("#stepSelect")[0].selectedIndex);
     $('#stepSelect :nth-child(' + prevStep +')').prop('selected', true); // To select via index
     $('#stepSelect').trigger('change');
 });
@@ -51,17 +51,17 @@ function livePlotLine(){
     var latestLineFileIndex = 0;
     var lineFile;
     if(os.platform()=='win32'){
-        lineFile = workingDir + '\\'; 
+        lineFile = workingDir + '\\results\\'; 
     }else{
-        lineFile = workingDir + '/'; 
+        lineFile = workingDir + '/results/'; 
     }
     // clear the selectable list
-    var currentStep = $('#stepSelect').val();
+    var currentStep = $('#stepSelect').val() || 0;
     $('#stepSelect').empty();
     var steps = [];
-    fs.readdirSync(workingDir).forEach(file => {
+    fs.readdirSync(fullPath('results','')).forEach(file => {
         // check if the file matches the syntax
-        if(file.indexOf('live_plot_line_step_') !== -1){
+        if(file.indexOf('live_plot_line_frame_') !== -1){
             // grab the index of the file
             var suffixAndExt = file.split("_").pop();
             var suffix = suffixAndExt.substr(0, suffixAndExt.indexOf('.'));
@@ -80,7 +80,7 @@ function livePlotLine(){
     if(plottingPausedLine) return;
     if(currentStep!=latestLineFileIndex)
         $('#stepSelect').val(latestLineFileIndex);
-    lineFile += 'live_plot_line_step_' + latestLineFileIndex + '.txt';
+    lineFile += 'live_plot_line_frame_' + latestLineFileIndex + '.txt';
     console.log('live plot line file: ' + lineFile);
     plotLine(lineFile);
 }
@@ -160,5 +160,5 @@ function plotLineDataTable(){
                 'lasso2d'
                 ]
     };
-    Plotly.plot(document.getElementById(divID),[plotlyData],layout,config);
+    Plotly.newPlot(document.getElementById(divID),[plotlyData],layout,config);
 }

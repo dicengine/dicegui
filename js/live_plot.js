@@ -4,6 +4,7 @@ var dataObjs = [];
 var currentTable = 0;
 
 function livePlotRepeat() {
+    console.log('livePlotRepeat():');
     var workingDir = localStorage.getItem("workingDirectory");
     var fileNameStr = localStorage.getItem("livePlotFiles"); 
     var fileNames = fileNameStr.split(/[ ,]+/);
@@ -124,5 +125,5 @@ function plotDataTable(){
                 'lasso2d'
                 ]
     };
-    Plotly.plot(document.getElementById(divID),plotlyData,layout,config);
+    Plotly.newPlot(document.getElementById(divID),plotlyData,layout,config);
 }

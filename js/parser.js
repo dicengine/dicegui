@@ -323,6 +323,7 @@ function readLivePlotFile(){
                     addLivePlotPts(livePlotPtsX,livePlotPtsY);
                     if(ox!=0||oy!=0||px!=0||py!=0)
                         addLivePlotLine(ox,oy,px,py);
+                    showLivePlots();
                 }
             }); // end readfile
         }
