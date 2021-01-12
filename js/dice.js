@@ -1417,6 +1417,7 @@ function checkValidInput() {
 
 $("#showContourCheck").change(function() {
     if(this.checked){
+        removeSubsetPreview();
         $(".contour-setting").removeAttr("disabled");
         showContourPlot(resizePreview);
     }else{
