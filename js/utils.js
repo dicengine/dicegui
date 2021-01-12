@@ -271,18 +271,22 @@ $("#changeWorkingDirLi").click(function(){
         workingDirectory = path[0];
         updateWorkingDirLabel();
         createHiddenDir();
+        resetWorkingDirectory();
         var fileName = fullPath('','input.xml');
         fs.stat(fileName, function(err, stat) {
             if(err == null) {
                 if (confirm('load the existing input files in this working directory?')) {
                     console.log('loading existing input file if it exists: ' + fileName);
                     parse_input_xml_file(fileName);
+                    checkValidInput();
                 }else{
                     return false;
                 }
             }else {
+                checkValidInput();
             }
         });
+        
     }
 });
 

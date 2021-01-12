@@ -305,7 +305,7 @@ function getPreviewConfig(dest){
             name: 'showSubsets',
             title: 'Show subsets',
             icon: dotsIcon,
-            click: () => { drawSubsetCoordinates(); }
+            click: () => {if(!$("#runLi").is(":visible")) return;drawSubsetCoordinates(); }
     }
     let importIcon = {
             'width': 24,
@@ -316,7 +316,7 @@ function getPreviewConfig(dest){
             name: 'importSubsets',
             title: 'Import subset locations',
             icon: importIcon,
-            click: () => {$('#loadSubsetFileInputIcon').click();}
+            click: () => {if(!$("#runLi").is(":visible"))return;$('#loadSubsetFileInputIcon').click();}
     }
     let deleteLivePlotPtsIcon = {
             'width': 24,
@@ -506,7 +506,6 @@ function removeSubsetPreview(){
 // draw the subset coordinates or remove them if they exist
 function drawSubsetCoordinates(){
     console.log('drawSubsetCoordinates()')
-    
     var allTraces = document.getElementById("plotlyViewerLeft").data;
     if($("#analysisModeSelect").val()=="subset" && $("#showContourCheck")[0].checked){
         // TODO update the subset trace to show or not show

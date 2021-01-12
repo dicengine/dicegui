@@ -7,10 +7,11 @@ var plottingPausedLine = false;
 function livePlotLineRepeat() {
     livePlotLine();
         nIntervIdLine = setInterval(function(){
-            livePlotLine();
             if(!$("#runLoader").hasClass('loader')){
                 clearInterval(nIntervIdLine);
+                return;
             }
+            livePlotLine();
         }, 5000);
 }
 
@@ -59,6 +60,8 @@ function livePlotLine(){
     var currentStep = $('#stepSelect').val() || 0;
     $('#stepSelect').empty();
     var steps = [];
+    if (!fs.existsSync(fullPath('results',''))) 
+        return;
     fs.readdirSync(fullPath('results','')).forEach(file => {
         // check if the file matches the syntax
         if(file.indexOf('live_plot_line_frame_') !== -1){

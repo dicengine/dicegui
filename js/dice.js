@@ -171,6 +171,11 @@ function resetWorkingDirectory(){
 
     deleteHiddenFiles('keypoints');
     deleteHiddenFiles('background');
+
+    $('#stepSelect').empty();
+    $('#livePlots').empty();
+    $('#livePlotLine').empty();
+    $("#consoleButton").trigger( "click" );
 }
 
 document.getElementById("clearLi").onclick = function() {

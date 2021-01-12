@@ -24,10 +24,11 @@ function livePlotRepeat() {
 //    console.log('livePlot line filename' + lineFile);
     livePlot(fileNames);
     nIntervId = setInterval(function(){
-        livePlot(fileNames);
         if(!$("#runLoader").hasClass('loader')){
             clearInterval(nIntervId);
+            return;
         }
+        livePlot(fileNames);
     }, 5000);
 }
 

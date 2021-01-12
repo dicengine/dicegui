@@ -3,6 +3,7 @@
 function fullPath(folder,file){
     if(typeof workingDirectory === 'undefined' || workingDirectory === null || workingDirectory == 'undefined'){
         workingDirectory = localStorage.getItem("workingDirectory");
+        console.log('fullPath(): getting workingDirectory from local storage');
     }
     var filePath = workingDirectory;
     if(folder!=''){
@@ -17,6 +18,7 @@ function fullPath(folder,file){
     }else{
         filePath += '/' + file;
     }
+    console.log('fullPath(): ',filePath);
     return filePath;
 }
 
