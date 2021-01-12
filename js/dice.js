@@ -1473,7 +1473,7 @@ function showContourPlot(cb){
     
     Plotly.d3.json(fileName, function(jsonErr, fig) {
         if(jsonErr==null){
-            console.log(fig);
+            //console.log(fig);
             replacePlotlyData('left',fig.data,cb);
         }else{
             console.log(jsonErr);

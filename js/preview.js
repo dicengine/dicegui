@@ -94,27 +94,32 @@ function replacePlotlyData(dest,data,cb){
     if(!div.data){
         Plotly.addTraces(div,data);
     }else{
-        var ids = [];
         for(var i=0;i<data.length;++i){
+            var replaced = false;
             if(data[i].name){
-                console.log('checking for ', data[i].name);
                 for(var j=0;j<div.data.length;++j){
                     if(div.data[j].name){
-                        console.log('testing agains existing field ' + div.data[j].name);
                         if(div.data[j].name==data[i].name){
-                            console.log('found match, index ' + j);
-                            ids.push(j);
-                        }
-                    }
-                }
+                            console.log('replacing data for ' + data[i].name);
+                            var update = {};
+                            for (const prop in data[i]) {
+                                if(prop==='x'||prop==='y'||prop==='z'||prop==='text'){
+                                    update[prop] = [data[i][prop]];
+                                }
+                            }
+//                            console.log('update',update);
+                            Plotly.restyle(div,update,j);
+                            replaced = true;
+                            continue;
+                        } // names match
+                    } // object has name
+                } // end loop over existing data
+            } // object has name
+            if(!replaced){
+                Plotly.addTraces(div,[data[i]]);
             }
-        }
-        
-        if(ids.length>0){
-            Plotly.deleteTraces(div,ids);
-        }
-        Plotly.addTraces(div,data);
-    }
+        } // end loop over input data objects
+    } // end else
     cb();
 }
 
