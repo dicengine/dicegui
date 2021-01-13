@@ -699,7 +699,7 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
     if(numROIs==0&&$("#analysisModeSelect").val()=="global"){
         // if no ROIs are defined for global, define one large ROI
         var points = {x:[20,refImageWidth-20,refImageWidth-20,20],
-                y:[20,20,refImageHeight,refImageHeight]};
+                y:[20,20,refImageHeight-20,refImageHeight-20]};
         var shape = pointsToPathShape(points,'ROI_0');
         ROIShapes.push(shape);
         var update = {shapes: ROIShapes};
@@ -1052,7 +1052,6 @@ function writeParamsFile(only_write,resolution,ss_locs) {
             content += '<ParameterList name="post_process_plotly_contour">\n';
             content += '<Parameter name="plotly_contour_grid_step" type="int" value=" ' + $("#stepSize").val() + '" />\n';
             content += '</ParameterList>\n';
-
         }else if($("#analysisModeSelect").val()=="global"){
             content += '<Parameter name="max_solver_iterations_fast" type="int" value="500" />\n';
             content += '<Parameter name="global_solver" type="string" value="gmres_solver" />\n';
