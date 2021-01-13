@@ -54,6 +54,15 @@ function resetPlotlyViewer(dest,keepImage=false){
     var data = [{type:'scatter',x:[0],y:[0],visible:false,name:'dummyData',showlegend:false,mode:'none'}];
     Plotly.purge(div); // need to call purge, otherwise the mode bar buttons won't update
     Plotly.newPlot(div,data,params.layout,params.config);
+    
+    div.on('plotly_click', function(data){
+        if(dest!='left'&&dest!='right') return;
+        if(!data.points) return;
+        if(data.points[0].data.name==='tracklibPreviewScatter'){
+            var index2d = data.points[0].pointIndex;
+            updateInspectors(dest,index2d);
+        }
+    });
 }
 
 function destToPlotlyDiv(dest){
@@ -86,7 +95,42 @@ function deletePlotlyTraces(dest,name){
     }
 }
 
+// delete the existing trace if it exists
+// and add a new one
+// mainly for small scatter traces with extra information
+// stored in the trace such as extra objects or arrays other than x,y,z, and text
 function replacePlotlyData(dest,data,cb){
+    cb = cb || $.noop;
+    var div = destToPlotlyDiv(dest);
+    // search for existing traces with the same name as the data being added
+    // if they exist, delete them before adding the new data
+    if(!div.data){
+        Plotly.addTraces(div,data);
+    }else{
+        var ids = [];
+        for(var i=0;i<data.length;++i){
+            if(data[i].name){
+                for(var j=0;j<div.data.length;++j){
+                    if(div.data[j].name){
+                        if(div.data[j].name==data[i].name){
+                            ids.push(j);
+                        }
+                    }
+                }
+            }
+        }
+        if(ids.length>0){
+            Plotly.deleteTraces(div,ids);
+        }
+        Plotly.addTraces(div,data);
+    }
+    cb();
+}
+
+// used to update existing traces by updating the x,y,z, and text
+// arrays. Does not copy other objects inside the data aside from x,y,z, and text
+// this is more useful for heavy-weight traces like contours
+function updatePlotlyData(dest,data,cb){
     cb = cb || $.noop;
     var div = destToPlotlyDiv(dest);
     // search for existing traces with the same name as the data being added
@@ -665,22 +709,6 @@ $("#plotlyViewerRight").mousemove(function( event ) {
     var xInDataCoord = parseInt(coordsXaxisRight.p2c(event.offsetX - coordsLeftRight));
     var yInDataCoord = parseInt(coordsYaxisRight.p2c(event.offsetY - coordsTopRight));
     document.getElementById('rightPos').innerText = '['+xInDataCoord+','+yInDataCoord+']';
-});
-
-$("#plotlyViewerLeft").on('plotly_click', function(data){
-    if(!data.points) return;
-    if(data.points[0].data.name==='tracklibPreviewScatter'){
-        var index2d = data.points[0].pointIndex;
-        updateInspectors('left',index2d);
-    }
-});
-
-$("#plotlyViewerRight").on('plotly_click', function(data){
-    if(!data.points) return;
-    if(data.points[0].data.name==='tracklibPreviewScatter'){
-        var index2d = data.points[0].pointIndex;
-        updateInspectors('right',index2d);
-    }
 });
 
 $("#plotlyViewerLeft").on('click', function(event){ // note: not plotly_click, to register clicks anywhere in the DOM, not just on a plotly plot

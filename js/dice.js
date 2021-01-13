@@ -1464,7 +1464,7 @@ function showContourPlot(cb){
                     fig.data[0].z[i] = null;
             fig.data[0].x = fig.data[0]['COORDINATE_X'];
             fig.data[0].y = fig.data[0]['COORDINATE_Y'];
-            replacePlotlyData('left',fig.data,cb);
+            updatePlotlyData('left',fig.data,cb);
             adjustContourOpacity();
         }else{
             console.log(jsonErr);
@@ -1478,7 +1478,7 @@ function showContourPlot(cb){
     Plotly.d3.json(fileName, function(jsonErr, fig) {
         if(jsonErr==null){
             //console.log(fig);
-            replacePlotlyData('left',fig.data,cb);
+            updatePlotlyData('left',fig.data,cb);
         }else{
             console.log(jsonErr);
             alert('error: reading subset raw data json file failed');
