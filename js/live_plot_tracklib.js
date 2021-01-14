@@ -286,7 +286,7 @@ function setTrackingVisibility(){
     if(pvl.data){
         var ids = [];
         for(var i=0;i<pvl.data.length;++i){
-            if(pvl.data[i].name.includes('tracklibPreviewScatter'))
+            if(pvl.data[i].name.includes('tracklibPreviewScatter')) // includes the filtered scatter too
                 ids.push(i);
         }
         Plotly.restyle(pvl,update,ids);
@@ -294,7 +294,7 @@ function setTrackingVisibility(){
     if(pvr.data){
         var ids = [];
         for(var i=0;i<pvr.data.length;++i){
-            if(pvr.data[i].name.includes('tracklibPreviewScatter'))
+            if(pvr.data[i].name.includes('tracklibPreviewScatter')) // includes the filtered scatter too
                 ids.push(i);
         }
         Plotly.restyle(pvr,update,ids);
@@ -453,6 +453,28 @@ function loadPlotlyJsonOutput(source){
         }
     });
 }
+
+function loadPlotlyFilteredJsonOutput(){
+    Plotly.d3.json(fullPath('.dice','.preview_left_filtered.json'), function(jsonErr, fig) {
+        if(jsonErr==null){
+            replacePlotlyData('left',fig.data);
+            setTrackingVisibility();
+        }else{
+            console.log(jsonErr);
+            alert('error: reading json file failed');
+        }
+    });
+    Plotly.d3.json(fullPath('.dice','.preview_right_filtered.json'), function(jsonErr, fig) {
+        if(jsonErr==null){
+            replacePlotlyData('right',fig.data);
+            setTrackingVisibility();
+        }else{
+            console.log(jsonErr);
+            alert('error: reading json file failed');
+        }
+    });
+}
+
 
 function addPreviewTracks(dest){
     var div = destToPlotlyDiv(dest);

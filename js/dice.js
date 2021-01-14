@@ -565,8 +565,10 @@ function updateTracklibDisplayImages(index,loadData=true){
         if(code==0){
             if(isResultsMode()&&loadData)
                 loadPlotlyJsonOutput('results');
-            else if(loadData)
+            else if(loadData){
                 loadPlotlyJsonOutput('preview');
+                loadPlotlyFilteredJsonOutput();
+            }
             else{
                 updatePreviewImage({srcPath:fullPath('',displayLeft),dest:'left'},function(){
                     clearDebugUtils();});

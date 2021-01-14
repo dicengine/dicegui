@@ -1217,7 +1217,7 @@ function updateNeighInfoTrace(dest,index){
                 + 'area: ' + areas[i] + ' (Δ:'+diffAreas[i]+', '+ parseFloat(diffAreas[i]*100.0/(areas[i]-diffAreas[i])).toPrecision(3) + '%)' + '<br>'
                 + 'gray: ' + grays[i] + ' (Δ:'+diffGrays[i]+', ' + parseFloat(diffGrays[i]*100.0/255.0).toPrecision(3) + '%)' + '<br>'
                 + 'dist: ' + parseFloat(dists[i]).toPrecision(2) + ' (Δ:'+parseFloat(diffDists[i]).toPrecision(2)+', '+parseFloat(diffDists[i]*100.0/(dists[i]-diffDists[i])).toPrecision(3) + '%)' + '<br>'
-                + 'angle: ' + parseFloat(angles[i]).toPrecision(3) + '<br>'
+                + 'Δangle: ' + parseFloat(angles[i]).toPrecision(3) + '<br>'
                 + 'disparity: ' + parseFloat(disparities[i]).toPrecision(3) + '<br>'
                 + 'fail: '+failCode);
     }
