@@ -182,7 +182,7 @@ function updatePreviewImage(update,cb){
     var srcPath = update.srcPath || "";
     var destPath = fullPath('.dice','.preview_' + dest + '.png');
     var imgWidth = -1;
-    var imgHeigh = -1;
+    var imgHeight = -1;
 //  if(dest!='left'&&dest!='right'&&dest!='cal_left'&&dest!='cal_right'){
 //  console.log('error: invalid destination ' + dest);
 //  return;
