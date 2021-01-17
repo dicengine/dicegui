@@ -582,6 +582,8 @@ $("#stereoButton").click(function(){
             resetPlotlyViewer('right',true);
             $(".non-tracklib-tools").hide();
             $(".tracklib-tools").show();
+            if($("#fileSelectMode").val()!="cine")
+                $("#fileSelectMode").val("cine").change();
         }else{
             $(".non-tracklib-tools").show();
             $(".tracklib-tools").hide();
@@ -781,9 +783,8 @@ $("#analysisModeSelect").on('change',function() {
                 $(".results-right").show();
                 $(".non-tracklib-tools").hide();
                 $(".tracklib-tools").show();
-                if($("#fileSelectMode").val()!="cine"){
-                    $("#fileSelectMode").val("cine").change()
-                }
+                if($("#fileSelectMode").val()!="cine")
+                    $("#fileSelectMode").val("cine").change();
             }
             else{
                 $(".results-right").hide();
@@ -791,10 +792,6 @@ $("#analysisModeSelect").on('change',function() {
                 $(".tracklib-tools").hide();
             }
         }
-        //$("#subsetParams").hide();
-        //$("#trackingParams").show();
-        //$("#sssigPreview").hide();
-        //clearDrawnROIs();
     }
     else if($(this).val()=="global"){
         $(".full-field").hide();
