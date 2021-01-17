@@ -350,8 +350,17 @@ function callCineStatExec(file,mode,callback) {
                              // check that the two cine files have valid frame ranges
                              if($("#startPreviewSpan").text()!=""||$("#endPreviewSpan").text()!="")
                                  if($("#startPreviewSpan").text()!=stats[1]||$("#endPreviewSpan").text()!=stats[2]){
-                                     alert("Error, all .cine files need to have matching frame ranges");
-                                     return false;
+                                     if(mode==0){
+                                         // unload the stereo image
+                                         cinePathRight = "undefined";
+                                         resetPlotlyViewer('right');
+                                         $("#cineRightPreview span").text("");
+                                     }else{
+                                         // unload the stereo image
+                                         cinePathLeft = "undefined";
+                                         resetPlotlyViewer('left');
+                                         $("#cineLeftPreview span").text("");
+                                     }
                                  }
                              cineFirstFrame = stats[1];
                              $("#startPreviewSpan").text(stats[1]);
@@ -359,14 +368,14 @@ function callCineStatExec(file,mode,callback) {
                              $("#endPreviewSpan").text(stats[2]);
                              $("#cineGoToIndex").val(stats[1]);
                              $("#cineFrameRatePreviewSpan").text(stats[3]);
-                             if(mode==0){
+//                             if(mode==0){
                                  $("#cineRefIndex").val(stats[1]);
                                  $("#cineStartIndex").val(stats[1]);
                                  $("#cineEndIndex").val(stats[2]);
                                  $("#frameScroller").attr('max',stats[2]);
                                  $("#frameScroller").attr('min',stats[1]);
                                  $("#frameScroller").val(stats[1]);
-                             }
+//                             }
                              // convert the cine to tiff
                              // always start with the ref index for the initial display
                              if(mode==0){
