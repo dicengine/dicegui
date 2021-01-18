@@ -821,6 +821,7 @@ $("#fileSelectMode").on('change',function (){
         $(".nav-cine").css('display','none');
     }
     else if($(this).val()=="list"){
+        $("#skipIndex").val(1);
         $(".nav-sequence").css('display','none');
         $(".nav-list").css('display','block');
         $(".nav-cine").css('display','none');
