@@ -108,15 +108,11 @@ function impl_input_xml_file(xml){
         else show2DViewer();
         $("#fileSelectMode").change();
         full_name = image_folder + cine_file;
-        getFileObject(full_name, function (fileObject) {
-            callCineStatExec(fileObject,0,function(){update_cine_indices(xml); parseSubsetFile(xml);});
-        });
+        callCineStatExec(full_name,0,function(){update_cine_indices(xml); parseSubsetFile(xml);});
         if(stereo_cine_file){
             console.log('reading stereo cine file: ' + image_folder + stereo_cine_file);
             stereo_full_name = image_folder + stereo_cine_file;
-            getFileObject(stereo_full_name, function (fileObject) {
-                callCineStatExec(fileObject,1);
-            });
+            callCineStatExec(stereo_full_name,1);
         }
     }else{
         // list

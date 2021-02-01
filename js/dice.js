@@ -296,23 +296,22 @@ function updateCineDisplayImage(fileName,index,dest,cb){
     updatePreviewImage({srcPath:decoratedFile,dest:dest},cb);
 }
 
-function callCineStatExec(file,mode,callback) {
+function callCineStatExec(path,mode,callback) {
 
     callback = callback || $.noop;
     var child_process = require('child_process');
     var readline      = require('readline');
     var proc;
 
-    var fileName = file.path;
-    console.log('loading cine file: ' + file.path)
-    fs.stat(fileName, function(err, stat) {
+    console.log('loading cine file: ' + path)
+    fs.stat(path, function(err, stat) {
         if(err != null) {
-            alert("could not find .cine file: " + fileName);
+            alert("could not find .cine file: " + path);
             return false;
         }
         else{
-            console.log("getting frame range of cine file: " + fileName);
-            var proc = child_process.spawn(execCineStatPath, [fileName],{cwd:workingDirectory});//,maxBuffer:1024*1024})
+            console.log("getting frame range of cine file: " + path);
+            var proc = child_process.spawn(execCineStatPath, [path],{cwd:workingDirectory});//,maxBuffer:1024*1024})
         }
         readline.createInterface({
             input     : proc.stdout,
@@ -379,13 +378,13 @@ function callCineStatExec(file,mode,callback) {
                              // convert the cine to tiff
                              // always start with the ref index for the initial display
                              if(mode==0){
-                                 cinePathLeft = file.path;
-                                 $("#cineLeftPreview span").text(file.name);
-                                 updateCineDisplayImage(fileName,stats[1],'left',callback); // only execute the callback after the left image is updated
+                                 cinePathLeft = path;
+                                 $("#cineLeftPreview span").text(path.replace(/^.*[\\\/]/, ''));
+                                 updateCineDisplayImage(path,stats[1],'left',callback); // only execute the callback after the left image is updated
                              }else if(mode==1){
-                                 cinePathRight = file.path;
-                                 $("#cineRightPreview span").text(file.name);
-                                 updateCineDisplayImage(fileName,stats[1],'right');
+                                 cinePathRight = path;
+                                 $("#cineRightPreview span").text(path.replace(/^.*[\\\/]/, ''));
+                                 updateCineDisplayImage(path,stats[1],'right');
                              }
                              deleteHiddenFiles('keypoints');
                              return true;

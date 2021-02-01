@@ -304,7 +304,7 @@ $("#leftCineInput").change(function (evt) {
 //            }
 //        } // end a right cine file exists
 //        else{
-            callCineStatExec(file,0);
+            callCineStatExec(file.path,0);
 //        }
     }
 });
@@ -317,7 +317,7 @@ $("#rightCineInput").change(function (evt) {
         file = tgt.files[0];
     if(file){
         // create a tiff image of the selected reference frame
-        callCineStatExec(file,1);
+        callCineStatExec(file.path,1);
     }
 });
 
