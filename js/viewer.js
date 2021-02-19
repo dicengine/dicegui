@@ -332,7 +332,8 @@ function reloadCineImages(index,loadData=true){
     // for tracklib special filters can be applied over the images
     if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1&&($("#showSegmentationCheck")[0].checked||$("#showTrackingCheck")[0].checked)){  // signifies tracklib
             updateTracklibDisplayImages(offsetIndex,loadData);
-    }else{    // otherwise just diplay the raw frame
+            return;
+    }else if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1){    // otherwise just diplay the raw frame
         // remove any plots or display lines
         resetPlotlyViewer('left');
         resetPlotlyViewer('right');
@@ -343,6 +344,10 @@ function reloadCineImages(index,loadData=true){
         if(cinePathRight!="undefined")
             updateCineDisplayImage(cinePathRight,offsetIndex,'right');
     }
+    if(cinePathLeft!="undefined")
+        updateCineDisplayImage(cinePathLeft,offsetIndex,'left',function(){showDeformedROIs();});
+    if(cinePathRight!="undefined")
+        updateCineDisplayImage(cinePathRight,offsetIndex,'right');
 }
 
 

@@ -561,7 +561,7 @@ function drawSubsetCoordinates(){
             Plotly.restyle(document.getElementById("plotlyViewerLeft"), {"visible": newFlag}, [result]);
         }
         resizePreview();
-    }else if($("#frameScroller").val()==$("#frameScroller").attr('min')){
+    }else{
         var result = allTraces.findIndex(obj => { 
             return obj.name === "subsetCoordinates";
         });
@@ -569,19 +569,23 @@ function drawSubsetCoordinates(){
             var newFlag = !allTraces[result].visible;
             Plotly.restyle(document.getElementById("plotlyViewerLeft"), {"visible": newFlag}, [result]);
         }else if($("#analysisModeSelect").val()=="subset"){ // if doing subset analysis and custom coordinates are not defined, preview where the subsets will end up
-            // check if the subset preview exists, if so turn it off
-            var traceExisted = removeSubsetPreview();
-//          var previewResult = allTraces.findIndex(obj => { 
-//          return obj.name === "subsetPreview";
-//          });
-//          if(previewResult>=0){
-//          Plotly.deleteTraces(document.getElementById("plotlyViewerLeft"), previewResult);
-//          return;
-//          }
-            // if not rebuild it
-            if(!traceExisted){
-                startProgress();
-                writeInputFile(false,false,true);
+            if(($("#fileSelectMode").val()=='list'&&$("#frameScroller").val()==$("#frameScroller").attr('min'))||
+            ($("#fileSelectMode").val()=='sedquence'&&$("#frameScroller").val()==$("#refIndex").val())||
+            ($("#fileSelectMode").val()=='cine'&&$("#frameScroller").val()==$("#cineRefIndex").val())){
+                // check if the subset preview exists, if so turn it off
+                var traceExisted = removeSubsetPreview();
+//              var previewResult = allTraces.findIndex(obj => { 
+//              return obj.name === "subsetPreview";
+//              });
+//              if(previewResult>=0){
+//              Plotly.deleteTraces(document.getElementById("plotlyViewerLeft"), previewResult);
+//              return;
+//              }
+                // if not rebuild it
+                if(!traceExisted){
+                    startProgress();
+                    writeInputFile(false,false,true);
+                }
             }
         }
     }
