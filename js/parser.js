@@ -432,14 +432,15 @@ function readSubsetFile(data){
 
 function update_cine_indices(xml){
     cine_start_index = xml_get(xml,"cine_start_index");
-    if(cine_start_index!='undefined') $("#cineStartIndex").val(cine_start_index);
+    if(cine_start_index && cine_start_index!='undefined') {$("#cineStartIndex").val(cine_start_index);}
     cine_end_index = xml_get(xml,"cine_end_index");
-    if(cine_end_index!='undefined') $("#cineEndIndex").val(cine_end_index);
+    if(cine_end_index && cine_end_index!='undefined') {$("#cineEndIndex").val(cine_end_index);}
     cine_skip_index = xml_get(xml,"cine_skip_index");
-    if(cine_skip_index!='undefined') $("#cineSkipIndex").val(cine_skip_index);
+    if(cine_skip_index && cine_skip_index!='undefined') {$("#cineSkipIndex").val(cine_skip_index);}
     cine_ref_index = xml_get(xml,"cine_ref_index");
-    if(cine_ref_index!='undefined') $("#cineRefIndex").val(cine_ref_index);
+    if(cine_ref_index && cine_ref_index!='undefined') {$("#cineRefIndex").val(cine_ref_index);}
     $("#frameScroller").val(cine_ref_index);
+    $("#currentPreviewSpan").text(cine_ref_index);
 }
 
 function parse_params_xml_file(filename){
@@ -473,7 +474,7 @@ function impl_params_xml_file(xml){
     // set the sssig threshold
     sssig = xml_get(xml,"sssig_threshold");
     console.log('sssig_threshold: ' + sssig);
-    if(sssig!='undefined'){
+    if(sssig && sssig!='undefined'){
         $("#sssigThresh").val(sssig);
         $("#sssigLabel").text(sssig);
     }
