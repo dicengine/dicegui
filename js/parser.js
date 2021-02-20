@@ -329,7 +329,7 @@ function readLivePlotFile(){
 // note: the read_susbset_file does not read the
 // subset_id for a conformal subset, instead it assumes that the
 // subsets are always saved in order from 0 to n.
-// note: obstructed regions are copied in all subsets, as such only the
+// note: obstructed regions are copied in all subsets, as such only the FIXME is this still the case?
 // obstructed regions from the first subeset are loaded
 function readSubsetFile(data){
     hierarchy = [];
@@ -357,6 +357,7 @@ function readSubsetFile(data){
                         // if this is a tracking analysis, this could potentially be skipped since this info is stored in the shape centroids
                         subsetLocations.x.push(num_line[0]);
                         subsetLocations.y.push(num_line[1]);
+                        blockingSubsets.push([]);
                     }
                     line+=vertex;
                 }
@@ -388,17 +389,24 @@ function readSubsetFile(data){
                         var shape = pointsToPathShape(points,'excluded_' + excludedId.toString());
                         shapes.push(shape);
                     }
-//                    else if((hierarchy[hierarchy.length-3].toUpperCase()=='OBSTRUCTED')&&currentROIIndex==1){
-//                        if(currentObstructedIndex!=0){
-//                            obstructedDefsX.push([]);
-//                            obstructedDefsY.push([]);
-//                        }
-//                        for(var i=0;i<vertex_x.length;i++){
-//                            obstructedDefsX[obstructedDefsX.length-1].push(vertex_x[i]);
-//                            obstructedDefsY[obstructedDefsY.length-1].push(vertex_y[i]);
-//                        }
-//                        currentObstructedIndex += 1;
-//                    }
+                    else if(hierarchy[hierarchy.length-3].toUpperCase()=='OBSTRUCTED'){
+                        var obstructedId = currentROI - 1;
+                        var shape = pointsToPathShape(points,'obstructed_0'); // all obstructions get associated with subset 0
+                        shapes.push(shape);
+                    }
+                }
+                if(split_line[1].toUpperCase()=='BLOCKING_SUBSETS'){
+                    if(subsetLocations.x.length==0) alert('invalid subset definitions file');
+                    var blockingId = 0;
+                    var blockingSubsetList = [];
+                    while(blockingId < max_vertices){
+                        num_line = lines[line+1+blockingId].match(/\S+/g).map(Number);
+                        if(isNaN(num_line[0])) break;
+                        blockingId++;
+                        blockingSubsetList.push(num_line[0]);
+                    }
+                    line+=blockingId;
+                    blockingSubsets[currentROI-1] = blockingSubsetList;
                 }
             }
             else if(split_line[0]=='end' && hierarchy.length > 0){
@@ -406,6 +414,7 @@ function readSubsetFile(data){
             }
         } // end split_line
     } // end lines
+    //console.log(blockingSubsets);
     // assuming here that the plotly div already exists
     var update = {shapes: shapes};
     Plotly.relayout(document.getElementById("plotlyViewerLeft"),update);
@@ -720,6 +729,11 @@ function pointsToPathShape(points,name){
         if(name.includes('excluded')){
             shape.line = {color: 'red'};
             shape.fillcolor = 'red';
+            shape.opacity = 0.2;
+        }
+        else if(name.includes('obstructed')){
+            shape.line = {color: 'cyan'};
+            shape.fillcolor = 'cyan';
             shape.opacity = 0.2;
         }
     }

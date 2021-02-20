@@ -40,6 +40,10 @@ var cinePathRight = "undefined";
 var cineFirstFrame = 0;
 var calPath = "undefined";
 
+// blocking subsets (used for legacy tracking code)
+var blockingSubsets = [[]];
+var roiType = 'ROI';
+
 // reference image dimensions
 var refImageWidth = 0;
 var refImageHeight = 0;

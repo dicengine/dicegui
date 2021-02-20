@@ -34,6 +34,7 @@
 <script src="./js/viewer.js" defer></script>
 <!-- Local style sheet -->
 <link rel="stylesheet" type="text/css" href="style.css">
+<link rel="stylesheet" type="text/css" href="jquery-ui.min.css">
 <!-- Google fonts and icons -->
 <link rel="stylesheet" type="text/css" href="open_sans.css">
 <link rel="stylesheet" type="text/css" href="material_icons.css">
@@ -856,6 +857,15 @@
         <!-- end inner-fluid-right-col -->
       </div>
       <!-- end fluid-col -->
+    </div>
+    <div id="dialog" title="Alert message" style="display: none">
+      <div class="ui-dialog-content ui-widget-content">
+        <p>
+          <span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 20px 0"></span> <label
+            id="lblMessage"
+          > </label>
+        </p>
+      </div>
     </div>
     <!-- end content -->
     <div class="footer">Copyright 2017 Sandia Corporation</div>

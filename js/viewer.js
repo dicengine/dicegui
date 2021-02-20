@@ -588,3 +588,33 @@ $("#bestFitCheck").change(function() {
 $("#showRepSubsetCheck").change(function() {
     drawRepresentativeSubset();
 });
+
+function ShowDialogBox(title, content, btn1text, btn2text, cb1, cb2) {
+    cb1 = cb1 || $.noop;
+    cb2 = cb2 || $.noop;
+    $("#lblMessage").html(content);
+    $("#dialog").dialog({
+        resizable: false,
+        title: title,
+        modal: true,
+        width: '400px',
+        height: 'auto',
+        bgiframe: false,
+        buttons: [
+            {
+                text: btn1text,
+                click: function () {
+                    cb1();
+                    $("#dialog").dialog('close');
+                }
+            },
+            {
+                text: btn2text,
+                click: function () {
+                    cb2();
+                    $("#dialog").dialog('close');
+                }
+            }
+        ]
+    });
+}

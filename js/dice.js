@@ -1151,6 +1151,8 @@ function writeSubsetFile(only_write,resolution,ss_locs){
     var numROIs = pathShapes.length;
     var excludedShapes = getPlotlyShapes('excluded');
     var numExcluded = excludedShapes.length;
+    var obstructedShapes = getPlotlyShapes('obstructed');
+    var numObstructed = obstructedShapes.length;
     
     var content = '';
     content += '# Auto generated subset file from DICe GUI\n';
@@ -1187,9 +1189,6 @@ function writeSubsetFile(only_write,resolution,ss_locs){
             content += '    end polygon\n';
         }
         content += '  end boundary\n';
-        
-        // TODO deal with obstructued (if we decide to continue supporting this
-
         if(numExcluded>0){
             content += '  begin excluded\n';
             for(var i = 0; i < numExcluded; i++) {
@@ -1205,7 +1204,6 @@ function writeSubsetFile(only_write,resolution,ss_locs){
             content += '  end excluded\n';
         }
         content += 'end region_of_interest\n';
-        
     }else if($("#analysisModeSelect").val()=="tracking"&&numROIs>0){ // tracking mode
 
         // add a polygon for each ROI
@@ -1222,9 +1220,14 @@ function writeSubsetFile(only_write,resolution,ss_locs){
             content += '      end vertices\n';
             content += '    end polygon\n';
             content += '  end boundary\n';
-            
-            // TODO deal with obstructed
-            
+            if(blockingSubsets.length>i){
+                if(blockingSubsets[i].length>0){
+                    content += '  begin blocking_subsets\n';
+                    for(var j=0;j<blockingSubsets[i].length;++j)
+                        content += '    ' + blockingSubsets[i][j]  + '\n';
+                    content += '  end blocking_subsets\n';
+                }
+            }
             // excluded
             var hasExcluded = false;
             for(var j = 0; j < numExcluded; j++) {
@@ -1250,6 +1253,32 @@ function writeSubsetFile(only_write,resolution,ss_locs){
             }
             if(hasExcluded){
                 content += '  end excluded\n';
+            }
+            // obstructed
+            var hasObstructed = false;
+            for(var j = 0; j < numObstructed; j++) {
+                var obstructedId = parseInt(obstructedShapes[j].name.split('_').pop());
+                if(obstructedId == i)
+                    hasObstructed = true;
+            }
+            if(hasObstructed){
+                content += '  begin obstructed\n';
+            }
+            for(var j = 0; j < numObstructed; j++) {
+                var obstructedId = parseInt(obstructedShapes[j].name.split('_').pop());
+                if(obstructedId == i){
+                    content += '    begin polygon\n'; 
+                    content += '      begin vertices\n';
+                    var points = pathShapeToPoints(obstructedShapes[j]);
+                    for(var k=0;k<points.x.length;k++){
+                        content += '        ' +  points.x[k] + ' ' + points.y[k] + '\n';
+                    }
+                    content += '      end vertices\n';
+                    content += '    end polygon\n';
+                }
+            }
+            if(hasObstructed){
+                content += '  end obstructed\n';
             }
             content += 'end conformal_subset\n';
         }

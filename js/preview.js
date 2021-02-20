@@ -611,6 +611,7 @@ function getPlotlyShapes(name,strict=false){
             for(var i=0;i<shapes.length;++i){
                 //if(shapes[i].type=='path')
                     if(name){
+                        if(!shapes[i].name) continue;
                         if(!strict&&shapes[i].name.includes(name))
                             returnShapes.push(shapes[i]);
                         else if(shapes[i].name==name)
@@ -997,7 +998,6 @@ function updateLivePlotLine(){
 function assignShapeNames(){
     var relayoutNeeded = false;
     var shapes = getPlotlyShapes(); // get all shapes, not just ROIs
-    var ROICount = 0;
     var i = shapes.length;
     while (i--) {
         if(shapes[i].name===undefined&&shapes[i].type==='path'){
@@ -1007,8 +1007,7 @@ function assignShapeNames(){
                 relayoutNeeded = true;
                 continue;
             }else{
-                shapes[i].name='ROI_' + ROICount.toString();
-                ROICount++;
+                shapes[i].name='newShape_' + numROIShapes();
             }
         }
     }
@@ -1021,19 +1020,24 @@ function checkForInternalShapes(){
     var shapes = getPlotlyShapes(); // get all shapes, not just ROIs
     if(shapes.length<=0) return;
     var centroids = shapesToCentroids(shapes);
+    var newShapeId = -1;
     // loop through the shapes to
     // iterate the shapes backwards because the exclusions are always added after the base shape
     for(var i=centroids.x.length-1;i>=0;i--){
-        if(!shapes[i].name.includes('ROI')) continue;
-        //console.log('checking shape ' + shapes[i].name);
+        if(!shapes[i].name.includes('newShape')) continue;
+        newShapeId = shapes[i].name.split('_').pop();
+        console.log('checking shape ' + shapes[i].name);
+        shapes[i].name = 'ROI_' + newShapeId;
+        console.log('created shape ' + shapes[i].name);
         var cx = centroids.x[i];
         var cy = centroids.y[i];
-        //console.log('checking shape ' + cx + ' ' + cy);
+        console.log('checking shape ' + cx + ' ' + cy);
         for(var j=0;j<shapes.length;j++){
             if(j==i) continue;
             if(!shapes[j].name.includes('ROI'))continue;
             var inShapeId = shapes[j].name.split('_').pop();
             if(isInShape(cx,cy,shapes[j])){
+                console.log('found in shape ' + inShapeId);
                 shapes[i].name = 'excluded_' + inShapeId;
                 shapes[i].line = {color: 'red'};
                 shapes[i].fillcolor = 'red';
@@ -1042,6 +1046,29 @@ function checkForInternalShapes(){
                 break;
             }
         }
+    }
+    if(!relayoutNeeded&&newShapeId>=0&&$("#analysisModeSelect").val()=="tracking"){ // signifies the shape was not inside another one, so check if ROI or obstructed
+        ShowDialogBox('Shape type', 'Select shape type', 'ROI', 'obstruction',
+                function(){
+                   // for ROI no op
+                },
+                function(){
+                    var shapes = getPlotlyShapes(); // get all shapes, not just ROIs
+                    var lastShapeName = 'ROI_' + (numROIShapes()-1).toString();
+                    for( var i=0;i<shapes.length;++i){
+                        if(!shapes[i].name) continue;
+                        if(shapes[i].name === lastShapeName){
+                            shapes[i].name = 'obstructed_0';
+                            shapes[i].line = {color: 'cyan'};
+                            shapes[i].fillcolor = 'cyan';
+                            shapes[i].opacity = 0.2;
+                            break;
+                        }
+                    }
+                    var update = {'shapes' : shapes}
+                    Plotly.relayout(destToPlotlyDiv('left'),update);
+                }
+            );
     }
     return relayoutNeeded;
 }
