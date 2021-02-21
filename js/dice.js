@@ -1072,6 +1072,9 @@ function writeParamsFile(only_write,resolution,ss_locs) {
             }else{
                 content += '<Parameter name="global_element_type" type="string" value="TRI6" />\n';
             }
+            content += '<ParameterList name="post_process_plotly_contour">\n';
+            content += '<Parameter name="plotly_contour_grid_step" type="int" value=" ' + $("#meshSize").val() + '" />\n';
+            content += '</ParameterList>\n';
         }else{ // assume tracking at this point
             content += '<Parameter name="use_tracking_default_params" type="bool" value="true" />\n';
             content += '<Parameter name="normalize_gamma_with_active_pixels" type="bool" value="true" />\n';
@@ -1499,8 +1502,9 @@ function showContourPlot(cb){
             // copy the selected field to the z array
             fig.data[0].z = fig.data[0][fieldName];
             for(var i=0;i<fig.data[0].z.length;++i)
-                if(fig.data[0].STATUS_FLAG[i] < 0.0)
-                    fig.data[0].z[i] = null;
+                if(fig.data[0].STATUS_FLAG)
+                    if(fig.data[0].STATUS_FLAG[i] < 0.0)
+                        fig.data[0].z[i] = null;
             fig.data[0].x = fig.data[0]['COORDINATE_X'];
             fig.data[0].y = fig.data[0]['COORDINATE_Y'];
             updatePlotlyData('left',fig.data,cb);
@@ -1536,21 +1540,28 @@ function getContourJsonFileName(leastSquares = false){
 
 function populateContourFields(){
     // TODO make this switch on analysis type
+    $("#contourFieldSelect").empty();
     $("#contourFieldSelect").append(new Option('COORDINATE_X','COORDINATE_X'));
     $("#contourFieldSelect").append(new Option('COORDINATE_Y','COORDINATE_Y'));
     $("#contourFieldSelect").append(new Option('DISPLACEMENT_X','DISPLACEMENT_X'));
     $("#contourFieldSelect").append(new Option('DISPLACEMENT_Y','DISPLACEMENT_Y'));
-    $("#contourFieldSelect").append(new Option('SIGMA','SIGMA'));
-    $("#contourFieldSelect").append(new Option('GAMMA','GAMMA'));
-    $("#contourFieldSelect").append(new Option('BETA','BETA'));
-    $("#contourFieldSelect").append(new Option('STATUS_FLAG','STATUS_FLAG'));
-    $("#contourFieldSelect").append(new Option('UNCERTAINTY','UNCERTAINTY'));
-    $("#contourFieldSelect").append(new Option('VSG_STRAIN_XX','VSG_STRAIN_XX'));
-    $("#contourFieldSelect").append(new Option('VSG_STRAIN_YY','VSG_STRAIN_YY'));
-    $("#contourFieldSelect").append(new Option('VSG_STRAIN_XY','VSG_STRAIN_XY'));
+    if($("#analysisModeSelect").val()=="subset"){
+        $("#contourFieldSelect").append(new Option('SIGMA','SIGMA'));
+        $("#contourFieldSelect").append(new Option('GAMMA','GAMMA'));
+        $("#contourFieldSelect").append(new Option('BETA','BETA'));
+        $("#contourFieldSelect").append(new Option('STATUS_FLAG','STATUS_FLAG'));
+        $("#contourFieldSelect").append(new Option('UNCERTAINTY','UNCERTAINTY'));
+        $("#contourFieldSelect").append(new Option('VSG_STRAIN_XX','VSG_STRAIN_XX'));
+        $("#contourFieldSelect").append(new Option('VSG_STRAIN_YY','VSG_STRAIN_YY'));
+        $("#contourFieldSelect").append(new Option('VSG_STRAIN_XY','VSG_STRAIN_XY'));
+    }else if($("#analysisModeSelect").val()=="global"){
+        $("#contourFieldSelect").append(new Option('GREEN_LAGRANGE_STRAIN_XX','GREEN_LAGRANGE_STRAIN_XX'));
+        $("#contourFieldSelect").append(new Option('GREEN_LAGRANGE_STRAIN_YY','GREEN_LAGRANGE_STRAIN_YY'));
+        $("#contourFieldSelect").append(new Option('GREEN_LAGRANGE_STRAIN_XY','GREEN_LAGRANGE_STRAIN_XY'));
+    }
 }
 
-function checkSubsetJsonFileExists(){
+function checkContourJsonFileExists(){
     var fileName = getContourJsonFileName(true);
     console.log('loadSubsetJsonFile(): ' + fileName);
     fs.stat(fileName, function(err, stat) {
@@ -1574,7 +1585,7 @@ function displayResults(){
         if($("#fileSelectMode").val()=="list") // advance past the ref frame
             $("#frameScroller").val(1).change();
         $("#showContourCheck").prop("checked",true).change();
-//        checkSubsetJsonFileExists();
+//        checkContourJsonFileExists();
     }
 }
 

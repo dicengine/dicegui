@@ -811,6 +811,7 @@ $("#analysisModeSelect").on('change',function() {
     }
     drawBestFitLine();
     resizeAll();
+    populateContourFields();
     checkValidInput();
 });
 

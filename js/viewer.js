@@ -400,8 +400,8 @@ $("#frameScroller").on('input', function () {
     else if($("#fileSelectMode").val()=="cine"){
         reloadCineImages($(this).val(),!isResultsMode());
     }
-    if($("#analysisModeSelect").val()=="subset"){
-        checkSubsetJsonFileExists();
+    if($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global"){
+        checkContourJsonFileExists();
     }
     // turn off live plot info if this is not the first frame
     toggleLivePlotVisibility($(this).val()==$(this).attr('min'));

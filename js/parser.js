@@ -34,14 +34,14 @@ function parseSubsetFile(xml){
             }else{ // file doesn't exist
                 readLivePlotFile();
                 readBestFitFile();
-                checkSubsetJsonFileExists();
+                checkContourJsonFileExists();
             }
         }); // end stat subset file
     }  // end has subset_file
     else{
         readLivePlotFile();
         readBestFitFile();
-        checkSubsetJsonFileExists();
+        checkContourJsonFileExists();
     }
 }
 
@@ -436,7 +436,7 @@ function readSubsetFile(data){
     }
     readLivePlotFile();
     readBestFitFile();
-    checkSubsetJsonFileExists();
+    checkContourJsonFileExists();
 }
 
 function update_cine_indices(xml){
