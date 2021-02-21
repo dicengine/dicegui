@@ -525,7 +525,7 @@ function addLivePlotPts(ptsX,ptsY){
                 marker: {
                     color: color,
                     size: 8,
-                    line: {color:'white',width:1}
+                    line: {color:'white',width:2}
                 },
         };
         Plotly.addTraces(document.getElementById("plotlyViewerLeft"),previewTrace);
