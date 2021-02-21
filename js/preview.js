@@ -329,7 +329,7 @@ function getPreviewLayout(){
             hovermode: 'closest',
     };
     if($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global"){
-        _layout.newshape = {line: {color: 'yellow'},fillcolor:'cyan',opacity:0.4};
+        _layout.newshape = {line: {color: 'yellow', width: 3},fillcolor:'yellow',opacity:0.3};
     }
     if($("#analysisModeSelect").val()=="tracking"){
         _layout.newshape = {line: {color: 'purple'},fillcolor:'green',opacity:0.4};
@@ -385,7 +385,7 @@ function getPreviewConfig(dest){
                 'hoverClosestCartesian'
                 ],
     };
-    if($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global"){
+    if($("#analysisModeSelect").val()=="subset"){
         if(dest=='left'){
             _config.modeBarButtonsToAdd = [
                 'drawclosedpath',
@@ -393,6 +393,15 @@ function getPreviewConfig(dest){
                 'drawline',
                 showSubsetLocationsButton,
                 importSubsetLocationsButton,
+                deleteLivePlotPtsButton];
+        }
+    }
+    if($("#analysisModeSelect").val()=="global"){
+        if(dest=='left'){
+            _config.modeBarButtonsToAdd = [
+                'drawclosedpath',
+                'eraseshape',
+                'drawline',
                 deleteLivePlotPtsButton];
         }
     }
@@ -430,7 +439,7 @@ function getPreviewLayoutConfig(dest){
 function livePlotDims(){
     var result = {numLivePlotPts:0,
             livePlotLineActive: false};
-    if($("#analysisModeSelect").val()!="subset") return result;
+    if($("#analysisModeSelect").val()=="tracking") return result;
     var data = document.getElementById("plotlyViewerLeft").data;
     var livePlotPtsTraceId = data.findIndex(obj => { 
         return obj.name === "live plot pts";
@@ -445,7 +454,7 @@ function livePlotDims(){
 
 function addLivePlotLine(ox,oy,px,py){
     // check if live plot points have been defined
-    if($("#analysisModeSelect").val()!="subset") return;
+    if($("#analysisModeSelect").val()=="tracking") return;
     var lineColor = plotlyDefaultColor(9);
     var lineShape = {
             type: 'line',
@@ -466,7 +475,7 @@ function addLivePlotLine(ox,oy,px,py){
 
 function addLivePlotPts(ptsX,ptsY){
     // check if live plot points have been defined
-    if($("#analysisModeSelect").val()!="subset") return;
+    if($("#analysisModeSelect").val()=="tracking") return;
     var data = document.getElementById("plotlyViewerLeft").data;
     if(!data){
         alert('error: plotly viewer left data has not been defined');
@@ -532,7 +541,7 @@ function deleteLivePlotPts(){
     if(previewResult>=0){
         Plotly.deleteTraces(document.getElementById("plotlyViewerLeft"), previewResult);
     }
-    // TODO delete line info as well
+    updateLivePlotLine(true);
 }
 
 function removeSubsetPreview(){
@@ -717,7 +726,7 @@ $("#plotlyViewerRight").mousemove(function( event ) {
 });
 
 $("#plotlyViewerLeft").on('click', function(event){ // note: not plotly_click, to register clicks anywhere in the DOM, not just on a plotly plot
-    if($("#analysisModeSelect").val()=="subset"&&event.which==2){
+    if($("#analysisModeSelect").val()!="tracking"&&event.which==2){
         var xInDataCoord = parseInt(coordsXaxisLeft.p2c(event.offsetX - coordsLeftLeft));
         var yInDataCoord = parseInt(coordsYaxisLeft.p2c(event.offsetY - coordsTopLeft));
         addLivePlotPts([xInDataCoord],[yInDataCoord]);
@@ -927,6 +936,7 @@ function numROIShapes(){
 }
 
 function deleteShape(index){
+    if(index<0) return;
     if(document.getElementById("plotlyViewerLeft").layout)
         if(document.getElementById("plotlyViewerLeft").layout.shapes)
             if(document.getElementById("plotlyViewerLeft").layout.shapes.length>index)
@@ -962,7 +972,7 @@ function toggleLivePlotVisibility(visibility){
     }
 }
 
-function updateLivePlotLine(){
+function updateLivePlotLine(deleteOnly = false){
     var relayoutNeeded = false;
     var shapes = getPlotlyShapes(); // get all shapes, not just ROIs
     var oldLineIndex = -1;
@@ -981,6 +991,13 @@ function updateLivePlotLine(){
                 newLineIndex = i;
             }
         }
+    }
+    if(deleteOnly){
+        alert('deleting old line index ' + oldLineIndex);
+        deleteShape(oldLineIndex);
+        var update = {'shapes' : getPlotlyShapes()};
+        Plotly.relayout(destToPlotlyDiv('left'),update);
+        return true;
     }
     if(oldLineIndex>=0&&newLineIndex>=0){
         deleteShape(oldLineIndex);
@@ -1028,6 +1045,10 @@ function checkForInternalShapes(){
         newShapeId = shapes[i].name.split('_').pop();
         console.log('checking shape ' + shapes[i].name);
         shapes[i].name = 'ROI_' + newShapeId;
+        shapes[i].line = {color: 'yellow', width: 3, dash: 'dash'};
+        shapes[i].fillcolor = 'none';
+        shapes[i].opacity = 0.7;
+        relayoutNeeded = true;
         console.log('created shape ' + shapes[i].name);
         var cx = centroids.x[i];
         var cy = centroids.y[i];
@@ -1039,10 +1060,10 @@ function checkForInternalShapes(){
             if(isInShape(cx,cy,shapes[j])){
                 console.log('found in shape ' + inShapeId);
                 shapes[i].name = 'excluded_' + inShapeId;
-                shapes[i].line = {color: 'red'};
+                shapes[i].line = {color: 'red', width: 3};
                 shapes[i].fillcolor = 'red';
-                shapes[i].opacity = 0.2;
-                relayoutNeeded = true;
+                shapes[i].opacity = 0.3;
+                //relayoutNeeded = true;
                 break;
             }
         }

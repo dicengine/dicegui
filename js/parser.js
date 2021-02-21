@@ -714,14 +714,14 @@ function pointsToPathShape(points,name){
     shape.path = path;
     // color the shape:
     if($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global"){
-        shape.line = {color: 'cyan', width:4}
-        shape.fillcolor = 'cyan'
-        shape.opacity = 0.4;
+        shape.line = {color: 'yellow', width:3, dash: 'dash'}
+        shape.fillcolor = 'none'
+        shape.opacity = 0.7;
     }
     else{
-        shape.line = {color: 'purple', width:4}
+        shape.line = {color: 'purple', width:3}
         shape.fillcolor = 'green';
-        shape.opacity =0.4;
+        shape.opacity =0.3;
     }
     shape.editable = true;
     if(name){

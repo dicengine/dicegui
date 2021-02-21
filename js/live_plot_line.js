@@ -70,8 +70,9 @@ function livePlotLine(){
             var suffix = suffixAndExt.substr(0, suffixAndExt.indexOf('.'));
             var stepID = Number(suffix);
             steps.push(stepID);
-            if(stepID > latestLineFileIndex)
+            if(stepID > latestLineFileIndex){
                 latestLineFileIndex = stepID;
+            }
         }
     });
     steps.sort(function(a, b){return a-b});

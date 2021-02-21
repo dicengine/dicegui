@@ -733,11 +733,11 @@ function showStereoViewer(){
 function updateFrameScrollerRange(){
     if($("#fileSelectMode").val()=="list"){
         $("#startPreviewSpan").text("ref");
-        $("#endPreviewSpan").text(defImagePathsLeft.length);
-        $("#currentPreviewSpan").text("0");
-        $("#frameScroller").attr('max',defImagePathsLeft.length);
-        $("#frameScroller").attr('min',0);
-        $("#frameScroller").val(0);
+        $("#endPreviewSpan").text(defImagePathsLeft.length-1);
+        $("#currentPreviewSpan").text("ref");
+        $("#frameScroller").attr('max',defImagePathsLeft.length-1);
+        $("#frameScroller").attr('min',-1);
+        $("#frameScroller").val(-1);
     }else if($("#fileSelectMode").val() == "sequence"){
         $("#startPreviewSpan").text($("#startIndex").val());
         $("#endPreviewSpan").text($("#endIndex").val());

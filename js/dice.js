@@ -60,7 +60,7 @@ function showLivePlots(){
     localStorage.setItem("workingDirectory",workingDirectory);
     if($("#analysisModeSelect").val()=="tracking"){
         if(diceTrackLibOn && showStereoPane==1){
-            // TODO enable live plots for tracklib
+            // enable live plots for tracklib
             $("#plotsButton").trigger( "click" );
             //livePlotTracklibRepeat();
         }else{
@@ -200,7 +200,7 @@ function callDICeExec(resolution,ss_locs) {
     // nuke the old line plot and point live plot files
     fs.readdirSync(workingDirectory).forEach(file => {
         // check if the file matches the syntax                                                                       
-        if(file.indexOf('live_plot_line_step_') !== -1 || file.indexOf('live_plot_pt_') !== -1){
+        if(file.indexOf('live_plot_line_frame_') !== -1 || file.indexOf('live_plot_pt_') !== -1){
             fs.unlink(fullPath('',file), (err) => {
                 if (err) throw err;
                 console.log('successfully deleted old line plot file'+file);
@@ -674,6 +674,7 @@ function postExecTasks(){
         }
     }
     displayResults();
+    showLivePlots();
 }
 
 function startProgress (){
@@ -853,7 +854,7 @@ function writeBestFitFile() {
 }
 
 function writeLivePlotsFile() {
-    if($("#analysisModeSelect").val()!="subset") return;
+    if($("#analysisModeSelect").val()=="tracking") return;
     var data = document.getElementById("plotlyViewerLeft").data;
     if(!data) return;
     var livePlotPtsTraceId = data.findIndex(obj => { 
@@ -1531,8 +1532,8 @@ function showContourPlot(cb){
 
 function getContourJsonFileName(leastSquares = false){
     var frameId = $("#frameScroller").val();
-    if($("#fileSelectMode").val()=="list")
-        frameId -= 1; // for sequence and list, the zeroeth index is the reference image so need to decrement by 1
+    //if($("#fileSelectMode").val()=="list")
+    //    frameId -= 1; // for sequence and list, the zeroeth index is the reference image so need to decrement by 1
     // check if the file exists for this frameID, if not return
     if(leastSquares) return fullPath('.dice','.results_2d_ls_' + frameId + '.json');
     else return fullPath('.dice','.results_2d_' + frameId + '.json');
@@ -1581,9 +1582,10 @@ function checkContourJsonFileExists(){
 }
 
 function displayResults(){
-    if($("#analysisModeSelect").val()=="subset"){
+    console.log('displayResults():');
+    if($("#analysisModeSelect").val()!="tracking"){
         if($("#fileSelectMode").val()=="list") // advance past the ref frame
-            $("#frameScroller").val(1).change();
+            $("#frameScroller").val(0).change();
         $("#showContourCheck").prop("checked",true).change();
 //        checkContourJsonFileExists();
     }

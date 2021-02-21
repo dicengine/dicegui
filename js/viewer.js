@@ -356,9 +356,26 @@ $("#cineRefIndex").change(function () {
     var refIndex = $("#cineRefIndex").val();
 });
 
+function selectHasValue(select, value) {
+    obj = document.getElementById(select);
+    if (obj !== null) {
+        return (obj.innerHTML.indexOf('value="' + value + '"') > -1);
+    } else {
+        return false;
+    }
+}
+
+function setScrollerText(val){
+    if($("#fileSelectMode").val()=="list" && val<0)
+        $("#currentPreviewSpan").text('ref');
+    else
+        $("#currentPreviewSpan").text(val);
+}
+
 $("#frameScroller").on('input', function () {
-    $("#currentPreviewSpan").text($(this).val());
+    setScrollerText($(this).val());
 }).change(function(){
+    setScrollerText($(this).val()); // call this again in case the value was set by a call to .val() which wouldn't fire the input event
     if($("#fileSelectMode").val()=="list"){
         $('#defImageListLeft li').each(function(i){
             $(this).removeClass('def-image-ul-selected');
@@ -366,7 +383,7 @@ $("#frameScroller").on('input', function () {
         $('#defImageListRight li').each(function(i){
             $(this).removeClass('def-image-ul-selected');
         });
-        if(Number($(this).val())==0){
+        if(Number($(this).val())<0){
             if(refImagePathLeft!="")
                 updatePreviewImage({srcPath:refImagePathLeft,dest:'left'});
             else{
@@ -378,15 +395,15 @@ $("#frameScroller").on('input', function () {
                 resetPlotlyViewer('right');
             }
         }else{
-            var index = $(this).val()-1;
-            if(defImagePathsLeft.length >= $(this).val()){
+            var index = $(this).val();
+            if(defImagePathsLeft.length > $(this).val()){
                 updatePreviewImage({srcPath:defImagePathsLeft[index].path,dest:'left'});
                 $("#defImageListLeft li:eq(" + index.toString() + ")").addClass("def-image-ul-selected");
             }
             else{
                 resetPlotlyViewer('left');
             }
-            if(defImagePathsRight.length >= $(this).val()){
+            if(defImagePathsRight.length > $(this).val()){
                 updatePreviewImage({srcPath:defImagePathsRight[index].path,dest:'right'});
                 $("#defImageListRight li:eq(" + index.toString() + ")").addClass("def-image-ul-selected");
             }
@@ -405,7 +422,12 @@ $("#frameScroller").on('input', function () {
     }
     // turn off live plot info if this is not the first frame
     toggleLivePlotVisibility($(this).val()==$(this).attr('min'));
-    $("#stepSelect").val($(this).val()).change();
+    if(selectHasValue("stepSelect",$(this).val())){
+        console.log('updating step select with val ' + $(this).val());
+        $("#stepSelect").val($(this).val()).change();
+    }else{
+        console.log('not updating step select since ' + $(this).val() + ' is not a valid option');
+    }
     removeSubsetPreview();
 });
 
