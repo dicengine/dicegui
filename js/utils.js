@@ -34,7 +34,7 @@ function initialize_gui(load_existing){
     $(".global").hide();
     $(".cal-options").hide();
     //$("#trackingParams").hide();
-    $("#analysisModeSelect").val("subset");
+    $("#analysisModeSelect").val("subset").change();
 
     // hide the minimized bars for closed views
     $("#leftMinimized").hide();
