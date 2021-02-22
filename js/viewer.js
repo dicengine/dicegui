@@ -413,8 +413,7 @@ $("#frameScroller").on('input', function () {
         }
     }else if($("#fileSelectMode").val()=="sequence"){
         updateImageSequencePreview(true);
-    }
-    else if($("#fileSelectMode").val()=="cine"){
+    }else if($("#fileSelectMode").val()=="cine"){
         reloadCineImages($(this).val(),!isResultsMode());
     }
     if($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global"){
@@ -428,6 +427,7 @@ $("#frameScroller").on('input', function () {
     }else{
         console.log('not updating step select since ' + $(this).val() + ' is not a valid option');
     }
+    showDeformedROIs();
     removeSubsetPreview();
 });
 

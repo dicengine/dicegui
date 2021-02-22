@@ -1045,10 +1045,12 @@ function checkForInternalShapes(){
         newShapeId = shapes[i].name.split('_').pop();
         console.log('checking shape ' + shapes[i].name);
         shapes[i].name = 'ROI_' + newShapeId;
-        shapes[i].line = {color: 'yellow', width: 3, dash: 'dash'};
-        shapes[i].fillcolor = 'none';
-        shapes[i].opacity = 0.7;
-        relayoutNeeded = true;
+        if($("#analysisModeSelect").val()!="tracking"){
+            shapes[i].line = {color: 'yellow', width: 3, dash: 'dash'};
+            shapes[i].fillcolor = 'none';
+            shapes[i].opacity = 0.7;
+            relayoutNeeded = true;
+        }
         console.log('created shape ' + shapes[i].name);
         var cx = centroids.x[i];
         var cy = centroids.y[i];

@@ -283,6 +283,10 @@ function readBestFitFile(){
 }
 
 function readLivePlotFile(){
+    // for tracking mode, the live plot files are the results files themselves:
+    if($("#analysisModeSelect").val()=='tracking'&&showStereoPaneState==0){
+        showLivePlots();
+    }
     // see if there is a "live_plot.dat" file in the folder
     var LPFileName = fullPath('','live_plot.dat');
     var livePlotPtsX = [];

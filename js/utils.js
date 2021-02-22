@@ -301,6 +301,7 @@ $("#changeImageFolder").click(function(){
 function updateSequenceLabels(stats){
     $("#imagePrefix").val(stats.prefix);
     $("#imageSuffix").val(stats.suffix);
+    $("#refIndex").val(stats.startIndex);
     $("#startIndex").val(stats.startIndex);
     $("#endIndex").val(stats.endIndex);
     $("#skipIndex").val(stats.frameInterval);
@@ -757,9 +758,11 @@ $("#analysisModeSelect").on('change',function() {
         $(".full-field-global").show();
         $(".full-field-and-tracking").show();
         $(".global").hide();
+        console.log('SHOWING NON_TRACKLIB');
         $(".non-tracklib-tools").show();
         $(".results-right").show();
         $(".tracklib-tools").hide();
+        console.log('HIDING TRACKING');
         $(".tracking").hide();
 //        drawRepresentativeSubset();
         //$("#subsetParams").show();

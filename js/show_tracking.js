@@ -36,9 +36,10 @@ function loadTrackingResultsIntoMemory(cb){
     }
 
     // create copy shapes for each deformed ROI
-    var allShapes = getPlotlyPathShapes();
+    var allShapes = getPlotlyShapes();
     // remove any exising deformed shapes
     for(var i=0;i<allShapes.length;i++){
+        if(!allShapes[i].name) continue;
         if(allShapes[i].name.includes('deformed'))
             allShapes.splice(i,1);
     }
@@ -85,8 +86,9 @@ function loadTrackingResultsIntoMemory(cb){
 
 function turnOffDeformedShapesAndROIsOn(){
     // create copy shapes for each deformed ROI
-    var allShapes = getPlotlyPathShapes();
+    var allShapes = getPlotlyShapes();
     for(var i=0;i<allShapes.length;++i){
+        if(!allShapes[i].name) continue;
         if(allShapes[i].name.includes('deformed')){
             allShapes[i].visible = false;
         }
@@ -102,6 +104,7 @@ function turnOffDeformedShapesAndROIsOn(){
 }
 
 function showDeformedROIs(){
+    console.log('showDeformedROIs(): showDeformedCheck ' + $("#showDeformedCheck")[0].checked);
     if(!$("#showDeformedCheck")[0].checked) return;
     if(!($("#analysisModeSelect").val()=="tracking"&&showStereoPane==0)) return;
     if(resultsDataObjs.length==0){
@@ -113,6 +116,7 @@ function showDeformedROIs(){
 }
 
 function updateDeformedROIs(){
+    console.log('updateDeformedROIs():');
     var frame = $("#frameScroller").val();
     var headers = resultsDataObjs[0].headings;
     var frameRowID=-1;
@@ -148,8 +152,9 @@ function updateDeformedROIs(){
     if(frameCol<0)return;
     
     // create copy shapes for each deformed ROI
-    var allShapes = getPlotlyPathShapes();
+    var allShapes = getPlotlyShapes();
     for(var i=0;i<allShapes.length;++i){
+        if(!allShapes[i].name) continue;
         if(allShapes[i].name.includes('deformed')){
             var id = allShapes[i].name.split('_').pop();
             // figure out which results data obj to use since they are not loaded in order
@@ -169,7 +174,7 @@ function updateDeformedROIs(){
             var cost = Math.cos(theta);
             var sint = Math.sin(theta);
             
-            var originalShape = getPlotlyPathShapes('ROI_' + id,true);
+            var originalShape = getPlotlyShapes('ROI_' + id,true);
             if(originalShape.length!=1){
                 console.log('error: could not find original path shape for ROI_' + id);
                 return;
