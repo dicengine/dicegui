@@ -1,13 +1,13 @@
 function addTracklibFieldstoFieldSelect(cb){
     $("#livePlotFieldSelect").empty();
-    $("#livePlotFieldSelect").append(new Option('world coord x','x'));
-    $("#livePlotFieldSelect").append(new Option('world coord y','y'));
-    $("#livePlotFieldSelect").append(new Option('world coord z','z'));
-    $("#livePlotFieldSelect").append(new Option('area','area'));
-    $("#livePlotFieldSelect").append(new Option('gray','gray'));
-    $("#livePlotFieldSelect").append(new Option('Δx/frame','velX'));
-    $("#livePlotFieldSelect").append(new Option('Δy/frame','velY'));
-    $("#livePlotFieldSelect").append(new Option('Δz/frame','velZ'));
+    $("#livePlotFieldSelect").append(new Option('world coord x (world dim)','x'));
+    $("#livePlotFieldSelect").append(new Option('world coord y (world dim)','y'));
+    $("#livePlotFieldSelect").append(new Option('world coord z (world dim)','z'));
+    $("#livePlotFieldSelect").append(new Option('area (px)','area'));
+    $("#livePlotFieldSelect").append(new Option('gray (counts)','gray'));
+    $("#livePlotFieldSelect").append(new Option('Δx(world)/frame','velX'));
+    $("#livePlotFieldSelect").append(new Option('Δy(world)/frame','velY'));
+    $("#livePlotFieldSelect").append(new Option('Δz(world)/frame','velZ'));
     cb = cb || $.noop;
     cb();
 }
@@ -110,19 +110,19 @@ function updateTracklib3dScatter(data,camera,cb){
                 aspectmode: 'data',
                 xaxis: {
                     title: {
-                        text: 'X',
+                        text: 'world coord x',
                     },
                 },
                 yaxis: {
                     scaleanchor: 'x',
                     title: {
-                        text: 'Y',
+                        text: 'world coord y',
                     }
                 },
                 zaxis: {
                     scaleanchor: 'x',
                     title: {
-                        text: 'Z',
+                        text: 'world coord z',
                     }
                 },
                 camera: {
@@ -411,7 +411,7 @@ function loadPlotlyJsonOutput(source){
                     if(fig.data)
                         if(fig.data[0].x)
                             if(fig.data[0].x.length==0)
-                                alert('Warning: Tracking results are empty in the LEFT image \n(this may indicate the segmentation \nparameters need to be adjusted)');
+                                alert('Warning: Tracking results are empty in the LEFT image \n(this may indicate the segmentation \nparameters need to be adjusted\n or there is nothing to track in this frame)');
                     updatePreviewImage({srcPath:fullPath('',displayLeft),dest:'left'},function(){
                         clearDebugUtils();
                         replacePlotlyData('left',fig.data);
@@ -445,7 +445,7 @@ function loadPlotlyJsonOutput(source){
                     if(fig.data)
                         if(fig.data[0].x)
                             if(fig.data[0].x.length==0)
-                                alert('Warning: Tracking results are empty in the RIGHT image \n(this may indicate the segmentation \nparameters need to be adjusted)');
+                                alert('Warning: Tracking results are empty in the RIGHT image \n(this may indicate the segmentation \nparameters need to be adjusted\n or there is nothing to track in this frame)');
                     updatePreviewImage({srcPath:fullPath('',displayRight),dest:'right'},function(){
                         replacePlotlyData('right',fig.data);
                         addPreviewTracks('right');
