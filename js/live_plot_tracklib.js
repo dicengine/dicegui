@@ -408,6 +408,10 @@ function loadPlotlyJsonOutput(source){
         if(err == null) {
             Plotly.d3.json(fullPath('.dice','.' + source + '_left.json'), function(jsonErr, fig) {
                 if(jsonErr==null){
+                    if(fig.data)
+                        if(fig.data[0].x)
+                            if(fig.data[0].x.length==0)
+                                alert('Warning: Tracking results are empty in the LEFT image \n(this may indicate the segmentation \nparameters need to be adjusted)');
                     updatePreviewImage({srcPath:fullPath('',displayLeft),dest:'left'},function(){
                         clearDebugUtils();
                         replacePlotlyData('left',fig.data);
@@ -427,7 +431,6 @@ function loadPlotlyJsonOutput(source){
                     });
                 }else{
                     console.log(jsonErr);
-                    //alert('error: reading 3d preview json file failed');
                     Plotly.purge(document.getElementById("livePlot3d"));
                     Plotly.purge(document.getElementById("livePlots"));
                 }
@@ -439,6 +442,10 @@ function loadPlotlyJsonOutput(source){
         if(err == null) {
             Plotly.d3.json(fullPath('.dice','.' + source + '_right.json'), function(jsonErr, fig) {
                 if(jsonErr==null){
+                    if(fig.data)
+                        if(fig.data[0].x)
+                            if(fig.data[0].x.length==0)
+                                alert('Warning: Tracking results are empty in the RIGHT image \n(this may indicate the segmentation \nparameters need to be adjusted)');
                     updatePreviewImage({srcPath:fullPath('',displayRight),dest:'right'},function(){
                         replacePlotlyData('right',fig.data);
                         addPreviewTracks('right');

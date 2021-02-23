@@ -18,7 +18,7 @@ function fullPath(folder,file){
     }else{
         filePath += '/' + file;
     }
-    console.log('fullPath(): ',filePath);
+    //console.log('fullPath(): ',filePath);
     return filePath;
 }
 
