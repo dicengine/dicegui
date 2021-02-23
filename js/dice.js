@@ -571,8 +571,11 @@ function updateTracklibDisplayImages(index,loadData=true){
     proc.on('close', (code) => {
         console.log(`OpenCVServer exited with code ${code}`);
         if(code==0){
-            if(isResultsMode()&&loadData)
+            if(isResultsMode()&&loadData){
+                deletePlotlyTraces('left','Filtered');
+                deletePlotlyTraces('right','Filtered');
                 loadPlotlyJsonOutput('results');
+            }
             else if(loadData){
                 loadPlotlyJsonOutput('preview');
                 loadPlotlyFilteredJsonOutput();
@@ -666,6 +669,8 @@ function postExecTasks(){
     // if this is a mono tracking run, load the results files into memory in case the user wants to view the tracked results
     if($("#analysisModeSelect").val()=="tracking"){
         if(showStereoPane==1){
+            deletePlotlyTraces('left','Filtered');
+            deletePlotlyTraces('right','Filtered');
             loadPlotlyJsonOutput('results');
             checkHasOutput();
             $("#resultsButton").trigger( "click" );
