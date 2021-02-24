@@ -78,6 +78,74 @@ function destToPlotlyDiv(dest){
         return null;
 }
 
+
+function transparentPlotlyTraces(dest,name,frame,global_id){
+    // use a little trick to set the color as transparent but save the original color
+    // the original color is #FFFF00 or (yellow), #FFFF0000 is fully transparent yellow
+    // so the original color is the first 7 characters, if it has 9 characters it's transparent
+    var div = destToPlotlyDiv(dest);
+    if(!div.data) return;
+    var ids = [];
+    for(var i=0;i<div.data.length;++i){
+        if(div.data[i].name)
+            if(div.data[i].name.includes(name)){
+                // check for lines or dots
+                if(div.data[i].mode.includes('lines')){
+                    // turn on all the lines
+                    if(div.data[i].line.color.length==9)
+                            div.data[i].line.color = div.data[i].line.color.substring(0,7);//'#ffffff00' -> '#ffffff';
+                    if(!isNaN(global_id)){
+                        if(div.data[i].name.split('_').pop()!=global_id)
+                            div.data[i].line.color += '00';
+                    }
+                    if(!isNaN(frame)){
+                        var inFrame = false;
+                        for(j=0;j<div.data[i].frame.length;++j){
+                            if(div.data[i].frame[j]==frame)
+                                inFrame = true;
+                        }
+                        if(!inFrame)
+                            div.data[i].line.color += '00';
+                    }
+                }
+                if(div.data[i].mode.includes('markers')){
+                    if(div.data[i].marker){
+                        for(j=0;j<div.data[i].marker.color.length;++j){
+                            if(div.data[i].marker.color[j].length==9) // reset the colors in case they were turned transparent previously
+                                div.data[i].marker.color[j] = div.data[i].marker.color[j].substring(0,7);//'#ffffff00' -> '#ffffff';
+                        }
+                        if(!isNaN(global_id)){
+                            for(j=0;j<div.data[i].marker.color.length;++j){
+                                if(div.data[i].stereoGlobalId[j]!=global_id){
+                                    if(div.data[i].marker.color[j].length==7)
+                                        div.data[i].marker.color[j] += '00';
+                                }
+                            }
+                        }
+                        if(!isNaN(frame)){
+                            // loop over all the points to collect valid local ids that have a point in this frame, then turn those ids on
+                            var inFrameSet = new Set();
+                            for(j=0;j<div.data[i].frame.length;++j){
+                                if(div.data[i].frame[j]==frame)
+                                    inFrameSet.add(div.data[i].twoDGlobalId[j]);
+                            }
+                            for(j=0;j<div.data[i].marker.color.length;++j){
+                                if(!inFrameSet.has(div.data[i].twoDGlobalId[j])){
+                                    if(div.data[i].marker.color[j].length==7)
+                                        div.data[i].marker.color[j] += '00';
+                                }
+                            }
+                        }
+                        var update = {'marker':{color: div.data[i].marker.color}};
+                        Plotly.restyle(div, update, [i]);
+                    }
+                }
+            }
+    }
+    //console.log(div.data);
+}
+
+
 function deletePlotlyTraces(dest,name){
     var div = destToPlotlyDiv(dest);
     if(!div.data) return;

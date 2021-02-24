@@ -18,6 +18,7 @@ $("#trackGID").change(function() {
         $('#trackGID').val(0);
     }
     updateInspectors('left',-1);
+    $("#trackDisplayModeSelect").trigger("change");
 //    updateTracklib2dScatter();
 });
 

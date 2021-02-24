@@ -431,6 +431,7 @@ $("#frameScroller").on('input', function () {
     }
     showDeformedROIs();
     removeSubsetPreview();
+    $("#trackDisplayModeSelect").trigger("change");
 });
 
 $("#cineGoToIndex").keypress(function(event) { 

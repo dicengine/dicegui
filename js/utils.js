@@ -750,6 +750,20 @@ function updateFrameScrollerRange(){
     }
 }
 
+$("#trackDisplayModeSelect").on('change',function(){
+    if($("#analysisModeSelect").val()!="tracking"||showStereoPane!=1) return;
+    if($("#trackDisplayModeSelect").val()=="all-tracks"){
+        transparentPlotlyTraces('left','tracklibPreviewScatter','all','all');
+        transparentPlotlyTraces('right','tracklibPreviewScatter','all','all');
+    }else if($("#trackDisplayModeSelect").val()=="in-frame-only"){
+        transparentPlotlyTraces('left','tracklibPreviewScatter',$("#frameScroller").val(),'all');
+        transparentPlotlyTraces('right','tracklibPreviewScatter',$("#frameScroller").val(),'all');
+    }else{ // by-id
+        transparentPlotlyTraces('left','tracklibPreviewScatter','all',$('#trackGID').val());
+        transparentPlotlyTraces('right','tracklibPreviewScatter','all',$('#trackGID').val());
+    }
+});
+
 $("#analysisModeSelect").on('change',function() {
     $("#showRepSubsetCheck").prop("checked",false);
     $("#bestFitCheck").prop("checked",false);
