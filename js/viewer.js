@@ -230,8 +230,9 @@ $("#resultsButton").on("click",function () {
     $("#previewButton").addClass('toggle-title');
     $(this).removeClass('action-li');
     $(this).addClass('toggle-title-bold');
+    $("#previewWindow :input").attr("disabled", true);
+    $(".tracklib-preview-only").hide();
     $("#resultsWindow").show();
-    $("#previewWindow").hide();
     // reload the results file
     $("#showTrackingCheck").prop("checked",true);
     reloadCineImages($("#frameScroller").val());
@@ -243,7 +244,8 @@ $("#previewButton").on("click",function () {
     $("#resultsButton").addClass('toggle-title');
     $(this).removeClass('action-li');
     $(this).addClass('toggle-title-bold');
-    $("#previewWindow").show();
+    $("#previewWindow :input").attr("disabled", false);
+    $(".tracklib-preview-only").show();
     $("#resultsWindow").hide();
     $('#trackGID').val(0);
     reloadCineImages($("#frameScroller").val());

@@ -415,21 +415,24 @@
                     >|</span> <span class="toggle-title action-li" id="resultsButton">RESULTS</span>
                   </div>
                   <!-- end toggle div banner -->
-                <div class="toggle-div-body" style="height: auto;  border-style:ridge;">
-                  <div id="resultsWindow" style="display:none;">
-                      <p>track display mode (not implemented yet...)</p>
-                      <select id="trackDisplayModeSelect" style="margin-top: 20px;">
+                <div class="toggle-div-body" style="height: auto; border-style:ridge;">
+                    <div id="resultsWindow" style="display:none;">
+                      <p style="padding-top: 15px; float:left;"><b>results</b></p>
+                      <hr style="width:100%;text-align:left;margin-left:0;">
+                      <div style="margin-top:10px; padding-bottom: 10px;">track display mode:
+                      <select id="trackDisplayModeSelect" style="margin-top: 5px; float:right;">
                         <option value="all-tracks">all tracks</option>
                         <option value="in-frame-only">in frame only</option>
                         <option value="by-id">by id</option>
                       </select>
+                      </div>
                     </div>
                     <div id="previewWindow">
-                      <div id="previewTracklib" class="action-li" style="margin-top: 10px;">
+                      <div id="previewTracklib" class="action-li tracklib-preview-only" style="margin-top: 10px;">
                         <i class="material-icons md-dark md-br-pad" style="margin-bottom: 0px;">check_circle</i>
                         update preview
                       </div>
-                      <div style="overflow: hidden;">
+                      <div style="overflow: hidden;" class=tracklib-preview-only>
                         <div style="width: 50%; float: left;">num frames in preview</div>
                         <input class="update-tracklib-preview" type="text" id="numPreviewFrames"
                           name="numPreviewFrames" value="1" style="width: 27%; float: left;"
