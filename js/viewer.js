@@ -377,6 +377,8 @@ function setScrollerText(val){
 $("#frameScroller").on('input', function () {
     setScrollerText($(this).val());
 }).change(function(){
+    $("#warningLeft").text("");
+    $("#warningRight").text("");
     setScrollerText($(this).val()); // call this again in case the value was set by a call to .val() which wouldn't fire the input event
     if($("#fileSelectMode").val()=="list"){
         $('#defImageListLeft li').each(function(i){

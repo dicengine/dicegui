@@ -385,8 +385,10 @@ function loadPlotlyJsonOutput(source){
                 if(jsonErr==null){
                     if(fig.data)
                         if(fig.data[0].x)
-                            if(fig.data[0].x.length==0)
-                                alert('Warning: Tracking results are empty in the LEFT image \n(this may indicate the segmentation \nparameters need to be adjusted\n or there is nothing to track in this frame)');
+                            if(fig.data[0].x.length==0){
+                                $("#warningLeft").text("No motion (or threshold needs adjust.)");
+                            }else
+                                $("#warningLeft").text("");
                     updatePreviewImage({srcPath:fullPath('',displayLeft),dest:'left'},function(){
                         clearDebugUtils();
                         replacePlotlyData('left',fig.data);
@@ -430,8 +432,10 @@ function loadPlotlyJsonOutput(source){
                 if(jsonErr==null){
                     if(fig.data)
                         if(fig.data[0].x)
-                            if(fig.data[0].x.length==0)
-                                alert('Warning: Tracking results are empty in the RIGHT image \n(this may indicate the segmentation \nparameters need to be adjusted\n or there is nothing to track in this frame)');
+                            if(fig.data[0].x.length==0){
+                                $("#warningRight").text("No motion (or threshold needs adjust.)");
+                            }else
+                                $("#warningRight").text("");
                     updatePreviewImage({srcPath:fullPath('',displayRight),dest:'right'},function(){
                         replacePlotlyData('right',fig.data);
                         //addPreviewTracks('right');
