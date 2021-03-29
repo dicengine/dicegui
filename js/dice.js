@@ -1069,7 +1069,7 @@ function writeParamsFile(only_write,resolution,ss_locs) {
             content += '<Parameter name="plotly_contour_grid_step" type="int" value=" ' + $("#stepSize").val() + '" />\n';
             content += '</ParameterList>\n';
         }else if($("#analysisModeSelect").val()=="global"){
-            content += '<Parameter name="max_solver_iterations_fast" type="int" value="500" />\n';
+            content += '<Parameter name="max_solver_iterations_fast" type="int" value="25" />\n';
             content += '<Parameter name="global_solver" type="string" value="gmres_solver" />\n';
             content += '<Parameter name="global_formulation" type="string" value="horn_schunck" />\n';
             content += '<Parameter name="global_regularization_alpha" type="double" value="'+$("#regularizationConstant").val()+'" />\n';
@@ -1079,7 +1079,8 @@ function writeParamsFile(only_write,resolution,ss_locs) {
                 content += '<Parameter name="global_element_type" type="string" value="TRI6" />\n';
             }
             content += '<ParameterList name="post_process_plotly_contour">\n';
-            content += '<Parameter name="plotly_contour_grid_step" type="int" value=" ' + $("#meshSize").val() + '" />\n';
+            var plotly_step = parseInt(Math.sqrt(parseFloat($("#meshSize").val())));
+            content += '<Parameter name="plotly_contour_grid_step" type="int" value="' + plotly_step + '" />\n';
             content += '</ParameterList>\n';
         }else{ // assume tracking at this point
             content += '<Parameter name="use_tracking_default_params" type="bool" value="true" />\n';
@@ -1553,9 +1554,8 @@ function populateContourFields(){
     $("#contourFieldSelect").append(new Option('DISPLACEMENT_Y','DISPLACEMENT_Y'));
     if($("#analysisModeSelect").val()=="subset"){
         $("#contourFieldSelect").append(new Option('SIGMA','SIGMA'));
-        $("#contourFieldSelect").append(new Option('GAMMA','GAMMA'));
         $("#contourFieldSelect").append(new Option('BETA','BETA'));
-        $("#contourFieldSelect").append(new Option('STATUS_FLAG','STATUS_FLAG'));
+        $("#contourFieldSelect").append(new Option('GAMMA','GAMMA'));
         $("#contourFieldSelect").append(new Option('UNCERTAINTY','UNCERTAINTY'));
         $("#contourFieldSelect").append(new Option('VSG_STRAIN_XX','VSG_STRAIN_XX'));
         $("#contourFieldSelect").append(new Option('VSG_STRAIN_YY','VSG_STRAIN_YY'));
@@ -1564,7 +1564,9 @@ function populateContourFields(){
         $("#contourFieldSelect").append(new Option('GREEN_LAGRANGE_STRAIN_XX','GREEN_LAGRANGE_STRAIN_XX'));
         $("#contourFieldSelect").append(new Option('GREEN_LAGRANGE_STRAIN_YY','GREEN_LAGRANGE_STRAIN_YY'));
         $("#contourFieldSelect").append(new Option('GREEN_LAGRANGE_STRAIN_XY','GREEN_LAGRANGE_STRAIN_XY'));
+        $("#contourFieldSelect").append(new Option('GLOBAL_GRAY_DIFF','GLOBAL_GRAY_DIFF'));
     }
+    $("#contourFieldSelect").append(new Option('STATUS_FLAG','STATUS_FLAG'));
 }
 
 function checkContourJsonFileExists(){
