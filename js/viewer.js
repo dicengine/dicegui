@@ -225,17 +225,23 @@ function isResultsMode(){
 }
 
 $("#resultsButton").on("click",function () {
+    // check to see if there are any results files available
     if(!$(this).hasClass('action-li')) return;
-    $("#previewButton").addClass('action-li');
-    $("#previewButton").addClass('toggle-title');
-    $(this).removeClass('action-li');
-    $(this).addClass('toggle-title-bold');
-    $("#previewWindow :input").attr("disabled", true);
-    $(".tracklib-preview-only").hide();
-    $("#resultsWindow").show();
-    // reload the results file
-    $("#showTrackingCheck").prop("checked",true);
-    reloadCineImages($("#frameScroller").val());
+    var resultsFile = '.dice/.results_left.json';
+    fs.stat(fullPath('',resultsFile), function(err, stat) {
+        if(err == null) {
+            $("#previewButton").addClass('action-li');
+            $("#previewButton").addClass('toggle-title');
+            $(this).removeClass('action-li');
+            $(this).addClass('toggle-title-bold');
+            $("#previewWindow :input").attr("disabled", true);
+            $(".tracklib-preview-only").hide();
+            $("#resultsWindow").show();
+            // reload the results file
+            $("#showTrackingCheck").prop("checked",true);
+            reloadCineImages($("#frameScroller").val());
+        }}
+    );
 });
 
 $("#previewButton").on("click",function () {
