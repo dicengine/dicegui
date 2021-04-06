@@ -457,6 +457,7 @@ function getPreviewConfig(dest){
         if(dest=='left'){
             _config.modeBarButtonsToAdd = [
                 'drawclosedpath',
+                'drawrect',
                 'eraseshape',
                 'drawline',
                 showSubsetLocationsButton,
@@ -468,6 +469,7 @@ function getPreviewConfig(dest){
         if(dest=='left'){
             _config.modeBarButtonsToAdd = [
                 'drawclosedpath',
+                'drawrect',
                 'eraseshape',
                 'drawline',
                 deleteLivePlotPtsButton];
@@ -482,6 +484,7 @@ function getPreviewConfig(dest){
         }else if(dest=='left'){
             _config.modeBarButtonsToAdd = [
                 'drawclosedpath',
+                'drawrect',
                 'eraseshape',
                 showSubsetLocationsButton,
                 importSubsetLocationsButton];
@@ -802,7 +805,7 @@ $("#plotlyViewerLeft").on('click', function(event){ // note: not plotly_click, t
 });
 
 function isInShape(cx,cy,shape){
-    var points = pathShapeToPoints(shape);
+    var points = shapeToPoints(shape);
     var vertices_x = points.x;
     var vertices_y = points.y;
     var num_vertices = vertices_x.length;
@@ -860,7 +863,7 @@ function drawRepresentativeSubset(){
         return obj.name === "representativeSubset";
     });
     if(existingBoxIndex>=0){
-        var boxPoints = pathShapeToPoints(existingShapes[existingBoxIndex]);
+        var boxPoints = shapeToPoints(existingShapes[existingBoxIndex]);
         cx = (boxPoints.x[0] + boxPoints.x[1])/2;
         cy = (boxPoints.y[0] + boxPoints.y[3])/2;
     }
@@ -1083,9 +1086,10 @@ function updateLivePlotLine(deleteOnly = false){
 function assignShapeNames(){
     var relayoutNeeded = false;
     var shapes = getPlotlyShapes(); // get all shapes, not just ROIs
+    //console.log(shapes);
     var i = shapes.length;
     while (i--) {
-        if(shapes[i].name===undefined&&shapes[i].type==='path'){
+        if(shapes[i].name===undefined&&(shapes[i].type==='path'||shapes[i].type==='rect')){
             if($("#showDeformedCheck")[0].checked){
                 alert('cannot add ROIs while show tracked ROIs is active');
                 deleteShape(i);

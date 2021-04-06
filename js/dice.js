@@ -1191,7 +1191,7 @@ function writeSubsetFile(only_write,resolution,ss_locs){
         for(var i=0;i<numROIs;++i){
             content += '    begin polygon\n';
             content += '      begin vertices\n';
-            var points = pathShapeToPoints(pathShapes[i]);
+            var points = shapeToPoints(pathShapes[i]);
             for(var j=0;j<points.x.length;j++){
                 content += '        ' +  points.x[j] + ' ' + points.y[j] + '\n';
             }
@@ -1204,7 +1204,7 @@ function writeSubsetFile(only_write,resolution,ss_locs){
             for(var i = 0; i < numExcluded; i++) {
                 content += '    begin polygon\n';
                 content += '      begin vertices\n';
-                var points = pathShapeToPoints(excludedShapes[i]);
+                var points = shapeToPoints(excludedShapes[i]);
                 for(var j=0;j<points.x.length;j++){
                     content += '        ' +  points.x[j] + ' ' + points.y[j] + '\n';
                 }
@@ -1223,7 +1223,7 @@ function writeSubsetFile(only_write,resolution,ss_locs){
             content += '  begin boundary\n';
             content += '    begin polygon\n'; 
             content += '      begin vertices\n';
-            var points = pathShapeToPoints(pathShapes[i]);
+            var points = shapeToPoints(pathShapes[i]);
             for(var j=0;j<points.x.length;j++){
                 content += '        ' +  points.x[j] + ' ' + points.y[j] + '\n';
             }
@@ -1253,7 +1253,7 @@ function writeSubsetFile(only_write,resolution,ss_locs){
                 if(excludedId == i){
                     content += '    begin polygon\n'; 
                     content += '      begin vertices\n';
-                    var points = pathShapeToPoints(excludedShapes[j]);
+                    var points = shapeToPoints(excludedShapes[j]);
                     for(var k=0;k<points.x.length;k++){
                         content += '        ' +  points.x[k] + ' ' + points.y[k] + '\n';
                     }
@@ -1279,7 +1279,7 @@ function writeSubsetFile(only_write,resolution,ss_locs){
                 if(obstructedId == i){
                     content += '    begin polygon\n'; 
                     content += '      begin vertices\n';
-                    var points = pathShapeToPoints(obstructedShapes[j]);
+                    var points = shapeToPoints(obstructedShapes[j]);
                     for(var k=0;k<points.x.length;k++){
                         content += '        ' +  points.x[k] + ' ' + points.y[k] + '\n';
                     }
