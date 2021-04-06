@@ -866,20 +866,25 @@ function writeLivePlotsFile() {
         return obj.name === "live plot pts";
     });
     console.log('writeLivePlotsFile(): livePlotPtsTraceId ' + livePlotPtsTraceId);
-    if(livePlotPtsTraceId<0) return;
-    var x = data[livePlotPtsTraceId].x;
-    var y = data[livePlotPtsTraceId].y;
+    var x;
+    var y;
+    if(livePlotPtsTraceId>=0){
+        x = data[livePlotPtsTraceId].x;
+        y = data[livePlotPtsTraceId].y;
+    }
     var lineShapes = getPlotlyShapes('livePlotLine');
     if(lineShapes.length>1){
         alert('error ocurred in determining live plot line shapes');
     }
-    if(x.length > 0||lineShapes.length==1){
+    if(livePlotPtsTraceId>=0||lineShapes.length==1){
         var livePlotFile = fullPath('','live_plot.dat');
         console.log('writing live plot data file ' + livePlotFile);
         var LPcontent = '';
         LPcontent += '# two numbers is a point four numbers is a line\n';
-        for(var i=0;i<x.length;++i){
-            LPcontent += x[i] + ' ' + y[i] + '\n'
+        if(livePlotPtsTraceId>=0){
+            for(var i=0;i<x.length;++i){
+                LPcontent += x[i] + ' ' + y[i] + '\n'
+            }
         }
         if(lineShapes.length==1)
             LPcontent += Math.floor(lineShapes[0].x0) + ' ' + Math.floor(lineShapes[0].y0) + 

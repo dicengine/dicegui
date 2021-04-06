@@ -1064,7 +1064,6 @@ function updateLivePlotLine(deleteOnly = false){
         }
     }
     if(deleteOnly){
-        alert('deleting old line index ' + oldLineIndex);
         deleteShape(oldLineIndex);
         var update = {'shapes' : getPlotlyShapes()};
         Plotly.relayout(destToPlotlyDiv('left'),update);
