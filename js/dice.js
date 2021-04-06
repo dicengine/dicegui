@@ -1546,13 +1546,17 @@ function getContourJsonFileName(leastSquares = false){
 }
 
 function populateContourFields(){
-    // TODO make this switch on analysis type
     $("#contourFieldSelect").empty();
     $("#contourFieldSelect").append(new Option('COORDINATE_X','COORDINATE_X'));
     $("#contourFieldSelect").append(new Option('COORDINATE_Y','COORDINATE_Y'));
     $("#contourFieldSelect").append(new Option('DISPLACEMENT_X','DISPLACEMENT_X'));
     $("#contourFieldSelect").append(new Option('DISPLACEMENT_Y','DISPLACEMENT_Y'));
     if($("#analysisModeSelect").val()=="subset"){
+        if(showStereoPane==1){
+            $("#contourFieldSelect").append(new Option('MODEL_COORDINATES_X','MODEL_COORDINATES_X'));
+            $("#contourFieldSelect").append(new Option('MODEL_COORDINATES_Y','MODEL_COORDINATES_Y'));
+            $("#contourFieldSelect").append(new Option('MODEL_COORDINATES_Z','MODEL_COORDINATES_Z'));
+        }
         $("#contourFieldSelect").append(new Option('SIGMA','SIGMA'));
         $("#contourFieldSelect").append(new Option('BETA','BETA'));
         $("#contourFieldSelect").append(new Option('GAMMA','GAMMA'));
