@@ -359,6 +359,8 @@ function readSubsetFile(data){
                         if(isNaN(num_line[0])) break;
                         vertex++;
                         // if this is a tracking analysis, this could potentially be skipped since this info is stored in the shape centroids
+                        if(num_line[0]<0) num_line[0] = 0;
+                        if(num_line[1]<0) num_line[1] = 0;
                         subsetLocations.x.push(num_line[0]);
                         subsetLocations.y.push(num_line[1]);
                         blockingSubsets.push([]);
@@ -376,6 +378,8 @@ function readSubsetFile(data){
                         num_line = lines[line+1+vertex].match(/\S+/g).map(Number);
                         if(isNaN(num_line[0])) break;
                         vertex++;
+                        if(num_line[0]<0) num_line[0] = 0;
+                        if(num_line[1]<0) num_line[1] = 0;
                         vertex_x.push(num_line[0]);
                         vertex_y.push(num_line[1]);
                     }
