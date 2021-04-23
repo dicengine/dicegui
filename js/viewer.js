@@ -175,7 +175,15 @@ function loadImageSequence(cb){
     var fullImageName = concatImageSequenceName(0);
     var fullStereoImageName = concatImageSequenceName(1);
     updateImageSequencePreview();
-
+    args = [];
+    if($("#brightnessCheck")[0].checked){
+        args.push("filter:brightness");
+        args.push("brightness");
+        args.push($("#brightnessBeta").val());
+    }
+    if($("#equalizeHistCheck")[0].checked){
+        args.push("filter:equalize_hist");
+    }
     fs.stat(fullImageName, function(err, stat) {
         if(err != null) {
             alert("Invalid image file name: " + fullImageName);
@@ -189,7 +197,7 @@ function loadImageSequence(cb){
                         alert("Invalid stereo image file name: " + fullStereoImageName);
                         return;
                     }
-                    updatePreviewImage({srcPath:fullStereoImageName,dest:'right'});
+                    updatePreviewImage({argsIn:args,srcPath:fullStereoImageName,dest:'right'});
                     flagSequenceImages();
                 });
             }
@@ -393,28 +401,37 @@ $("#frameScroller").on('input', function () {
         $('#defImageListRight li').each(function(i){
             $(this).removeClass('def-image-ul-selected');
         });
+        args = [];
+        if($("#brightnessCheck")[0].checked){
+            args.push("filter:brightness");
+            args.push("brightness");
+            args.push($("#brightnessBeta").val());
+        }
+        if($("#equalizeHistCheck")[0].checked){
+            args.push("filter:equalize_hist");
+        }
         if(Number($(this).val())<0){
             if(refImagePathLeft!="")
-                updatePreviewImage({srcPath:refImagePathLeft,dest:'left'});
+                updatePreviewImage({argsIn:args,srcPath:refImagePathLeft,dest:'left'});
             else{
                 resetPlotlyViewer('left');
             }
             if(showStereoPane==1&&refImagePathRight!="")
-                updatePreviewImage({srcPath:refImagePathRight,dest:'right'});
+                updatePreviewImage({argsIn:args,srcPath:refImagePathRight,dest:'right'});
             else{
                 resetPlotlyViewer('right');
             }
         }else{
             var index = $(this).val();
             if(defImagePathsLeft.length > $(this).val()){
-                updatePreviewImage({srcPath:defImagePathsLeft[index].path,dest:'left'});
+                updatePreviewImage({argsIn:args,srcPath:defImagePathsLeft[index].path,dest:'left'});
                 $("#defImageListLeft li:eq(" + index.toString() + ")").addClass("def-image-ul-selected");
             }
             else{
                 resetPlotlyViewer('left');
             }
             if(defImagePathsRight.length > $(this).val()){
-                updatePreviewImage({srcPath:defImagePathsRight[index].path,dest:'right'});
+                updatePreviewImage({argsIn:args,srcPath:defImagePathsRight[index].path,dest:'right'});
                 $("#defImageListRight li:eq(" + index.toString() + ")").addClass("def-image-ul-selected");
             }
             else{

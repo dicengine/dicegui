@@ -701,7 +701,6 @@
                 </select>
               </div>
               <div id="generalParams" class="param-options non-tracklib-tools">
-                <p>filtering:</p>
                 <p>
                   <input id="filterCheck" type="checkbox"> gauss filter images
                 </p>
@@ -710,6 +709,14 @@
                 </p>
                 <input id="filterSize" style="margin-bottom: 10px;" type="range" min="5" max="13"
                   defaultValue="5" value="5" step="2"
+                >
+                <p><input id="equalizeHistCheck" type="checkbox"> equalize preview histogram</p>
+                <p>
+                  <input id="brightnessCheck" type="checkbox"> brighten preview
+                </p>
+                <p>brightness: <label id="brightnessLabel">0</label></p>
+                <input id="brightnessBeta" style="margin-bottom: 10px;" type="range" min="-200" max="200"
+                  defaultValue="0" value="0" step="10"
                 >
                 <p><b>results</b></p>
                 <hr style="width:100%;text-align:left;margin-left:0; margin-bottom:10px;">

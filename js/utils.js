@@ -772,11 +772,9 @@ $("#analysisModeSelect").on('change',function() {
         $(".full-field-global").show();
         $(".full-field-and-tracking").show();
         $(".global").hide();
-        console.log('SHOWING NON_TRACKLIB');
         $(".non-tracklib-tools").show();
         $(".results-right").show();
         $(".tracklib-tools").hide();
-        console.log('HIDING TRACKING');
         $(".tracking").hide();
 //        drawRepresentativeSubset();
         //$("#subsetParams").show();
@@ -898,6 +896,10 @@ $("#strainGaugeSize").on('input',function(){
 
 $("#filterSize").on('input',function(){
     $("#filterSizeLabel").text($(this).val());
+});
+
+$("#brightnessBeta").on('input',function(){
+    $("#brightnessLabel").text($(this).val());
 });
 
 $("#binaryThreshBlockSize").on('input',function(){

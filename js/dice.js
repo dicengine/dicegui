@@ -293,7 +293,16 @@ function updateCineDisplayImage(fileName,index,dest,cb){
     // this assumes that fileName is not alredy decorated
     var decoratedFile = fileName.replace('.'+fileName.split('.').pop(),'_'+index+'.cine');
     console.log('updating cine display image: ' + decoratedFile);
-    updatePreviewImage({srcPath:decoratedFile,dest:dest},cb);
+    args = [];
+    if($("#brightnessCheck")[0].checked){
+        args.push("filter:brightness");
+        args.push("brightness");
+        args.push($("#brightnessBeta").val());
+    }
+    if($("#equalizeHistCheck")[0].checked){
+        args.push("filter:equalize_hist");
+    }
+    updatePreviewImage({argsIn:args,srcPath:decoratedFile,dest:dest},cb);
 }
 
 function callCineStatExec(path,mode,callback) {
