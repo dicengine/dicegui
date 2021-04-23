@@ -14,6 +14,7 @@ var execCineStatPath;
 var execCalPath;
 var execOpenCVServerPath;
 var execTrackingMoviePath;
+var execEpilinePath;
 
 if(os.platform()=='win32'){
     setExecPaths(win_path);
@@ -55,7 +56,7 @@ var bestFitXAxis = 0;
 var bestFitYAxis = 0;
 
 // regions of interest
-var drawEpipolarActive = false;
+var drawEpilineActive = false;
 
 // state of windows etc. in interface
 var showPrefPane = true;
@@ -74,6 +75,7 @@ function setExecPaths(path){
     execCineStatPath = path + 'DICe_CineStat.exe';
     execCalPath = path + 'DICe_Cal.exe';
     execOpenCVServerPath = path + 'DICe_OpenCVServer.exe';
+    execEpilinePath = path + 'DICe_Epiline.exe';
     execTrackingMoviePath = path + 'DICe_TrackingMovieMaker.exe';
   }else if(os.platform()=='linux' || os.platform()=='darwin'){
     execPath = path + 'dice';
@@ -81,6 +83,7 @@ function setExecPaths(path){
     execCineStatPath = path + 'DICe_CineStat';
     execCalPath = path + 'DICe_Cal';
     execOpenCVServerPath = path + 'DICe_OpenCVServer';
-    execTrackingMoviePath = path + 'DICe_TrackingMovieMaker';    
+    execEpilinePath = path + 'DICe_Epiline';
+    execTrackingMoviePath = path + 'DICe_TrackingMovieMaker';
   }
 }

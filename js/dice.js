@@ -396,12 +396,6 @@ function callCineStatExec(path,mode,callback) {
     }); // end fileName fs.stat
 }
 
-//function deactivateEpipolar(){
-//    $("#drawEpipolar").css('color','rgba(0, 0, 0, 0.5)');
-//    drawEpipolarActive = false;
-//    drawEpipolarLine(false,0,0,true);
-//}
-
 function updateTracklibDisplayImages(index,loadData=true){
     console.log('updateTracklibDisplayImages()');
     if(cinePathLeft=="undefined"||cinePathRight=="undefined"){

@@ -305,7 +305,7 @@ function setTrackingVisibility(){
 function updateInspectors(dest,index2d){//,stereoGlobalId,index3d){
     drawNeighCircle(dest,index2d);
     updateNeighInfoTrace(dest,index2d);
-    drawEpipolarLine(dest,index2d);
+    drawEpipolarLinePlotly(dest,index2d);
     // deterine the stereoGlobalId
     var data = document.getElementById("plotlyViewerLeft").data;
     if(dest==='right')
