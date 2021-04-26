@@ -1111,6 +1111,9 @@ function writeParamsFile(only_write,resolution,ss_locs) {
             content += '<Parameter name="gauss_filter_images" type="bool" value="true" />\n';
             content += '<Parameter name="gauss_filter_mask_size" type="int" value="'+$("#filterSize").val()+'" />\n';
         }
+        if($("#incrementalCheck")[0].checked){
+            content += '<Parameter name="use_incremental_formulation" type="bool" value="true" />\n';
+        }
         content += '<Parameter name="output_delimiter" type="string" value="," />\n'
             content += '<ParameterList name="output_spec"> \n';
         content += '<Parameter name="COORDINATE_X" type="bool" value="true" />\n';
