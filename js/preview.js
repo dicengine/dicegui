@@ -1536,7 +1536,7 @@ function drawEpipolarLine(dest,y0,y1){
     Plotly.relayout(pvOut,update);
 }
 
-function drawEpipolarLinePoltly(dest,index){ 
+function drawEpipolarLinePlotly(dest,index){ 
     // *** NOTE for this method, dest is where the click event ocurred,
     //          the line should appear in the opposite image
     if(!$("#analysisModeSelect").val()=="tracking"||showStereoPane!=1) return;
