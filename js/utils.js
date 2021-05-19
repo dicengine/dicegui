@@ -597,6 +597,7 @@ $("#stereoButton").click(function(){
         $(".tracklib-tools").hide();
         $(".results-right").hide();
     }
+    populateContourFields();
     checkValidInput();
 //    showBestFitLine();
 //    resizeAll();
