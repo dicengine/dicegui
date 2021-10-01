@@ -543,6 +543,8 @@ function impl_params_xml_file(xml){
         $("#strainCheck")[0].checked = true;
         $("#strainGaugeSize").val(vsg_strain);
         $("#strainGaugeSizeLabel").text(vsg_strain);
+    }else{
+        $("#strainCheck")[0].checked = false;
     }
     // global parameters
     reg_constant = xml_get(xml,"global_regularization_alpha");

@@ -1575,13 +1575,17 @@ function populateContourFields(){
         $("#contourFieldSelect").append(new Option('BETA','BETA'));
         $("#contourFieldSelect").append(new Option('GAMMA','GAMMA'));
         $("#contourFieldSelect").append(new Option('UNCERTAINTY','UNCERTAINTY'));
-        $("#contourFieldSelect").append(new Option('VSG_STRAIN_XX','VSG_STRAIN_XX'));
-        $("#contourFieldSelect").append(new Option('VSG_STRAIN_YY','VSG_STRAIN_YY'));
-        $("#contourFieldSelect").append(new Option('VSG_STRAIN_XY','VSG_STRAIN_XY'));
+        if($("#strainCheck")[0].checked){
+            $("#contourFieldSelect").append(new Option('VSG_STRAIN_XX','VSG_STRAIN_XX'));
+            $("#contourFieldSelect").append(new Option('VSG_STRAIN_YY','VSG_STRAIN_YY'));
+            $("#contourFieldSelect").append(new Option('VSG_STRAIN_XY','VSG_STRAIN_XY'));
+        }
     }else if($("#analysisModeSelect").val()=="global"){
-        $("#contourFieldSelect").append(new Option('GREEN_LAGRANGE_STRAIN_XX','GREEN_LAGRANGE_STRAIN_XX'));
-        $("#contourFieldSelect").append(new Option('GREEN_LAGRANGE_STRAIN_YY','GREEN_LAGRANGE_STRAIN_YY'));
-        $("#contourFieldSelect").append(new Option('GREEN_LAGRANGE_STRAIN_XY','GREEN_LAGRANGE_STRAIN_XY'));
+        if($("#strainCheck")[0].checked){
+            $("#contourFieldSelect").append(new Option('GREEN_LAGRANGE_STRAIN_XX','GREEN_LAGRANGE_STRAIN_XX'));
+            $("#contourFieldSelect").append(new Option('GREEN_LAGRANGE_STRAIN_YY','GREEN_LAGRANGE_STRAIN_YY'));
+            $("#contourFieldSelect").append(new Option('GREEN_LAGRANGE_STRAIN_XY','GREEN_LAGRANGE_STRAIN_XY'));
+        }
         $("#contourFieldSelect").append(new Option('GLOBAL_GRAY_DIFF','GLOBAL_GRAY_DIFF'));
     }
     $("#contourFieldSelect").append(new Option('STATUS_FLAG','STATUS_FLAG'));
