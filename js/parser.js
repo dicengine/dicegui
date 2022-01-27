@@ -344,7 +344,7 @@ function readSubsetFile(data){
     // if a representative subset shape exists, keep it
     var shapes = getPlotlyShapes('representativeSubset');
     var subsetLocations = {x:[],y:[]};
-    var max_vertices = 500;
+    var max_vertices = 2000000;
     var lines = data.toString().split('\n');
     for(line = 0;line < lines.length; line++){
         var split_line = lines[line].match(/\S+/g);
