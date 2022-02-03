@@ -39,40 +39,40 @@
         <div class="toggle-div-body" style="height: calc(100% - 32px);">
           <select id="calFileSelectMode" style="width: 95%; margin-top: 10px;">
             <option value="sequence">sequence of images</option>
-            <option value="cine">.cine video frames</option>
+            <option value="video">video frames</option>
           </select>
-          <div class="cine-input">
-            <label for="leftCalCineInput" class="custom-file-input action-li" style="padding-left:0px;"> <i
+          <div class="video-input">
+            <label for="leftCalVideoInput" class="custom-file-input action-li" style="padding-left:0px;"> <i
               class="material-icons md-dark md-br-pad"
-            >camera_roll</i> load cine
+            >camera_roll</i> load video
             </label>
-            <div id="cineCalLeftPreview" style="word-wrap: break-word; margin-bottom: 0px;"
+            <div id="videoCalLeftPreview" style="word-wrap: break-word; margin-bottom: 0px;"
               class="nav-item"
             >
-              <span id="cineCalLeftPreviewSpan"></span>
+              <span id="videoCalLeftPreviewSpan"></span>
             </div>
-            <input id="leftCalCineInput" type="file" accept=".cine">
-            <div class="cine-input stereoOption">
-              <label for="rightCalCineInput" class="custom-file-input action-li" style="padding-left:0px;"> <i
+            <input id="leftCalVideoInput" type="file" accept=".cine,.mp4,.avi">
+            <div class="video-input stereoOption">
+              <label for="rightCalVideoInput" class="custom-file-input action-li" style="padding-left:0px;"> <i
                 class="material-icons md-dark md-br-pad"
-              >camera_roll</i> load stereo cine
+              >camera_roll</i> load stereo video
               </label>
-              <div id="cineCalRightPreview" style="word-wrap: break-word; margin-bottom: 10px;"
+              <div id="videoCalRightPreview" style="word-wrap: break-word; margin-bottom: 10px;"
                 class="nav-item"
               >
-                <span id="cineCalRightPreviewSpan"></span>
+                <span id="videoCalRightPreviewSpan"></span>
               </div>
-              <input id="rightCalCineInput" type="file" accept=".cine">
+              <input id="rightCalVideoInput" type="file" accept=".cine,.mp4,.avi">
             </div>
-            <div id="cineCalStart" style="word-wrap: break-word; margin-bottom: 10px; margin-left:0px;"
+            <div id="videoCalStart" style="word-wrap: break-word; margin-bottom: 10px; margin-left:0px;"
               class="nav-item"
             >file start index: 
-              <span id="cineCalStartSpan"></span>
+              <span id="videoCalStartSpan"></span>
             </div>
-            <div id="cineCalEnd" style="word-wrap: break-word; margin-bottom: 10px; margin-left:0px;"
+            <div id="videoCalEnd" style="word-wrap: break-word; margin-bottom: 10px; margin-left:0px;"
               class="nav-item"
             >file end index: 
-              <span id="cineCalEndSpan"></span>
+              <span id="videoCalEndSpan"></span>
             </div>
           </div>
           <div class="sequence-input">

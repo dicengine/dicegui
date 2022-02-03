@@ -651,7 +651,7 @@ function drawSubsetCoordinates(){
         }else if($("#analysisModeSelect").val()=="subset"){ // if doing subset analysis and custom coordinates are not defined, preview where the subsets will end up
             if(($("#fileSelectMode").val()=='list'&&$("#frameScroller").val()==$("#frameScroller").attr('min'))||
             ($("#fileSelectMode").val()=='sedquence'&&$("#frameScroller").val()==$("#refIndex").val())||
-            ($("#fileSelectMode").val()=='cine'&&$("#frameScroller").val()==$("#cineRefIndex").val())){
+            ($("#fileSelectMode").val()=='video'&&$("#frameScroller").val()==$("#videoRefIndex").val())){
                 // check if the subset preview exists, if so turn it off
                 var traceExisted = removeSubsetPreview();
 //              var previewResult = allTraces.findIndex(obj => { 

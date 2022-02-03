@@ -12,7 +12,7 @@ $(window).load(function(){
     calFixK2 = "false";
     calFixK3 = "false";
     execCalPath = localStorage.getItem("execCalPath");
-    execCineStatPath = localStorage.getItem("execCineStatPath");
+    execVideoStatPath = localStorage.getItem("execVideoStatPath");
     execOpenCVServerPath = localStorage.getItem("execOpenCVServerPath");
     console.log('using cal exec: ' + execCalPath);
     $("#calibrateButton").prop("disabled",true);
@@ -45,7 +45,7 @@ $(window).load(function(){
     $("#calThreshConstant").hide();
     $(".adaptive-thresh").hide();
     $("#calUseAdaptiveThreshP").hide();
-    $(".cine-input").hide();
+    $(".video-input").hide();
 
     deleteCalDisplayImageFiles();
     
@@ -84,7 +84,7 @@ $("#calFileSelectMode").on('change',function (){
             $(".stereoPrefix").show();
         }
         $(".sequence-input").show();
-        $(".cine-input").hide();
+        $(".video-input").hide();
         calFixIntrinsic = "false";
         calUseIntrinsic = "true";
         calUseExtrinsic = "false";
@@ -96,9 +96,9 @@ $("#calFileSelectMode").on('change',function (){
         calFixK2 = "false";
         calFixK3 = "false";
     }
-    else if($(this).val()=="cine"){
+    else if($(this).val()=="video"){
         $(".sequence-input").hide();
-        $(".cine-input").show();
+        $(".video-input").show();
         calFixIntrinsic = "false";
         calUseIntrinsic = "true";
         calUseExtrinsic = "false";
@@ -218,43 +218,43 @@ function impl_target_xml_file(xml){
     $("#calMode").trigger("change");
 }
 
-$("#leftCalCineInput").on("click",function () {
+$("#leftCalVideoInput").on("click",function () {
     this.value = null;
 });
-$("#leftCalCineInput").change(function (evt) {
+$("#leftCalVideoInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
     if(file){
-        $("#cineCalLeftPreview span").text(file.path);
+        $("#videoCalLeftPreview span").text(file.path);
         fs.stat(file.path, function(err, stat) {
             if(err == null) {
                 if(localStorage.getItem("showStereoPane")!=0) {// stereo?
-                    fs.stat($("#cineCalRightPreview span").text(), function(err2, stat) { // only update the preview if both cine files are defined
+                    fs.stat($("#videoCalRightPreview span").text(), function(err2, stat) { // only update the preview if both video files are defined
                         if(err2 == null) {
-                            callCalCineStatExec(file.path,function(){updateSelectableList();updateCalPreview(true)});
+                            callCalVideoStatExec(file.path,function(){updateSelectableList();updateCalPreview(true)});
                         }
                     });
                 }else{
-                    callCalCineStatExec(file.path,function(){updateSelectableList();updateCalPreview(true)});
+                    callCalVideoStatExec(file.path,function(){updateSelectableList();updateCalPreview(true)});
                 }
             }
         });
     }
 });
 
-$("#rightCalCineInput").on("click",function () {
+$("#rightCalVideoInput").on("click",function () {
     this.value = null;
 });
-$("#rightCalCineInput").change(function (evt) {
+$("#rightCalVideoInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
     if(file){
-        $("#cineCalRightPreview span").text(file.path);
+        $("#videoCalRightPreview span").text(file.path);
         fs.stat(file.path, function(err, stat) {
             if(err == null) {
-                fs.stat($("#cineCalLeftPreview span").text(), function(err2, stat) {
+                fs.stat($("#videoCalLeftPreview span").text(), function(err2, stat) {
                     if(err2 == null) {
-                        callCalCineStatExec(file.path,function(){updateSelectableList();updateCalPreview(true)});
+                        callCalVideoStatExec(file.path,function(){updateSelectableList();updateCalPreview(true)});
                     }
                 });
             }
@@ -329,21 +329,21 @@ $("#calMode").on('change',function (){
     }
 });
 
-function callCalCineStatExec(file,callback) {
+function callCalVideoStatExec(file,callback) {
     var child_process = require('child_process');
     var readline      = require('readline');
     var proc;
 
 //    var fileName = file.path;
-    console.log('callCalCineStatExec: loading cal cine file: ' + file)
+    console.log('callCalVideoStatExec: loading cal video file: ' + file)
     fs.stat(file, function(err, stat) {
         if(err != null) {
-            alert("could not find .cine file: " + file);
+            alert("could not find video file: " + file);
             return false;
         }
         else{
-            console.log("getting frame range of cine file: " + file);
-            var proc = child_process.spawn(execCineStatPath, [file],{cwd:workingDirectory});//,maxBuffer:1024*1024})
+            console.log("getting frame range of video file: " + file);
+            var proc = child_process.spawn(execVideoStatPath, [file],{cwd:workingDirectory});//,maxBuffer:1024*1024})
         }
         readline.createInterface({
             input     : proc.stdout,
@@ -352,21 +352,21 @@ function callCalCineStatExec(file,callback) {
             console.log(line);
         });
         proc.on('error', function(){
-            alert('DICe .cine file stat failed: invalid executable: ' + execCineStatPath);
+            alert('DICe video file stat failed: invalid executable: ' + execVideoStatPath);
             return false;
         });
         proc.on('close', (code) => {
             console.log(`child process exited with code ${code}`);
             if(code!=0){
-                alert('DICe .cine file stat failed');
+                alert('DICe video file stat failed');
                 return false;
             }
             else{
                 // read the output file:
-                var statFileName = fullPath('.dice','.cine_stats.dat');
+                var statFileName = fullPath('.dice','.video_stats.dat');
                 fs.stat(statFileName, function(err, stat) {
                     if(err != null) {
-                        alert("could not find .cine stats file: " + statFileName);
+                        alert("could not find video stats file: " + statFileName);
                         return false;
                     }else{
                          fs.readFile(statFileName, 'utf8', function (err,data) {
@@ -376,14 +376,14 @@ function callCalCineStatExec(file,callback) {
                              }
                              var stats = data.toString().split(/\s+/g).map(Number);
                              if($("#frameStartPreviewSpan").text()!=stats[1]||$("#frameEndPreviewSpan").text()!=stats[2]){
-                                 console.log('callCalCineStatExec: updating cine file stats');
+                                 console.log('callCalVideoStatExec: updating video file stats');
                                  $("#startIndex").val(stats[1]);
                                  $("#endIndex").val(stats[2]);
                                  $("#frameStartPreviewSpan").text(stats[1]);
                                  $("#frameCurrentPreviewSpan").text(stats[1]);
                                  $("#frameEndPreviewSpan").text(stats[2]);
-                                 $("#cineCalStartSpan").text(stats[1]);
-                                 $("#cineCalEndSpan").text(stats[2]);
+                                 $("#videoCalStartSpan").text(stats[1]);
+                                 $("#videoCalEndSpan").text(stats[2]);
                                  $("#calFrameScroller").attr('min',stats[1]);
                                  $("#calFrameScroller").attr('max',stats[2]);
                                  $("#calFrameScroller").val(stats[1]);
@@ -463,7 +463,7 @@ function updateCalPreview(firstLoad=false){
     } // end dot target
 
     var decObj = decorateFileNames();
-    if($("#calFileSelectMode").val()=="cine"){
+    if($("#calFileSelectMode").val()=="video"){
         $("#calibrateButton").prop("disabled",false);
     }
     console.log("updateCalPreview: left file " + decObj.decoratedLeft);
@@ -479,12 +479,13 @@ function decorateFileNames(){
     var obj = {};
     obj.decoratedLeft = "";
     obj.decoratedRight = "";
-    if($("#calFileSelectMode").val()=="cine"){
-        var cineLeft = $("#cineCalLeftPreview span").text();
-        var cineRight = $("#cineCalRightPreview span").text();
+    if($("#calFileSelectMode").val()=="video"){
+        var videoLeft = $("#videoCalLeftPreview span").text();
+        var videoRight = $("#videoCalRightPreview span").text();
         var index = $("#calFrameScroller").val();
-        obj.decoratedLeft = cineLeft.replace('.'+cineLeft.split('.').pop(),'_'+index+'.cine');
-        obj.decoratedRight = cineRight.replace('.'+cineRight.split('.').pop(),'_'+index+'.cine');
+	var ext = '.'+videoLeft.split('.').pop();
+        obj.decoratedLeft = videoLeft.replace(ext,'_'+index+ext);
+        obj.decoratedRight = videoRight.replace(ext,'_'+index+ext);
         // enable the cal execute button since it wasn't enabled when the list of images was created
     }else{
         if(localStorage.getItem("showStereoPane")==0)
@@ -622,20 +623,20 @@ $("#changeImageFolder").click(function(){
 });
 
 function updateFrameScroller(){
-    if($("#calFileSelectMode").val()=="cine"){
+    if($("#calFileSelectMode").val()=="video"){
         invalid = false;
         if(Number($("#startIndex").val())>Number($("#endIndex").val())){
             invalid = true;
         }else if(Number($("#endIndex").val())<Number($("#startIndex").val())){
             invalid = true;
-        }else if(Number($("#endIndex").val())>Number($("#cineCalEndSpan").text())){
+        }else if(Number($("#endIndex").val())>Number($("#videoCalEndSpan").text())){
             invalid = true;
-        }else if(Number($("#startIndex").val())<Number($("#cineCalStartSpan").text())){
+        }else if(Number($("#startIndex").val())<Number($("#videoCalStartSpan").text())){
             invalid = true;
         }
         if(invalid){
-            $("#startIndex").val(Number($("#cineCalStartSpan").text()));
-            $("#endIndex").val(Number($("#cineCalEndSpan").text()));
+            $("#startIndex").val(Number($("#videoCalStartSpan").text()));
+            $("#endIndex").val(Number($("#videoCalEndSpan").text()));
         }
     }
     $("#calFrameScroller").attr('min',$("#startIndex").val());
@@ -778,7 +779,7 @@ function updateSelectableList(){
     var index = 0;
     for(i=si;i<=ei;i+=step){
         fileName = "";
-        if($("#calFileSelectMode").val()=="cine"){
+        if($("#calFileSelectMode").val()=="video"){
             fileName = "frame_" + i;
         }else{
             if(localStorage.getItem("showStereoPane")==1||localStorage.getItem("showStereoPane")==2)
@@ -796,7 +797,7 @@ function updateSelectableList(){
 function updateCalImageSequencePreview(cb){
     var fullImageName='';
     
-    if($("#calFileSelectMode").val()=="cine"){
+    if($("#calFileSelectMode").val()=="video"){
         $("#calibrateButton").prop("disabled",false);
         updateSelectableList();
         return;
@@ -900,15 +901,15 @@ function writeInputFile() {
     }
     content += '<Parameter name="xml_file_format" type="string" value="DICe_xml_calibration_file" />\n';
     
-    if($("#calFileSelectMode").val()=="cine"){
+    if($("#calFileSelectMode").val()=="video"){
         content += '<Parameter name="image_folder" type="string" value="" />\n';
-        content += '<Parameter name="cine_file" type="string" value="'+ $("#cineCalLeftPreview span").text() +'" />\n';
-        content += '<Parameter name="cine_ref_index" type="int" value="'+$("#startIndex").val()+'" />\n';
-        content += '<Parameter name="cine_start_index" type="int" value="'+$("#startIndex").val()+'" />\n';
-        content += '<Parameter name="cine_skip_index" type="int" value="'+$("#skipIndex").val()+'" />\n';
-        content += '<Parameter name="cine_end_index" type="int" value="'+$("#endIndex").val()+'" />\n';
+        content += '<Parameter name="video_file" type="string" value="'+ $("#videoCalLeftPreview span").text() +'" />\n';
+        content += '<Parameter name="video_ref_index" type="int" value="'+$("#startIndex").val()+'" />\n';
+        content += '<Parameter name="video_start_index" type="int" value="'+$("#startIndex").val()+'" />\n';
+        content += '<Parameter name="video_skip_index" type="int" value="'+$("#skipIndex").val()+'" />\n';
+        content += '<Parameter name="video_end_index" type="int" value="'+$("#endIndex").val()+'" />\n';
         if(localStorage.getItem("showStereoPane")==1){
-            content += '<Parameter name="stereo_cine_file" type="string" value="'+ $("#cineCalRightPreview span").text() +'" />\n';
+            content += '<Parameter name="stereo_video_file" type="string" value="'+ $("#videoCalRightPreview span").text() +'" />\n';
         }
     }else{
         content += '<Parameter name="image_folder" type="string" value="'+folderName +'" />\n';
@@ -1165,7 +1166,7 @@ function deleteCalDisplayImageFiles(cb){
     filesToRemove.push('.preview_cal_right.png');
     filesToRemove.push('cal.log');
     filesToRemove.push('cal_errors.txt');
-    filesToRemove.push('.cine_stats.dat');
+    filesToRemove.push('.video_stats.dat');
     console.log('removing any existing calibration files');
     hiddenDir = fullPath('.dice','');
     fs.readdir(hiddenDir, (err,dir) => {

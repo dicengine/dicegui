@@ -10,7 +10,7 @@ var win_path = 'C:\\Program Files (x86)\\Digital Image Correlation Engine\\';
 
 var execPath;
 var execCrossInitPath;
-var execCineStatPath;
+var execVideoStatPath;
 var execCalPath;
 var execOpenCVServerPath;
 var execTrackingMoviePath;
@@ -36,9 +36,9 @@ var refImagePathLeft = "undefined";
 var refImagePathRight = "undefined";
 var defImagePathsLeft = [];
 var defImagePathsRight = [];
-var cinePathLeft = "undefined";
-var cinePathRight = "undefined";
-var cineFirstFrame = 0;
+var videoPathLeft = "undefined";
+var videoPathRight = "undefined";
+var videoFirstFrame = 0;
 var calPath = "undefined";
 
 // blocking subsets (used for legacy tracking code)
@@ -72,7 +72,7 @@ function setExecPaths(path){
   if(os.platform()=='win32'){
     execPath =  path + 'dice.exe';
     execCrossInitPath = path + 'DICe_CrossInit.exe';
-    execCineStatPath = path + 'DICe_CineStat.exe';
+    execVideoStatPath = path + 'DICe_VideoStat.exe';
     execCalPath = path + 'DICe_Cal.exe';
     execOpenCVServerPath = path + 'DICe_OpenCVServer.exe';
     execEpilinePath = path + 'DICe_Epiline.exe';
@@ -80,7 +80,7 @@ function setExecPaths(path){
   }else if(os.platform()=='linux' || os.platform()=='darwin'){
     execPath = path + 'dice';
     execCrossInitPath = path + 'DICe_CrossInit';
-    execCineStatPath = path + 'DICe_CineStat';
+    execVideoStatPath = path + 'DICe_VideoStat';
     execCalPath = path + 'DICe_Cal';
     execOpenCVServerPath = path + 'DICe_OpenCVServer';
     execEpilinePath = path + 'DICe_Epiline';

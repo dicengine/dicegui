@@ -69,7 +69,7 @@
         >
           <option value="list">select individually</option>
           <option value="sequence">sequence of images</option>
-          <option value="cine">.cine video frames</option>
+          <option value="video">video frames</option>
         </select>
         <p class="nav-item">frames:</p>
         <div style="display: block" id="rangePreview" class="nav-item">
@@ -150,58 +150,58 @@
             </label>  -->
           </div>
           <!-- end sequence input -->
-          <!-- begin cine input -->
-          <div class="nav-cine">
-            <label for="leftCineInput" class="custom-file-input action-li"> <i
+          <!-- begin video input -->
+          <div class="nav-video">
+            <label for="leftVideoInput" class="custom-file-input action-li"> <i
               class="material-icons md-dark md-br-pad"
-            >camera_roll</i> load cine
+            >camera_roll</i> load video
             </label>
-            <div id="cineLeftPreview" style="word-wrap: break-word; margin-bottom: 10px;"
+            <div id="videoLeftPreview" style="word-wrap: break-word; margin-bottom: 10px;"
               class="nav-item"
             >
-              <span id="cineLeftPreviewSpan"></span>
+              <span id="videoLeftPreviewSpan"></span>
             </div>
-            <input id="leftCineInput" type="file" accept=".cine">
+            <input id="leftVideoInput" type="file" accept=".cine,.mp4,.avi">
             <div class="nav-two-cam">
-              <label for="rightCineInput" class="custom-file-input action-li"> <i
+              <label for="rightVideoInput" class="custom-file-input action-li"> <i
                 class="material-icons md-dark md-br-pad"
-              >camera_roll</i> load stereo cine
-              </label> <input id="rightCineInput" type="file" accept=".cine">
-              <div id="cineRightPreview" style="word-wrap: break-word; margin-bottom: 10px;"
+              >camera_roll</i> load stereo video
+              </label> <input id="rightVideoInput" type="file" accept=".cine,.mp4,.avi">
+              <div id="videoRightPreview" style="word-wrap: break-word; margin-bottom: 10px;"
                 class="nav-item"
               >
-                <span id="cineRightPreviewSpan"></span>
+                <span id="videoRightPreviewSpan"></span>
               </div>
             </div>
             <!-- end nav two cam -->
             <div class="nav-item tracklib-tools" style="margin-bottom: 5px;">
-              go to frame <input class="nav-item" type="text" id="cineGoToIndex"
-                name="cineGoToIndex" value="0" style="width: 35%;"
+              go to frame <input class="nav-item" type="text" id="videoGoToIndex"
+                name="videoGoToIndex" value="0" style="width: 35%;"
               >
             </div>
             <div class="nav-item">ref frame</div>
-            <input class="nav-item update-tracklib-preview" type="text" id="cineRefIndex"
-              name="cineRefIndex" value="0" style="width: 95%;"
+            <input class="nav-item update-tracklib-preview" type="text" id="videoRefIndex"
+              name="videoRefIndex" value="0" style="width: 95%;"
             >
             <div class="nav-item">start frame</div>
-            <input class="nav-item" type="text" id="cineStartIndex" name="cineStartIndex" value="0"
+            <input class="nav-item" type="text" id="videoStartIndex" name="videoStartIndex" value="0"
               style="width: 95%;"
             >
             <div class="nav-item">end frame</div>
-            <input class="nav-item" type="text" id="cineEndIndex" name="cineEndIndex" value="0"
+            <input class="nav-item" type="text" id="videoEndIndex" name="videoEndIndex" value="0"
               style="width: 95%;"
             >
             <div class="nav-item">frame interval</div>
-            <input class="nav-item" type="text" id="cineSkipIndex" name="cineSkipIndex" value="1"
+            <input class="nav-item" type="text" id="videoSkipIndex" name="videoSkipIndex" value="1"
               style="width: 95%;"
             >
             <div class="nav-item">
-              frame rate <span id="cineFrameRatePreviewSpan"
+              frame rate <span id="videoFrameRatePreviewSpan"
                 style="display: block; float: right; width: 33%;"
               ></span>
             </div>
           </div>
-          <!-- end cine input -->
+          <!-- end video input -->
         </div>
         <!-- start nav-two-cam -->
         <div id="rightImageMenu" class="nav-two-cam">
@@ -766,7 +766,7 @@
               </div>
               <div class="reference-text non-tracklib-tools">
                 <h3>Running an Analysis</h3>
-                <p>Select at least one reference and deformed image (or .cine file). Then the
+                <p>Select at least one reference and deformed image (or video file). Then the
                   "run" and "write input" buttons should appear. (For stereo analysis, a reference
                   image and deformed image must be selected for the right camera as well as a
                   calibration file for the buttons to appear.)</p>

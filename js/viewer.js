@@ -247,7 +247,7 @@ $("#resultsButton").on("click",function () {
             $("#resultsWindow").show();
             // reload the results file
             $("#showTrackingCheck").prop("checked",true);
-            reloadCineImages($("#frameScroller").val());
+            reloadVideoImages($("#frameScroller").val());
         }}
     );
 });
@@ -262,7 +262,7 @@ $("#previewButton").on("click",function () {
     $(".tracklib-preview-only").show();
     $("#resultsWindow").hide();
     $('#trackGID').val(0);
-    reloadCineImages($("#frameScroller").val());
+    reloadVideoImages($("#frameScroller").val());
 });
 
 
@@ -294,52 +294,52 @@ $("#loadSubsetFileInput").change(function (evt) {
 //    loadImageSequence();
 //});
 
-$("#leftCineInput").on("click",function () {
+$("#leftVideoInput").on("click",function () {
     this.value = null;
 });
-$("#leftCineInput").change(function (evt) {
+$("#leftVideoInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
     if(file){
-        // TODO if a right cine file is alread loaded ask the user if it should be unloaded to
+        // TODO if a right video file is alread loaded ask the user if it should be unloaded to
         // to avoid frame range mismatch
-//        if(cinePathRight!="undefined"){
-//            if (confirm('unload right cine file (this is necessary if the frame ranges are different between right and left cine)')){
+//        if(videoPathRight!="undefined"){
+//            if (confirm('unload right video file (this is necessary if the frame ranges are different between right and left video)')){
 //                deleteDisplayImageFiles(0);
 //                deleteDisplayImageFiles(1);
 //                deleteDisplayImageFiles(2);
 //                deleteHiddenFiles('background');
-//                cinePathRight = "undefined";
-//                $("#cineRightPreviewSpan").text("");
+//                videoPathRight = "undefined";
+//                $("#videoRightPreviewSpan").text("");
 //                $("#startPreviewSpan").text("");
 //                $("#endPreviewSpan").text("");
 //                // create a tiff image of the selected reference frame
-//                callCineStatExec(file,0);
+//                callVideoStatExec(file,0);
 //            }
 //            else{
 //            }
-//        } // end a right cine file exists
+//        } // end a right video file exists
 //        else{
-            callCineStatExec(file.path,0);
+            callVideoStatExec(file.path,0);
 //        }
     }
 });
 
-$("#rightCineInput").on("click",function () {
+$("#rightVideoInput").on("click",function () {
     this.value = null;
 });
-$("#rightCineInput").change(function (evt) {
+$("#rightVideoInput").change(function (evt) {
     var tgt = evt.target || window.event.srcElement,
         file = tgt.files[0];
     if(file){
         // create a tiff image of the selected reference frame
-        callCineStatExec(file.path,1);
+        callVideoStatExec(file.path,1);
     }
 });
 
-function reloadCineImages(index,loadData=true){
+function reloadVideoImages(index,loadData=true){
     // check that the ref index is valid
-    if(cinePathLeft!="undefined"||cinePathRight!="undefined")
+    if(videoPathLeft!="undefined"||videoPathRight!="undefined")
         if(index < Number($("#startPreviewSpan").text()) || index > Number($("#endPreviewSpan").text())){
             alert("invalid index");
             return;
@@ -355,21 +355,21 @@ function reloadCineImages(index,loadData=true){
         resetPlotlyViewer('right');
         Plotly.purge(document.getElementById("livePlots"));
         Plotly.purge(document.getElementById("livePlot3d"));
-        if(cinePathLeft!="undefined")
-            updateCineDisplayImage(cinePathLeft,offsetIndex,'left',function(){showDeformedROIs();});
-        if(cinePathRight!="undefined")
-            updateCineDisplayImage(cinePathRight,offsetIndex,'right');
+        if(videoPathLeft!="undefined")
+            updateVideoDisplayImage(videoPathLeft,offsetIndex,'left',function(){showDeformedROIs();});
+        if(videoPathRight!="undefined")
+            updateVideoDisplayImage(videoPathRight,offsetIndex,'right');
     }
-    if(cinePathLeft!="undefined")
-        updateCineDisplayImage(cinePathLeft,offsetIndex,'left',function(){showDeformedROIs();});
-    if(cinePathRight!="undefined")
-        updateCineDisplayImage(cinePathRight,offsetIndex,'right');
+    if(videoPathLeft!="undefined")
+        updateVideoDisplayImage(videoPathLeft,offsetIndex,'left',function(){showDeformedROIs();});
+    if(videoPathRight!="undefined")
+        updateVideoDisplayImage(videoPathRight,offsetIndex,'right');
 }
 
 
-// reload the left and right cine image if the ref index is changed
-$("#cineRefIndex").change(function () {
-    var refIndex = $("#cineRefIndex").val();
+// reload the left and right video image if the ref index is changed
+$("#videoRefIndex").change(function () {
+    var refIndex = $("#videoRefIndex").val();
 });
 
 function selectHasValue(select, value) {
@@ -440,8 +440,8 @@ $("#frameScroller").on('input', function () {
         }
     }else if($("#fileSelectMode").val()=="sequence"){
         updateImageSequencePreview(true);
-    }else if($("#fileSelectMode").val()=="cine"){
-        reloadCineImages($(this).val(),!isResultsMode());
+    }else if($("#fileSelectMode").val()=="video"){
+        reloadVideoImages($(this).val(),!isResultsMode());
     }
     if($("#analysisModeSelect").val()=="subset"||$("#analysisModeSelect").val()=="global"){
         checkContourJsonFileExists();
@@ -459,7 +459,7 @@ $("#frameScroller").on('input', function () {
     $("#trackDisplayModeSelect").trigger("change");
 });
 
-$("#cineGoToIndex").keypress(function(event) { 
+$("#videoGoToIndex").keypress(function(event) { 
     if (event.keyCode === 13) { 
         if($(this).val() < Number($("#startPreviewSpan").text()) || $(this).val() > Number($("#endPreviewSpan").text())){
             alert("invalid index");
@@ -467,18 +467,18 @@ $("#cineGoToIndex").keypress(function(event) {
         }
         $("#frameScroller").val($(this).val());
         $("#currentPreviewSpan").text($(this).val());
-        reloadCineImages($(this).val());
+        reloadVideoImages($(this).val());
     } 
 }); 
 
 $(".update-tracklib-preview").keypress(function(event) { 
     if (event.keyCode === 13) { 
-        reloadCineImages($("#frameScroller").val());
+        reloadVideoImages($("#frameScroller").val());
     } 
 }); 
 
 $("#previewTracklib").on("click",function () {
-    reloadCineImages($("#frameScroller").val());
+    reloadVideoImages($("#frameScroller").val());
 });
 
 $("#rightRefInput").on("click",function () {
@@ -600,7 +600,7 @@ $("#performCal").click(function () {
     localStorage.setItem("calFileName","");
     localStorage.setItem("execCalPath",execCalPath);
     localStorage.setItem("execOpenCVServerPath",execOpenCVServerPath);
-    localStorage.setItem("execCineStatPath",execCineStatPath);
+    localStorage.setItem("execVideoStatPath",execVideoStatPath);
     localStorage.setItem("showStereoPane",showStereoPane);
     
     var win = new BrowserWindow({

@@ -49,6 +49,7 @@ function initialize_gui(load_existing){
                 }else{
                     hideParams();
                 }
+		if(fileSelectMode=='cine') fileSelectMode ='video';
                 $("#fileSelectMode").val(fileSelectMode).change();
                 $("#analysisModeSelect").val(analysisModeSelect).change();
                 //if($("#analysisModeSelect").val()=='tracking')
@@ -93,7 +94,7 @@ function initialize_gui(load_existing){
                         // load the existing input file if there is one in this directory:
                         var existing_input = fullPath('','input.xml');
                         console.log('loading existing input file if it exists: ' + existing_input);
-                        deleteHiddenFiles('cine_stats');
+                        deleteHiddenFiles('video_stats');
                         parse_input_xml_file(existing_input);
                     }
                 }else{
@@ -583,8 +584,8 @@ $("#stereoButton").click(function(){
             resetPlotlyViewer('right',true);
             $(".non-tracklib-tools").hide();
             $(".tracklib-tools").show();
-            if($("#fileSelectMode").val()!="cine")
-                $("#fileSelectMode").val("cine").change();
+            if($("#fileSelectMode").val()!="video")
+                $("#fileSelectMode").val("video").change();
         }else{
             $(".non-tracklib-tools").show();
             $(".tracklib-tools").hide();
@@ -799,8 +800,8 @@ $("#analysisModeSelect").on('change',function() {
                 $(".results-right").show();
                 $(".non-tracklib-tools").hide();
                 $(".tracklib-tools").show();
-                if($("#fileSelectMode").val()!="cine")
-                    $("#fileSelectMode").val("cine").change();
+                if($("#fileSelectMode").val()!="video")
+                    $("#fileSelectMode").val("video").change();
             }
             else{
                 $(".results-right").hide();
@@ -835,18 +836,18 @@ $("#fileSelectMode").on('change',function (){
     if($(this).val()=="sequence"){
         $(".nav-sequence").css('display','block');
         $(".nav-list").css('display','none');
-        $(".nav-cine").css('display','none');
+        $(".nav-video").css('display','none');
     }
     else if($(this).val()=="list"){
         $("#skipIndex").val(1);
         $(".nav-sequence").css('display','none');
         $(".nav-list").css('display','block');
-        $(".nav-cine").css('display','none');
+        $(".nav-video").css('display','none');
     }
-    else if($(this).val()=="cine"){
+    else if($(this).val()=="video"){
         $(".nav-sequence").css('display','none');
         $(".nav-list").css('display','none');
-        $(".nav-cine").css('display','block');
+        $(".nav-video").css('display','block');
     }
     resetWorkingDirectory();
     checkValidInput();

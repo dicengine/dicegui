@@ -94,25 +94,27 @@ function impl_input_xml_file(xml){
         $("#omitTextCheck")[0].checked = true;
     }
 
-    // read the images (one of three options 1: sequence of images, 2: cine file, or 3: list of images
+    // read the images (one of three options 1: sequence of images, 2: video file, or 3: list of images
     image_folder = xml_get(xml,"image_folder");
-    // cine
-    cine_file = xml_get(xml,"cine_file");
-    if(cine_file){
-        console.log('reading cine file: ' + image_folder + cine_file);
-        $("#fileSelectMode").val("cine");
-        stereo_cine_file = xml_get(xml,"stereo_cine_file");
-        if(stereo_cine_file){
+    // video
+    video_file = xml_get(xml,"cine_file");
+    if(!video_file) video_file = xml_get(xml,"video_file");
+    if(video_file){
+        console.log('reading video file: ' + image_folder + video_file);
+        $("#fileSelectMode").val("video");
+        stereo_video_file = xml_get(xml,"stereo_cine_file");
+	if(!stereo_video_file) stereo_video_file = xml_get(xml,"stereo_video_file");
+        if(stereo_video_file){
             showStereoViewer();
         }
         else show2DViewer();
         $("#fileSelectMode").change();
-        full_name = image_folder + cine_file;
-        callCineStatExec(full_name,0,function(){update_cine_indices(xml); parseSubsetFile(xml);});
-        if(stereo_cine_file){
-            console.log('reading stereo cine file: ' + image_folder + stereo_cine_file);
-            stereo_full_name = image_folder + stereo_cine_file;
-            callCineStatExec(stereo_full_name,1);
+        full_name = image_folder + video_file;
+        callVideoStatExec(full_name,0,function(){update_video_indices(xml); parseSubsetFile(xml);});
+        if(stereo_video_file){
+            console.log('reading stereo video file: ' + image_folder + stereo_video_file);
+            stereo_full_name = image_folder + stereo_video_file;
+            callVideoStatExec(stereo_full_name,1);
         }
     }else{
         // list
@@ -447,17 +449,21 @@ function readSubsetFile(data){
     checkContourJsonFileExists();
 }
 
-function update_cine_indices(xml){
-    cine_start_index = xml_get(xml,"cine_start_index");
-    if(cine_start_index && cine_start_index!='undefined') {$("#cineStartIndex").val(cine_start_index);}
-    cine_end_index = xml_get(xml,"cine_end_index");
-    if(cine_end_index && cine_end_index!='undefined') {$("#cineEndIndex").val(cine_end_index);}
-    cine_skip_index = xml_get(xml,"cine_skip_index");
-    if(cine_skip_index && cine_skip_index!='undefined') {$("#cineSkipIndex").val(cine_skip_index);}
-    cine_ref_index = xml_get(xml,"cine_ref_index");
-    if(cine_ref_index && cine_ref_index!='undefined') {$("#cineRefIndex").val(cine_ref_index);}
-    $("#frameScroller").val(cine_ref_index);
-    $("#currentPreviewSpan").text(cine_ref_index);
+function update_video_indices(xml){
+    video_start_index = xml_get(xml,"cine_start_index");
+    if(!video_start_index) video_start_index = xml_get(xml,"video_start_index");
+    if(video_start_index && video_start_index!='undefined') {$("#videoStartIndex").val(video_start_index);}
+    video_end_index = xml_get(xml,"cine_end_index");
+    if(!video_end_index) video_end_index = xml_get(xml,"video_end_index");
+    if(video_end_index && video_end_index!='undefined') {$("#videoEndIndex").val(video_end_index);}
+    video_skip_index = xml_get(xml,"cine_skip_index");
+    if(!video_skip_index) video_skip_index = xml_get(xml,"video_skip_index");
+    if(video_skip_index && video_skip_index!='undefined') {$("#videoSkipIndex").val(video_skip_index);}
+    video_ref_index = xml_get(xml,"cine_ref_index");
+    if(!video_ref_index) video_ref_index = xml_get(xml,"video_ref_index");
+    if(video_ref_index && video_ref_index!='undefined') {$("#videoRefIndex").val(video_ref_index);}
+    $("#frameScroller").val(video_ref_index);
+    $("#currentPreviewSpan").text(video_ref_index);
 }
 
 function parse_params_xml_file(filename){

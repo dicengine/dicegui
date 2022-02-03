@@ -139,16 +139,16 @@ function resetWorkingDirectory(){
     $("#stereoRightSuffix").val('_1');
     $("#imageExtension").val('');
 
-    $("#cineLeftPreviewSpan").text('');
-    $("#cineRightPreviewSpan").text('');
+    $("#videoLeftPreviewSpan").text('');
+    $("#videoRightPreviewSpan").text('');
     $("#startPreviewSpan").text('');
     $("#endPreviewSpan").text('');
-    $("#cineRefIndex").val(0);
-    $("#cineStartIndex").val(0);
-    $("#cineEndIndex").val(0);
-    $("#cineSkipIndex").val(1);
-    $("#cineFrameRatePreviewSpan").text("");
-    $("#cineGoToIndex").val("");
+    $("#videoRefIndex").val(0);
+    $("#videoStartIndex").val(0);
+    $("#videoEndIndex").val(0);
+    $("#videoSkipIndex").val(1);
+    $("#videoFrameRatePreviewSpan").text("");
+    $("#videoGoToIndex").val("");
 
     $("#calList").empty();
     $("#runLoader").removeClass('post-loader-success');
@@ -160,8 +160,8 @@ function resetWorkingDirectory(){
     
     refImagePathLeft = "undefined";
     refImagePathRight = "undefined";
-    cinePathLeft = "undefined";
-    cinePathRight = "undefined";
+    videoPathLeft = "undefined";
+    videoPathRight = "undefined";
     calPath = "undefined";
     defImagePathsLeft = [];
     defImagePathsRight = [];
@@ -287,12 +287,13 @@ function callDICeExec(resolution,ss_locs) {
     });
 }
 
-function updateCineDisplayImage(fileName,index,dest,cb){
+function updateVideoDisplayImage(fileName,index,dest,cb){
     cb = cb || $.noop;
     // construct the file name with the indes
     // this assumes that fileName is not alredy decorated
-    var decoratedFile = fileName.replace('.'+fileName.split('.').pop(),'_'+index+'.cine');
-    console.log('updating cine display image: ' + decoratedFile);
+    var ext = '.' + fileName.split('.').pop();
+    var decoratedFile = fileName.replace(ext,'_'+index+ext);
+    console.log('updating video display image: ' + decoratedFile);
     args = [];
     if($("#brightnessCheck")[0].checked){
         args.push("filter:brightness");
@@ -305,22 +306,22 @@ function updateCineDisplayImage(fileName,index,dest,cb){
     updatePreviewImage({argsIn:args,srcPath:decoratedFile,dest:dest},cb);
 }
 
-function callCineStatExec(path,mode,callback) {
+function callVideoStatExec(path,mode,callback) {
 
     callback = callback || $.noop;
     var child_process = require('child_process');
     var readline      = require('readline');
     var proc;
 
-    console.log('loading cine file: ' + path)
+    console.log('loading video file: ' + path)
     fs.stat(path, function(err, stat) {
         if(err != null) {
-            alert("could not find .cine file: " + path);
+            alert("could not find video file: " + path);
             return false;
         }
         else{
-            console.log("getting frame range of cine file: " + path);
-            var proc = child_process.spawn(execCineStatPath, [path],{cwd:workingDirectory});//,maxBuffer:1024*1024})
+            console.log("getting frame range of video file: " + path);
+            var proc = child_process.spawn(execVideoStatPath, [path],{cwd:workingDirectory});//,maxBuffer:1024*1024})
         }
         readline.createInterface({
             input     : proc.stdout,
@@ -329,21 +330,21 @@ function callCineStatExec(path,mode,callback) {
             console.log(line);
         });
         proc.on('error', function(){
-            alert('DICe .cine file stat failed: invalid executable: ' + execCineStatPath);
+            alert('DICe video file stat failed: invalid executable: ' + execVideoStatPath);
             return false;
         });
         proc.on('close', (code) => {
             console.log(`child process exited with code ${code}`);
             if(code!=0){
-                alert('DICe .cine file stat failed');
+                alert('DICe video file stat failed');
                 return false;
             }
             else{
                 // read the output file:
-                var statFileName = fullPath('.dice','.cine_stats.dat');
+                var statFileName = fullPath('.dice','.video_stats.dat');
                 fs.stat(statFileName, function(err, stat) {
                     if(err != null) {
-                        alert("could not find .cine stats file: " + statFileName);
+                        alert("could not find video stats file: " + statFileName);
                         return false;
                     }else{
                          fs.readFile(statFileName, 'utf8', function (err,data) {
@@ -355,45 +356,45 @@ function callCineStatExec(path,mode,callback) {
                              //alert(stats[0]);
                              //alert(stats[1]);
                              //alert(stats[2]);
-                             // check that the two cine files have valid frame ranges
+                             // check that the two video files have valid frame ranges
                              if($("#startPreviewSpan").text()!=""||$("#endPreviewSpan").text()!="")
                                  if($("#startPreviewSpan").text()!=stats[1]||$("#endPreviewSpan").text()!=stats[2]){
                                      if(mode==0){
                                          // unload the stereo image
-                                         cinePathRight = "undefined";
+                                         videoPathRight = "undefined";
                                          resetPlotlyViewer('right');
-                                         $("#cineRightPreview span").text("");
+                                         $("#videoRightPreview span").text("");
                                      }else{
                                          // unload the stereo image
-                                         cinePathLeft = "undefined";
+                                         videoPathLeft = "undefined";
                                          resetPlotlyViewer('left');
-                                         $("#cineLeftPreview span").text("");
+                                         $("#videoLeftPreview span").text("");
                                      }
                                  }
-                             cineFirstFrame = stats[1];
+                             videoFirstFrame = stats[1];
                              $("#startPreviewSpan").text(stats[1]);
                              $("#currentPreviewSpan").text(stats[1]);
                              $("#endPreviewSpan").text(stats[2]);
-                             $("#cineGoToIndex").val(stats[1]);
-                             $("#cineFrameRatePreviewSpan").text(stats[3]);
+                             $("#videoGoToIndex").val(stats[1]);
+                             $("#videoFrameRatePreviewSpan").text(stats[3]);
 //                             if(mode==0){
-                                 $("#cineRefIndex").val(stats[1]);
-                                 $("#cineStartIndex").val(stats[1]);
-                                 $("#cineEndIndex").val(stats[2]);
+                                 $("#videoRefIndex").val(stats[1]);
+                                 $("#videoStartIndex").val(stats[1]);
+                                 $("#videoEndIndex").val(stats[2]);
                                  $("#frameScroller").attr('max',stats[2]);
                                  $("#frameScroller").attr('min',stats[1]);
                                  $("#frameScroller").val(stats[1]);
 //                             }
-                             // convert the cine to tiff
+                             // convert the video to tiff
                              // always start with the ref index for the initial display
                              if(mode==0){
-                                 cinePathLeft = path;
-                                 $("#cineLeftPreview span").text(path.replace(/^.*[\\\/]/, ''));
-                                 updateCineDisplayImage(path,stats[1],'left',callback); // only execute the callback after the left image is updated
+                                 videoPathLeft = path;
+                                 $("#videoLeftPreview span").text(path.replace(/^.*[\\\/]/, ''));
+                                 updateVideoDisplayImage(path,stats[1],'left',callback); // only execute the callback after the left image is updated
                              }else if(mode==1){
-                                 cinePathRight = path;
-                                 $("#cineRightPreview span").text(path.replace(/^.*[\\\/]/, ''));
-                                 updateCineDisplayImage(path,stats[1],'right');
+                                 videoPathRight = path;
+                                 $("#videoRightPreview span").text(path.replace(/^.*[\\\/]/, ''));
+                                 updateVideoDisplayImage(path,stats[1],'right');
                              }
                              deleteHiddenFiles('keypoints');
                              return true;
@@ -407,9 +408,9 @@ function callCineStatExec(path,mode,callback) {
 
 function updateTracklibDisplayImages(index,loadData=true){
     console.log('updateTracklibDisplayImages()');
-    if(cinePathLeft=="undefined"||cinePathRight=="undefined"){
+    if(videoPathLeft=="undefined"||videoPathRight=="undefined"){
         alert('cannot update tracklib image preview since the paths are not defined');
-        console.log('left path ' + cinePathLeft + ' right path ' + cinePathRight);
+        console.log('left path ' + videoPathLeft + ' right path ' + videoPathRight);
         return;
     }
     if(calPath=="undefined"){
@@ -447,13 +448,13 @@ function updateTracklibDisplayImages(index,loadData=true){
     args.push('show_segmentation');
     args.push($("#showSegmentationCheck")[0].checked);
     
-    args.push('cine_file');
-    args.push(cinePathLeft);
-    args.push('stereo_cine_file');
-    args.push(cinePathRight);
+    args.push('video_file');
+    args.push(videoPathLeft);
+    args.push('stereo_video_file');
+    args.push(videoPathRight);
 
-    args.push('cine_ref_index');
-    args.push(parseInt($("#cineRefIndex").val()));
+    args.push('video_ref_index');
+    args.push(parseInt($("#videoRefIndex").val()));
     
     args.push('write_results');
     if(isResultsMode())
@@ -461,31 +462,31 @@ function updateTracklibDisplayImages(index,loadData=true){
     // when in results mode, but this is prevent over-writing a full analysis results file
     else args.push('true');
     
-    args.push('cine_start_index');
+    args.push('video_start_index');
     var startFrame = Number($("#currentPreviewSpan").text());
     if(!isResultsMode()){ // only one frame is shown in results mode
-        startFrame = Number($("#currentPreviewSpan").text()) - ($("#numPreviewFrames").val()-1)*$("#cineSkipIndex").val();
+        startFrame = Number($("#currentPreviewSpan").text()) - ($("#numPreviewFrames").val()-1)*$("#videoSkipIndex").val();
         if(startFrame < Number($("#startPreviewSpan").text()))
             startFrame = Number($("#startPreviewSpan").text());
     }
     args.push(startFrame);
     // overload the start frame as the current frame since the preview begins
     // with the current frame
-//    args.push($("#cineStartIndex").val());
+//    args.push($("#videoStartIndex").val());
 //    args.push($("#currentPreviewSpan").text());
     
     // the end frame is the start frame plus num_frames * skips
-    args.push('cine_preview_index'); // the last frame is also the preview frame for preview mode
+    args.push('video_preview_index'); // the last frame is also the preview frame for preview mode
     args.push(parseInt($("#currentPreviewSpan").text()));
-    args.push('cine_end_index');
+    args.push('video_end_index');
     args.push(parseInt($("#currentPreviewSpan").text()));
-//    var endFrame = Number($("#currentPreviewSpan").text()) + ($("#numPreviewFrames").val()-1)*$("#cineSkipIndex").val();
+//    var endFrame = Number($("#currentPreviewSpan").text()) + ($("#numPreviewFrames").val()-1)*$("#videoSkipIndex").val();
 //    if(endFrame > Number($("#endPreviewSpan").text()))
 //        endFrame = Number($("#endPreviewSpan").text());
 //    args.push(endFrame);
     
-    args.push('cine_skip_index');
-    args.push(parseInt($("#cineSkipIndex").val()));
+    args.push('video_skip_index');
+    args.push(parseInt($("#videoSkipIndex").val()));
     
     args.push('camera_system_file');
     args.push(calPath);
@@ -504,7 +505,7 @@ function updateTracklibDisplayImages(index,loadData=true){
     
     args.push('num_background_frames');
     var numBackgroundFrames = parseInt($("#numBackgroundFrames").val());
-    if(numBackgroundFrames<1||numBackgroundFrames > ($("#cineEndIndex").val()-$("#cineStartIndex").val())){
+    if(numBackgroundFrames<1||numBackgroundFrames > ($("#videoEndIndex").val()-$("#videoStartIndex").val())){
         numBackgroundFrames = 1;
         $("#numBackgroundFrames").val(1);
     }
@@ -815,17 +816,17 @@ function writeInputFile(only_write,resolution=false,ss_locs=false) {
             content += '<Parameter name="file_suffix" type="string" value="'+$("#imageSuffix").val()+'" />\n';
         }
     }
-    else if(fileSelectMode=="cine"){
+    else if(fileSelectMode=="video"){
         content += '<Parameter name="image_folder" type="string" value="" />\n';
-        content += '<Parameter name="cine_file" type="string" value="'+cinePathLeft+'" />\n';
-        content += '<Parameter name="cine_ref_index" type="int" value="'+$("#cineRefIndex").val()+'" />\n';
-        content += '<Parameter name="cine_start_index" type="int" value="'+$("#cineStartIndex").val()+'" />\n';
-        content += '<Parameter name="cine_skip_index" type="int" value="'+$("#cineSkipIndex").val()+'" />\n';
-        content += '<Parameter name="cine_end_index" type="int" value="'+$("#cineEndIndex").val()+'" />\n';
+        content += '<Parameter name="video_file" type="string" value="'+videoPathLeft+'" />\n';
+        content += '<Parameter name="video_ref_index" type="int" value="'+$("#videoRefIndex").val()+'" />\n';
+        content += '<Parameter name="video_start_index" type="int" value="'+$("#videoStartIndex").val()+'" />\n';
+        content += '<Parameter name="video_skip_index" type="int" value="'+$("#videoSkipIndex").val()+'" />\n';
+        content += '<Parameter name="video_end_index" type="int" value="'+$("#videoEndIndex").val()+'" />\n';
         if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1) // signifies tracklib
-            content += '<Parameter name="cine_preview_index" type="int" value="'+parseInt($("#frameScroller").val())+'" />\n';
+            content += '<Parameter name="video_preview_index" type="int" value="'+parseInt($("#frameScroller").val())+'" />\n';
         if((showStereoPane==1||showStereoPane==2)&&!resolution&&!ss_locs){
-            content += '<Parameter name="stereo_cine_file" type="string" value="'+cinePathRight+'" />\n';
+            content += '<Parameter name="stereo_video_file" type="string" value="'+videoPathRight+'" />\n';
         }
     }
     content += '</ParameterList>\n';
@@ -1011,8 +1012,8 @@ function writeParamsFile(only_write,resolution,ss_locs) {
         content += Number($("#distFromEpiWeight").val()).toFixed(2);
         content += '" />\n';
         var numBackgroundFrames = parseInt($("#numBackgroundFrames").val());
-        if(numBackgroundFrames<0||numBackgroundFrames > ($("#cineEndIndex").val()-$("#cineStartIndex").val())){
-            alert('warning: invalid num background frames (needs to be an integer value between 0 and the total num frames in the cine file)\nSetting num background frames to 0');
+        if(numBackgroundFrames<0||numBackgroundFrames > ($("#videoEndIndex").val()-$("#videoStartIndex").val())){
+            alert('warning: invalid num background frames (needs to be an integer value between 0 and the total num frames in the video file)\nSetting num background frames to 0');
             numBackgroundFrames = 0;
             $("#numBackgroundFrames").val(0);
         }
@@ -1343,7 +1344,7 @@ function checkValidInput() {
     var enableCross = true;
     //var enableResolution = true;
     var isSequence = $("#fileSelectMode").val()=='sequence';
-    var isCine =  $("#fileSelectMode").val()=='cine';
+    var isVideo =  $("#fileSelectMode").val()=='video';
     var isList = $("#fileSelectMode").val()=='list';
     var isStereo = showStereoPane==1||showStereoPane==2;
     var calRequired = isStereo || $("#calibrationCheck")[0].checked;
@@ -1359,10 +1360,10 @@ function checkValidInput() {
         }
     }else if(isSequence){
         $("#taskList").append('<li id=\"seqLoadLi\" class=\"task-list-item\";>load image sequence</li>');
-    }else if(isCine){
-        $("#taskList").append('<li id=\"cineLoadLi\" class=\"task-list-item\";>load cine</li>');
+    }else if(isVideo){
+        $("#taskList").append('<li id=\"videoLoadLi\" class=\"task-list-item\";>load video</li>');
         if(isStereo){
-            $("#taskList").append('<li id=\"cineLoadStereoLi\" class=\"task-list-item\";>load stereo cine</li>');
+            $("#taskList").append('<li id=\"videoLoadStereoLi\" class=\"task-list-item\";>load stereo video</li>');
         }
     }
     if(calRequired)
@@ -1385,24 +1386,24 @@ function checkValidInput() {
         }else
             $('#loadCalLi').addClass('task-list-item-done');
     }
-    if(isCine){
-        if(cinePathLeft=="undefined"){
+    if(isVideo){
+        if(videoPathLeft=="undefined"){
             validInput = false;
             enableCross = false;
-            $('#cineLoadLi').removeClass('task-list-item-done');
+            $('#videoLoadLi').removeClass('task-list-item-done');
             $(".ref-image-required").attr("disabled", true);
             $(".ref-image-required").prop("checked", false);
         }else{
-            $('#cineLoadLi').addClass('task-list-item-done');
+            $('#videoLoadLi').addClass('task-list-item-done');
             $(".ref-image-required").removeAttr("disabled");
         }
         if(isStereo){
-            if(cinePathRight=="undefined"){
+            if(videoPathRight=="undefined"){
                 validInput = false;
                 enableCross = false;
-                $('#cineLoadStereoLi').removeClass('task-list-item-done');
+                $('#videoLoadStereoLi').removeClass('task-list-item-done');
             }else
-                $('#cineLoadStereoLi').addClass('task-list-item-done');
+                $('#videoLoadStereoLi').addClass('task-list-item-done');
         }
     }
     else if(isSequence){

@@ -350,7 +350,7 @@ function updateInspectors(dest,index2d){//,stereoGlobalId,index3d){
     highlightTrack(curveNum,index3d);
 }
 $("#showSegmentationCheck").click(function(){
-    reloadCineImages($("#frameScroller").val());
+    reloadVideoImages($("#frameScroller").val());
 });
 
 $("#showTrackingCheck").click(function(){
