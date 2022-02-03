@@ -428,7 +428,7 @@ function getPreviewConfig(dest){
             name: 'importSubsets',
             title: 'Import subset locations',
             icon: importIcon,
-            click: () => {if(!$("#runLi").is(":visible"))return;$('#loadSubsetFileInputIcon').click();}
+            click: () => {$('#loadSubsetFileInputIcon').click();}
     }
     let deleteLivePlotPtsIcon = {
             'width': 24,
