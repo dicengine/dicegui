@@ -559,15 +559,40 @@ function impl_params_xml_file(xml){
         $("#regularizationConstant").val(reg_constant);
         $("#regularizationConstantLabel").text(reg_constant);
     }
+    threshold_method = xml_get(xml,"threshold_method");
+    console.log('threhsold_method: ' + threshold_method);
+    if(threshold_method=="guildenbecher"){
+        $("#thresholdModeSelect").val("guildenbecher");
+    }
+    if(threshold_method=="threshold"){
+        $("#thresholdModeSelect").val("threshold");
+    }
+
     // tracking parameters
-    thresh_left = xml_get(xml,"thresh_left");
-    console.log('thresh_left: ' + thresh_left);
-    if(thresh_left)
-        $("#threshLeft").val(thresh_left);
-    thresh_right = xml_get(xml,"thresh_right");
-    console.log('thresh_right: ' + thresh_right);
-    if(thresh_right)
-        $("#threshRight").val(thresh_right);
+    min_thresh_left = xml_get(xml,"min_thresh_left");
+    console.log('min_thresh_left: ' + min_thresh_left);
+    if(min_thresh_left)
+        $("#minThreshLeft").val(min_thresh_left);
+    max_thresh_left = xml_get(xml,"max_thresh_left");
+    console.log('max_thresh_left: ' + max_thresh_left);
+    if(max_thresh_left)
+        $("#maxThreshLeft").val(max_thresh_left);
+    steps_thresh_left = xml_get(xml,"steps_thresh_left");
+    console.log('steps_thresh_left: ' + steps_thresh_left);
+    if(steps_thresh_left)
+        $("#stepsThreshLeft").val(steps_thresh_left);
+    min_thresh_right = xml_get(xml,"min_thresh_right");
+    console.log('min_thresh_right: ' + min_thresh_right);
+    if(min_thresh_right)
+        $("#minThreshRight").val(min_thresh_right);
+    max_thresh_right = xml_get(xml,"max_thresh_right");
+    console.log('max_thresh_right: ' + max_thresh_right);
+    if(max_thresh_right)
+        $("#maxThreshRight").val(max_thresh_right);
+    steps_thresh_right = xml_get(xml,"steps_thresh_right");
+    console.log('steps_thresh_right: ' + steps_thresh_right);
+    if(steps_thresh_right)
+        $("#stepsThreshRight").val(steps_thresh_right);
     max_pt_density = xml_get(xml,"max_pt_density");
     console.log('max_pt_density: ' + max_pt_density);
     if(max_pt_density)

@@ -444,18 +444,39 @@
                       <p style="padding-top: 15px; float:left;"><b>segmentation</b></p>
                       <p style="padding-top: 15px; float:right;"><input id="showSegmentationCheck" type="checkbox" checked> show</p>
                       </div>
-                      <hr style="width:100%;text-align:left;margin-left:0;">
+                      <hr style="width:100%;text-align:left;margin-left:0;margin-bottom:10px;">
+		      <p>method</p>
+                      <select id="thresholdModeSelect" style="width:50%;">
+                        <option value="guildenbecher">Guildenbecher</option>
+                        <option value="threshold">threshold-only</option>
+                      </select>
                       <div style="overflow: hidden;">
                         <div style="width: 50%; float: left; padding-top:10px;">
-                          <p>thresh left (counts)</p>
-                          <input type="text" class="update-tracklib-preview" id="threshLeft"
-                            name="threshLeft" value="10" style="width: 54%;"
+                          <p>min thresh left (counts)</p>
+                          <input type="text" class="update-tracklib-preview" id="minThreshLeft"
+                            name="minThreshLeft" value="10" style="width: 54%;"
+                          >
+                          <p>max thresh left (counts)</p>
+                          <input type="text" class="update-tracklib-preview" id="maxThreshLeft"
+                            name="maxThreshLeft" value="10" style="width: 54%;"
+                          >
+                          <p>thresh left steps</p>
+                          <input type="text" class="update-tracklib-preview" id="stepsThreshLeft"
+                            name="stepsThreshLeft" value="1" style="width: 54%;"
                           >
                         </div>
                         <div style="width: 50%; float: right; padding-top: 10px;">
-                          <p>thresh right (counts)</p>
-                          <input type="text" class="update-tracklib-preview" id="threshRight"
-                            name="threshRight" value="10" style="width: 54%;"
+                          <p>min thresh right (counts)</p>
+                          <input type="text" class="update-tracklib-preview" id="minThreshRight"
+                            name="minThreshRight" value="10" style="width: 54%;"
+                          >
+                          <p>max thresh right (counts)</p>
+                          <input type="text" class="update-tracklib-preview" id="maxThreshRight"
+                            name="maxThreshRight" value="10" style="width: 54%;"
+                          >
+                          <p>thresh right steps</p>
+                          <input type="text" class="update-tracklib-preview" id="stepsThreshRight"
+                            name="stepsThreshRight" value="1" style="width: 54%;"
                           >
                         </div>
                       </div>

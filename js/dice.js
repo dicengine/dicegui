@@ -490,12 +490,23 @@ function updateTracklibDisplayImages(index,loadData=true){
     
     args.push('camera_system_file');
     args.push(calPath);
-    
-    args.push('thresh_left');
-    args.push(parseInt($("#threshLeft").val()));
 
-    args.push('thresh_right');
-    args.push(parseInt($("#threshRight").val()));
+    args.push('threshold_method');
+    args.push($("#thresholdModeSelect").val());
+    
+    args.push('min_thresh_left');
+    args.push(parseInt($("#minThreshLeft").val()));
+    args.push('max_thresh_left');
+    args.push(parseInt($("#maxThreshLeft").val()));
+    args.push('steps_thresh_left');
+    args.push(parseInt($("#stepsThreshLeft").val()));
+
+    args.push('min_thresh_right');
+    args.push(parseInt($("#minThreshRight").val()));
+    args.push('max_thresh_right');
+    args.push(parseInt($("#maxThreshRight").val()));
+    args.push('steps_thresh_right');
+    args.push(parseInt($("#stepsThreshRight").val()));
     
     args.push('min_area');
     args.push(parseInt($("#minArea").val()));
@@ -952,8 +963,13 @@ function writeParamsFile(only_write,resolution,ss_locs) {
     if($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1){ // signifies tracklib
         // set the show tracks check to true by default
         $('#showTrackingCheck').prop('checked', true);
-        content += '<Parameter name="thresh_left" type="int" value="' + parseInt($("#threshLeft").val()) +'" />\n';
-        content += '<Parameter name="thresh_right" type="int" value="' + parseInt($("#threshRight").val()) +'" />\n';
+        content += '<Parameter name="threshold_method" type="string" value="' + $("#thresholdModeSelect").val() +'" />\n';
+        content += '<Parameter name="min_thresh_left" type="int" value="' + parseInt($("#minThreshLeft").val()) +'" />\n';
+        content += '<Parameter name="max_thresh_left" type="int" value="' + parseInt($("#maxThreshLeft").val()) +'" />\n';
+        content += '<Parameter name="steps_thresh_left" type="int" value="' + parseInt($("#stepsThreshLeft").val()) +'" />\n';
+        content += '<Parameter name="min_thresh_right" type="int" value="' + parseInt($("#minThreshRight").val()) +'" />\n';
+        content += '<Parameter name="max_thresh_right" type="int" value="' + parseInt($("#maxThreshRight").val()) +'" />\n';
+        content += '<Parameter name="steps_thresh_right" type="int" value="' + parseInt($("#stepsThreshRight").val()) +'" />\n';
         content += '<Parameter name="min_area" type="int" value="' + parseInt($("#minArea").val()) +'" />\n';
         content += '<Parameter name="max_area" type="int" value="' + parseInt($("#maxArea").val()) +'" />\n';
         if(parseInt($("#minPtsPerTrack").val())<2){
