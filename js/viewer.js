@@ -180,8 +180,8 @@ function loadImageSequence(cb){
         args.push("filter:brightness");
         args.push("brightness");
         args.push($("#brightnessBeta").val());
-    }
-    if($("#equalizeHistCheck")[0].checked){
+    }                                      // true for tracklib
+    if($("#equalizeHistCheck")[0].checked||($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1)){
         args.push("filter:equalize_hist");
     }
     fs.stat(fullImageName, function(err, stat) {
@@ -406,8 +406,8 @@ $("#frameScroller").on('input', function () {
             args.push("filter:brightness");
             args.push("brightness");
             args.push($("#brightnessBeta").val());
-        }
-        if($("#equalizeHistCheck")[0].checked){
+        }                                     // true by default for tracklib
+        if($("#equalizeHistCheck")[0].checked||($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1)){
             args.push("filter:equalize_hist");
         }
         if(Number($(this).val())<0){

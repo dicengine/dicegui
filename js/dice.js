@@ -299,8 +299,8 @@ function updateVideoDisplayImage(fileName,index,dest,cb){
         args.push("filter:brightness");
         args.push("brightness");
         args.push($("#brightnessBeta").val());
-    }
-    if($("#equalizeHistCheck")[0].checked){
+    }                                     // equilize histogram for tracklib by default
+    if($("#equalizeHistCheck")[0].checked||($("#analysisModeSelect").val()=="tracking"&&showStereoPane==1)){
         args.push("filter:equalize_hist");
     }
     updatePreviewImage({argsIn:args,srcPath:decoratedFile,dest:dest},cb);
