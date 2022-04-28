@@ -419,6 +419,7 @@ function loadPlotlyJsonOutput(source){
                     });
                 }else{
                     console.log(jsonErr);
+		    alert('Tracking or segmentation failed, options such as the threshold values or number of search frames might need to be adjusted. There might also not be any objects to track in this frame.');
                     Plotly.purge(document.getElementById("livePlot3d"));
                     Plotly.purge(document.getElementById("livePlots"));
                 }
