@@ -469,10 +469,16 @@ function updateCalPreview(firstLoad=false){
     console.log("updateCalPreview: left file " + decObj.decoratedLeft);
     console.log("updateCalPreview: right file " + decObj.decoratedRight);
     startProgress();
-    var update = {srcPath:decObj.decoratedLeft, dest:'cal_left',argsIn:args,debugConsoleDivId:"#calConsoleWindow"};
-    updatePreviewImage(update,function (code) {respondToOpenCVErrorCode(code);});
-    update = {srcPath:decObj.decoratedRight, dest:'cal_right',argsIn:args,debugConsoleDivId:"#calConsoleWindow"};
-    updatePreviewImage(update,function (code) {respondToOpenCVErrorCode(code);});
+    var update_left  = {srcPath:decObj.decoratedLeft, dest:'cal_left',argsIn:args,debugConsoleDivId:"#calConsoleWindow"};
+    var update_right = {srcPath:decObj.decoratedRight, dest:'cal_right',argsIn:args,debugConsoleDivId:"#calConsoleWindow"};
+    updatePreviewImage(update_left,function (code) {
+	respondToOpenCVErrorCode(code);
+        updatePreviewImage(update_right,function (code) {
+	    respondToOpenCVErrorCode(code);
+	});
+    });
+    //update = {srcPath:decObj.decoratedRight, dest:'cal_right',argsIn:args,debugConsoleDivId:"#calConsoleWindow"};
+    //updatePreviewImage(update,function (code) {respondToOpenCVErrorCode(code);});
 }
 
 function decorateFileNames(){
