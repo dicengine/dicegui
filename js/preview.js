@@ -817,6 +817,8 @@ function computeEpipolarY0Y1(event,dest){
     args = [];
     args.push(xInDataCoord);
     args.push(yInDataCoord);
+    args.push(refImageWidth);
+    args.push(refImageHeight);
     args.push(calPath);
     if(dest=='left')
         args.push(1); // indicates left image

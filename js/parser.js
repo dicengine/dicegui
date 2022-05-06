@@ -562,10 +562,10 @@ function impl_params_xml_file(xml){
     threshold_method = xml_get(xml,"threshold_method");
     console.log('threhsold_method: ' + threshold_method);
     if(threshold_method=="guildenbecher"){
-        $("#thresholdModeSelect").val("guildenbecher");
+        $("#thresholdModeSelect").val("guildenbecher").change();
     }
     if(threshold_method=="threshold"){
-        $("#thresholdModeSelect").val("threshold");
+        $("#thresholdModeSelect").val("threshold").change();
     }
 
     // tracking parameters

@@ -752,6 +752,35 @@ function updateFrameScrollerRange(){
     }
 }
 
+$("#thresholdModeSelect").on('change',function() {
+    if($(this).val()=="threshold"){
+	$("#minThreshLeftText").text('thresh left (counts)');
+	$("#maxThreshLeftText").hide();
+	$("#maxThreshLeft").hide();
+	$("#stepsThreshLeft").hide();
+	$("#stepsThreshLeftText").hide();
+	$("#minThreshRightText").text('thresh right (counts)');
+	$("#maxThreshRightText").hide();
+	$("#maxThreshRight").hide();
+	$("#stepsThreshRight").hide();
+	$("#stepsThreshRightText").hide();
+    }
+    else if($(this).val()=="guildenbecher"){
+	$("#minThreshLeftText").text('min thresh left (counts)');
+	$("#maxThreshLeftText").show();
+	$("#maxThreshLeft").show();
+	$("#stepsThreshLeft").show();
+	$("#stepsThreshLeftText").show();
+	$("#minThreshRightText").text('min thresh right (counts)');
+	$("#maxThreshRightText").show();
+	$("#maxThreshRight").show();
+	$("#stepsThreshRight").show();
+	$("#stepsThreshRightText").show();
+    }
+});
+
+
+
 $("#trackDisplayModeSelect").on('change',function(){
     if($("#analysisModeSelect").val()!="tracking"||showStereoPane!=1) return;
     if($("#trackDisplayModeSelect").val()=="all-tracks"){
