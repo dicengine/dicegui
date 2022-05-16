@@ -494,13 +494,15 @@ function updateTracklibDisplayImages(index,loadData=true){
     args.push('threshold_method');
     args.push($("#thresholdModeSelect").val());
 
-    if(parseInt($("#minThreshLeft").val())>parseInt($("#maxThreshLeft").val())){
-	alert('max threshold left must be larger than min threshold left');
-	return;
-    }
-    if(parseInt($("#minThreshRight").val())>parseInt($("#maxThreshRight").val())){
+    if($("#thresholdModeSelect").val()=="guildenbecher"){
+      if(parseInt($("#minThreshLeft").val())>parseInt($("#maxThreshLeft").val())){
+  	alert('max threshold left must be larger than min threshold left');
+  	return;
+      }
+      if(parseInt($("#minThreshRight").val())>parseInt($("#maxThreshRight").val())){
 	alert('max threshold right must be larger than min threshold right');
 	return;
+      } 
     }
     
     args.push('min_thresh_left');
