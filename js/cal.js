@@ -917,6 +917,10 @@ function writeInputFile() {
         if(localStorage.getItem("showStereoPane")==1){
             content += '<Parameter name="stereo_video_file" type="string" value="'+ $("#videoCalRightPreview span").text() +'" />\n';
         }
+	if(localStorage.getItem("showStereoPane")==0){ // add the pose estimation index for 2d
+            pose_index = Number($("#imagePoseIndex").val()) - Number($("#startIndex").val());
+            content += '<Parameter name="pose_estimation_index" type="int" value="'+pose_index+'" />\n';
+        }
     }else{
         content += '<Parameter name="image_folder" type="string" value="'+folderName +'" />\n';
         content += '<Parameter name="image_file_extension" type="string" value="'+$("#imageExtension").val()+'" />\n';
