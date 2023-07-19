@@ -809,6 +809,10 @@ $("#plotlyViewerLeft").on('click', function(event){ // note: not plotly_click, t
 function computeEpipolarY0Y1(event,dest){
     var xInDataCoord = parseInt(coordsXaxisLeft.p2c(event.offsetX - coordsLeftLeft));
     var yInDataCoord = parseInt(coordsYaxisLeft.p2c(event.offsetY - coordsTopLeft));
+    if(dest=='right'){
+	xInDataCoord = parseInt(coordsXaxisRight.p2c(event.offsetX - coordsLeftRight));
+	yInDataCoord = parseInt(coordsYaxisRight.p2c(event.offsetY - coordsTopRight));
+    }
     if(xInDataCoord<0) return;
     if(yInDataCoord<0) return;
 //    alert("I am here " + xInDataCoord + " " + yInDataCoord);
