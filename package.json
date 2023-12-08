@@ -1,5 +1,7 @@
 {
     "name"    : "DICe",
     "version" : "2.0.0",
-    "main"    : "main.js"
+    "main"    : "main.js",
+    "scripts"   : {"start":"electron ."},
+    "devDependencies" : {"electron": "^x.x.x","@electron/remote":"^x.x.x"}
 }

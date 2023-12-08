@@ -1,9 +1,3 @@
-//const electron = require('electron');
-//const shell = electron.shell;
-//const {dialog} = electron.remote;
-//const homeDir = os.homedir();
-//const fs = require('fs');
-
 $(window).load(function(){
     initialize_gui(true);
 });
