@@ -267,16 +267,11 @@ function callDICeExec(resolution,ss_locs) {
             resultsFresh = true;
             if(resolution){
                 localStorage.setItem("workingDirectory",workingDirectory);
-                var win = new BrowserWindow({ 
-                    webPreferences: {
-                        nodeIntegration: true
-                    },
-                    width: 850, height: 1000 });
-                win.on('closed', () => {
-                    win = null
-                })
-                win.loadURL('file://' + __dirname + '/resolution.html');
-                //win.webContents.openDevTools()
+		var arg1 = 850;
+                var arg2 = 1000;
+                var arg3 = 'file://' + __dirname + '/resolution.html';
+                var args = {arg1, arg2, arg3}
+                ipcRenderer.send('create-window',args);
             }else if(ss_locs){
                 addSubsetSSSIGPreviewTrace(fullPath('.dice','.subset_locs.txt'));
 //              drawDotsAndBoxesForSubsets(fullPath('.dice','.subset_locs.txt'));

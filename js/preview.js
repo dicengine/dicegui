@@ -796,8 +796,6 @@ $("#plotlyViewerRight").mousemove(function( event ) {
     document.getElementById('rightPos').innerText = '['+xInDataCoord+','+yInDataCoord+']';
 });
 
-document.getElementById
-
 $("#plotlyViewerLeft").on('click', function(event){ // note: not plotly_click, to register clicks anywhere in the DOM, not just on a plotly plot
     if($("#analysisModeSelect").val()!="tracking"&&event.which==2){
         var xInDataCoord = parseInt(coordsXaxisLeft.p2c(event.offsetX - coordsLeftLeft));
@@ -863,20 +861,24 @@ function computeEpipolarY0Y1(event,dest){
     });
 }
 
-document.getElementById("plotlyViewerLeft").addEventListener('mousedown', (ev) => {
+if(document.getElementById("plotlyViewerLeft") != null){
+ document.getElementById("plotlyViewerLeft").addEventListener('mousedown', (ev) => {
     if(calPath==undefined) return;
     if(calPath=="") return;
     if(ev.which==3){
         computeEpipolarY0Y1(event,'left');
     } // end which == 3
-})
-document.getElementById("plotlyViewerRight").addEventListener('mousedown', (ev) => {
+ })
+}
+if(document.getElementById("plotlyViewerRight") != null){
+  document.getElementById("plotlyViewerRight").addEventListener('mousedown', (ev) => {
     if(calPath==undefined) return;
     if(calPath=="") return;
     if(ev.which==3){
         computeEpipolarY0Y1(event,'right');
     } // end which == 3
-})
+  })
+}
 
 function isInShape(cx,cy,shape){
     var points = shapeToPoints(shape);

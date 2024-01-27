@@ -738,34 +738,43 @@ $("#calOptionsButton").click(function () {
     localStorage.setItem("calFixK1",calFixK1);
     localStorage.setItem("calFixK2",calFixK2);
     localStorage.setItem("calFixK3",calFixK3);
-    var win = new BrowserWindow({ webPreferences: {
-		nodeIntegration: true
-	    },width: 500, height: 650});
-    win.on('closed', () => {
-        calFixIntrinsic = localStorage["calFixIntrinsic"];
-        calUseIntrinsic = localStorage["calUseIntrinsic"];
-        calUseExtrinsic = localStorage["calUseExtrinsic"];
-        calFixPrincipal = localStorage["calFixPrincipal"];
-        calFixAspect = localStorage["calFixAspect"];
-        calSameFocalLength = localStorage["calSameFocalLength"];
-        calZeroTangentDist = localStorage["calZeroTangentDist"];
-        calFixK1 = localStorage["calFixK1"];
-        calFixK2 = localStorage["calFixK2"];
-        calFixK3 = localStorage["calFixK3"];
-        console.log("calibration options set to \n"
-                + "fix intrinsic " + calFixIntrinsic + "\n"
-                + "use intrinsic " + calUseIntrinsic + "\n"
-                + "use extrinsic  " + calUseExtrinsic + "\n"
-                + "fix principal  " + calFixPrincipal + "\n"
-                + "fix aspect " + calFixAspect + "\n"
-                + "same focal " + calSameFocalLength + "\n"
-                + "zero tangent " + calZeroTangentDist + "\n"
-                + "fix K1 " + calFixK1 + "\n"
-                + "fix K2 " + calFixK2 + "\n"
-                + "fix K3 " + calFixK3 + "\n");
-        win = null
-    })
-    win.loadURL('file://' + __dirname + '/cal_options.html');
+    var arg1 = 500;
+    var arg2 = 650;
+    var arg3 = 'file://' + __dirname + '/cal_options.html';
+    var args = {arg1, arg2, arg3}
+    ipcRenderer.send('create-window',args);    
+//    var win = new BrowserWindow({ webPreferences: {
+//	        nodeIntegration: true,
+//                contextIsolation: false,
+//                enableRemoteModule: true
+//	    },width: 500, height: 650});
+//    win.on('closed', () => {
+    
+//        calFixIntrinsic = localStorage["calFixIntrinsic"];
+//        calUseIntrinsic = localStorage["calUseIntrinsic"];
+//        calUseExtrinsic = localStorage["calUseExtrinsic"];
+//        calFixPrincipal = localStorage["calFixPrincipal"];
+//        calFixAspect = localStorage["calFixAspect"];
+//        calSameFocalLength = localStorage["calSameFocalLength"];
+//        calZeroTangentDist = localStorage["calZeroTangentDist"];
+//        calFixK1 = localStorage["calFixK1"];
+//        calFixK2 = localStorage["calFixK2"];
+//        calFixK3 = localStorage["calFixK3"];
+//        console.log("calibration options set to \n"
+//                + "fix intrinsic " + calFixIntrinsic + "\n"
+//                + "use intrinsic " + calUseIntrinsic + "\n"
+//                + "use extrinsic  " + calUseExtrinsic + "\n"
+//                + "fix principal  " + calFixPrincipal + "\n"
+//                + "fix aspect " + calFixAspect + "\n"
+//                + "same focal " + calSameFocalLength + "\n"
+//                + "zero tangent " + calZeroTangentDist + "\n"
+//                + "fix K1 " + calFixK1 + "\n"
+//                + "fix K2 " + calFixK2 + "\n"
+//                + "fix K3 " + calFixK3 + "\n");
+//        win = null
+    //    })
+    
+//    win.loadURL('file://' + __dirname + '/cal_options.html');
     //win.webContents.openDevTools()
 });
 
@@ -885,6 +894,10 @@ $("#acceptButton").on('click',function(){
     outName += 'cal.xml';
     localStorage.setItem("calFileName",outName);
     window.close();
+    $("#calList").empty()
+    calPath = outName; 
+    $("#calList").append("<li class='calListLi'>cal.xml</li>");                                                               
+    checkValidInput(); 
 });
 
 function writeInputFile() {

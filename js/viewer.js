@@ -1,5 +1,3 @@
-//const remote = require('electron').remote;
-//const BrowserWindow = remote.BrowserWindow;
 ///////////////////////////////////////////////////                                                                                
 // these three transform a string into a file object                                                                               
 var getFileBlob = function (url, cb) {
@@ -507,15 +505,12 @@ $("#calInput").change(function (evt) {
 });
 
 $("#calInfo").click(function(){
-	var win = new BrowserWindow({ 
-            webPreferences: {
-		nodeIntegration: true
-	    },
-            width: 500, height: 800 });
-    win.on('closed', () => {
-        win = null
-    })
-    win.loadURL('file://' + __dirname + '/cal_help.html');
+    var arg1 = 900;
+    var arg2 = 500;
+    var arg3 = 'file://' + __dirname + '/cal_help.html';
+    //console.log(arg3)
+    var args = {arg1, arg2, arg3}
+    ipcRenderer.send('create-window',args);
 });
 
 $("#leftRefInput").on("click",function () {
@@ -602,24 +597,12 @@ $("#performCal").click(function () {
     localStorage.setItem("execOpenCVServerPath",execOpenCVServerPath);
     localStorage.setItem("execVideoStatPath",execVideoStatPath);
     localStorage.setItem("showStereoPane",showStereoPane);
-    
-    var win = new BrowserWindow({
-            webPreferences: {
-		nodeIntegration: true
-	    },
-            width: 1200, height: 1200 });
-    win.on('closed', () => {
-        calFileName = localStorage["calFileName"];
-        if(calFileName != ""){
-            $("#calList").empty();
-            calPath = calFileName;
-            $("#calList").append("<li class='calListLi'>cal.xml</li>");
-            checkValidInput();
-        }
-        win = null
-    })
-    win.loadURL('file://' + __dirname + '/cal.html');
-    //win.webContents.openDevTools()
+    var arg1 = 1200;
+    var arg2 = 1200;
+    var arg3 = 'file://' + __dirname + '/cal.html';
+    //console.log(arg3)
+    var args = {arg1, arg2, arg3}
+    ipcRenderer.send('create-window',args);
 });
 
 $("#calibrationCheck").change(function() {
