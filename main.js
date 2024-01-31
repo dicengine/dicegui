@@ -1,71 +1,76 @@
-const {app, BrowserWindow, ipcMain} = require('electron')
+const {app, BrowserWindow, ipcMain, dialog} = require('electron')
 var path = require('path')
 
 require('@electron/remote/main').initialize()
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let win
-let calWin
-let calInfoWin
+const windows = [];
 
-function createWindow() {
+function createWindow(args) {
     // Create the browser window.
-    win = new BrowserWindow({
+    var w = 800;
+    var h = 600;
+    var i = path.join(__dirname, 'images/icons/png/icon_32x32@2x.png');
+    var page_path = `file://${__dirname}/index.html`;
+    if(args!==undefined){
+	const {arg1, arg2, arg3} = args;
+	w = arg1;
+	h = arg2;
+	page_path = arg3;
+	// TODO enable icon as an argument
+    }
+    const win = new BrowserWindow({
         webPreferences: {
             nodeIntegration: true,
 	    contextIsolation: false,
 	    enableRemoteModule: true
         },
-        width: 800,
-        height: 600,
-        icon: path.join(__dirname, 'images/icons/png/icon_32x32@2x.png')
+        width: w,
+        height: h,
+	icon: i
     })
-    require('@electron/remote/main').enable(win.webContents)
-
-    win.maximize()
-    
+    require('@electron/remote/main').enable(win.webContents)    
     // and load the index.html of the app.
-    win.loadURL(`file://${__dirname}/index.html`)
-
-    // Open the DevTools.
-    //win.webContents.openDevTools()
-
+    win.loadURL(page_path)
     // Emitted when the window is closed.
     win.on('closed', () => {
-        // Dereference the window object, usually you would store windows
-        // in an array if your app supports multi windows, this is the time
-        // when you should delete the corresponding element.
-        win = null})
+        // Remove the closed window from the array
+        windows.splice(windows.indexOf(win), 1);
+    })
+    if(args==undefined){
+	win.maximize();
+    }
+    windows.push(win);
 }
 
-// TODO merge this with the createWindow function above
-ipcMain.on('create-window', (event, args) => {
-    // Create the browser window.
-    const {arg1, arg2, arg3} = args;
-    calInfoWin = new BrowserWindow({
-        webPreferences: {
-            nodeIntegration: true,
-	    contextIsolation: false,
-	    enableRemoteModule: true
-        },
-        width: arg1,
-        height: arg2
-    })
-    require('@electron/remote/main').enable(calInfoWin.webContents)    
-    // and load the index.html of the app.
-    calInfoWin.loadURL(arg3)
-    // Emitted when the window is closed.
-    calInfoWin.on('closed', () => {
-	// code for cal list here
-        calInfoWin = null})
-});
 
+function createDialog(event, args){
+}
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow)
+app.on('ready', () => {
+  createWindow()
+
+  // Handle IPC messages from the renderer process
+  ipcMain.on('open-dialog-request', (event,args) => {
+      // Show an open dialog
+      dialog.showOpenDialog(args).then(result => {
+          // Send the dialog result back to the renderer process
+          event.sender.send('open-dialog-response', result);
+      }).catch(err => {
+          console.error(err);
+      });
+  });
+
+  ipcMain.on('create-window', (event, args) => {
+    // Create the browser window.
+    createWindow(args);
+  });
+    
+})
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -79,10 +84,7 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
    // On macOS it's common to re-create a window in the app when the
    // dock icon is clicked and there are no other windows open.
-   if (win === null) {
+   if (windows.length == 0) {
         createWindow()
    }
 })
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.

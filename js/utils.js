@@ -174,10 +174,14 @@ function testForDebugMsg() {
     exec_check.access(execPath, (err) => {
         if (err) {
             alert("DICe executable path does not exist. Did you set the path in global.js?\nPlease select the correct path in the following dialog.");
-            dialog.showOpenDialog({
+	    const dialogConfig = {
+                title: 'Select a folder',
                 properties: ['openDirectory']
-            }, function (folder) {
-                if (folder != 'undefined'){
+	    };
+            ipcRenderer.send('open-dialog-request',dialogConfig);
+            ipcRenderer.on('open-dialog-response', (event,result) => {
+	        if (!result.canceled) {
+		    var folder = result.filePaths[0];
                     if(os.platform()=='win32'){
                         folder = folder +"\\";
                     }else if(os.platform()=='linux' || os.platform()=='darwin'){
@@ -185,7 +189,7 @@ function testForDebugMsg() {
                     }
                     execPathOverride = folder;
                     alert('setting the exec path to: ' + execPathOverride);
-                    setExecPaths(execPathOverride);
+                    setExecPaths(execPathOverride);		    
                 }
             });
         } else {
@@ -261,36 +265,49 @@ $(document).on('click', 'a[href^="http"]', function(event) {
 });
 
 $("#changeWorkingDirLi").click(function(){
-    var path =  dialog.showOpenDialog({defaultPath: workingDirectory, properties: ['openDirectory','createDirectory']});
-    if(path){
-        workingDirectory = path[0];
-        updateWorkingDirLabel();
-        createHiddenDir();
-        resetWorkingDirectory();
-        var fileName = fullPath('','input.xml');
-        fs.stat(fileName, function(err, stat) {
-            if(err == null) {
-                if (confirm('load the existing input files in this working directory?')) {
-                    console.log('loading existing input file if it exists: ' + fileName);
-                    parse_input_xml_file(fileName);
-                    checkValidInput();
+         const dialogConfig = {
+             title: 'Select a folder',
+             properties: ['openDirectory','createDirectory'],
+             defaultPath: workingDirectory
+	 };
+         ipcRenderer.send('open-dialog-request',dialogConfig);
+         ipcRenderer.on('open-dialog-response', (event,result) => {
+	 if (!result.canceled) {
+             workingDirectory = result.filePaths[0];
+             updateWorkingDirLabel();
+             createHiddenDir();
+             resetWorkingDirectory();
+             var fileName = fullPath('','input.xml');
+             fs.stat(fileName, function(err, stat) {
+                 if(err == null) {
+                    if (confirm('load the existing input files in this working directory?')) {
+                        console.log('loading existing input file if it exists: ' + fileName);
+                        parse_input_xml_file(fileName);
+                        checkValidInput();
+                    }else{
+                        return false;
+                    }
                 }else{
-                    return false;
+                    checkValidInput();
                 }
-            }else {
-                checkValidInput();
-            }
-        });
-        
-    }
+            });
+        }
+    });
 });
 
 $("#changeImageFolder").click(function(){
-    var path =  dialog.showOpenDialog({defaultPath: workingDirectory, properties: ['openDirectory']});
-    if(path){
-        autoDetectImageSequence(path[0],updateSequenceLabels);
-        $('#imageFolder span').text(path[0]);
-    }
+    const dialogConfig = {
+        title: 'Select a folder',
+        properties: ['openDirectory'],
+        defaultPath: workingDirectory
+    };
+    ipcRenderer.send('open-dialog-request',dialogConfig);
+    ipcRenderer.on('open-dialog-response', (event,result) => {
+        if (!result.canceled) {
+            autoDetectImageSequence(result.filePaths[0],updateSequenceLabels);
+            $('#imageFolder span').text(result.filePaths[0]);
+        }
+    })
 });
 
 function updateSequenceLabels(stats){

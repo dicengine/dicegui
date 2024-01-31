@@ -621,11 +621,18 @@ $("#previewCal").on("click",function () {
 
 
 $("#changeImageFolder").click(function(){
-    var path =  dialog.showOpenDialog({defaultPath: workingDirectory, properties: ['openDirectory']});
-    if(path){
-        autoDetectImageSequence(path[0],updateCalSequenceLabels);
-        $('#imageFolder span').text(path[0]);
-    }
+    const dialogConfig = {
+        title: 'Select a folder',
+        properties: ['openDirectory'],
+	defaultPath: workingDirectory
+    };
+    ipcRenderer.send('open-dialog-request',dialogConfig);
+    ipcRenderer.on('open-dialog-response', (event,result) => {
+	if (!result.canceled) {
+            autoDetectImageSequence(result.filePaths[0],updateCalSequenceLabels);
+            $('#imageFolder span').text(result.filePaths[0]);
+	}
+    })
 });
 
 function updateFrameScroller(){
